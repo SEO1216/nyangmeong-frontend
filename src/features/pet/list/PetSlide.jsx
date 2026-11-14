@@ -298,9 +298,6 @@ function PetCard({ pet, onEdit, onDelete, onUnlink, onInvite, children }) {
             >
               {pet.petNm}
               <span className="inline-flex flex-wrap gap-1 align-middle">
-                {pet.rprsPetYn && (
-                  <Badge className="bg-brand-500 text-white">대표</Badge>
-                )}
                 {isCoParent ? (
                   <Badge className="bg-tone-gray-bg text-tone-gray-fg">
                     공동양육
@@ -308,6 +305,11 @@ function PetCard({ pet, onEdit, onDelete, onUnlink, onInvite, children }) {
                 ) : (
                   <Badge className="bg-tone-green-bg text-tone-green-fg">
                     주양육
+                  </Badge>
+                )}
+                {pet.bscCharSbstYn && (
+                  <Badge className="bg-tone-amber-bg text-tone-amber-fg">
+                    오류 확인 중
                   </Badge>
                 )}
               </span>
