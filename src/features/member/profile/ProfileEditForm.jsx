@@ -2,13 +2,13 @@ import { ChevronRight, Lock } from 'lucide-react';
 import { useState } from 'react';
 import { publicFileUrl } from '@/utils/fileUrl';
 import { CARD_ROWS, SECTION_TITLE } from '../shared/profileStyles';
+import SnsLogoChip from '../shared/SnsLogoChip';
 import { JOIN_PATH_EMAIL, SNS_NAME } from '../shared/snsCodes';
 import AccountInfoCard from './AccountInfoCard';
 import NicknameField from './NicknameField';
 import PasswordChangeCard from './PasswordChangeCard';
 import PhoneField from './PhoneField';
 import ProfileImageField from './ProfileImageField';
-import SnsBadge from './SnsBadge';
 import SnsLinkCard from './SnsLinkCard';
 
 export default function ProfileEditForm({ profile, hidePassword, onWithdraw }) {
@@ -47,8 +47,8 @@ export default function ProfileEditForm({ profile, hidePassword, onWithdraw }) {
           <ProfileImageField prflImgUrl={prflImgUrl} mbrNcnm={mbrNcnm}>
             {snsTyCd ? (
               <>
-                <span>
-                  <SnsBadge snsTyCd={snsTyCd} />
+                <span className="inline-flex items-center gap-1.5">
+                  <SnsLogoChip snsOffrCd={snsTyCd} />
                   {SNS_NAME[snsTyCd]} 계정으로 로그인 중
                 </span>
                 <small className="text-sm text-subtle">
