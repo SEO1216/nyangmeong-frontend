@@ -19,8 +19,7 @@ const headButton =
   'grid size-11 place-items-center rounded-full text-ink-2 hover:bg-surface-3';
 
 function ChatModalPanel() {
-  const { otoChatRoomSn, pstSn, listPstSn, close, selectRoom, clearPost } =
-    useChatModal();
+  const { otoChatRoomSn, pstSn, listPstSn, close, selectRoom } = useChatModal();
   const openChatWindow = useChatWindow();
   const { mutate: createChatRoom } = useCreateChatRoom();
   const panelRef = useRef(null);
@@ -118,7 +117,6 @@ function ChatModalPanel() {
         onSelect={selectRoom}
         onBack={handleBack}
         onLeft={handleBack}
-        onClearPost={clearPost}
       />
     </div>
   );

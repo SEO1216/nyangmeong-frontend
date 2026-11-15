@@ -337,20 +337,12 @@ export default function ChatConversation({ otoChatRoomSn, onBack, onLeft }) {
         )}
       </div>
 
-      {isClosed && (
-        <p className="flex h-11 shrink-0 items-center justify-center gap-1.5 border-t border-line text-sm text-subtle">
-          <Icon name="lock" className="text-lg" />
-          {room.chatRoomSttsCd === ROOM_STTS.ACTIVE
-            ? '응답이 없어 종료된 채팅방이에요'
-            : '상대방이 나간 채팅방이에요'}{' '}
-          · 메시지를 보낼 수 없어요
-        </p>
-      )}
-      {room && !isClosed && !isError && (
+      {room && !isError && (
         <ChatMessageInput
           otoChatRoomSn={otoChatRoomSn}
           stage={room.mtchDlngSttsCd}
           ctptMbrNcnm={room.ctptMbrNcnm}
+          isDisabled={isClosed}
         />
       )}
 
