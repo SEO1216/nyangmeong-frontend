@@ -15,10 +15,3 @@ export const JOIN_PATH_NAME = {
   USRC0007: '네이버 간편 가입',
   USRC0009: '구글 간편 가입',
 };
-
-/** 제공자 표시 색은 각 서비스의 브랜드 색 사용 */
-export const SNS_BADGE = {
-  USRC0008: 'bg-[#fee500] text-[#191600]',
-  USRC0007: 'bg-[#03c75a] text-white',
-  USRC0009: 'border border-line bg-white text-ink',
-};

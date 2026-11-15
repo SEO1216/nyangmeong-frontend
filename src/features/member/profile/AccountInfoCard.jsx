@@ -1,6 +1,6 @@
+import SnsLogoChip from '../shared/SnsLogoChip';
 import { JOIN_PATH_NAME } from '../shared/snsCodes';
 import AccountRow from './AccountRow';
-import SnsBadge from './SnsBadge';
 
 /** 'YYYY-MM-DD...' -> 'YYYY.MM.DD' */
 const formatDay = (dt) => dt.slice(0, 10).replaceAll('-', '.');
@@ -20,10 +20,10 @@ export default function AccountInfoCard({
       <AccountRow
         label="가입 방식"
         value={
-          <>
-            {snsTyCd && <SnsBadge snsTyCd={snsTyCd} />}
+          <span className="inline-flex items-center gap-1.5">
+            {snsTyCd && <SnsLogoChip snsOffrCd={snsTyCd} />}
             {JOIN_PATH_NAME[joinPathCd]}
-          </>
+          </span>
         }
       />
       <AccountRow
