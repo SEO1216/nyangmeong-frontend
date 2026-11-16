@@ -1,6 +1,7 @@
 /**
  * [채팅 입력]
  * - 사진 첨부·주소 공유·메시지 입력·전송 한 줄 (FN-COM-009-19, FN-CMU-005-04·05)
+ * - 사진과 글을 같이 입력하면 사진, 글 순서로 둘 다 보낸다
  * - Enter 전송·Shift+Enter 줄바꿈(한글 조합 중에는 보내지 않음), 공백 전송 금지
  * - 전송이 실패하면 입력 유지 후 같은 요청 ID로 재전송
  */
@@ -21,7 +22,10 @@ const TEXTAREA_MAX_HEIGHT = 88;
 const NOT_MATCHED_NOTICE = '매칭이 완료된 뒤 주소를 공유할 수 있어요';
 
 const iconButton =
-  'grid size-10 shrink-0 place-items-center rounded-full text-ink-2 hover:bg-surface-3 aria-disabled:text-line-strong aria-disabled:hover:bg-transparent';
+  'grid size-10 shrink-0 place-items-center rounded-full text-ink-2 hover:bg-surface-3 aria-disabled:text-line-strong aria-disabled:hover:bg-transparent disabled:cursor-not-allowed disabled:text-line-strong disabled:hover:bg-transparent';
+
+/** 대화할 수 없는 방(상대방이 나감·무응답 종료) 입력칸 안내 */
+const CLOSED_PLACEHOLDER = '상대방과 더 이상 대화할 수 없어요';
 
 /** 사진 고르기 검사: 문제가 있으면 문구 */
 const checkPhotos = (files, currentCount) => {
@@ -37,10 +41,12 @@ const checkPhotos = (files, currentCount) => {
   return null;
 };
 
+/** isDisabled: 대화할 수 없는 방. 입력칸·사진·주소·전송을 모두 막고 안내 문구를 보인다 */
 export default function ChatMessageInput({
   otoChatRoomSn,
   stage,
   ctptMbrNcnm,
+  isDisabled = false,
 }) {
   const [msgCn, setMsgCn] = useState('');
   const [photos, setPhotos] = useState([]);
@@ -51,7 +57,8 @@ export default function ChatMessageInput({
   const fileRef = useRef(null);
   const sendMessage = useSendChatMessage(otoChatRoomSn);
   const hasPhotos = photos.length > 0;
-  const canSend = (msgCn.trim() !== '' || hasPhotos) && !sendMessage.isPending;
+  const canSend =
+    !isDisabled && (msgCn.trim() !== '' || hasPhotos) && !sendMessage.isPending;
   const isAddressEnabled = canShareAddress(stage);
 
   /** 입력 줄 수에 맞춰 높이 */
@@ -75,32 +82,41 @@ export default function ChatMessageInput({
   const handleSubmit = (event) => {
     event.preventDefault();
     if (!canSend) return;
+    const text = msgCn.trim();
+    const clearText = () => {
+      setMsgCn('');
+      textareaRef.current?.focus();
+    };
+    const clearPhotos = () =>
+      setPhotos((prev) => {
+        prev.forEach((photo) => URL.revokeObjectURL(photo.url));
+        return [];
+      });
+    const sendText = () =>
+      send(
+        {
+          msgTypeCd: MSG_TYPE.TEXT,
+          msgCn: text,
+          idmptDmndId: crypto.randomUUID(),
+        },
+        clearText,
+      );
     if (hasPhotos) {
+      /** 사진과 글을 함께 보내면 사진 메시지 다음에 글 메시지가 이어진다(서버는 한 메시지에 둘을 담지 않음) */
       send(
         {
           msgTypeCd: MSG_TYPE.IMAGE,
           images: photos.map((photo) => photo.file),
           idmptDmndId: crypto.randomUUID(),
         },
-        () =>
-          setPhotos((prev) => {
-            prev.forEach((photo) => URL.revokeObjectURL(photo.url));
-            return [];
-          }),
+        () => {
+          clearPhotos();
+          if (text) sendText();
+        },
       );
       return;
     }
-    send(
-      {
-        msgTypeCd: MSG_TYPE.TEXT,
-        msgCn: msgCn.trim(),
-        idmptDmndId: crypto.randomUUID(),
-      },
-      () => {
-        setMsgCn('');
-        textareaRef.current?.focus();
-      },
-    );
+    sendText();
   };
 
   const handleKeyDown = (event) => {
@@ -219,6 +235,7 @@ export default function ChatMessageInput({
         <button
           type="button"
           aria-label="사진 첨부"
+          disabled={isDisabled}
           className={iconButton}
           onClick={() => fileRef.current.click()}
         >
@@ -228,18 +245,26 @@ export default function ChatMessageInput({
           type="button"
           aria-label="주소 공유"
           aria-disabled={!isAddressEnabled}
+          disabled={isDisabled}
           className={`${iconButton} -ml-2`}
           onClick={handleAddressClick}
         >
           <Icon name="location_on" className="text-2xl" />
         </button>
-        <div className="flex min-w-0 flex-1 items-end gap-1 rounded-[22px] border border-input-line bg-white py-px pr-px pl-4 focus-within:border-brand-500">
+        <div
+          className={`flex min-w-0 flex-1 items-end gap-1 rounded-[22px] border border-input-line py-px pr-[3px] pl-4 focus-within:border-brand-500 ${
+            isDisabled ? 'bg-surface-2' : 'bg-white'
+          }`}
+        >
           <textarea
             ref={textareaRef}
             rows={1}
             aria-label="메시지"
-            placeholder="메시지를 입력하세요"
-            className="h-10 max-h-[88px] min-w-0 flex-1 resize-none bg-transparent py-2 leading-6 text-ink outline-none placeholder:text-placeholder"
+            placeholder={
+              isDisabled ? CLOSED_PLACEHOLDER : '메시지를 입력하세요'
+            }
+            disabled={isDisabled}
+            className="h-10 max-h-[88px] min-w-0 flex-1 resize-none bg-transparent py-2 leading-6 text-ink outline-none placeholder:text-placeholder disabled:cursor-not-allowed disabled:placeholder:text-subtle"
             value={msgCn}
             onChange={(event) => setMsgCn(event.target.value)}
             onKeyDown={handleKeyDown}
@@ -247,10 +272,10 @@ export default function ChatMessageInput({
           <button
             type="submit"
             aria-label="전송"
-            className="grid size-10 shrink-0 place-items-center rounded-full bg-brand-500 text-white disabled:bg-surface-3 disabled:text-placeholder"
+            className="mb-0.5 grid size-9 shrink-0 place-items-center rounded-full bg-brand-500 text-white disabled:bg-surface-3 disabled:text-placeholder"
             disabled={!canSend}
           >
-            <Icon name="arrow_upward" className="text-[22px]" />
+            <Icon name="arrow_upward" className="text-xl" />
           </button>
         </div>
       </form>

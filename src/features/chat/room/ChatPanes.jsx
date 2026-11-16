@@ -26,7 +26,6 @@ export default function ChatPanes({
   onSelect,
   onBack,
   onLeft,
-  onClearPost,
 }) {
   const isNarrow = useSyncExternalStore(subscribeNarrow, getIsNarrow);
   const hasRoom = otoChatRoomSn !== null;
@@ -42,9 +41,9 @@ export default function ChatPanes({
       >
         <ChatRoomList
           isHidden={isNarrow && isRoomPane}
+          pstSn={pstSn}
           listPstSn={listPstSn}
           selectedRoomSn={otoChatRoomSn}
-          onClearPost={onClearPost}
           onSelect={onSelect}
         />
       </section>
@@ -67,7 +66,9 @@ export default function ChatPanes({
             role="status"
             className="flex flex-1 items-center justify-center bg-[#fdfcfb] text-subtle"
           >
-            {pstSn !== null ? '채팅방을 여는 중이에요' : '채팅방을 골라 주세요'}
+            {pstSn !== null
+              ? '채팅방을 여는 중이에요'
+              : '대화할 채팅을 골라 주세요'}
           </p>
         )}
       </section>
