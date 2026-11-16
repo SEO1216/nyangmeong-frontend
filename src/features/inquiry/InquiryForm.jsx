@@ -51,6 +51,7 @@ export default function InquiryForm({
   types,
   mode,
   cancelTo,
+  hideCancel = false,
   isPending,
   errorMessage,
   fieldErrors,
@@ -294,13 +295,15 @@ export default function InquiryForm({
       )}
 
       <div className="mt-8 flex items-center justify-end gap-2 border-t border-[#e2e7e7] pt-6 max-[760px]:mt-6 max-[760px]:flex-wrap max-[760px]:pt-5">
-        <button
-          type="button"
-          onClick={() => handleLeave(cancelTo)}
-          className={`${BTN_SECONDARY} min-w-[120px] max-[760px]:h-12 max-[760px]:min-w-0 max-[760px]:flex-1`}
-        >
-          취소
-        </button>
+        {!hideCancel && (
+          <button
+            type="button"
+            onClick={() => handleLeave(cancelTo)}
+            className={`${BTN_SECONDARY} min-w-[120px] max-[760px]:h-12 max-[760px]:min-w-0 max-[760px]:flex-1`}
+          >
+            취소
+          </button>
+        )}
         <button
           type="submit"
           form="inquiry-form"
