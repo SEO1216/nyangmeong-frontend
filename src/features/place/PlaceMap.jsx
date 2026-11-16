@@ -293,7 +293,11 @@ export default function PlaceMap({
 
       {selectedPlace && (
         <div className={isSheetFull ? 'max-md:hidden' : ''}>
-          <PlacePopup place={selectedPlace} onClose={onClosePopup} />
+          <PlacePopup
+            key={selectedPlace.plcSn}
+            place={selectedPlace}
+            onClose={onClosePopup}
+          />
         </div>
       )}
     </div>

@@ -14,7 +14,7 @@ export default function PlacePopup({ place, onClose }) {
     <div
       role="dialog"
       aria-label={`${place.plcConm} 요약`}
-      className="absolute bottom-8 left-1/2 z-[4] w-[min(360px,calc(100%-32px))] -translate-x-1/2 rounded-modal bg-white p-5 shadow-depth-md max-md:bottom-[calc(var(--sheet-peek)+16px)]"
+      className="absolute bottom-8 left-1/2 z-[4] w-[min(360px,calc(100%-32px))] -translate-x-1/2 rounded-modal bg-white p-5 shadow-depth-md animate-[man-pop_.25s_cubic-bezier(.2,.8,.2,1)_both] motion-reduce:animate-none max-md:bottom-[calc(var(--sheet-peek)+16px)]"
     >
       <button
         type="button"

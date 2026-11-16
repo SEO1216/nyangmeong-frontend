@@ -30,7 +30,7 @@ export default function PlaceCategoryNav({ variant, category, onSelect }) {
             type="button"
             aria-pressed={isPressed}
             onClick={() => onSelect(key)}
-            className={`flex items-center justify-center ${style.button} ${
+            className={`flex items-center justify-center transition-colors duration-200 motion-reduce:transition-none ${style.button} ${
               isPressed ? style.pressed : style.normal
             }`}
           >
