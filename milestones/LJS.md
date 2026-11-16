@@ -1405,10 +1405,11 @@
 - 완료 조건 결과: 검증 `통과`(2026-11-14, 1회차, 8080 백엔드), 사람 확인 2026-11-14
 - 연결 남음: 없음
 
-## SCR-ADM-042 1:1 문의 · 캐릭터 무료 재생성 Python 호출 — 대기
+## SCR-ADM-042 1:1 문의 · 캐릭터 무료 재생성 Python 호출 — 끝
 - 기능: 명세 기능 ID 추가 없음. 걸치는 기능 FN-ADM-042-07, FN-MYP-010-23
 - 기다리는 것: 백엔드 SCR-MYP-010 무료 재생성 Python 연결(끝 2026-11-16, develop 병합 전), ai 재생성 입구(ai-39 구현, 첫 생성 success의 photo는 다음 ai 세션)
 - 완료 조건: 캐릭터 오류 처리에서 CHRC0008(무료 재생성) 응답의 `regenJobSn`으로 Python `POST /ai/admin/characters/jobs/{regenJobSn}/regenerate`(관리자 쿠키, 202)를 부른다. 상세의 `regenJobSttsCd`·`regenJobSttsCdNm`으로 재생성 상태를 보여 주고, CHRC0004(실패)면 다시 처리(CHRC0008·CHRC0009) 버튼을 보인다. 진행 중 다시 처리는 409 `PIXEL_CHARACTER_CREATING`, 성공 뒤는 409 `ALREADY_PROCESSED`. 계약은 백엔드 `docs/api/support.md` character-error 행과 `AdminInquiryResponse`
+- 결과(2026-11-16): `features/adminInquiry/api.js` `regenerateAdminCharacter`, `queries.js` 무료 재생성 뒤 AI 서버 호출(실패해도 처리는 성공, 토스트로 알림)·요청·생성 중 5초 다시 받기, `InquiryCharacterError.jsx` 재생성 상태 표시·생성 실패면 다시 처리 버튼. 추가-1 요청·생성 중 로딩 아이콘과 안내. 검증 2회차 통과, 사람 확인
 
 ## 제외
 - FN-AIM-009-01~27: 화면 담당이 JAJ(milestone.md "화면과 API 담당이 다른 곳" — AIM-009 영수증 결과 규칙, 화면은 SCR-HLT-002)
