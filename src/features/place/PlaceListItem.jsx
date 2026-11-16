@@ -92,19 +92,11 @@ export default function PlaceListItem({
           event.stopPropagation();
           onToggleFavorite(place);
         }}
-        className={`absolute right-3 top-2 grid size-10 place-items-center rounded-full ${
-          isStarred
-            ? ''
-            : 'text-placeholder hover:bg-surface-3 hover:text-muted'
+        className={`absolute right-3 top-2 grid size-10 place-items-center ${
+          isStarred ? 'text-[#f5c518]' : 'text-placeholder hover:text-muted'
         }`}
       >
-        <span
-          className={`grid size-7 place-items-center rounded-full ${
-            isStarred ? 'bg-[#fbd85d] text-brand-500' : ''
-          }`}
-        >
-          <Star className={`size-4 ${isStarred ? 'fill-current' : ''}`} />
-        </span>
+        <Star className={`size-5 ${isStarred ? 'fill-current' : ''}`} />
       </button>
     </li>
   );
