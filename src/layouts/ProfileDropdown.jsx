@@ -3,12 +3,14 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import userAvatar from '@/assets/user.svg';
 import ConfirmModal from '@/components/ConfirmModal';
+import FileImage from '@/components/FileImage';
 import Skeleton from '@/components/Skeleton';
-import { useLogout, useMemberSummary } from '@/features/member/queries';
+import { useLogout, useMe, useMemberSummary } from '@/features/member/queries';
 import { useAiModal } from '@/context/aiModal';
 import { useChatModal } from '@/context/chatModal';
 import { closeChatWindow } from '@/hooks/useChatWindow';
 import { PATHS } from '@/routes/paths';
+import { publicFileUrl } from '@/utils/fileUrl';
 
 const MENU_LINKS = [
   { label: '마이페이지', to: PATHS.MYPAGE },
@@ -111,6 +113,11 @@ export default function ProfileDropdown({
   const rootRef = useRef(null);
   const buttonRef = useRef(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  /** 프로필 사진: 없거나 열리지 않으면 기본 아이콘 */
+  const { data: me } = useMe();
+  const avatar = (
+    <img src={userAvatar} alt="" className="size-full object-cover" />
+  );
 
   /** 토글 버튼이 rootRef 안: 닫자마자 다시 열리는 것 방지 */
   useEffect(() => {
@@ -159,7 +166,11 @@ export default function ProfileDropdown({
         aria-expanded={isOpen}
         onClick={onToggle}
       >
-        <img src={userAvatar} alt="" className="size-full object-cover" />
+        <FileImage
+          src={publicFileUrl(me?.atchFileSn)}
+          className="size-full object-cover"
+          fallback={avatar}
+        />
       </button>
       {isOpen && (
         <ProfileMenuPanel onClose={onClose} onLogout={handleLogoutClick} />

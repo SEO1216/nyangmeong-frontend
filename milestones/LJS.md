@@ -2,6 +2,15 @@
 
 기준: 공통레이아웃_기능명세서_v0.4_20261001, AI매니저_기능명세서_v0.7_20261009 (DMS, 2026-10-17), 커뮤니티_기능명세서_v0.7_20261019 (CMU-005만, KSJ 마일스톤에서 옮김, 2026-10-21), AI매니저_기능명세서_v0.9_20261026 (SCR-AIM-013만, DMS 업로드 전 로컬 사본, 2026-10-26), 관리자_기능명세서_v0.2_20261030 (DMS, 2026-10-30. 화면설계서 `관리자_화면설계서_v0.1_20261030`, 순서는 백엔드 `docs/admin/implementation-plan.md` 3절 단계)
 
+## SCR-COM-002 기본 레이아웃 · 헤더 프로필 사진 · 플로팅 AI 말풍선·기본 캐릭터 · 바로가기 편집 반려동물 왼쪽 정렬 — 끝
+- 기능: 명세 기능 ID 추가 없음(사람 요청 2026-11-16), 걸치는 기능 FN-COM-002-15 헤더 프로필·FN-COM-002-19 플로팅 AI 버튼, 걸치는 화면 SCR-MAN-001 바로가기 편집 창
+- 기다리는 것: 없음(`GET /auth/me` `atchFileSn` 있음, 백엔드 `docs/api/member.md` AuthMeResponse)
+- 완료 조건: 기획(핸드오프 "지금 하는 것") P1~P4
+- 추가 요청: 추가-1 메인 말풍선 없음(추가-3으로 대체) · 추가-2 강아지 기본 전신 · 추가-3 메인 플로팅 버튼 없음 · 추가-4 고양이·강아지 512 전신 원본 · 추가-5 보이는 높이 PC 80·모바일 60 · 추가-6 그림 PC 4px·모바일 3px 왼쪽
+- 완료 조건 결과: 검증 `통과`(2026-11-16, 5회차까지 P1~P4·추가-1~6), 사람 확인 2026-11-16
+- 이번엔 안 함: 관리자 헤더 프로필 사진
+- 연결 남음: 없음
+
 ## SCR-HLT-011 종합 건강기록 · AI 건강분석 리포트 연결 — 끝
 - 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-HLT-011-12(명세는 자리만, 내용 미정). 사람 요청 2026-11-14 "ai 분석 리포트 먼저 붙이자". R1 API·훅 / R2 카드 / R3 640px 미만 띠 / R4 반려동물 전환
 - 기다리는 것: 없음(AI `GET·POST /ai/pets/{petSn}/health-report(/refresh)`, AI·Java develop에 있음, 계약 ai `docs/api/healthreport.md`)
@@ -1161,6 +1170,13 @@
 - 참고(백엔드 2026-11-10): 서버 운영 설정에서 대시보드 케어 최대 노출 수(`dshbdCareMaxExpsrCnt`)를 지웠다. 응답에 없고 PATCH로 보내도 무시한다. 프론트 화면·가짜에는 원래 이 칸이 없다
 - 결과(2026-11-10): `features/setting/api.js` 실제 `GET`·`PATCH /api/admin/settings`, 묶음별 응답을 `settingFields.js` `resKey`로 읽음, 입력 자릿수를 서버 범위에 맞춤, 탈퇴 회원 보관 기간은 읽기 전용(사람 결정), 수정자 "관리자 #번호". 추가-1 저장 400이면 첫 오류 칸으로 스크롤·포커스. 검증 통과, 사람 확인
 
+## SCR-ADM-110 운영 설정 · 거래완료 글 숨김 기준 일수 — 끝
+- 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-110-01~04. 백엔드(KSJ, SCR-CMU-004, 백엔드 develop `13794f1`)가 `GET`·`PATCH /api/admin/settings` community 묶음에 `dlngCmptnHideCrtrDayCnt`(선택, 1~99, 기본 7)를 넣었다(요청 2026-11-16)
+- 기다리는 것: 검증 백엔드 8081이 백엔드 develop의 이 필드를 담은 코드로 떠 있어야 한다(백엔드 LJS 세션에 요청)
+- 완료 조건: 운영 설정 커뮤니티 묶음에 "거래완료 글 숨김 기준"(일) 입력칸이 보이고, 조회 값이 들어오며, 바꿔 저장하면 PATCH 본문에 그 키만 실려 저장된다
+- 결과(2026-11-16): `features/setting/shared/settingFields.js` 커뮤니티 묶음 "펫돌봄 매칭 무응답 종료 기준" 아래에 "거래완료 글 숨김 기준"(일, 1~99) 칸. 검증 1회차 `확인 못 함 있음`(칸 위치·1440·390 확인, 8081에 필드가 없어 조회·저장은 못 봄), 사람 확인
+- 연결 남음: S1 (검증 백엔드 8081을 `dlngCmptnHideCrtrDayCnt`가 든 코드로 다시 띄운 뒤 조회 값 7·PATCH 본문·새로고침 유지·0 입력 400 칸 오류 확인, 백엔드 LJS가 global/setting 검토 뒤 8081 재시작)
+
 ## SCR-ADM-001 대시보드 · 이용 통계 API 연결 — 끝
 - 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-001-04·05 (2026-11-10 대시보드 연결 절에 빠져 있어 따로 둠)
 - 기다리는 것: 백엔드 `GET /api/admin/dashboard/stats?fromYmd=&toYmd=`(LJS 백엔드, 있음)
@@ -1388,6 +1404,11 @@
 - 완료 조건: 기획 R1(I1~I4)·R2(A1~A4·추가-1), 프론트 코드 변경 없음
 - 완료 조건 결과: 검증 `통과`(2026-11-14, 1회차, 8080 백엔드), 사람 확인 2026-11-14
 - 연결 남음: 없음
+
+## SCR-ADM-042 1:1 문의 · 캐릭터 무료 재생성 Python 호출 — 대기
+- 기능: 명세 기능 ID 추가 없음. 걸치는 기능 FN-ADM-042-07, FN-MYP-010-23
+- 기다리는 것: 백엔드 SCR-MYP-010 무료 재생성 Python 연결(끝 2026-11-16, develop 병합 전), ai 재생성 입구(ai-39 구현, 첫 생성 success의 photo는 다음 ai 세션)
+- 완료 조건: 캐릭터 오류 처리에서 CHRC0008(무료 재생성) 응답의 `regenJobSn`으로 Python `POST /ai/admin/characters/jobs/{regenJobSn}/regenerate`(관리자 쿠키, 202)를 부른다. 상세의 `regenJobSttsCd`·`regenJobSttsCdNm`으로 재생성 상태를 보여 주고, CHRC0004(실패)면 다시 처리(CHRC0008·CHRC0009) 버튼을 보인다. 진행 중 다시 처리는 409 `PIXEL_CHARACTER_CREATING`, 성공 뒤는 409 `ALREADY_PROCESSED`. 계약은 백엔드 `docs/api/support.md` character-error 행과 `AdminInquiryResponse`
 
 ## 제외
 - FN-AIM-009-01~27: 화면 담당이 JAJ(milestone.md "화면과 API 담당이 다른 곳" — AIM-009 영수증 결과 규칙, 화면은 SCR-HLT-002)

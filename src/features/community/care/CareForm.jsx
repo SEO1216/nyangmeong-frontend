@@ -41,6 +41,22 @@ const TIME_OPTIONS = (placeholder) => [
   ...CARE_TIMES.map((time) => ({ value: time, label: time })),
 ];
 
+/** 종료가 시작과 같은 날이거나 날짜가 덜 골라졌으면, 종료 시간은 시작 시간 뒤만 고를 수 있다 */
+const isSameDayOrOpen = ({ fromDate, toDate }) =>
+  !fromDate || !toDate || fromDate === toDate;
+
+const toTimeOptions = (values) => {
+  const limit = isSameDayOrOpen(values) ? values.fromTime : '';
+  return [
+    { value: '', label: '종료' },
+    ...CARE_TIMES.map((time) => ({
+      value: time,
+      label: time,
+      disabled: Boolean(limit) && time <= limit,
+    })),
+  ];
+};
+
 const REGION_ERROR_CODE = 'CARE_REGION_NOT_ALLOWED';
 
 const snapshot = (values) =>
@@ -204,7 +220,19 @@ export default function CareForm({
   }, [isDirty]);
 
   const set = (patch, clear = []) => {
-    setValues((prev) => ({ ...prev, ...patch }));
+    setValues((prev) => {
+      const next = { ...prev, ...patch };
+      /** 바꾼 뒤 종료 시간이 시작 시간 이전이 되면 비운다 */
+      if (
+        next.toTime &&
+        next.fromTime &&
+        isSameDayOrOpen(next) &&
+        next.toTime <= next.fromTime
+      ) {
+        next.toTime = '';
+      }
+      return next;
+    });
     setErrors((prev) => {
       const next = { ...prev };
       clear.forEach((key) => delete next[key]);
@@ -495,7 +523,7 @@ export default function CareForm({
                     <Select
                       label="종료 시간"
                       value={values.toTime}
-                      options={TIME_OPTIONS('종료')}
+                      options={toTimeOptions(values)}
                       onChange={(toTime) => set({ toTime }, ['when'])}
                       className="min-w-0 flex-1"
                     />

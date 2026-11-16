@@ -14,6 +14,7 @@ import {
 import { PATHS } from '@/routes/paths';
 import { formatDate, getTodayYmd, getYear } from '@/utils/formatDate';
 import { useCheckupYears, useCheckups, useDeleteCheckup } from '../queries';
+import CareShortageNotice from '../CareShortageNotice';
 import CheckupModal from './CheckupModal';
 import EmptyBox from './EmptyBox';
 
@@ -249,7 +250,13 @@ export default function CheckupListCard({ pet, pets, onReceipt }) {
               </button>
             </>
           }
-        />
+        >
+          {/** 지우면 케어리스트가 5개 미만이 될 때만 안내 (※신규 정책) */}
+          <CareShortageNotice
+            petSn={pet.petSn}
+            isTarget={(item) => item.ckupRcdSn === deleteSn}
+          />
+        </Modal>
       )}
     </Card>
   );

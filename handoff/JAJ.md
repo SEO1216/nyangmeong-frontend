@@ -2,7 +2,7 @@
 
 ## 지금 하는 것
 
-건강기록 · 기록 항목 편집에서 순서 변경, 오늘 기록하기 모달, 켠 항목만 표시 — 끝 (SCR-HLT-011·002, 추가-1~4, 사람 확인 2026-11-14). 기록은 `milestones/JAJ.md` 같은 절
+SCR-HLT-003 케어 캘린더 · 케어리스트 개편 연결 — 끝 (검증 4회차 통과, 사람 확인 2026-11-16). 기록은 `milestones/JAJ.md` 같은 절
 
 ## 결정
 
@@ -39,6 +39,8 @@
 - 건강기록 문구 통일(2026-11-13, 위 결정): 화면설계서·기능명세서·`docs/tc/`(TC_건강기록 약 90곳 등)의 옛 문구. 범위 밖 코드 `features/expense/dashboard/ExpenseAddModal.jsx`「영수증으로 등록하기」, `features/ai/chat/actionForm.js`「배변상태」, `features/point/guide/PointGuide.jsx`·`pages/ai/AiChatScreen.jsx`「검진기록 등록」은 각 담당
 - FN-HLT-003-36 기본 색 「질병진료 분홍」 → 「빨강」(HLTC0081 팀 확정, 공용 DB `COM_CD_NM`)
 
+- FN-HLT-003-12·011 (※신규 정책, 2026-11-16) 케어리스트 개편: 고른 케어(`indctYn`)만 표시·5개 이상·연동 항목 항상 표시, 「케어 항목 관리」 모달([관리 항목 추가] 없앰), 진행 상자·「오늘 할 케어」·「다가오는 정기관리」·케어미션 배지, 5개 미만 자동 모달(「케어가 n개로 줄었어요. (5−n)개 이상 더 골라 주세요.」)·삭제 확인창 주의 상자, 튜토리얼 4단계(케어 고르기), 대시보드 케어리스트 위젯도 고른 항목만
+
 ### 결정 기다림 (디자인·퍼블리싱 담당에 전달함, 2026-11-04)
 
 - SCR-HLT-003: 카드 머리·빈 상태 버튼 색, 오른쪽 열 높이 배분, 굵은 구분선. 시안 `html/hlt-calendar.html`
@@ -51,7 +53,7 @@
 - 로컬 확인: AI 서버 영수증 인식은 nyangmeong-ai `.env.local`의 `GOOGLE_VISION_API_KEY`가 없으면 502. 백엔드 내부 API(`POST /internal/ai/receipts` → `/{recptSn}/result` RECOGNIZED)로 영수증을 만들고 `/ai/receipts` 응답만 route로 준다. 백엔드가 DevTools 재시작으로 옛 클래스로 돌면 새 API가 404이니 완전히 다시 띄운다
 - 검증용 데이터: 검증 계정의 구름(petSn 17)에 검진기록 274와 그 처방약·첨부·연동 케어 항목, 검사 수치 11건은 까미(petSn 1)에 있다(2026-11-03 기준)
 - 캐릭터: 배너(`summary/SummaryBanner.jsx`)는 `GET /pixel-characters`에 `pixelCharSn`이 없는 주양육 아이만 "캐릭터 만들기", 그 밖은 `PetFace`. 생성 중·실패는 백엔드가 종별 기본 캐릭터를 준다(사람 결정). 마이페이지 `features/pet/shared/charState.js`도 같은 기준. 로컬에서 캐릭터 있는 아이(여름 22·까미 1)의 `character-image?part=face`가 404 `FILE_NOT_FOUND`면 로컬에 이미지 파일이 없는 것이다(API는 LJS 담당, 2026-11-05 확인)
-- 케어미션: 케어 완료·일상 기록·지속 관찰 저장 때 백엔드가 반영한다(프론트 할 일 없음, `pointKeys`는 무효화하지 않음)
+- 케어미션: 케어 완료·일상 기록·지속 관찰 저장 때 백엔드가 반영한다. 케어 완료 체크·취소·항목 저장 뒤에는 `healthKeys.careMissions`·`pointKeys.all`을 무효화한다(일상 기록·지속 관찰은 무효화하지 않음). 완료 체크를 취소해도 오늘 미션 완료는 서버에 남는다(백엔드 동작)
 - 뱃지 색상(003): 톤은 `TONE_CLASSES[tone].chip`·`.bar`, hex 표는 지웠다. 링 틈은 Tailwind `--spacing`(앱 CSS에 `--space-*` 없음). 고른 칩에 포커스가 있으면 브랜드색 가는 선만 보인다. 390px 수정 모달 하단 [새 일정 추가] 글자가 잘린다(이전부터)
 - 지속 관찰: 사진 줄은 전체 회차, 차트는 크기 입력 회차 기준 최신 5개라 어긋날 수 있다(사람 결정). 회차 삭제는 `DEL_YN='Y'`만, 사진 파일은 남는다. 사진 캐시 키 `healthKeys.observationPhoto`(사진을 바꾼 수정만 다시 받음)
 - 그래프: `diary/LineChart.jsx` 선택 속성 `bandLabelSide`·`isLeftColumn`·`activeIndex`·`labelFill`·`isEdgeToEdge`, 말풍선은 가장자리 `TIP_INSET` 안쪽. 체중 범위 태그는 "최대/최소". 390px x축 날짜가 붙는다. 일상 기록은 선택 지표만 `size=5`, 식사량·음수량·산책은 `fromYmd`로 한 번 더

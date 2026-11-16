@@ -2,10 +2,17 @@
 
 ## 지금 하는 것
 
-없음(2026-11-16 SCR-MYP-010 이미지 주소 /api/files 전환 끝: `publicFileUrl`·공지 [이미지 넣기]가 `/api/files/{번호}`, `PostBody`는 새·예전 줄 둘 다 이미지. 검증 2회차 `확인 못 함 있음`(연결 남음만), 사람 확인 2026-11-16)
+없음(2026-11-16 SCR-ADM-110 운영 설정 거래완료 글 숨김 기준 일수 칸 끝: 검증 1회차 확인 못 함 있음(연결 남음 S1), 사람 확인 2026-11-16)
 
 ## 다음에 할 것
 
+- SCR-ADM-110 연결 남음(2026-11-16): S1 거래완료 글 숨김 기준 칸(`dlngCmptnHideCrtrDayCnt`)은 검증 8081이 예전 코드라 칸이 비어 있었다. 백엔드 LJS가 다음 /start에서 global/setting(KSJ가 고침, 백엔드 `13794f1`) 검토 뒤 8081을 다시 띄우고 알려 주기로 함. 그 뒤 `/admin/settings`에서 조회 값 7, 저장 본문 `{"dlngCmptnHideCrtrDayCnt": n}` 하나, 새로고침 유지, 0 입력 400 칸 오류를 보고 값을 7로 되돌린다
+- SCR-ADM-042 1:1 문의 · 캐릭터 무료 재생성 Python 호출(2026-11-16, 백엔드 LJS가 마일스톤 `대기` 절을 넣음, 백엔드 PR #251): 계약은 백엔드 `docs/api/support.md`
+- SCR-ADM-001 페이지 틀·조회 오류 정리: 2026-11-16 기획했으나 승인 전에 운영 설정 요청으로 바꿔 `대기`로 되돌림(조회 오류 50곳·42개 파일, 페이지 틀 34개 파일 36곳)
+- SCR-COM-002 PR 알림(2026-11-16): member 도메인 `features/member/queries.js` `useUpdateProfileImage`가 `memberKeys.me`도 무효화한다(헤더 프로필 사진이 `useMe`의 `atchFileSn`을 씀). 플로팅 AI 버튼은 대표 반려동물만 쓰고(대표 없으면 강아지 기본 전신), 메인(`/main`)에서는 플로팅 버튼이 없다. 기본 전신 그림 `assets/pets/default-character-dog-full.png`·`cat-full.png` 추가
+- SCR-COM-002 사람이 볼 것(판정 밖, 2026-11-16 검증 보고): ① `useAiDock`이 메인에서도 돌아 첫 방문 말풍선 "봤음"이 바로 저장된다. 로그인 뒤 첫 화면이 메인이라 메인 밖 첫 방문 말풍선이 거의 안 보인다(이전과 같은 동작). 고치려면 저장 시점을 "실제로 보였을 때"로(`hooks/useAiDock.js`) ② 760px 이하 창에서 마우스로 끌어 접으면 뒤따르는 click으로 다시 펼쳐진다(터치는 정상, 이전과 같은 동작) ③ 캐릭터를 안 만든 대표는 서버 기본 그림(네모 블록)이라 보이는 높이가 93/70px로 다르다(아래 "서버 기본 캐릭터 그림 맞추기")
+- SCR-COM-002 이번엔 안 함(2026-11-16): 관리자 헤더(`AdminLayout`) 프로필 사진
+- 서버 기본 캐릭터 그림 맞추기(2026-11-16, LJS 백엔드): 캐릭터 안 만든 반려동물에 `GET /pets/{petSn}/character-image`가 주는 서버 기본 그림(백엔드 `resources/character/default-dog.png`·`cat.png`, 512 네모 블록)이 우리 기본 캐릭터(프론트 `assets/pets/default-character-*.png`)와 다르다. 맞출지 정하고, 하면 백엔드 저장소에서 /start(전신 `full`·얼굴 `face` 둘 다)
 - SCR-MYP-010 연결 남음(2026-11-16): F1 프로필·채팅 상대 프로필·뉴스 썸네일은 기존 첨부 번호(69·42·4225·4590~4600 등)가 이 PC에서 새·예전 주소 모두 404 `FILE_NOT_FOUND`라 그림까지 못 봤다. 서버는 DB 행 `physStrgPath`로 디스크를 읽고 파일이 없으면 404(백엔드 `FileStore.java` `read`), 아래 "백엔드에 알릴 것(2026-10-30) ①"과 같은 원인으로 봄(LJS 백엔드). 이 PC에서 새로 올린 4612는 200
 - SCR-MYP-010 백엔드 예전 주소 정리(2026-11-16, 판정 밖): 프론트에서 `/api/files/public/` 요청이 0건이 됐다(저장된 공지 본문의 예전 줄도 `PostBody`가 `/api/files/{번호}`로 그림). 백엔드 커밋 `e8734cf`의 "프론트가 옮긴 뒤 예전 주소를 지운다"를 할지 백엔드 저장소에서 정한다
 - SCR-MYP-010 팀 알림(2026-11-16): `utils/fileUrl.js` `publicFileUrl`(25개 파일이 씀, 이름 그대로)이 `/api/files/{번호}`를 준다. 이제 로그인해야 열리는 주소라 비로그인 화면(`/chat`은 `auth: 'public'`)에서 쓰면 401로 그림이 깨진다(추정, 확인 안 함)
