@@ -1,4 +1,5 @@
 import {
+  CalendarClock,
   CalendarDays,
   Clock,
   Flag,
@@ -21,9 +22,9 @@ import SharePanel from '@/components/SharePanel';
 import { showToast } from '@/components/toastStore';
 import { useChatModal } from '@/context/chatModal';
 import { PATHS } from '@/routes/paths';
-import { formatDate } from '@/utils/formatDate';
+import { formatDate, getTodayYmd } from '@/utils/formatDate';
 import { publicFileUrl } from '@/utils/fileUrl';
-import { getCostLabel, getPetBadges, isOpen } from '../careCodes';
+import { getCostLabel, getPetBadges, isOpen, RCRT_STTS } from '../careCodes';
 import {
   useDeleteCare,
   useReportCare,
@@ -74,6 +75,11 @@ export default function CareDetail({ post }) {
   const isLiked = post.liked;
   const badges = [...new Set([...getShapeNames(post), ...getPetBadges(post)])];
   const schedule = formatScheduleDetail(post);
+  /** 매칭완료인데 돌봄 종료일이 지났으면 거래 마무리를 안내(일정 협의 글은 종료일이 없어 제외) */
+  const isScheduleOver =
+    post.rcrtSttsCd === RCRT_STTS.MATCHED &&
+    Boolean(post.prtcEndDt) &&
+    post.prtcEndDt.slice(0, 10) < getTodayYmd();
 
   const closeModal = () => setModal('');
 
@@ -134,6 +140,16 @@ export default function CareDetail({ post }) {
             </p>
           )}
         </div>
+
+        {isScheduleOver && (
+          <p
+            role="note"
+            className="mt-4 flex items-center gap-2 rounded-box bg-warn-soft px-4 py-3 text-sm font-medium text-warn"
+          >
+            <CalendarClock size={18} aria-hidden="true" className="shrink-0" />
+            돌봄 일정이 지났어요. 거래를 마무리해 주세요.
+          </p>
+        )}
 
         <PostBody content={post.pstCn}>
           {post.imgs.length > 0 && (
