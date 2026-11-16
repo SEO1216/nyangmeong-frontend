@@ -8,6 +8,7 @@ import {
   BTN_PRIMARY,
   BTN_SECONDARY,
 } from '@/components/buttonStyles';
+import CareShortageNotice from '../CareShortageNotice';
 import FieldError from '../diary/FieldError';
 import { INPUT_CLASS, LABEL_CLASS } from '../diary/formStyles';
 import CharCount from '../shared/CharCount';
@@ -247,7 +248,13 @@ export default function PrescriptionForm({
               </button>
             </>
           }
-        />
+        >
+          {/** 지우면 케어리스트가 5개 미만이 될 때만 안내 (※신규 정책) */}
+          <CareShortageNotice
+            petSn={petSn}
+            isTarget={(item) => item.prscSn === prescription.prscSn}
+          />
+        </Modal>
       )}
     </form>
   );

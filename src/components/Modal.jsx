@@ -7,6 +7,7 @@ const WIDTH_CLASSES = {
   560: 'w-[min(560px,calc(100vw-2rem))]',
   688: 'w-[min(688px,calc(100vw-2rem))]',
   720: 'w-[min(720px,calc(100vw-2rem))]',
+  1040: 'w-[min(1040px,calc(100vw-2rem))]',
 };
 
 /**
@@ -18,7 +19,7 @@ const WIDTH_CLASSES = {
  * isSheet: 760px 이하에서만 아래에서 올라오는 시트(손잡이 막대 포함), 그 위 폭은 가운데 모달 그대로.
  *          isLarge와 함께 쓰면 760px 이하에서 화면 전체 대신 이 시트(높이는 화면 − 2rem까지, 넘치면 본문 안쪽 스크롤)
  * isWide: 가로 688px(본문 640px) 입력 모달. 제목 줄 위아래 8px, 푸터 버튼은 내용 너비로 오른쪽 정렬
- * width: 가로 폭(px) 560·688·720, 없으면 440(isLarge는 760). isWide(688)보다 우선. 화면보다 좁으면 양옆 1rem을 남긴다
+ * width: 가로 폭(px) 560·688·720·1040, 없으면 440(isLarge는 760). isWide(688)보다 우선. 화면보다 좁으면 양옆 1rem을 남긴다
  * headerLead: 제목 줄 왼쪽에 제목 대신 둘 요소(예: 「‹ 다시 검색」). isTitleHidden와 함께 쓴다
  * isHeaderBorderHidden: 제목 줄 아래 구분선을 없앤다
  * isTitleHidden: 제목 글자를 화면에서 숨긴다(화면 읽기용 이름은 유지, ✕는 오른쪽에 그대로)
