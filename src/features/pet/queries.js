@@ -12,8 +12,10 @@ import { getCharState } from './shared/charState';
 import { CRT_JOB_STTS } from '@/utils/petCodes';
 import {
   acceptInvitation,
+  cancelInvitation,
   createCharacter,
   createInvitation,
+  deleteInvitation,
   createPet,
   deleteCaregiver,
   deletePet,
@@ -369,6 +371,7 @@ const CLOSED_CODES = [
   'CAREGIVER_INVITATION_EXPIRED',
   'CAREGIVER_INVITATION_ALREADY_PROCESSED',
   'CAREGIVER_INVITATION_EMAIL_MISMATCH',
+  'CAREGIVER_INVITATION_CANCELED',
 ];
 const refreshIfClosed = (qc, error) => {
   if (CLOSED_CODES.includes(error.code)) {
@@ -394,5 +397,22 @@ export const useRejectInvitation = () => {
     mutationFn: rejectInvitation,
     onSuccess: () => qc.invalidateQueries({ queryKey: invitationKeys.all }),
     onError: (error) => refreshIfClosed(qc, error),
+  });
+};
+
+/** 성공·실패 모두 보낸 목록을 다시 읽어 서버의 실제 상태를 보인다(다른 곳에서 먼저 바뀐 경우) */
+export const useCancelInvitation = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: cancelInvitation,
+    onSettled: () => qc.invalidateQueries({ queryKey: invitationKeys.all }),
+  });
+};
+
+export const useDeleteInvitation = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: deleteInvitation,
+    onSettled: () => qc.invalidateQueries({ queryKey: invitationKeys.all }),
   });
 };

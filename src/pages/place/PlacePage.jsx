@@ -22,8 +22,14 @@ export default function PlacePage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { search } = place;
 
+  // 핀이나 목록 항목으로 고르면 지도가 그 업체로 가고 팝업이 뜬다. 모바일은 시트를 내려 지도가 보이게 한다
   const handlePinSelect = (plcSn) => {
     place.selectPlace(plcSn, 'pin');
+    sheet.setSheet('peek');
+  };
+
+  const handleListSelect = (plcSn) => {
+    place.selectPlace(plcSn, 'list');
     sheet.setSheet('peek');
   };
 
@@ -70,6 +76,7 @@ export default function PlacePage() {
         onSearch={place.submitSearch}
         onType={place.typeSearch}
         onSortChange={place.setSort}
+        onSelectPlace={handleListSelect}
         onToggleFavorite={place.toggleFavorite}
       />
 
