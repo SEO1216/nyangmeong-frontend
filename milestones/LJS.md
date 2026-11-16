@@ -1151,11 +1151,13 @@
 - 완료 조건 결과: 검증 `통과`(2026-11-10 1회차, 5180·8081 관리자), 사람 확인 2026-11-10
 - 연결 남음: 없음
 
-## SCR-ADM-081 키워드 사전 · 관리자 키워드 사전 API 연결 — 대기
-- 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-081-01·02
-- 기다리는 것: 백엔드 SCR-ADM-081 키워드 사전 · 프론트 연결 관리자 키워드 사전 API(LJS, 끝 2026-11-05). 계약은 백엔드 `docs/api/ai.md` "관리자 API" 절의 `/admin/ai/keywords` 네 행과 DTO 절
-- 완료 조건: `features/adminAiKeyword/api.js`의 가짜 네 함수를 실제 `GET /api/admin/ai/keywords?dictUsgCd=&kwrdClsfNm=`(배열, 페이지 없음)·`POST /api/admin/ai/keywords`(201 `{ kwrdDictSn }`)·`PATCH /api/admin/ai/keywords/{kwrdDictSn}`(보낸 칸만, 바뀐 행을 돌려줌)·`DELETE /api/admin/ai/keywords/{kwrdDictSn}`로 바꾸고 sessionStorage 가짜를 지운다. 가정과 다른 것: `useYn`은 true/false('Y' 아님), 행에 `mpngCdNm`(연결 코드 이름)이 더 있다, 없는 행 404 `AI_KEYWORD_NOT_FOUND`(가짜 `KEYWORD_NOT_FOUND` 아님), 수정에서 해석 결과·연결 코드·비고를 비우려면 빈 문자열(`null`은 그대로 둠), 용도·분류는 수정되지 않는다. 연결 코드는 `일정 종류`(HLTG19)·`검진유형`(HLTG01)·`가계부 카테고리`(MYPG05)만 필수이고 다른 분류에 보내면 400 `INVALID_INPUT_VALUE`. `kwrdClsfNm`은 서버가 글자 그대로 검사하므로 `SCR-ADM-081 키워드 사전 · 탭·칸 이름을 쉬운 말로` 절에서 바꾸는 것은 화면 표시만이다. 가계부 카테고리 초기 데이터 6건(병원~돌봄, 기타 없음)은 공용 DB에 있다
+## SCR-ADM-081 키워드 사전 · 화면 없애기 — 끝
+- 기능: FN-ADM-081-01·02·03 없앰(사람 결정 2026-11-16: AI가 도구 호출로 바뀌어 키워드 사전을 읽지 않음, AI 서버 develop `59ba84f` 확인)
+- 기다리는 것: 없음. 백엔드 API·테이블 지우기는 백엔드 저장소에서 따로, 문서 정리는 사람
+- 완료 조건: `features/adminAiKeyword/`·`AdminAiKeywordsPage.jsx`·라우트·`ADMIN_AI_KEYWORDS`·메뉴 항목·`docs/routes.md`·TC 문서의 키워드 사전 부분이 없고, 관리자 메뉴 AI 묶음의 남은 두 화면이 열린다. lint·build 0
+- 예전 계획(연결, 2026-11-16 취소): `features/adminAiKeyword/api.js`의 가짜 네 함수를 실제 `GET /api/admin/ai/keywords?dictUsgCd=&kwrdClsfNm=`(배열, 페이지 없음)·`POST /api/admin/ai/keywords`(201 `{ kwrdDictSn }`)·`PATCH /api/admin/ai/keywords/{kwrdDictSn}`(보낸 칸만, 바뀐 행을 돌려줌)·`DELETE /api/admin/ai/keywords/{kwrdDictSn}`로 바꾸고 sessionStorage 가짜를 지운다. 가정과 다른 것: `useYn`은 true/false('Y' 아님), 행에 `mpngCdNm`(연결 코드 이름)이 더 있다, 없는 행 404 `AI_KEYWORD_NOT_FOUND`(가짜 `KEYWORD_NOT_FOUND` 아님), 수정에서 해석 결과·연결 코드·비고를 비우려면 빈 문자열(`null`은 그대로 둠), 용도·분류는 수정되지 않는다. 연결 코드는 `일정 종류`(HLTG19)·`검진유형`(HLTG01)·`가계부 카테고리`(MYPG05)만 필수이고 다른 분류에 보내면 400 `INVALID_INPUT_VALUE`. `kwrdClsfNm`은 서버가 글자 그대로 검사하므로 `SCR-ADM-081 키워드 사전 · 탭·칸 이름을 쉬운 말로` 절에서 바꾸는 것은 화면 표시만이다. 가계부 카테고리 초기 데이터 6건(병원~돌봄, 기타 없음)은 공용 DB에 있다
 - 이미 바뀐 것: `features/adminAiKeyword/api.js`·`keywordLabels.js`(가짜)
+- 연결 남음: FN-ADM-081-01·02·03 (백엔드 연결 관리자·내부 키워드 사전 API 삭제, 백엔드 저장소에서 /start)
 
 ## SCR-ADM-082 처리 현황 · 검사결과지 분석 현황 API 연결 — 대기
 - 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-082-03
