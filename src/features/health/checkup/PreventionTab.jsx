@@ -5,6 +5,7 @@ import Icon from '@/components/Icon';
 import Modal from '@/components/Modal';
 import { BTN_DANGER, BTN_SECONDARY } from '@/components/buttonStyles';
 import { formatDate } from '@/utils/formatDate';
+import CareShortageNotice from '../CareShortageNotice';
 import { getCycleName } from '../careDue';
 import EmptyBox from '../diary/EmptyBox';
 import { useCancelPrevention } from '../queries';
@@ -117,7 +118,14 @@ export default function PreventionTab({ petSn, ckupRcdSn, preventions }) {
               </button>
             </>
           }
-        />
+        >
+          {/** 지우면 케어리스트가 5개 미만이 될 때만 안내 (※신규 정책) */}
+          <CareShortageNotice
+            petSn={petSn}
+            verb="해지하면"
+            isTarget={(item) => item.reptPrvntMngSn === cancelSn}
+          />
+        </Modal>
       )}
     </Card>
   );
