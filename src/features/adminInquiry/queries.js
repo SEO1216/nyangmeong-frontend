@@ -13,8 +13,14 @@ import {
   getAdminInquiryImage,
   getAdminInquiryTypes,
   processAdminInquiryCharacterError,
+  regenerateAdminCharacter,
   updateAdminInquiryAnswer,
 } from './api';
+
+/** 재생성 작업이 끝나지 않은 상태(CHRG01): 요청, 생성 중 */
+const REGEN_RUNNING_CODES = ['CHRC0001', 'CHRC0002'];
+/** 재생성 상태를 다시 받는 간격(ms) */
+const REGEN_POLL_MS = 5000;
 
 export const adminInquiryKeys = {
   all: ['adminInquiry'],
@@ -41,6 +47,11 @@ export const useAdminInquiry = (otoInqrySn) =>
     queryKey: adminInquiryKeys.detail(otoInqrySn),
     queryFn: () => getAdminInquiry(otoInqrySn),
     enabled: Number.isInteger(otoInqrySn),
+    /** 무료 재생성이 진행 중이면 끝날 때까지 다시 받기 */
+    refetchInterval: (query) =>
+      REGEN_RUNNING_CODES.includes(query.state.data?.regenJobSttsCd)
+        ? REGEN_POLL_MS
+        : false,
   });
 
 /** 공통코드는 화면을 열어 둔 동안 변경 없음 */
@@ -138,9 +149,40 @@ export const useUpdateAdminInquiryAnswer = () =>
     onError: useRefetchInquiry(),
   });
 
-export const useProcessAdminInquiryCharacterError = () =>
-  useMutation({
-    mutationFn: processAdminInquiryCharacterError,
-    onSuccess: useApplyInquiryResult(),
+/**
+ * 캐릭터 오류 처리: { inquiry, regenFailed }
+ * - 무료 재생성(CHRC0008)이면 이어서 AI 서버에 재생성을 시작시킨다
+ * - AI 서버 호출이 실패해도 처리는 기록됐으므로 성공으로 끝내고 regenFailed만 알린다
+ *   (시작 못 한 작업은 서버 시간 초과 배치가 실패로 정리해 다시 처리할 수 있다)
+ */
+const processCharacterError = async (variables) => {
+  const inquiry = await processAdminInquiryCharacterError(variables);
+  if (
+    variables.charErrPrcsRsltCd !== 'CHRC0008' ||
+    inquiry.regenJobSn == null
+  ) {
+    return { inquiry, regenFailed: false };
+  }
+  try {
+    await regenerateAdminCharacter(inquiry.regenJobSn);
+    return { inquiry, regenFailed: false };
+  } catch {
+    return { inquiry, regenFailed: true };
+  }
+};
+
+export const useProcessAdminInquiryCharacterError = () => {
+  const queryClient = useQueryClient();
+  const applyResult = useApplyInquiryResult();
+  return useMutation({
+    mutationFn: processCharacterError,
+    onSuccess: ({ inquiry }) => {
+      applyResult(inquiry);
+      /** 재생성 상태(regenJobSttsCd)를 지금 값으로 */
+      return queryClient.invalidateQueries({
+        queryKey: adminInquiryKeys.detail(inquiry.otoInqrySn),
+      });
+    },
     onError: useRefetchInquiry(),
   });
+};

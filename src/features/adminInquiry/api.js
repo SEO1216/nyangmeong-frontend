@@ -1,4 +1,4 @@
-import { api } from '@/api/axios';
+import { aiApi, api } from '@/api/axios';
 
 /**
  * [관리자 1:1 문의 API]
@@ -38,6 +38,13 @@ export const processAdminInquiryCharacterError = ({
   api.post(`/admin/inquiries/${otoInqrySn}/character-error`, {
     charErrPrcsRsltCd,
   });
+
+/**
+ * 무료 재생성 시작(AI 서버): 202, 데이터 없음
+ * - 캐릭터 오류 처리(CHRC0008) 응답의 regenJobSn으로 부른다(AI docs/api/character.md)
+ */
+export const regenerateAdminCharacter = (regenJobSn) =>
+  aiApi.post(`/admin/characters/jobs/${regenJobSn}/regenerate`);
 
 /** 문의 유형 목록: [{ comCd, comCdNm, sortSeq }] */
 export const getAdminInquiryTypes = () =>
