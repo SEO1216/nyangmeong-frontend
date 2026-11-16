@@ -6,8 +6,6 @@ import {
   PET_SE_BY_FILTER,
   SIZE_BY_FILTER,
   SIZE_FILTERS,
-  STATUS_TABS,
-  STTS_BY_TAB,
 } from '@/features/community/careCodes';
 import { useCareList } from '@/features/community/careQueries';
 import CareList from '@/features/community/care/CareList';
@@ -114,7 +112,6 @@ const writeAction = (
 export default function CareListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page')) || 1;
-  const stts = pick(searchParams.get('stts'), STATUS_TABS);
   const mine = searchParams.get('mine') === '1';
   /** 지역은 지역 번호(rgnSn). 숫자가 아니면 전체 */
   const region = /^\d+$/.test(searchParams.get('rgn') ?? '')
@@ -130,7 +127,7 @@ export default function CareListPage() {
   /** 고양이는 반려견 크기를 선택 불가 */
   const size =
     pet === 'cat' ? '' : pick(searchParams.get('size'), SIZE_FILTERS);
-  const filters = { stts, mine, region, dong, from, to, pet, size };
+  const filters = { mine, region, dong, from, to, pet, size };
 
   const {
     data: posts,
@@ -139,7 +136,6 @@ export default function CareListPage() {
   } = useCareList({
     page,
     size: PAGE_SIZE,
-    rcrtSttsCd: STTS_BY_TAB[stts] ?? '',
     mineYn: mine,
     rgnSn: dong || region,
     fromDate: from,
@@ -154,7 +150,6 @@ export default function CareListPage() {
     setSearchParams(
       Object.fromEntries(
         Object.entries({
-          stts: merged.stts,
           mine: merged.mine ? '1' : '',
           rgn: merged.region,
           dong: merged.dong,
