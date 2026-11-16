@@ -8,6 +8,7 @@ import {
 import { showToast } from '@/components/toastStore';
 import { expenseKeys } from '@/features/expense/queries';
 import { notificationKeys } from '@/features/notification/queries';
+import { pointKeys } from '@/features/point/queries';
 import {
   cancelCareRecord,
   cancelLastDose,
@@ -17,10 +18,12 @@ import {
   deleteCareItem,
   deleteSchedule,
   getCareItems,
+  getCareMissionProgress,
   getMyPets,
   getPetDetail,
   getPixelCharacters,
   getSchedules,
+  saveCareIndications,
   updateCareItem,
   updateSchedule,
 } from './api';
@@ -92,6 +95,8 @@ export const healthKeys = {
   scheduleList: (params) => ['health', 'schedules', params],
   careItems: ['health', 'care-items'],
   careItemList: (petSn) => ['health', 'care-items', petSn],
+  careMissions: ['health', 'care-missions'],
+  careMissionProgress: (petSn) => ['health', 'care-missions', petSn],
   dailyRecords: ['health', 'daily-records'],
   dailyRecordList: (petSn) => ['health', 'daily-records', petSn],
   dailyTrend: (petSn, dailyRcdIdctCd) => [
@@ -191,16 +196,32 @@ export const useCareItems = (petSn) =>
     enabled: petSn != null,
   });
 
-const useCareMutation = (mutationFn) => {
+/** 케어 항목·오늘 케어미션 진행·포인트 미션 캐시 무효화 */
+const invalidateCare = (queryClient) => {
+  queryClient.invalidateQueries({ queryKey: healthKeys.careItems });
+  queryClient.invalidateQueries({ queryKey: healthKeys.careMissions });
+  queryClient.invalidateQueries({ queryKey: pointKeys.all });
+};
+
+const useCareMutation = (mutationFn, { hasErrorToast = true } = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn,
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: healthKeys.careItems }),
-    onError: showErrorToast,
+    onSuccess: () => invalidateCare(queryClient),
+    onError: (error) => {
+      if (hasErrorToast) showErrorToast(error);
+    },
   });
 };
+
+/** 오늘 케어미션 완료 수·전체 수·주양육자 여부 (※신규 정책) */
+export const useCareMissionProgress = (petSn) =>
+  useQuery({
+    queryKey: healthKeys.careMissionProgress(petSn),
+    queryFn: () => getCareMissionProgress(petSn),
+    enabled: petSn != null,
+  });
 
 export const useCheckCareItem = () => useCareMutation(checkCareItem);
 
@@ -212,7 +233,66 @@ export const useCreateCareItem = () => useCareMutation(createCareItem);
 
 export const useUpdateCareItem = () => useCareMutation(updateCareItem);
 
-export const useDeleteCareItem = () => useCareMutation(deleteCareItem);
+/** 오류는 확인창 안에 표시 */
+export const useDeleteCareItem = () =>
+  useCareMutation(deleteCareItem, { hasErrorToast: false });
+
+/** 튜토리얼의 케어 고르기 저장 (※신규 정책) */
+export const useSaveCareIndications = () =>
+  useCareMutation(saveCareIndications);
+
+/**
+ * 「케어 항목 관리」 저장: 생성 -> 수정 -> 고른 항목 저장 -> 삭제 (※신규 정책)
+ * - done: 끝난 단계 기록. 다시 시도하면 남은 단계만 보냄
+ */
+const saveCareChanges = async ({ petSn, items, removedSns, done }) => {
+  for (const item of items) {
+    if (item.careArtclSn == null) {
+      /** 새 항목: 이미 만들었으면 그 뒤 고친 값만 수정으로 반영 */
+      const createdSn = done.createdSns[item.chipKey];
+      const bodyKey = JSON.stringify(item.createBody);
+      if (createdSn == null) {
+        const created = await createCareItem({ petSn, body: item.createBody });
+        done.createdSns[item.chipKey] = created.careArtclSn;
+        done.updatedBodies[created.careArtclSn] = bodyKey;
+      } else if (done.updatedBodies[createdSn] !== bodyKey) {
+        await updateCareItem({
+          petSn,
+          careArtclSn: createdSn,
+          body: { ...item.createBody, lastCmptnYmd: undefined },
+        });
+        done.updatedBodies[createdSn] = bodyKey;
+      }
+      continue;
+    }
+    const bodyKey = JSON.stringify(item.updateBody ?? {});
+    if (bodyKey === '{}' || done.updatedBodies[item.careArtclSn] === bodyKey)
+      continue;
+    await updateCareItem({
+      petSn,
+      careArtclSn: item.careArtclSn,
+      body: item.updateBody,
+    });
+    done.updatedBodies[item.careArtclSn] = bodyKey;
+  }
+  const careArtclSns = items
+    .filter((item) => item.isOn)
+    .map((item) => item.careArtclSn ?? done.createdSns[item.chipKey]);
+  const indicationKey = careArtclSns.join(',');
+  if (done.indicationKey !== indicationKey) {
+    await saveCareIndications({ petSn, careArtclSns });
+    done.indicationKey = indicationKey;
+  }
+  for (const careArtclSn of removedSns) {
+    if (done.deletedSns.includes(careArtclSn)) continue;
+    await deleteCareItem({ petSn, careArtclSn });
+    done.deletedSns.push(careArtclSn);
+  }
+};
+
+/** 오류는 모달 안에 표시 */
+export const useSaveCareChanges = () =>
+  useCareMutation(saveCareChanges, { hasErrorToast: false });
 
 export const useDailyRecords = (petSn) =>
   useQuery({

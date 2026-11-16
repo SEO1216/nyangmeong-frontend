@@ -101,3 +101,11 @@ export const updateCareItem = ({ petSn, careArtclSn, body }) =>
 
 export const deleteCareItem = ({ petSn, careArtclSn }) =>
   api.delete(`/pets/${petSn}/care-items/${careArtclSn}`);
+
+/** 케어리스트에 보일 항목 전체 저장 (※신규 정책) */
+export const saveCareIndications = ({ petSn, careArtclSns }) =>
+  api.put(`/pets/${petSn}/care-items/indications`, { careArtclSns });
+
+/** 오늘 케어미션 완료 수·전체 수·주양육자 여부 (※신규 정책) */
+export const getCareMissionProgress = (petSn) =>
+  api.get(`/pets/${petSn}/care-items/mission-progress`);

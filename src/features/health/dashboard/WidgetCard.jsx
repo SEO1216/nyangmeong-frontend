@@ -697,8 +697,9 @@ const careBody = ({ care }) => {
   if (!care) return null;
   const { careItems, careRecords } = care;
   const todayYmd = getTodayYmd();
+  /** 케어리스트에 보이는 항목(indctYn)만 (※신규 정책) */
   const dailyItems = careItems.filter(
-    (item) => item.careZoneCd === CARE_ZONE.DAILY,
+    (item) => item.indctYn && item.careZoneCd === CARE_ZONE.DAILY,
   );
   if (dailyItems.length === 0) return null;
   /** 케어 캘린더 케어리스트와 같은 오늘 완료 기준 */

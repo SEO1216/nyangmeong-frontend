@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import Card from '@/components/Card';
 import Icon from '@/components/Icon';
 import { formatMonthDayDot, getTodayYmd } from '@/utils/formatDate';
 import { toCareIcon } from './careIcons';
 
 const PAGE_SIZE = 10;
 
-// 최근 케어 기록(FN-HLT-003-12). 케어리스트 카드 안에 놓는다. 아이콘을 누르면 그날 완료 기록이 취소되고, 마우스를 올리면 아이콘이 ✕로 바뀐다
+// 최근 케어 기록(FN-HLT-003-12). 케어리스트 카드 아래의 별도 카드다(숨긴 항목의 지난 기록도 그대로 나온다, ※신규 정책). 아이콘을 누르면 그날 완료 기록이 취소되고, 마우스를 올리면 아이콘이 ✕로 바뀐다
 // 날짜 10줄씩 페이지로 나눠 보여 준다. 기록을 취소해 줄어들면 마지막 페이지로 당겨 온다
 // regularSns: 정기관리 항목 번호(완료 기록 응답에 구역이 없어 R 표시에 쓴다)
 export default function CareRecordList({ records, regularSns, onCancel }) {
@@ -24,11 +25,7 @@ export default function CareRecordList({ records, regularSns, onCancel }) {
     'grid h-9 min-w-9 place-items-center rounded-full px-2 font-medium';
 
   return (
-    <div className="mt-8">
-      <div className="mb-2 flex items-baseline gap-3 border-b-2 border-[#b9c4c4] pb-2">
-        <h3 className="text-lg font-semibold text-[#1a3234]">최근 케어 기록</h3>
-        <span className="text-[#667374]">일상관리·정기관리 완료 기록 통합</span>
-      </div>
+    <Card title="최근 케어 기록" sub="일상관리·정기관리 완료 기록 통합">
       {dates.length === 0 ? (
         <div className="rounded-[10px] border border-dashed border-[#b9c4c4]">
           <div className="flex flex-col items-center gap-2 px-4 py-6 text-center">
@@ -134,6 +131,6 @@ export default function CareRecordList({ records, regularSns, onCancel }) {
           </button>
         </nav>
       )}
-    </div>
+    </Card>
   );
 }
