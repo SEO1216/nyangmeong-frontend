@@ -1350,12 +1350,16 @@
 - 배경: 핸드오프 다음에 할 것 "`/api/pets/main-shortcuts` 400"(검증 보고 2026-11-11)
 - 기다리는 것: 없음
 - 완료 조건: 핸드오프 기획 B1~B3
+- 넘김: 사람 2026-11-14 "이건 넘어가자"
 
-## SCR-MYP-010 픽셀 캐릭터 관리 · 이미지 주소 /api/files 전환 — 대기
+## SCR-MYP-010 픽셀 캐릭터 관리 · 이미지 주소 /api/files 전환 — 끝
 - 기능: 명세 기능 ID 추가 없음(백엔드 SCR-MYP-010 파일 저장 경로 재구성 2026-11-13의 프론트 연결). 걸치는 기능: 공통 파일 이미지, FN-ADM-040-02 공지 본문 이미지, FN-ADM-050-02 뉴스 썸네일
 - 기다리는 것: 백엔드 SCR-MYP-010 파일 저장 경로 재구성(백엔드 `LJS` 브랜치, develop 병합 전). 병합 전에도 백엔드는 예전 주소 `/api/files/public/{번호}`를 같은 동작으로 남긴다
 - 완료 조건: `src/utils/fileUrl.js`가 `/api/files/{atchFileSn}`을 만든다. 관리자 공지 편집기(`features/adminNotice/NoticeForm.jsx`)가 본문에 `![](/api/files/{atchFileSn})`를 넣는다. `components/PostBody.jsx`는 새 줄 `![](/api/files/숫자)`와 이미 저장된 공지 본문의 예전 줄 `![](/api/files/public/숫자)`를 둘 다 이미지로 그린다. 로그인 상태에서 게시글·프로필·캐릭터·공지·뉴스 이미지가 보이고, 이미지 요청이 `/api/files/{번호}`로 나간다(이제 두 주소 모두 로그인 필요, 비로그인 401)
 - 이미 바뀐 것: 없음(백엔드 계약은 백엔드 `docs/api/global.md` `GET /files/{atchFileSn}` 행, `community.md`·`support.md` 공지·뉴스 행)
+- 결정(사람 2026-11-14): 캐릭터 이미지는 `GET /pets/{petSn}/character-image`라 `publicFileUrl`을 안 써서 회귀 확인만
+- 완료 조건 결과: 검증 `확인 못 함 있음`(2026-11-16, 회차 2. 1회차 실패는 로컬 백엔드 DB 연결 문제로 화면 미확인), F2·F3 통과, F1 게시글 사진 통과, 사람 확인 2026-11-16
+- 연결 남음: F1 프로필·채팅 상대 프로필·뉴스 썸네일 그림 표시(기존 첨부 파일이 이 PC 디스크에 없어 새·예전 주소 모두 404 `FILE_NOT_FOUND`, 프론트 변경과 무관. LJS 백엔드)
 
 ## SCR-COM-008 설정(알림) · 취소 버튼 — 끝
 - 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-COM-008-14 저장 처리·008-15 저장 버튼 활성 제어
