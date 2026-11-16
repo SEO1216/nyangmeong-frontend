@@ -2,9 +2,32 @@
 
 ## 지금 하는 것
 
-SCR-MYP-002 반려동물 프로필 목록 · 슬라이드 카드에 "오류 확인 중" 배지 추가, "대표" 배지 빼기 — 끝 (2026-11-14, 검증 `통과` 1회차, lint·build 0, 사람 확인 완료: 탄이·루루 배지, 취두부 "대표" 배지 없음, ⋮ 두 항목, 393px. 나비는 검증 결과로 갈음)
+SCR-MYP-005 공동양육자 추가 · 보낸 초대 취소·삭제 버튼 연결 — 구현 중 (승인 2026-11-16), 시작 2026-11-16
 
-- 바꾼 것: FN-MYP-002-02 `features/pet/list/PetSlide.jsx`의 이름 옆 배지 묶음에서 "대표"를 지우고 주양육/공동양육 다음에 `bscCharSbstYn`이면 amber "오류 확인 중"(`CharacterCard`·`PetMiniCard`와 같은 색)을 넣었다. 대표 지정 메뉴·API는 그대로
+- 기준: 기능명세서 `마이페이지_기능명세서_v0.5_20261101`(DMS 미인증이라 캐시 사용. 명세에는 취소·삭제가 아직 없다), 백엔드 `docs/api/pet.md`의 cancel·DELETE 줄. 백엔드 마일스톤의 프론트 경로 추정은 실제 파일(`features/pet/list/SentInvitations.jsx`, `features/pet/invite/InvitationClosed.jsx`)로 확인함
+- 디자인: 시안 폴더의 `myp-pets-invite.html`(보낸 초대 행). 취소·삭제 버튼은 시안에 없을 수 있어 행 모양은 시안 그대로, 버튼은 `buttonStyles.js`의 `TEXT_ACTION`(취소)·`TEXT_ACTION_DANGER`(삭제), 확인 모달은 `PetUnlinkDialog`와 같은 `Modal isConfirm isSpacious` 모양
+- 공통: `features/pet/shared/petCodes.js` `INVTN_STTS.CNCL = 'PETC0035'`. `features/pet/api.js` `cancelInvitation`(POST `/caregiver-invitations/{sn}/cancel`)·`deleteInvitation`(DELETE `/caregiver-invitations/{sn}`), SJM 백엔드(있음). `features/pet/queries.js` `useCancelInvitation`·`useDeleteInvitation`(성공·실패 모두 `invitationKeys.all` 무효화)
+- FN-MYP-005-03 보낸 초대: `SentInvitations.jsx`에 배지 "취소됨"(gray tone) 추가. 행의 `pet.invtnSttsCd`가 대기중이면 [취소], 취소면 [삭제]. 취소·삭제는 초대 단위라 확인 모달 문구에 그 초대에 묶인 반려동물 이름을 모두 적는다("…에게 보낸 코코·나비 초대를 취소할까요?"). 새 파일 `features/pet/list/SentInvitationDialog.jsx`(취소/삭제 두 모드, 요청 중 닫기 막음). 성공 토스트 "초대를 취소했어요"·"초대를 삭제했어요"
+  - 오류: 취소 409 `CAREGIVER_INVITATION_CANCELED`·`..._ALREADY_PROCESSED`, 400 `..._EXPIRED`, 403 `..._NOT_SENDER` / 삭제 409 `..._NOT_CANCELED`, 403, 404 `..._NOT_FOUND` → 모달을 닫고 서버 `message` 토스트, 목록을 다시 읽어 실제 상태로 바꾼다. 401은 화면에서 처리하지 않는다
+  - 완료 조건: `명령:` `yarn -s lint`, `yarn -s build` 종료 코드 0. `화면:` tester(mbrSn 1)로 user0006 이메일에 초대 → 대기중 행 [취소] → 모달 [취소하지 않음]이면 그대로, 확인하면 배지 "취소됨"·[삭제]로 바뀜 → [삭제] 확인 → 그 초대의 행이 모두 사라짐. 한 초대 여러 마리면 행마다 같이 바뀜. 다른 탭에서 먼저 취소해 둔 뒤 [취소]하면 409 토스트와 목록 갱신. 393px에서 버튼·배지가 이메일과 겹치지 않음
+- FN-MYP-005-10 만료·종료 안내: `InvitationClosed.jsx`에 `PETC0035`면 "취소된 초대예요" / "초대한 분이 이 초대를 취소했어요." / "필요하면 초대한 분께 다시 초대를 요청해 주세요." (아이콘·버튼은 만료·처리됨과 같다). `InvitationPage.jsx`는 대기중이 아니면 이미 안내로 가므로 그대로. `queries.js` `CLOSED_CODES`에 `CAREGIVER_INVITATION_CANCELED`를 넣어 수락·거절 중 취소되면 다시 읽어 안내로 바뀐다. 삭제한 초대(404)는 기존 "초대를 찾을 수 없어요" 그대로
+  - 완료 조건: `화면:` 취소한 초대 링크를 user0006(mbrSn 6)으로 열면 "취소된 초대예요" 안내, [마이페이지 홈으로] 하나, 393px에서 전체 폭. 수락 화면을 열어 둔 채 tester가 취소 → [수락]하면 409 뒤 취소 안내로 바뀜. 삭제 뒤 같은 링크는 "초대를 찾을 수 없어요"
+- 정리: 화면 확인으로 공용 DB에 초대 1~2건(`JNT_BRUP_INVTN`, 취소 뒤 `DEL_YN='Y'`)·상태 이력·user0006 인앱 알림이 생긴다. 번호와 복구 SQL은 보고에 적는다
+- 문서 작업(`/end` 때 다음에 할 것): FN-MYP-005-03에 [취소]·[삭제]·"취소됨" 배지·확인 모달, FN-MYP-005-10에 취소 안내 문구 추가. 화면설계서 SCR-MYP-005 보낸 초대·5-6 안내도
+- 새 의존성: 없음
+- 질문: 시안 `myp-pets-invite.html`의 보낸 초대 행을 기준으로 하고 버튼만 기존 텍스트 버튼 스타일로 덧붙일까요? (추천: 그렇게 한다)
+  - 결정: 추천안대로. 시안 `myp-pets-invite.html` 보낸 초대 행 기준, 버튼은 TEXT_ACTION(취소)·TEXT_ACTION_DANGER(삭제)
+
+### 추가 요청
+
+| 번호 | 바꿀 파일 | 완료 조건 | 요청 |
+| --- | --- | --- | --- |
+| 추가-1 | `features/pet/list/SentInvitations.jsx`, 새 `features/pet/list/MoreMenu.jsx`(`PetSlide.jsx`의 ⋮ 메뉴를 꺼내 공용으로), `PetSlide.jsx` | 명령: lint·build 0. 화면: 초대 1건=1행, 둘째 줄 "연탄·루루 · 발송 · 가입 · 만료"(만료는 끝), 오른쪽은 배지+⋮만([취소]·[삭제] 텍스트 버튼 없음), ⋮는 대기중 "초대 취소"·취소됨 "삭제"(빨강), 할 게 없는 행은 ⋮ 자리만 비움, 반려동물별 결과가 갈리면 배지 "일부 수락"+둘째 줄 "탄이 수락(초록) · 까미 거절(빨강)", 메뉴를 고르면 기존 확인 모달, 393px에서 이메일·배지·⋮ 안 겹침 | 요청 2026-11-16 "보낸 초대 행을 한 초대 한 행·⋮ 메뉴로 다듬기" |
+| 추가-2 | `features/pet/invite/InvitationClosed.jsx`, `features/pet/invite/InvitationAccept.jsx` | 명령: lint·build 0. 화면: 취소 안내 아이콘이 ✕ 든 원, 404는 같은 카드 모양(편지+✕ 아이콘, "초대를 찾을 수 없어요", "삭제됐거나 잘못된 링크예요. 링크를 다시 확인해 주세요.", [마이페이지 홈으로]) | 요청 2026-11-16 "취소 안내 아이콘과 404 안내를 같은 카드 모양으로" |
+| 추가-3 | `features/pet/list/SentInvitations.jsx` | 명령: lint·build 0. 화면: 둘째 줄 "가입 회원"·"미가입", 이메일은 "@" 뒤에서만 줄바꿈하고 넘칠 때만 글자 단위, 둘째 줄은 단어 단위(break-keep), 393·1440px | 요청 2026-11-16 "393px 보낸 초대 행 다듬기" |
+| 추가-4 | `features/pet/list/SentInvitations.jsx`, `features/pet/list/MoreMenu.jsx` | 명령: lint·build 0. 화면: 둘째 줄은 이름+날짜 문구만(대기중 "N일 후 만료"·당일 "오늘 만료", 그 외 "MM-DD 보냄", 대기중+미가입은 "메일로 보냄 · N일 후 만료"), 일부 수락은 이름 자리에 "탄이 수락 · 까미 거절". 모바일(≤760px): 1줄 이메일 말줄임+테두리 없는 ⋮(없으면 생략), 2줄 배지→이름(말줄임)→오른쪽 끝 날짜(작고 흐리게). PC는 배지+⋮ 오른쪽 그대로. 393·360·1440px | 요청 2026-11-16 "보낸 초대 행 정보 줄이기·모바일 배치" |
+| 추가-5 | `features/pet/list/SentInvitations.jsx` | 명령: lint·build 0. 화면: 둘째 줄 반려동물 이름이 보통 굵기(이메일은 그대로 굵게). 일부 수락의 수락 초록·거절 빨강과 기준선 정렬은 그대로 | 요청 2026-11-16 "시안대로 이름을 보통 굵기로(글자를 덜 무겁게)" |
+| 문서 | FN-MYP-005-03 행 구성 변경(초대당 1행·⋮ 메뉴·일부 수락 배지, 가입 여부·만료 안내 표시를 "N일 후 만료"·"MM-DD 보냄"·"메일로 보냄"으로), FN-MYP-005-10 404 안내 | `/end` 문서 작업 | 요청 2026-11-16 |
 
 ## 다음에 할 것
 
@@ -58,3 +81,8 @@ SCR-MYP-002 반려동물 프로필 목록 · 슬라이드 카드에 "오류 확�
 - SCR-MYP-002 인식 번호 여유: 1108px에서 15자리 여유가 4.13px뿐이다(Pretendard 기준, 1108~1280 원래 값). 글꼴·카드 패딩을 바꾸면 1101~1110 구간을 다시 잰다
 - 공용 `components/Modal.jsx`: 가운데 모달에서 배경 오른쪽을 누르면 닫히지 않는다(왼쪽·위·아래는 닫힘, 가계부 [영수증으로 등록]에서 확인). `handleMouseDown`의 스크롤바 예외(`clientX >= rect.left + dialog.clientWidth`면 무시)가 `isTop`이 아닌 모달에도 걸려 모달 오른쪽 끝보다 오른쪽 배경 클릭이 무시된다. 고칠 방향: 스크롤바 예외는 `isTop`일 때만, 보통 모달은 클릭이 dialog 상자 밖일 때만 닫는다
 
+
+## 중단 2026-11-16 11:13 (5시간 한도 95%)
+- 자동 커밋한 변경 9개: handoff/SJM.md, milestones/SJM.md, src/features/pet/api.js, src/features/pet/invite/InvitationAccept.jsx, src/features/pet/invite/InvitationClosed.jsx, src/features/pet/list/PetSlide.jsx, src/features/pet/list/SentInvitations.jsx, src/features/pet/queries.js, src/features/pet/shared/petCodes.js
+- 커밋 안 한 새 파일 2개 (사람이 판단): src/features/pet/list/MoreMenu.jsx, src/features/pet/list/SentInvitationDialog.jsx
+- 이어서: 이 파일의 "지금 하는 것" 과 `git log -1` 을 본다

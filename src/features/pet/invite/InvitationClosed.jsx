@@ -1,4 +1,4 @@
-import { Clock } from 'lucide-react';
+import { CircleX, Clock, MailX } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BTN_PRIMARY } from '@/components/buttonStyles';
 import { PATHS } from '@/routes/paths';
@@ -11,13 +11,28 @@ import { INVTN_STTS } from '../shared/petCodes';
  */
 const MESSAGES = {
   expired: {
+    Icon: Clock,
     title: '만료된 초대예요',
     descriptions: [
       '초대는 보낸 날부터 7일 동안만 받을 수 있어요.',
       '초대한 분께 다시 초대를 요청해 주세요.',
     ],
   },
+  notFound: {
+    Icon: MailX,
+    title: '초대를 찾을 수 없어요',
+    descriptions: ['삭제됐거나 잘못된 링크예요.', '링크를 다시 확인해 주세요.'],
+  },
+  canceled: {
+    Icon: CircleX,
+    title: '취소된 초대예요',
+    descriptions: [
+      '초대한 분이 이 초대를 취소했어요.',
+      '필요하면 초대한 분께 다시 초대를 요청해 주세요.',
+    ],
+  },
   done: {
+    Icon: Clock,
     title: '이미 처리된 초대예요',
     descriptions: [
       '이 초대는 이미 수락했거나 거절했어요.',
@@ -26,9 +41,15 @@ const MESSAGES = {
   },
 };
 
+const CLOSED_KIND = {
+  [INVTN_STTS.EXPR]: 'expired',
+  [INVTN_STTS.CNCL]: 'canceled',
+};
+
+/** invtnSttsCd 없이 부르면 초대를 찾을 수 없을 때(삭제됐거나 잘못된 링크)의 안내 */
 export default function InvitationClosed({ invtnSttsCd }) {
-  const { title, descriptions } =
-    invtnSttsCd === INVTN_STTS.EXPR ? MESSAGES.expired : MESSAGES.done;
+  const kind = invtnSttsCd ? (CLOSED_KIND[invtnSttsCd] ?? 'done') : 'notFound';
+  const { Icon, title, descriptions } = MESSAGES[kind];
 
   return (
     <section
@@ -37,7 +58,7 @@ export default function InvitationClosed({ invtnSttsCd }) {
     >
       <div className="flex flex-col items-center gap-3 px-8 pt-10 pb-7 text-center">
         <span className="mb-2 grid size-[72px] place-items-center rounded-full bg-brand-50 text-brand-600">
-          <Clock className="size-9" aria-hidden="true" />
+          <Icon className="size-9" aria-hidden="true" />
         </span>
         <h2 id="closed-title" className="text-lg font-bold break-keep">
           {title}

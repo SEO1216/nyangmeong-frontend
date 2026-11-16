@@ -126,6 +126,14 @@ export const getSentInvitations = () => api.get('/caregiver-invitations');
 export const createInvitation = ({ invtnTrgtEml, petSns }) =>
   api.post('/caregiver-invitations', { invtnTrgtEml, petSns });
 
+/** 보낸 초대 취소 POST /caregiver-invitations/{jntBrupInvtnSn}/cancel (SJM 백엔드, 만료 전 대기중 초대만) */
+export const cancelInvitation = (jntBrupInvtnSn) =>
+  api.post(`/caregiver-invitations/${jntBrupInvtnSn}/cancel`);
+
+/** 취소한 보낸 초대 삭제 DELETE /caregiver-invitations/{jntBrupInvtnSn} (SJM 백엔드, 보낸 목록에서 숨김) */
+export const deleteInvitation = (jntBrupInvtnSn) =>
+  api.delete(`/caregiver-invitations/${jntBrupInvtnSn}`);
+
 /** 받은 초대 조회 GET /caregiver-invitations/{jntBrupInvtnSn} (SJM 백엔드) */
 export const getInvitation = (jntBrupInvtnSn) =>
   api.get(`/caregiver-invitations/${jntBrupInvtnSn}`);
