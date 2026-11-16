@@ -8,7 +8,11 @@ import PageSkeleton from '@/components/PageSkeleton';
 import SkeletonCard from '@/components/SkeletonCard';
 import { INQUIRY_TYPE_PIXEL_CHARACTER } from '@/features/inquiry/api';
 import InquiryForm from '@/features/inquiry/InquiryForm';
-import { useCreateInquiry, useInquiryTypes } from '@/features/inquiry/queries';
+import {
+  useCreateInquiry,
+  useInquiries,
+  useInquiryTypes,
+} from '@/features/inquiry/queries';
 import { useCharacterImage } from '@/hooks/useCharacterImage';
 import { PATHS } from '@/routes/paths';
 
@@ -34,6 +38,9 @@ export default function InquiryWritePage() {
   const [searchParams] = useSearchParams();
   const types = useInquiryTypes();
   const { mutate, isPending, error } = useCreateInquiry();
+  /** 문의 이력이 없으면 돌아갈 목록이 없으니 [취소]를 숨긴다 */
+  const { data: firstPage } = useInquiries({ page: 1, size: 1, status: '' });
+  const hasNoInquiry = firstPage?.totalElements === 0;
   /** 캐릭터 화면에서 넘어왔으면 자동 첨부될 캐릭터 이미지(미리보기). 새로고침해도 보이게 번호로 다시 받는다 */
   const characterImage = useCharacterImage(
     state?.pixelCharSn != null ? state.petSn : null,
@@ -82,6 +89,7 @@ export default function InquiryWritePage() {
         imgs: [],
       }}
       cancelTo={PATHS.INQUIRIES}
+      hideCancel={hasNoInquiry}
       isPending={isPending}
       errorMessage={error?.message}
       fieldErrors={error?.fields}
