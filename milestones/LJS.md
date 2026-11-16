@@ -2,6 +2,14 @@
 
 기준: 공통레이아웃_기능명세서_v0.4_20261001, AI매니저_기능명세서_v0.7_20261009 (DMS, 2026-10-17), 커뮤니티_기능명세서_v0.7_20261019 (CMU-005만, KSJ 마일스톤에서 옮김, 2026-10-21), AI매니저_기능명세서_v0.9_20261026 (SCR-AIM-013만, DMS 업로드 전 로컬 사본, 2026-10-26), 관리자_기능명세서_v0.2_20261030 (DMS, 2026-10-30. 화면설계서 `관리자_화면설계서_v0.1_20261030`, 순서는 백엔드 `docs/admin/implementation-plan.md` 3절 단계)
 
+## SCR-COM-002 기본 레이아웃 · 공용 Modal 밖 dialog 뒤 스크롤 잠금 — 대기
+- 기능: 명세 기능 ID 추가 없음(버그, 사람 요청 2026-11-16 "다음 작업으로"), 걸치는 기능 FN-COM-002
+- 배경: `showModal()`을 직접 부르고 `useScrollLock`이 없는 창은 열린 채 뒤 페이지가 휠로 스크롤된다. 5180·8081에서 확인(2026-11-16): `ScheduleModal`(일정 추가·수정), `FormModal`(건강 일지 입력 틀, 관찰 항목 추가로 확인), `ConfirmModal`(단독, 게시글 삭제 확인), `ImageViewer`(첨부 이미지 크게 보기), `ExpenseDetailSheet`(390px 지출 상세). 공용 `Modal`(오늘 기록 추가·게시글 신고)은 막힘. 창을 연 채 `useScrollLock`과 같은 html 스타일을 걸면 막히는 것까지 확인(ConfirmModal·ImageViewer)
+- 정할 것: 다섯 곳에 `useScrollLock()` 한 줄씩(모양 그대로) vs `ConfirmModal`을 `Modal`(isConfirm)로 옮기기(320px 왼쪽 정렬 → 440px 가운데, 20개 파일 모양 바뀜). `FormModal`·`ScheduleModal`은 form이 푸터까지 감싸 `Modal`로 옮기려면 `Modal` 확장이 먼저, `ImageViewer`는 형태가 달라 맞지 않음
+- 함께 볼 것: `NavDrawer`·`AdminLayout` 드로어는 `body` 잠금(헤더 밀림 원인과 같은 방식), `LandingHeader` 모바일 메뉴는 잠금 없음(코드만 봄)
+- 기다리는 것: 없음. `features/health`(JAJ)·`features/expense`(SJM) 파일을 고치므로 담당에게 알림
+- 완료 조건 후보: 다섯 창을 연 채 배경 휠로 `scrollY`가 그대로, 창이 겹쳐 닫혀도 마지막에만 풀림
+
 ## SCR-COM-002 기본 레이아웃 · 헤더 프로필 사진 · 플로팅 AI 말풍선·기본 캐릭터 · 바로가기 편집 반려동물 왼쪽 정렬 — 끝
 - 기능: 명세 기능 ID 추가 없음(사람 요청 2026-11-16), 걸치는 기능 FN-COM-002-15 헤더 프로필·FN-COM-002-19 플로팅 AI 버튼, 걸치는 화면 SCR-MAN-001 바로가기 편집 창
 - 기다리는 것: 없음(`GET /auth/me` `atchFileSn` 있음, 백엔드 `docs/api/member.md` AuthMeResponse)
