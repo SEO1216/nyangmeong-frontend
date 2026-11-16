@@ -6,9 +6,9 @@ import CareFilters from './CareFilters';
 import CareGuideRail from './CareGuideRail';
 
 /**
- * 펫돌봄 목록: 왼쪽에 필터 · 건수와 모집중만 보기·내 글만 보기 · 카드 · 페이지, 오른쪽에 안내 레일
- * - [돌봄 요청 등록]은 오른쪽 레일 맨 위(action, CareListPage가 넘긴다). 탭은 없고 모집중만 보기는 체크(?stts=open)
- * - filters: { stts, mine, region, dong, from, to, pet, size }, onChange(바뀐 값만), onReset, onPageChange
+ * 펫돌봄 목록: 왼쪽에 필터 · 건수와 내 글만 보기 · 카드 · 페이지, 오른쪽에 안내 레일
+ * - [돌봄 요청 등록]은 오른쪽 레일 맨 위(action, CareListPage가 넘긴다). 탭과 모집중만 보기는 없다(모집중이 먼저 오도록 서버가 정렬)
+ * - filters: { mine, region, dong, from, to, pet, size }, onChange(바뀐 값만), onReset, onPageChange
  */
 export default function CareList({
   posts,

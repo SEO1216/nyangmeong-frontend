@@ -24,14 +24,6 @@ export const RCRT_STTS_LABEL = {
   [RCRT_STTS.DONE]: '거래완료',
 };
 
-export const STATUS_TABS = [
-  { value: '', label: '전체' },
-  { value: 'open', label: '모집중' },
-];
-
-/** URL ?stts= 값 → 서버에 보낼 상태 코드 */
-export const STTS_BY_TAB = { open: RCRT_STTS.OPEN };
-
 export const CST_UNIT = { HOUR: 'PCAC0004', CASE: 'PCAC0005' };
 
 export const CST_UNIT_OPTIONS = [
