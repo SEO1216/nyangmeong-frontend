@@ -168,23 +168,23 @@ export default function ShortcutEditModal({
       }
     >
       <div className="flex min-h-0 flex-1 flex-col text-left">
-        {/** 웹은 모달 전체 폭을 반려동물 수로 나눠 한 줄, 760px 이하는 가로 스크롤 */}
+        {/** 반려동물은 고정 폭 칸을 왼쪽부터 놓고, 넘치면 가로 스크롤 */}
         <ul
           aria-label="반려동물"
-          className="flex shrink-0 gap-2 overflow-x-auto border-b border-line-soft px-6 pt-5 pb-4 min-[761px]:overflow-visible"
+          className="flex shrink-0 gap-2 overflow-x-auto border-b border-line-soft px-6 pt-5 pb-4"
         >
           {pets.map((pet) => {
             const isSelected = pet.petSn === petSn;
             return (
               <li
                 key={pet.petSn}
-                className="shrink-0 min-[761px]:min-w-0 min-[761px]:flex-1 min-[761px]:shrink"
+                className="shrink-0"
               >
                 <button
                   type="button"
                   aria-pressed={isSelected}
                   onClick={() => setPetSn(pet.petSn)}
-                  className="flex w-14 flex-col items-center gap-1 min-[761px]:w-full"
+                  className="flex w-14 flex-col items-center gap-1"
                 >
                   <PetFace
                     petSn={pet.petSn}
