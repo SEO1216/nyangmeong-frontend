@@ -1,9 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { Hospital, Star, Store } from 'lucide-react';
-import { CATEGORIES } from './placeData';
+import { Star } from 'lucide-react';
 import { formatDistance } from './placeFormat';
-
-const HOSPITAL_CODE = CATEGORIES[0].code;
 
 // letter가 없으면 상단 고정된 즐겨찾기 줄이다
 // 카드를 누르면 핀을 누른 것처럼 지도를 그 업체로 옮기고 팝업을 연다(onSelect). 카카오맵 상세는 팝업 [상세보기]로 연다
@@ -19,7 +16,6 @@ export default function PlaceListItem({
   onToggleFavorite,
 }) {
   const itemRef = useRef(null);
-  const ThumbIcon = place.plcClsfCd === HOSPITAL_CODE ? Hospital : Store;
 
   // 지도 핀으로 고른 장소를 목록에서도 보이게 한다. 모바일은 바텀시트가 가려 건너뛴다
   useEffect(() => {
@@ -43,19 +39,12 @@ export default function PlaceListItem({
       aria-label={`${place.plcConm} — 지도에서 보기`}
       onClick={() => onSelect(place.plcSn)}
       onKeyDown={handleKeyDown}
-      className={`relative grid cursor-pointer grid-cols-[84px_minmax(0,1fr)] gap-4 border-b border-line-soft px-4 py-4 hover:bg-surface-2 md:px-5 lg:grid-cols-[88px_minmax(0,1fr)] ${
+      className={`relative cursor-pointer border-b border-line-soft px-4 py-4 hover:bg-surface-2 md:px-5 ${
         isSelected
           ? 'bg-brand-50 shadow-[inset_3px_0_0_var(--color-brand-500)] hover:bg-brand-50'
           : ''
       }`}
     >
-      <span
-        aria-hidden="true"
-        className="flex size-[84px] flex-col items-center justify-center gap-1 self-start rounded-xl bg-surface-2 text-line-strong lg:size-[88px]"
-      >
-        <ThumbIcon className="size-[30px]" />
-        <small className="text-xs text-subtle">업체 사진</small>
-      </span>
       <div className="min-w-0">
         <div className="flex items-center gap-2 pr-9">
           {letter && (
