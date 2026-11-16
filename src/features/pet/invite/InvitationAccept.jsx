@@ -7,6 +7,7 @@ import { showToast } from '@/components/toastStore';
 import { PATHS } from '@/routes/paths';
 import { useAcceptInvitation, useInvitation } from '../queries';
 import PetFace from '@/components/PetFace';
+import InvitationClosed from './InvitationClosed';
 import InvitationMismatch from './InvitationMismatch';
 import InvitationRejectDialog from './InvitationRejectDialog';
 
@@ -73,11 +74,7 @@ export default function InvitationAccept({
     );
   }
   if (isError) {
-    return (
-      <p className={`${CARD} px-[22px] py-10 text-center text-muted`}>
-        초대를 찾을 수 없어요. 링크를 다시 확인해 주세요
-      </p>
-    );
+    return <InvitationClosed />;
   }
 
   if (!invitation.emailMatched) {
@@ -126,7 +123,9 @@ export default function InvitationAccept({
         >
           {petNames}의 공동양육자가 되어주세요
         </h2>
-        <p className="mt-1 text-muted">{invitation.sndrMbrNcnm}님이 초대했어요</p>
+        <p className="mt-1 text-muted">
+          {invitation.sndrMbrNcnm}님이 초대했어요
+        </p>
       </div>
       <div className="flex flex-col gap-5 px-[22px] pt-5 pb-[22px]">
         <ul className="grid grid-cols-2 gap-3">

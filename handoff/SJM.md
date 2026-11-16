@@ -2,9 +2,9 @@
 
 ## 지금 하는 것
 
-SCR-MYP-002 반려동물 프로필 목록 · 슬라이드 카드에 "오류 확인 중" 배지 추가, "대표" 배지 빼기 — 끝 (2026-11-14, 검증 `통과` 1회차, lint·build 0, 사람 확인 완료: 탄이·루루 배지, 취두부 "대표" 배지 없음, ⋮ 두 항목, 393px. 나비는 검증 결과로 갈음)
+SCR-MYP-005 공동양육자 추가 · 보낸 초대 취소·삭제 버튼 연결 — 끝 (2026-11-16, 검증 `통과`, lint·build 0, 사람 확인 완료: 취소·삭제 흐름, 취소 안내, 찾을 수 없음 안내, 393·360·1440px. 추가-1~5는 사람이 요청한 것으로 확인)
 
-- 바꾼 것: FN-MYP-002-02 `features/pet/list/PetSlide.jsx`의 이름 옆 배지 묶음에서 "대표"를 지우고 주양육/공동양육 다음에 `bscCharSbstYn`이면 amber "오류 확인 중"(`CharacterCard`·`PetMiniCard`와 같은 색)을 넣었다. 대표 지정 메뉴·API는 그대로
+- 바꾼 것: FN-MYP-005-03 `features/pet/list/SentInvitations.jsx`를 초대 1건=1행으로(배지 "취소됨"·"일부 수락", ⋮ "초대 취소"·"삭제", 둘째 줄은 이름+"N일 후 만료"/"MM-DD 보냄"/"메일로 보냄 · …", 모바일은 이메일 말줄임+배지·이름·날짜 한 줄), 확인 모달 `SentInvitationDialog.jsx`, ⋮ 메뉴는 `PetSlide.jsx`에서 꺼낸 `list/MoreMenu.jsx`를 같이 쓴다. FN-MYP-005-10 `invite/InvitationClosed.jsx`에 취소 안내(✕ 원)와 찾을 수 없음 안내(편지+✕) 카드. `api.js`·`queries.js`에 cancel·delete, `INVTN_STTS.CNCL = 'PETC0035'`
 
 ## 다음에 할 것
 
@@ -33,6 +33,7 @@ SCR-MYP-002 반려동물 프로필 목록 · 슬라이드 카드에 "오류 확�
 - FN-MYP-003-04: "소수 셋째 자리까지" → 소수 둘째 자리·200kg 이하, 정상범위 자동 계산('N')·직접 입력('Y') 선택과 안내 문구("현재 체중의 ±10%로 자동 계산돼요. 성장기이거나 수의사 권장 범위가 있다면 직접 입력해 주세요.") 추가
 - FN-MYP-010-13: 고정 좌표 겹침 → 서버 합성(`POST /ai/characters/{pixelCharSn}/preview` PNG). 010-17·18·19는 서버 합성에 맞게 고치거나 삭제. 상점 미리보기가 다르면 FN-MYP-011-01도
 - FN-MYP-004-01: 서버에 권한(`authrtNm`)이 없어 카드에서 뺀 "권한" 줄을 명세에서 고칠지
+- FN-MYP-005-03: 보낸 초대를 초대당 1행으로, 배지 "취소됨"·"일부 수락", ⋮ 메뉴 [초대 취소]·[삭제]와 확인 모달, 가입 여부·만료 안내를 "N일 후 만료"(당일 "오늘 만료")·"MM-DD 보냄"·미가입 대기중 "메일로 보냄 · N일 후 만료"로, 모바일 배치. FN-MYP-005-10: 취소 안내("취소된 초대예요")와 404 안내("초대를 찾을 수 없어요" 카드) 문구. 화면설계서 SCR-MYP-005 보낸 초대·5-6도
 
 ### 팀 답 기다림
 
@@ -44,6 +45,7 @@ SCR-MYP-002 반려동물 프로필 목록 · 슬라이드 카드에 "오류 확�
 - 건강 일지 병원 영수증 저장 때 자동 기록되는 가계부 1건(FN-AIM-009-10)이 `recptSn`으로 연결되는지(JAJ·YAY). 가계부 출처 영수증 다시 열기는 명세에 진입점이 없어 안 했다(필요하면 명세에서 정한다)
 - 공용 DB 정리(SCR-MYP-031 검증): 회원 1 지출 `EXPND_SN=10459`(소프트 삭제), 인앱 알림 `INAPP_NOTI_SN=5297`(남김). `NOTI_SNDNG_LOG` 발송 기록, petSn 1011 케어미션(EXPENSE_CREATE) 반영이 생겼을 수 있다. 복구: `DELETE FROM EXPND WHERE EXPND_SN = 10459;`, `DELETE FROM INAPP_NOTI WHERE INAPP_NOTI_SN = 5297;`
 - 스타일 결정 합의: 그림자 토큰 `shadow-depth-sm/md/lg`·`ring-focus`·`ring-error`(`OPEN_ISSUES.md`에 제안), `@theme` 토큰·Pretendard CDN·브랜드 색 #285a5c·lucide·가계부 tone·warn 토큰. 합의되면 `docs/OPEN_ISSUES.md` 스타일링 항목 갱신
+- 공용 DB 정리(SCR-MYP-005 검증): tester(mbrSn 1)가 보낸 초대 `JNT_BRUP_INVTN_SN` 217~219·221~223·225~236이 남았다(화면에서 취소·삭제해 대부분 `DEL_YN='Y'`, 229는 일부 수락이고 탄이–user0006 연동은 화면에서 해제함). 상태 이력·대상 반려동물·user0006 인앱 알림·미가입 메일 발송 기록(230·234)도 있을 수 있다. 복구: `JNT_BRUP_INVTN_STTS_HSTRY` → `INVTN_TRGT_PET` → `JNT_BRUP_INVTN` 순으로 그 번호를 지운다
 
 ### 다른 사람 담당·기다리는 것
 
@@ -57,4 +59,3 @@ SCR-MYP-002 반려동물 프로필 목록 · 슬라이드 카드에 "오류 확�
 
 - SCR-MYP-002 인식 번호 여유: 1108px에서 15자리 여유가 4.13px뿐이다(Pretendard 기준, 1108~1280 원래 값). 글꼴·카드 패딩을 바꾸면 1101~1110 구간을 다시 잰다
 - 공용 `components/Modal.jsx`: 가운데 모달에서 배경 오른쪽을 누르면 닫히지 않는다(왼쪽·위·아래는 닫힘, 가계부 [영수증으로 등록]에서 확인). `handleMouseDown`의 스크롤바 예외(`clientX >= rect.left + dialog.clientWidth`면 무시)가 `isTop`이 아닌 모달에도 걸려 모달 오른쪽 끝보다 오른쪽 배경 클릭이 무시된다. 고칠 방향: 스크롤바 예외는 `isTop`일 때만, 보통 모달은 클릭이 dialog 상자 밖일 때만 닫는다
-
