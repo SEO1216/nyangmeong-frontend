@@ -11,8 +11,7 @@ import {
   FilterToggle,
 } from '../ListFilterParts';
 
-const countActive = ({ stts, mine, region, from, to, pet, size }) =>
-  Number(stts === 'open') +
+const countActive = ({ mine, region, from, to, pet, size }) =>
   Number(mine) +
   Number(region !== ALL_REGION) +
   Number(from !== '' || to !== '') +
@@ -123,12 +122,6 @@ export default function CareFilters({ filters, onChange, onReset }) {
         </fieldset>
       </FilterField>
       <FilterActions onReset={onReset} className={foldClass}>
-        <CheckOption
-          checked={filters.stts === 'open'}
-          onChange={(checked) => onChange({ stts: checked ? 'open' : '' })}
-        >
-          모집중만 보기
-        </CheckOption>
         <CheckOption
           checked={filters.mine}
           onChange={(checked) => onChange({ mine: checked })}
