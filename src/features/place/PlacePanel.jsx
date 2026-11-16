@@ -123,7 +123,7 @@ export default function PlacePanel({
             )}
           </h2>
           {query.isPending ? (
-            <p className="px-6 py-12 text-center text-muted animate-[landing-fade_.3s_ease_both] motion-reduce:animate-none">
+            <p className="px-6 py-12 text-center text-muted">
               검색 결과를 불러오는 중이에요
             </p>
           ) : query.isError ? (
@@ -152,7 +152,7 @@ export default function PlacePanel({
             </div>
           ) : (
             <>
-              <ul className="animate-[landing-fade_.3s_ease_both] motion-reduce:animate-none">
+              <ul>
                 {results.map((place, index) => (
                   <PlaceListItem
                     key={place.plcSn}

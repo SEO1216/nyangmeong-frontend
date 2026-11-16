@@ -39,7 +39,7 @@ export default function PlaceListItem({
       aria-label={`${place.plcConm} — 지도에서 보기`}
       onClick={() => onSelect(place.plcSn)}
       onKeyDown={handleKeyDown}
-      className={`relative cursor-pointer border-b transition-colors duration-200 motion-reduce:transition-none border-line-soft px-4 py-4 hover:bg-surface-2 md:px-5 ${
+      className={`relative cursor-pointer border-b border-line-soft px-4 py-4 hover:bg-surface-2 md:px-5 ${
         isSelected
           ? 'bg-brand-50 shadow-[inset_3px_0_0_var(--color-brand-500)] hover:bg-brand-50'
           : ''

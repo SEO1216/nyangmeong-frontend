@@ -14,14 +14,6 @@ import PlacePopup from './PlacePopup';
 const INITIAL_LEVEL = 6;
 const SINGLE_LEVEL = 4;
 const BOUNDS_PADDING = 80;
-/** 카카오 지도에서 가장 넓게 보는 확대 수준 */
-const MAX_LEVEL = 14;
-/** 확대 애니메이션·부드러운 이동이 끝날 때까지 기다리는 시간 */
-const ZOOM_MS = 450;
-const PAN_MS = 650;
-
-const prefersReducedMotion = () =>
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const floatCard = 'bg-white shadow-depth-md';
 const toolButton =
@@ -51,10 +43,6 @@ export default function PlaceMap({
   const fittedKeyRef = useRef(null);
   // 코드로 지도를 옮기는 중에는 zoom_changed를 사용자가 움직인 것으로 치지 않는다
   const isAutoMoveRef = useRef(false);
-  // 이어지는 지도 이동(줌아웃 → 이동 → 줌인) 도중 새 이동이 오면 앞 이동의 남은 단계를 버린다
-  const flightRef = useRef(0);
-  // 진행 중인 이동이 마지막에 돌아갈 확대 수준
-  const endLevelRef = useRef(null);
   const onMovedRef = useRef(onMoved);
   const [map, setMap] = useState(null);
   const [isSky, setIsSky] = useState(false);
@@ -63,85 +51,16 @@ export default function PlaceMap({
     onMovedRef.current = onMoved;
   }, [onMoved]);
 
-  // flight가 아직 마지막 이동이면 ms 뒤 fn을 부른다. 카카오는 애니메이션 확대 뒤 idle을 보내지 않을 때가 있어 시간으로 잇는다
-  const later = (flight, ms, fn) =>
-    setTimeout(() => {
-      if (flightRef.current === flight) fn();
-    }, ms);
-
-  /**
-   * latlng로 부드럽게 옮기고 endLevel 확대로 맞춘다. 카카오 panTo는 화면 밖 먼 곳이면 순간이동하므로,
-   * 그럴 때는 목적지가 화면에 들어올 만큼 먼저 줌아웃하고 이동한 뒤 다시 줌인한다.
-   * endLevel을 주지 않으면 이동을 시작할 때의 확대(앞 이동이 도중에 끊겼으면 그 이동의 목표)로 돌아온다
-   */
-  const flyTo = (target, latlng, endLevel) => {
-    const flight = ++flightRef.current;
-    const level = endLevel ?? endLevelRef.current ?? target.getLevel();
-    endLevelRef.current = level;
-    const step = (fn) => {
-      isAutoMoveRef.current = true;
-      fn();
-    };
-    const finish = () => {
-      step(() => {
-        if (target.getLevel() !== level) {
-          target.setLevel(level, { animate: true });
-        }
-      });
-      endLevelRef.current = null;
-      // 마지막 확대 뒤 idle이 오지 않아도 사용자가 움직인 것을 다시 알아보게 한다
-      later(flight, ZOOM_MS, () => {
-        isAutoMoveRef.current = false;
-      });
-    };
-    if (prefersReducedMotion()) {
-      step(() => {
-        target.setCenter(latlng);
-        target.setLevel(level);
-      });
-      endLevelRef.current = null;
-      return;
-    }
-    const center = target.getCenter();
-    const bounds = target.getBounds();
-    if (bounds.contain(latlng)) {
-      step(() => target.panTo(latlng));
-      later(flight, PAN_MS, finish);
-      return;
-    }
-    // 목적지까지 거리가 화면 반쪽의 몇 배인지로 줌아웃할 단계를 정한다(한 단계에 두 배)
-    const sw = bounds.getSouthWest();
-    const ne = bounds.getNorthEast();
-    const ratio = Math.max(
-      (2 * Math.abs(latlng.getLat() - center.getLat())) /
-        (ne.getLat() - sw.getLat()),
-      (2 * Math.abs(latlng.getLng() - center.getLng())) /
-        (ne.getLng() - sw.getLng()),
-    );
-    const outLevel = Math.min(
-      target.getLevel() + Math.ceil(Math.log2(ratio * 1.2)),
-      MAX_LEVEL,
-    );
-    step(() => target.setLevel(outLevel, { animate: true }));
-    later(flight, ZOOM_MS, () => {
-      step(() => target.panTo(latlng));
-      later(flight, PAN_MS, finish);
-    });
-  };
-
-  // 결과가 다 보이게 지도를 맞춘다(부드럽게 이동). 결과가 없으면 처음 영역(내 주변·전주시 대표 영역)을 보인다
+  // 결과가 다 보이게 지도를 맞춘다. 결과가 없으면 처음 영역(내 주변·전주시 대표 영역)을 보인다
   const fitPlaces = (target, places) => {
+    isAutoMoveRef.current = true;
     if (places.length === 1) {
-      flyTo(
-        target,
+      target.setCenter(
         new kakao.maps.LatLng(places[0].plcLat, places[0].plcLot),
-        SINGLE_LEVEL,
       );
+      target.setLevel(SINGLE_LEVEL);
       return;
     }
-    flightRef.current += 1;
-    endLevelRef.current = null;
-    isAutoMoveRef.current = true;
     const bounds = new kakao.maps.LatLngBounds();
     if (places.length === 0) {
       bounds.extend(new kakao.maps.LatLng(homeArea.swLat, homeArea.swLot));
@@ -151,17 +70,13 @@ export default function PlaceMap({
         bounds.extend(new kakao.maps.LatLng(plcLat, plcLot)),
       );
     }
-    if (prefersReducedMotion()) {
-      target.setBounds(
-        bounds,
-        BOUNDS_PADDING,
-        BOUNDS_PADDING,
-        BOUNDS_PADDING,
-        BOUNDS_PADDING,
-      );
-      return;
-    }
-    target.panTo(bounds, BOUNDS_PADDING);
+    target.setBounds(
+      bounds,
+      BOUNDS_PADDING,
+      BOUNDS_PADDING,
+      BOUNDS_PADDING,
+      BOUNDS_PADDING,
+    );
   };
 
   useEffect(() => {
@@ -216,12 +131,9 @@ export default function PlaceMap({
 
   useEffect(() => {
     if (!map || !selectedPlace) return;
-    flyTo(
-      map,
+    map.panTo(
       new kakao.maps.LatLng(selectedPlace.plcLat, selectedPlace.plcLot),
     );
-    // 고른 장소가 바뀔 때만 옮긴다(flyTo는 그릴 때마다 새로 만들어진다)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, kakao, selectedPlace]);
 
   // 버튼을 누른 순간의 지도 영역과 중앙으로 다시 검색한다
@@ -309,8 +221,15 @@ export default function PlaceMap({
         <div
           role="group"
           aria-label="지도 종류"
-          className={`pointer-events-auto flex rounded-md p-[3px] max-md:hidden ${floatCard}`}
+          className={`pointer-events-auto relative grid grid-cols-2 rounded-md p-[3px] max-md:hidden ${floatCard}`}
         >
+          {/* 고른 쪽 밑에 깔리는 배경. 지도 종류를 바꾸면 좌우로 미끄러져 간다 */}
+          <span
+            aria-hidden="true"
+            className={`pointer-events-none absolute inset-y-[3px] left-[3px] w-[calc(50%-3px)] rounded-sm bg-brand-500 transition-transform duration-300 ease-[cubic-bezier(.2,.8,.2,1)] motion-reduce:transition-none ${
+              isSky ? 'translate-x-full' : ''
+            }`}
+          />
           {[
             ['일반 지도', false],
             ['스카이뷰', true],
@@ -320,9 +239,9 @@ export default function PlaceMap({
               type="button"
               aria-pressed={isSky === sky}
               onClick={() => setIsSky(sky)}
-              className={`h-[34px] rounded-sm px-3.5 text-sm ${
+              className={`relative h-[34px] rounded-sm px-3.5 text-sm transition-colors duration-300 motion-reduce:transition-none ${
                 isSky === sky
-                  ? 'bg-brand-500 font-semibold text-white'
+                  ? 'font-semibold text-white'
                   : 'font-medium text-muted'
               }`}
             >
@@ -381,11 +300,7 @@ export default function PlaceMap({
 
       {selectedPlace && (
         <div className={isSheetFull ? 'max-md:hidden' : ''}>
-          <PlacePopup
-            key={selectedPlace.plcSn}
-            place={selectedPlace}
-            onClose={onClosePopup}
-          />
+          <PlacePopup place={selectedPlace} onClose={onClosePopup} />
         </div>
       )}
     </div>
