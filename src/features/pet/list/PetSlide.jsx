@@ -224,9 +224,15 @@ function PetDots({ pets, index, isFull, onMove }) {
           onClick={() => onMove(pets.length)}
           aria-label="반려동물 등록"
           aria-current={index === pets.length ? 'true' : undefined}
-          className={`grid size-3.5 place-items-center ${index === pets.length ? 'text-brand-600' : 'text-line-strong'}`}
+          className={`group relative grid size-5 place-items-center rounded-full border-[1.5px] border-brand-500 ${index === pets.length ? 'bg-brand-500 text-white' : 'bg-white text-brand-600 hover:bg-brand-50'}`}
         >
-          <Plus className="size-3.5" />
+          <Plus className="size-3" strokeWidth={3} />
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-md bg-ink px-2.5 py-1.5 text-xs font-medium whitespace-nowrap text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 max-[760px]:hidden"
+          >
+            새 반려동물 등록
+          </span>
         </button>
       )}
     </nav>
@@ -251,7 +257,7 @@ function AddSlide({ isFull, onAdd, children }) {
       </h2>
       <p className="break-keep text-subtle">
         {isFull
-          ? `반려동물은 최대 ${MAX_OWN_PETS}마리까지 등록할 수 있어요`
+          ? `반려동물은 공동양육을 포함해 최대 ${MAX_OWN_PETS}마리까지 등록할 수 있어요`
           : '함께 사는 반려동물을 추가하면 건강기록·케어미션을 같이 관리할 수 있어요'}
       </p>
       {!isFull && (

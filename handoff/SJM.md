@@ -2,9 +2,9 @@
 
 ## 지금 하는 것
 
-SCR-MYP-005 공동양육자 추가 · 보낸 초대 취소·삭제 버튼 연결 — 끝 (2026-11-16, 검증 `통과`, lint·build 0, 사람 확인 완료: 취소·삭제 흐름, 취소 안내, 찾을 수 없음 안내, 393·360·1440px. 추가-1~5는 사람이 요청한 것으로 확인)
+SCR-MYP-001·002·003·005·040 반려동물 10마리 한도 연결·등록 진입점·[사진 제거] — 끝 (2026-11-16, 검증 `통과` 3회차, lint·build 0, 사람 확인 완료. 추가-1·2는 사람이 요청한 것으로 확인)
 
-- 바꾼 것: FN-MYP-005-03 `features/pet/list/SentInvitations.jsx`를 초대 1건=1행으로(배지 "취소됨"·"일부 수락", ⋮ "초대 취소"·"삭제", 둘째 줄은 이름+"N일 후 만료"/"MM-DD 보냄"/"메일로 보냄 · …", 모바일은 이메일 말줄임+배지·이름·날짜 한 줄), 확인 모달 `SentInvitationDialog.jsx`, ⋮ 메뉴는 `PetSlide.jsx`에서 꺼낸 `list/MoreMenu.jsx`를 같이 쓴다. FN-MYP-005-10 `invite/InvitationClosed.jsx`에 취소 안내(✕ 원)와 찾을 수 없음 안내(편지+✕) 카드. `api.js`·`queries.js`에 cancel·delete, `INVTN_STTS.CNCL = 'PETC0035'`
+- 바꾼 것: FN-MYP-002-01 `PetListPage.jsx` 한도 판정을 공동양육 포함 `pets.length >= 10`으로, 한도 카드·0마리 안내(`PetSlide.jsx`·`PetEmpty.jsx`) 문구에 "공동양육을 포함해". FN-MYP-005-05 `invite/InvitationAccept.jsx`가 `remainingPetCount`까지만 선택(처음 선택은 앞에서부터, 안 고른 카드 비활성, 목록 위 안내, 0이면 [수락] 비활성과 아래 안내 숨김, 수락 400이면 `data.remainingPetCount`로 다시 맞춤). FN-MYP-002-02 점 줄 ＋를 초록 테두리 원·hover 안내로. FN-MYP-001-01 `home/MyPetsSection.jsx`에 [＋ 등록](`PetFormModal`). FN-MYP-040-02 [기본 이미지로] → [사진 제거]. FN-MYP-003-01 등록 400은 기존 `error.message` 토스트 그대로
 
 ## 다음에 할 것
 
