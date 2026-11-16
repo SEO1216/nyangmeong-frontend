@@ -6,6 +6,8 @@ import { useAdminNotice } from '@/features/adminNotice/queries';
 import { PATHS } from '@/routes/paths';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 /** 폼 카드 한 장 */
 function NoticeFormSkeleton() {
@@ -45,12 +47,7 @@ function NoticeEdit({ ntcMttrSnParam }) {
   }
   if (notice.isError) {
     return (
-      <div role="alert" className="flex flex-col items-center gap-3 py-16">
-        <p className="text-base text-subtle">공지를 불러오지 못했어요.</p>
-        <button type="button" className={BTN_SECONDARY} onClick={handleRetry}>
-          다시 시도
-        </button>
-      </div>
+      <LoadError message="공지를 불러오지 못했어요." onRetry={handleRetry} />
     );
   }
   return <NoticeForm key={ntcMttrSn} notice={notice.data} />;
@@ -66,15 +63,12 @@ export default function AdminNoticeFormPage() {
   const isEdit = ntcMttrSnParam !== undefined;
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">
-        {isEdit ? '공지 수정' : '공지 등록'}
-      </h1>
+    <AdminPageFrame title={isEdit ? '공지 수정' : '공지 등록'}>
       {isEdit ? (
         <NoticeEdit key={ntcMttrSnParam} ntcMttrSnParam={ntcMttrSnParam} />
       ) : (
         <NoticeForm />
       )}
-    </div>
+    </AdminPageFrame>
   );
 }

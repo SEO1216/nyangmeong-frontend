@@ -6,6 +6,8 @@ import { useAdminTerms } from '@/features/adminTerms/queries';
 import { isTermsKind } from '@/features/adminTerms/termsKinds';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 /**
  * [약관 새 버전 등록]
@@ -31,18 +33,10 @@ export default function AdminTermFormPage() {
     }
     if (terms.isError) {
       return (
-        <div role="alert" className="flex flex-col items-center gap-3 py-16">
-          <p className="text-base text-subtle">
-            약관 목록을 불러오지 못했어요.
-          </p>
-          <button
-            type="button"
-            className={BTN_SECONDARY}
-            onClick={() => terms.refetch()}
-          >
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message="약관 목록을 불러오지 못했어요."
+          onRetry={() => terms.refetch()}
+        />
       );
     }
     return (
@@ -57,9 +51,6 @@ export default function AdminTermFormPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">약관 새 버전 등록</h1>
-      {renderBody()}
-    </div>
+    <AdminPageFrame title="약관 새 버전 등록">{renderBody()}</AdminPageFrame>
   );
 }

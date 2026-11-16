@@ -9,6 +9,7 @@ import { isForbiddenError } from '@/utils/isForbiddenError';
 import CommentDeleteModal from './CommentDeleteModal';
 import { useAdminComments } from './queries';
 import { ADMIN_TABLE_BOX } from '@/components/adminTableStyles';
+import LoadError from '@/components/LoadError';
 
 /**
  * [댓글 목록 표]
@@ -40,12 +41,7 @@ export default function CommentTable({
   }
   if (comments.isError) {
     return (
-      <div role="alert" className="flex flex-col items-center gap-3 py-16">
-        <p className="text-base text-subtle">댓글을 불러오지 못했어요.</p>
-        <button type="button" className={BTN_SECONDARY} onClick={handleRetry}>
-          다시 시도
-        </button>
-      </div>
+      <LoadError message="댓글을 불러오지 못했어요." onRetry={handleRetry} />
     );
   }
   if (comments.data.content.length === 0) {

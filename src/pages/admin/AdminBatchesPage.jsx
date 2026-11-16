@@ -14,6 +14,8 @@ import {
 } from '@/features/batch/queries';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 const PAGE_SIZE = 20;
 
@@ -33,18 +35,6 @@ function BatchesSkeleton({ hasHistory }) {
     <div className="space-y-8" aria-busy="true">
       <SkeletonCard className="h-[436px]" />
       {hasHistory && <HistorySkeleton />}
-    </div>
-  );
-}
-
-/** 조회 실패 안내 */
-function LoadError({ message, onRetry }) {
-  return (
-    <div role="alert" className="flex flex-col items-center gap-3 py-16">
-      <p className="text-base text-subtle">{message}</p>
-      <button type="button" className={BTN_SECONDARY} onClick={onRetry}>
-        다시 시도
-      </button>
     </div>
   );
 }
@@ -169,8 +159,7 @@ export default function AdminBatchesPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">배치 현황</h1>
+    <AdminPageFrame title="배치 현황">
       {renderBody()}
       {runTarget && (
         <ConfirmModal
@@ -183,6 +172,6 @@ export default function AdminBatchesPage() {
           onCancel={handleRunCancel}
         />
       )}
-    </div>
+    </AdminPageFrame>
   );
 }

@@ -13,6 +13,7 @@ import {
   getRcrtStatusLabel,
 } from './careMatchLabels';
 import { adminCommunityKeys, useAdminCareRecruit } from './queries';
+import LoadError from '@/components/LoadError';
 
 /** 라벨·값 한 줄 */
 function InfoRow({ label, children }) {
@@ -255,18 +256,11 @@ export default function CareMatchDetailModal({ petPrtcRcrtSn, onClose }) {
     }
     if (recruit.isError) {
       return (
-        <div role="alert" className="flex flex-col items-center gap-3 py-8">
-          <p className="text-base text-subtle">
-            {recruit.error?.message || '매칭 정보를 불러오지 못했어요.'}
-          </p>
-          <button
-            type="button"
-            className={BTN_SECONDARY}
-            onClick={() => recruit.refetch()}
-          >
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message={recruit.error?.message || '매칭 정보를 불러오지 못했어요.'}
+          onRetry={() => recruit.refetch()}
+          className="py-8"
+        />
       );
     }
     const { data } = recruit;

@@ -6,18 +6,7 @@ import Skeleton from '@/components/Skeleton';
 import { formatDate } from '@/utils/formatDate';
 import { useAdminTerm, useAdminTermsHistory } from './queries';
 import { getTermsKindName } from './termsKinds';
-
-/** 조회 실패 안내 + [다시 시도] */
-function LoadError({ message, onRetry }) {
-  return (
-    <div role="alert" className="flex flex-col items-center gap-3 py-10">
-      <p className="text-base text-subtle">{message}</p>
-      <button type="button" className={BTN_SECONDARY} onClick={onRetry}>
-        다시 시도
-      </button>
-    </div>
-  );
-}
+import LoadError from '@/components/LoadError';
 
 /** 지난 버전 목록(최신순). 행을 누르면 onSelect(버전 행) */
 function VersionList({ history, onSelect }) {
@@ -33,6 +22,7 @@ function VersionList({ history, onSelect }) {
   if (history.isError) {
     return (
       <LoadError
+        className="py-10"
         message="버전 이력을 불러오지 못했어요."
         onRetry={() => history.refetch()}
       />
@@ -93,6 +83,7 @@ function VersionDetail({ summary, onBack }) {
     if (detail.isError) {
       return (
         <LoadError
+          className="py-10"
           message="약관 내용을 불러오지 못했어요."
           onRetry={() => detail.refetch()}
         />

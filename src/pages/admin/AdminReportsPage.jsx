@@ -16,6 +16,8 @@ import ReportTable from '@/features/adminReport/ReportTable';
 import { PATHS } from '@/routes/paths';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 const PAGE_SIZE = 20;
 
@@ -61,18 +63,6 @@ function AutoBlindSkeleton() {
   );
 }
 
-/** 조회 오류: 다시 시도 */
-function LoadError({ message, onRetry }) {
-  return (
-    <div role="alert" className="flex flex-col items-center gap-3 py-16">
-      <p className="text-base text-subtle">{message}</p>
-      <button type="button" className={BTN_SECONDARY} onClick={onRetry}>
-        다시 시도
-      </button>
-    </div>
-  );
-}
-
 /** 목록 빈 문구 */
 function EmptyList({ children }) {
   return (
@@ -111,7 +101,7 @@ function ReportsTab({ status }) {
     return <AdminForbidden message={reports.error.message} />;
   }
 
-  /** 입력값 오류는 서버 문구, 그 밖의 오류는 다시 시도 */
+  /** 입력값 오류는 서버 문구, 그 밖의 오류는 조회 오류 안내(LoadError) */
   const renderList = () => {
     if (reports.error?.code === 'INVALID_INPUT_VALUE') {
       return (
@@ -236,8 +226,7 @@ export default function AdminReportsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">신고 처리</h1>
+    <AdminPageFrame title="신고 처리">
       <div
         role="tablist"
         aria-label="신고 처리 상태"
@@ -266,6 +255,6 @@ export default function AdminReportsPage() {
       <div role="tabpanel">
         {isAutoBlind ? <AutoBlindTab /> : <ReportsTab status={status} />}
       </div>
-    </div>
+    </AdminPageFrame>
   );
 }

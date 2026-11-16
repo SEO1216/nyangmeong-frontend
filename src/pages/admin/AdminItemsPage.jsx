@@ -16,6 +16,8 @@ import {
 import { canBakeItem, useItemBake } from '@/features/adminItem/useItemBake';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 /** 등록 모달을 연 상태 */
 const NEW_ITEM = 'new';
@@ -155,14 +157,10 @@ export default function AdminItemsPage() {
   const renderList = () => {
     if (items.isError) {
       return (
-        <div role="alert" className="flex flex-col items-center gap-3 py-16">
-          <p className="text-base text-subtle">
-            아이템 목록을 불러오지 못했어요.
-          </p>
-          <button type="button" className={BTN_SECONDARY} onClick={handleRetry}>
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message="아이템 목록을 불러오지 못했어요."
+          onRetry={handleRetry}
+        />
       );
     }
     if (shownItems.length === 0) {
@@ -195,14 +193,10 @@ export default function AdminItemsPage() {
     }
     if (parts.isError) {
       return (
-        <div role="alert" className="flex flex-col items-center gap-3 py-16">
-          <p className="text-base text-subtle">
-            아이템 부위를 불러오지 못했어요.
-          </p>
-          <button type="button" className={BTN_SECONDARY} onClick={handleRetry}>
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message="아이템 부위를 불러오지 못했어요."
+          onRetry={handleRetry}
+        />
       );
     }
     return (
@@ -227,8 +221,7 @@ export default function AdminItemsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">아이템</h1>
+    <AdminPageFrame title="아이템">
       {renderBody()}
       {editing != null && parts.isSuccess && (
         <ItemFormModal
@@ -240,6 +233,6 @@ export default function AdminItemsPage() {
           }}
         />
       )}
-    </div>
+    </AdminPageFrame>
   );
 }

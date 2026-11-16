@@ -3,12 +3,12 @@ import BoardPagination from '@/components/BoardPagination';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import { OCR_SOURCES } from './processingLabels';
 import ProcessingFilter from './ProcessingFilter';
-import ProcessingListError from './ProcessingListError';
 import ProcessingSkeleton from './ProcessingSkeleton';
 import ProcessingStatCards from './ProcessingStatCards';
 import { useAdminReceipts, useOcrStatuses } from './queries';
 import ReceiptImageModal from './ReceiptImageModal';
 import ReceiptTable from './ReceiptTable';
+import LoadError from '@/components/LoadError';
 
 const PAGE_SIZE = 20;
 
@@ -80,7 +80,7 @@ export default function OcrStatusPanel({
         onSearch={handleSearch}
       />
       {receipts.isError ? (
-        <ProcessingListError
+        <LoadError
           message="영수증 OCR 현황을 불러오지 못했어요."
           onRetry={() => receipts.refetch()}
         />
