@@ -1,11 +1,11 @@
 import { api } from '@/api/axios';
 
-/** 장소 검색. 쪽 크기 15 고정·최대 3쪽. 응답 { content, page, hasNext, totalElements, … } */
+/**
+ * 장소 검색. 지도 범위의 결과를 한 번에 받는다(whole=true, 응답 content에 범위 전체·hasNext=false, 45곳을 넘을 수 있다).
+ * 상호명 거르기·정렬은 받은 목록 안에서 하므로 keyword·page를 보내지 않고 거리순으로만 받는다
+ */
 export const searchPlaces = ({
   plcClsfCd,
-  keyword,
-  sort,
-  page,
   swLat,
   swLot,
   neLat,
@@ -16,9 +16,8 @@ export const searchPlaces = ({
   api.get('/places', {
     params: {
       plcClsfCd,
-      keyword: keyword || undefined,
-      sort,
-      page,
+      whole: true,
+      sort: 'DISTANCE',
       swLat,
       swLot,
       neLat,
