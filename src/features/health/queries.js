@@ -231,12 +231,6 @@ export const useCancelCareRecord = () => useCareMutation(cancelCareRecord);
 
 export const useCreateCareItem = () => useCareMutation(createCareItem);
 
-export const useUpdateCareItem = () => useCareMutation(updateCareItem);
-
-/** 오류는 확인창 안에 표시 */
-export const useDeleteCareItem = () =>
-  useCareMutation(deleteCareItem, { hasErrorToast: false });
-
 /** 튜토리얼의 케어 고르기 저장 (※신규 정책) */
 export const useSaveCareIndications = () =>
   useCareMutation(saveCareIndications);

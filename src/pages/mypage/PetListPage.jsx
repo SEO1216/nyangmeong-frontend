@@ -10,7 +10,7 @@ import PetFormModal from '@/features/pet/list/PetFormModal';
 import PetSlide from '@/features/pet/list/PetSlide';
 import PetUnlinkDialog from '@/features/pet/list/PetUnlinkDialog';
 import SentInvitations from '@/features/pet/list/SentInvitations';
-import { BRUP_ROLE, MAX_OWN_PETS } from '@/utils/petCodes';
+import { MAX_OWN_PETS } from '@/utils/petCodes';
 import { usePets } from '@/features/pet/queries';
 import SubPageLayout from '@/layouts/SubPageLayout';
 
@@ -96,10 +96,7 @@ export default function PetListPage() {
     slideIndex ?? (newIndex >= 0 ? newIndex : Math.max(focusIndex, 0)),
     pets.length,
   );
-  const ownPetCount = pets.filter(
-    (pet) => pet.brupRoleCd === BRUP_ROLE.PRIMARY,
-  ).length;
-  const isFull = ownPetCount >= MAX_OWN_PETS;
+  const isFull = pets.length >= MAX_OWN_PETS;
 
   return (
     <SubPageLayout section="mypage">

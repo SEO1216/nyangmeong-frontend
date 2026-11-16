@@ -77,7 +77,7 @@ export default function ProfileImageField({ prflImgUrl, mbrNcnm, children }) {
           onClick={() => mutate({ file: null }, { onError: handleError })}
           className="inline-flex h-10 items-center rounded-md px-4 font-semibold text-muted hover:enabled:bg-surface-2 hover:enabled:text-ink disabled:cursor-not-allowed disabled:text-line-strong"
         >
-          기본 이미지로
+          사진 제거
         </button>
       </div>
     </div>

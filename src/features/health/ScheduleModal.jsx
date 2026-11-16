@@ -17,6 +17,7 @@ import {
   useDeleteSchedule,
   useUpdateSchedule,
 } from './queries';
+import SegmentSwitch from './SegmentSwitch';
 import CharCount from './shared/CharCount';
 
 const MAX_HOSPITAL_NAME_LENGTH = 80;
@@ -213,26 +214,11 @@ export default function ScheduleModal({
             <legend className={`${labelClass} mb-1.5`}>
               일정 종류{required}
             </legend>
-            <div className="flex h-10 rounded-[6px] border border-[#e6eaeb] bg-[#f1f3f4] p-[3px]">
-              {SCHEDULE_TYPES.map((type) => {
-                const isSelected = form.schdlKndCd === type.cd;
-                return (
-                  <button
-                    key={type.cd}
-                    type="button"
-                    aria-pressed={isSelected}
-                    className={`flex flex-1 items-center justify-center rounded-[4px] whitespace-nowrap ${
-                      isSelected
-                        ? 'bg-white font-semibold text-[#1e4a4c] shadow-[0_1px_2px_rgba(26,50,52,0.08),0_0_0_1px_rgba(40,90,92,0.18)]'
-                        : 'font-medium text-[#566465] hover:text-[#1a3234]'
-                    }`}
-                    onClick={() => handleTypeChange(type.cd)}
-                  >
-                    {type.nm}
-                  </button>
-                );
-              })}
-            </div>
+            <SegmentSwitch
+              options={SCHEDULE_TYPES}
+              selected={form.schdlKndCd}
+              onSelect={handleTypeChange}
+            />
             <FieldError message={fieldError('schdlKndCd')} />
           </fieldset>
 
