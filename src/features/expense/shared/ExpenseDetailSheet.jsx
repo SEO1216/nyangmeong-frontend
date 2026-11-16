@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import useScrollLock from '@/hooks/useScrollLock';
 import { BTN_SECONDARY } from '@/components/buttonStyles';
 import { EXPND_CLSF } from './expenseCodes';
 import {
@@ -32,6 +33,7 @@ export default function ExpenseDetailSheet({
   onClose,
 }) {
   const dialogRef = useRef(null);
+  useScrollLock();
   const clsf = EXPND_CLSF[expense.expndClsfCd];
 
   useEffect(() => {
