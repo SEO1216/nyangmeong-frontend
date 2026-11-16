@@ -11,6 +11,7 @@ import {
   findRecordType,
   findStoolState,
 } from '../diaryTypes';
+import { DAILY_ITEMS, keepWidgetOrder } from '../dashboard/widgetItems';
 import { useDailyTrend, usePetDetail } from '../queries';
 import { round2 } from '../numberFormat';
 import BarChart from './BarChart';
@@ -27,17 +28,35 @@ import {
 
 /**
  * [건강기록 변화 카드]
- * - 지표 탭 5종 단일 선택, 최근 5개 기록 기준 그래프 (FN-HLT-002-09·10)
+ * - 지표 탭 5종 단일 선택, 최근 5건 기준 그래프 (FN-HLT-002-09·10)
  * - 0건·1건은 그래프 대신 안내
- * - 760px 이하: 지표 탭이 한 줄 가로 밀기이고 줄 끝에 걸쳐 잘린 탭은 반투명, 체중 그래프의 상한·목표·하한은 왼쪽 한 열
+ * - 760px 이하: 지표 탭이 한 줄 가로 밀기이고 줄 끝에 걸쳐 잘린 탭은 반투명, 체중 그래프의 최대·목표·최소은 왼쪽 한 열
  * - initialTypeCd: 처음 고를 지표(대시보드 카드 [더보기], ※신규 정책). 5종이 아니거나 없으면 체중
+ * - 지표 탭은 기록 항목 편집에서 켠 매일 기록만, 대시보드 카드 순서로. widgetIds가 null(고른 적 없음)이면 5종 모두 (※신규 정책, 2026-11-14)
+ *   고른 탭이 꺼지면(또는 처음 고를 지표가 꺼져 있으면) 첫 탭을 고름
  */
-export default function DailyTrendCard({ pet, onAddRecord, initialTypeCd }) {
-  const [typeCd, setTypeCd] = useState(() =>
+export default function DailyTrendCard({
+  pet,
+  widgetIds,
+  onAddRecord,
+  initialTypeCd,
+}) {
+  const [pickedTypeCd, setTypeCd] = useState(() =>
     RECORD_TYPES.some((item) => item.cd === initialTypeCd)
       ? initialTypeCd
       : WEIGHT,
   );
+  const shownTypes =
+    widgetIds == null
+      ? RECORD_TYPES
+      : keepWidgetOrder(widgetIds)
+          .map((id) => DAILY_ITEMS.find((item) => item.id === id)?.typeCd)
+          .filter((cd) => cd != null)
+          .map(findRecordType);
+  const typeCd = shownTypes.some((item) => item.cd === pickedTypeCd)
+    ? pickedTypeCd
+    : (shownTypes[0]?.cd ?? WEIGHT);
+  const shownKey = shownTypes.map((item) => item.cd).join();
   const type = findRecordType(typeCd);
   const trend = useDailyTrend(pet.petSn, typeCd);
   /** 목표체중은 목록(GET /pets)에 없어 상세로 받는다. 실패하거나 오기 전이면 목표선 없이 그린다 */
@@ -69,12 +88,13 @@ export default function DailyTrendCard({ pet, onAddRecord, initialTypeCd }) {
       row.removeEventListener('scroll', update);
       window.removeEventListener('resize', update);
     };
-  }, []);
+    /** 탭 수·순서가 바뀌면 잘림을 다시 잼 */
+  }, [shownKey]);
 
   return (
     <Card
       title="건강기록 변화"
-      sub={<span className="text-sm">최근 {RECENT_RECORD_COUNT}개 기록</span>}
+      sub={<span className="text-sm">최근 {RECENT_RECORD_COUNT}건</span>}
       className="min-w-0"
     >
       <div
@@ -83,7 +103,7 @@ export default function DailyTrendCard({ pet, onAddRecord, initialTypeCd }) {
         aria-label="지표 선택"
         className="mb-4 flex gap-2 overflow-x-auto [scrollbar-width:none] min-[761px]:flex-wrap min-[761px]:overflow-visible [&::-webkit-scrollbar]:hidden"
       >
-        {RECORD_TYPES.map((item, index) => {
+        {shownTypes.map((item, index) => {
           const isSelected = item.cd === typeCd;
           return (
             <button
@@ -130,7 +150,7 @@ function TrendBody({ pet, goalBdwg, trend, type, isPc, onAddRecord }) {
           className={`${BTN_SECONDARY} mt-2 h-8! px-3!`}
           onClick={() => onAddRecord(type.cd)}
         >
-          오늘 기록추가
+          오늘 기록 추가
         </button>
       }
     />

@@ -7,10 +7,9 @@ import { showToast } from '@/components/toastStore';
 import { usePurchaseItems, useShopItems } from '../queries';
 import { ITEM_PART_OPTIONS } from '../shared/petCodes';
 import ItemImage from './ItemImage';
+import PartTabs, { ALL } from './PartTabs';
 import WearPreview from './WearPreview';
 
-const ALL = 'ALL';
-const TABS = [{ code: ALL, name: '전체' }, ...ITEM_PART_OPTIONS];
 const PART_NAMES = Object.fromEntries(
   ITEM_PART_OPTIONS.map((option) => [option.code, option.name]),
 );
@@ -205,27 +204,7 @@ export default function ItemShopModal({ pet, worn, onClose }) {
           )}
         </div>
         <div className="flex min-w-0 flex-col gap-4 min-[761px]:min-h-0 min-[761px]:gap-2 min-[761px]:px-5 min-[761px]:pt-2 min-[761px]:pb-0">
-          <div
-            role="group"
-            aria-label="부위"
-            className="flex flex-wrap gap-2 max-[760px]:flex-nowrap max-[760px]:overflow-x-auto max-[760px]:[scrollbar-width:none] max-[760px]:[&::-webkit-scrollbar]:hidden"
-          >
-            {TABS.map((tab) => (
-              <button
-                key={tab.code}
-                type="button"
-                aria-pressed={tab.code === part}
-                onClick={() => setPart(tab.code)}
-                className={`inline-flex h-9 shrink-0 items-center rounded-full border px-3.5 font-semibold min-[761px]:h-8 ${
-                  tab.code === part
-                    ? 'border-brand-500 bg-brand-500 text-white'
-                    : 'border-line bg-white text-ink-2 hover:border-line-strong'
-                }`}
-              >
-                {tab.name}
-              </button>
-            ))}
-          </div>
+          <PartTabs value={part} onChange={setPart} />
           <div className="grid grid-cols-3 content-start gap-2 p-[3px] min-[761px]:min-h-0 min-[761px]:flex-1 min-[761px]:grid-cols-4 min-[761px]:overflow-y-auto">
             {isShopError && (
               <p className="col-span-full py-6 text-center text-muted">
@@ -269,7 +248,9 @@ export default function ItemShopModal({ pet, worn, onClose }) {
                   >
                     <ItemImage item={item} />
                   </span>
-                  <span className="mb-0.5 break-all">{item.itemNm}</span>
+                  <span className="mb-0.5 break-keep [overflow-wrap:anywhere]">
+                    {item.itemNm}
+                  </span>
                   <span
                     className={`font-semibold tabular-nums ${
                       isOwned ? 'text-line-strong' : 'text-ink'
