@@ -52,7 +52,7 @@ export default function PlacePage() {
     >
       <nav
         aria-label="장소 종류"
-        className="z-[3] hidden flex-col items-center gap-1 border-r border-line bg-white py-3 md:flex"
+        className="relative z-[3] hidden flex-col items-center gap-1 border-r border-line bg-white py-3 md:flex"
       >
         <PlaceCategoryNav
           variant="rail"
@@ -109,7 +109,7 @@ export default function PlacePage() {
           <div
             role="group"
             aria-label="장소 종류"
-            className="pointer-events-auto -mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none]"
+            className="pointer-events-auto relative -mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none]"
           >
             <PlaceCategoryNav
               variant="chips"
