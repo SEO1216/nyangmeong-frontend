@@ -22,8 +22,14 @@ export default function PlacePage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { search } = place;
 
+  // 핀이나 목록 항목으로 고르면 지도가 그 업체로 가고 팝업이 뜬다. 모바일은 시트를 내려 지도가 보이게 한다
   const handlePinSelect = (plcSn) => {
     place.selectPlace(plcSn, 'pin');
+    sheet.setSheet('peek');
+  };
+
+  const handleListSelect = (plcSn) => {
+    place.selectPlace(plcSn, 'list');
     sheet.setSheet('peek');
   };
 
@@ -46,7 +52,7 @@ export default function PlacePage() {
     >
       <nav
         aria-label="장소 종류"
-        className="z-[3] hidden flex-col items-center gap-1 border-r border-line bg-white py-3 md:flex"
+        className="relative z-[3] hidden flex-col items-center gap-1 border-r border-line bg-white py-3 md:flex"
       >
         <PlaceCategoryNav
           variant="rail"
@@ -70,6 +76,7 @@ export default function PlacePage() {
         onSearch={place.submitSearch}
         onType={place.typeSearch}
         onSortChange={place.setSort}
+        onSelectPlace={handleListSelect}
         onToggleFavorite={place.toggleFavorite}
       />
 
@@ -102,7 +109,7 @@ export default function PlacePage() {
           <div
             role="group"
             aria-label="장소 종류"
-            className="pointer-events-auto -mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none]"
+            className="pointer-events-auto relative -mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none]"
           >
             <PlaceCategoryNav
               variant="chips"

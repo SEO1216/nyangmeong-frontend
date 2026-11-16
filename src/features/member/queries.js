@@ -71,7 +71,11 @@ export const useUpdateProfileImage = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: updateProfileImage,
-    onSuccess: () => qc.invalidateQueries({ queryKey: memberKeys.profile }),
+    /** 헤더 프로필 사진(useMe)도 같이 바꾼다 */
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: memberKeys.profile });
+      qc.invalidateQueries({ queryKey: memberKeys.me });
+    },
   });
 };
 

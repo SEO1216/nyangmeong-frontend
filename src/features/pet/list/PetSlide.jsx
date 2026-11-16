@@ -4,7 +4,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Dog,
-  MoreVertical,
   Plus,
   X,
 } from 'lucide-react';
@@ -13,6 +12,7 @@ import PetFace from '@/components/PetFace';
 import { BRUP_ROLE, MAX_OWN_PETS, PET_SE } from '@/utils/petCodes';
 import { useCaregiversOf } from '../queries';
 import FamilySection, { OwnerLine } from './FamilySection';
+import MoreMenu from './MoreMenu';
 import {
   formatBirthAge,
   formatWeight,
@@ -367,57 +367,19 @@ function InfoGrid({ pet, vrtyName }) {
 
 /** 이름 줄 오른쪽 ⋯ 메뉴 */
 function PetMenu({ isCoParent, onEdit, onRemove }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const itemClass =
-    'block w-full rounded-md px-3 py-2.5 text-left whitespace-nowrap hover:bg-surface-2';
-
-  const choose = (action) => {
-    setIsOpen(false);
-    action();
-  };
-
   return (
-    <div className="relative shrink-0 max-[760px]:self-start">
-      <button
-        type="button"
-        onClick={() => setIsOpen((open) => !open)}
-        aria-label="반려동물 메뉴"
-        aria-haspopup="menu"
-        aria-expanded={isOpen}
-        className={`grid size-10 place-items-center rounded-full border bg-white hover:border-line-strong hover:text-ink ${isOpen ? 'border-line-strong text-ink' : 'border-line text-ink-2'}`}
-      >
-        <MoreVertical className="size-5" />
-      </button>
-      {isOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-10"
-            onClick={() => setIsOpen(false)}
-          />
-          <div
-            role="menu"
-            className="absolute top-[calc(100%+6px)] right-0 z-20 min-w-[168px] rounded-box border border-line bg-white p-1.5 shadow-depth-md"
-          >
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => choose(onEdit)}
-              className={itemClass}
-            >
-              반려동물 정보 수정
-            </button>
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => choose(onRemove)}
-              className={`${itemClass} text-danger`}
-            >
-              {isCoParent ? '연동 해제' : '반려동물 삭제'}
-            </button>
-          </div>
-        </>
-      )}
-    </div>
+    <MoreMenu
+      label="반려동물 메뉴"
+      className="max-[760px]:self-start"
+      items={[
+        { label: '반려동물 정보 수정', onSelect: onEdit },
+        {
+          label: isCoParent ? '연동 해제' : '반려동물 삭제',
+          onSelect: onRemove,
+          isDanger: true,
+        },
+      ]}
+    />
   );
 }
 
@@ -517,7 +479,8 @@ function Badge({ className, children }) {
 /** 한 줄 행. 위 두 칸은 위 선, 마지막 두 칸은 아래 선이 없다 */
 const ROW =
   'flex h-14 min-w-0 items-center gap-6 min-[761px]:max-[1032px]:gap-3 min-[1101px]:max-[1108px]:gap-3 border-b border-line-soft [&:nth-child(-n+2)]:border-t [&:nth-child(-n+2)]:border-t-line-strong [&:nth-last-child(-n+2)]:border-b-0';
-const DT = 'w-20 shrink-0 text-subtle min-[761px]:max-[1032px]:w-16 min-[1101px]:max-[1108px]:w-16';
+const DT =
+  'w-20 shrink-0 text-subtle min-[761px]:max-[1032px]:w-16 min-[1101px]:max-[1108px]:w-16';
 const DD = 'relative m-0 flex min-w-0 flex-1 items-center gap-2 font-semibold';
 
 /** 인식 번호: 띄어쓰기 없이 이어 쓴다. 15자리는 국가번호(앞 3자리) 뒤에서만 줄이 바뀔 수 있다 */

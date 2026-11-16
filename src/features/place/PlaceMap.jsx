@@ -221,8 +221,15 @@ export default function PlaceMap({
         <div
           role="group"
           aria-label="지도 종류"
-          className={`pointer-events-auto flex rounded-md p-[3px] max-md:hidden ${floatCard}`}
+          className={`pointer-events-auto relative grid grid-cols-2 rounded-md p-[3px] max-md:hidden ${floatCard}`}
         >
+          {/* 고른 쪽 밑에 깔리는 배경. 지도 종류를 바꾸면 좌우로 미끄러져 간다 */}
+          <span
+            aria-hidden="true"
+            className={`pointer-events-none absolute inset-y-[3px] left-[3px] w-[calc(50%-3px)] rounded-sm bg-brand-500 transition-transform duration-300 ease-[cubic-bezier(.2,.8,.2,1)] motion-reduce:transition-none ${
+              isSky ? 'translate-x-full' : ''
+            }`}
+          />
           {[
             ['일반 지도', false],
             ['스카이뷰', true],
@@ -232,9 +239,9 @@ export default function PlaceMap({
               type="button"
               aria-pressed={isSky === sky}
               onClick={() => setIsSky(sky)}
-              className={`h-[34px] rounded-sm px-3.5 text-sm ${
+              className={`relative h-[34px] rounded-sm px-3.5 text-sm transition-colors duration-300 motion-reduce:transition-none ${
                 isSky === sky
-                  ? 'bg-brand-500 font-semibold text-white'
+                  ? 'font-semibold text-white'
                   : 'font-medium text-muted'
               }`}
             >

@@ -29,7 +29,7 @@ const MAX_TTL_LENGTH = 200;
 const MAX_CN_LENGTH = 4000;
 
 /** 본문 이미지 한 줄: 사용자 공지 상세(PostBody fileImages)가 이 줄을 이미지로 그린다 */
-const imageLine = (atchFileSn) => `![](/api/files/public/${atchFileSn})`;
+const imageLine = (atchFileSn) => `![](/api/files/${atchFileSn})`;
 
 /** 칸 이름과 글자 수. action은 글자 수 왼쪽에 두는 버튼 */
 function FieldLabel({ htmlFor, label, length, maxLength, action }) {
@@ -81,7 +81,7 @@ function CheckOption({ checked, onChange, children }) {
  * - notice가 있으면 수정, 없으면 등록
  * - 등록 때 [알림 발송]을 체크하면 확인 모달 뒤 등록, 수정 화면에는 체크 칸이 없다
  * - 삭제는 없고 사용을 끄면 비노출
- * - [이미지 넣기]: 올린 뒤 내용 커서 자리에 ![](/api/files/public/번호) 한 줄을 넣는다(HTML 저장 안 함)
+ * - [이미지 넣기]: 올린 뒤 내용 커서 자리에 ![](/api/files/번호) 한 줄을 넣는다(HTML 저장 안 함)
  * - 내용 아래 미리보기는 사용자 공지 상세와 같은 PostBody라 그 줄이 이미지로 보인다
  * - 저장하면 목록으로, 실패하면 입력을 유지하고 서버 문구 표시
  */

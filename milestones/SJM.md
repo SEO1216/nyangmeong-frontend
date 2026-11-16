@@ -229,6 +229,14 @@
 - 완료 조건: 인식 결과 확인 모달과 직접 입력·지출 수정 폼의 필수 라벨에 `*`, [저장] 비활성 규칙은 그대로, 비활성일 때 빠진 항목 안내. `yarn -s lint`, `yarn -s build` 종료 코드 0
 - 연결 남음: 없음
 
+## SCR-MYP-005 공동양육자 추가 · 보낸 초대 취소·삭제 버튼 연결 — 끝
+
+- 기능: 명세 기능 ID 추가 없음. FN-MYP-005-03 보낸 초대(취소·삭제 버튼)·FN-MYP-005-10 만료·종료 안내(취소 안내)에 걸친다
+- 기다리는 것: 백엔드 `POST /api/caregiver-invitations/{sn}/cancel`·`DELETE /api/caregiver-invitations/{sn}` (SJM, 끝남. 공용 DB 반영 완료)
+- 완료 조건: 보낸 초대 목록의 대기중 행에서 [취소](확인 후 호출)를 누르면 상태가 취소로 바뀌고, 취소 행에서 [삭제]를 누르면 목록에서 사라진다. 수락 화면에서 초대 상태가 `PETC0035`면 "취소된 초대예요" 안내를 보인다(`pets`·발송자는 없음). 오류: 취소 409 `CAREGIVER_INVITATION_CANCELED`·`..._ALREADY_PROCESSED`, 만료 400, 남의 초대 403 `CAREGIVER_INVITATION_NOT_SENDER`, 삭제 409 `CAREGIVER_INVITATION_NOT_CANCELED`·404
+- 추가 요청(2026-11-16): 초대당 1행·⋮ 메뉴·"일부 수락" 배지, 날짜 문구("N일 후 만료"·"MM-DD 보냄"·"메일로 보냄"), 모바일 배치, 취소·404 안내 카드와 아이콘
+- 연결 남음: 없음
+
 ## 제외
 
 - 없음. 마이페이지 명세의 화면은 모두 SJM 담당이다

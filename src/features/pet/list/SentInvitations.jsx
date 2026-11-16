@@ -1,14 +1,19 @@
+import { useState } from 'react';
 import Skeleton from '@/components/Skeleton';
 import SkeletonCard from '@/components/SkeletonCard';
-import { getYmdOf } from '@/utils/formatDate';
+import { diffDays, getTodayYmd, getYmdOf } from '@/utils/formatDate';
 import { INVTN_STTS } from '../shared/petCodes';
 import { useSentInvitations } from '../queries';
+import MoreMenu from './MoreMenu';
+import SentInvitationDialog from './SentInvitationDialog';
 
 /**
  * [보낸 초대]
  * - 계정 전체 기준, 슬라이드와 무관한 조회 전용 목록
  * - 재발송 없음: 같은 이메일로 새로 초대
- * - 한 초대에 동물이 여러 마리면 동물마다 한 줄로 나누고 상태도 동물별로 표시(일부만 수락하면 수락/거절)
+ * - ⋮ 메뉴: 대기중이면 "초대 취소", 취소됨이면 "삭제"(확인 모달). 할 게 없는 행은 ⋮ 자리만 비운다
+ * - 한 초대는 한 행: 동물은 "연탄·루루"처럼 묶어 둘째 줄에 적는다
+ * - 동물별 결과가 갈리면(일부만 수락) 배지는 "일부 수락" 하나, 둘째 줄에 "탄이 수락 · 까미 거절"
  */
 
 const STATUS_BADGES = {
@@ -28,7 +33,43 @@ const STATUS_BADGES = {
     label: '만료됨',
     tone: 'bg-tone-gray-bg text-tone-gray-fg',
   },
+  [INVTN_STTS.CNCL]: {
+    label: '취소됨',
+    tone: 'bg-tone-gray-bg text-tone-gray-fg',
+  },
 };
+
+const PARTIAL_BADGE = {
+  label: '일부 수락',
+  tone: 'bg-tone-green-bg text-tone-green-fg',
+};
+
+/** 둘째 줄의 동물별 결과 글자색 */
+const PET_RESULT_TEXT = {
+  [INVTN_STTS.ACPT]: 'text-tone-green-fg',
+  [INVTN_STTS.RJCT]: 'text-danger',
+};
+
+/** 초대의 동물 상태가 하나로 같으면 그 상태, 갈리면 null */
+const getSharedStatus = (pets) => {
+  const first = pets[0].invtnSttsCd;
+  return pets.every((pet) => pet.invtnSttsCd === first) ? first : null;
+};
+
+/** 이메일은 "@" 뒤에서만 줄을 바꾼다(넘칠 때만 글자 단위로 끊김: 부모의 overflow-wrap). 모바일은 한 줄 말줄임이라 <wbr>를 숨긴다 */
+function EmailText({ email }) {
+  const at = email.indexOf('@');
+  if (at < 0) return email;
+  return (
+    <>
+      {email.slice(0, at + 1)}
+      <span className="max-[760px]:hidden">
+        <wbr />
+      </span>
+      {email.slice(at + 1)}
+    </>
+  );
+}
 
 function Badge({ tone, children }) {
   return (
@@ -43,12 +84,24 @@ function Badge({ tone, children }) {
 /** 'YYYY-MM-DDTHH:mm:ss' → 'MM-DD' */
 const formatMonthDay = (dateTime) => getYmdOf(dateTime).slice(5);
 
+/**
+ * 둘째 줄의 날짜 문구
+ * - 대기중: "N일 후 만료"(만료일 기준, 당일은 "오늘 만료"), 미가입 이메일이면 앞에 "메일로 보냄 · "
+ * - 그 밖: "MM-DD 보냄"
+ */
+const getDateText = (invitation, sharedStatus) => {
+  if (sharedStatus !== INVTN_STTS.WAIT) {
+    return `${formatMonthDay(invitation.regDt)} 보냄`;
+  }
+  const days = diffDays(getTodayYmd(), getYmdOf(invitation.invtnExpryDt));
+  const expiry = days <= 0 ? '오늘 만료' : `${days}일 후 만료`;
+  return invitation.rcvrJoined ? expiry : `메일로 보냄 · ${expiry}`;
+};
+
 export default function SentInvitations() {
   const { data: invitations = [], isPending } = useSentInvitations();
-  /** 초대 1건을 동물마다 한 줄로 펼침 */
-  const rows = invitations.flatMap((invitation) =>
-    invitation.pets.map((pet) => ({ invitation, pet })),
-  );
+  /** { mode: 'cancel' | 'delete', invitation } */
+  const [dialog, setDialog] = useState(null);
 
   if (isPending) {
     return (
@@ -70,45 +123,101 @@ export default function SentInvitations() {
           — 계정 전체
         </small>
       </h2>
-      {rows.length === 0 ? (
+      {invitations.length === 0 ? (
         <p className="rounded-card border border-line bg-white px-[22px] py-6 text-center text-muted shadow-depth-sm">
           아직 보낸 초대가 없어요
         </p>
       ) : (
         <ul className="min-w-0 rounded-card border border-line bg-white shadow-depth-sm">
-          {rows.map(({ invitation, pet }) => {
-            const status = STATUS_BADGES[pet.invtnSttsCd];
-            const meta = [
-              `${formatMonthDay(invitation.regDt)} 발송`,
-              invitation.rcvrJoined
-                ? '가입 회원(인앱 알림)'
-                : '미가입 이메일',
-            ];
+          {invitations.map((invitation) => {
+            const sharedStatus = getSharedStatus(invitation.pets);
+            const isMixed = sharedStatus === null;
+            const status = isMixed
+              ? PARTIAL_BADGE
+              : STATUS_BADGES[sharedStatus];
+            const menuItems =
+              sharedStatus === INVTN_STTS.WAIT
+                ? [
+                    {
+                      label: '초대 취소',
+                      onSelect: () => setDialog({ mode: 'cancel', invitation }),
+                      isDanger: true,
+                    },
+                  ]
+                : sharedStatus === INVTN_STTS.CNCL
+                  ? [
+                      {
+                        label: '삭제',
+                        onSelect: () =>
+                          setDialog({ mode: 'delete', invitation }),
+                        isDanger: true,
+                      },
+                    ]
+                  : [];
+            const dateText = getDateText(invitation, sharedStatus);
             return (
               <li
-                key={`${invitation.jntBrupInvtnSn}-${pet.petSn}`}
-                className="border-b border-line-soft px-[22px] py-6 last:border-b-0"
+                key={invitation.jntBrupInvtnSn}
+                className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-start gap-x-3 border-b border-line-soft px-[22px] py-6 last:border-b-0 max-[760px]:grid-cols-[auto_minmax(0,1fr)_auto] max-[760px]:gap-y-1.5 max-[760px]:px-4 max-[760px]:py-4"
               >
-                <p className="flex items-start gap-4 font-semibold">
-                  <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">
-                    {invitation.invtnTrgtEml}
+                <p
+                  className={`col-start-1 row-start-1 min-w-0 font-semibold [overflow-wrap:anywhere] max-[760px]:overflow-hidden max-[760px]:text-ellipsis max-[760px]:whitespace-nowrap ${menuItems.length > 0 ? 'max-[760px]:col-span-2' : 'max-[760px]:col-span-3'}`}
+                >
+                  <EmailText email={invitation.invtnTrgtEml} />
+                </p>
+                <p className="col-start-1 row-start-2 mt-1 min-w-0 text-sm leading-[1.6] break-keep text-subtle max-[760px]:col-span-2 max-[760px]:col-start-2 max-[760px]:mt-0 max-[760px]:flex max-[760px]:items-baseline">
+                  <span className="max-[760px]:min-w-0 max-[760px]:flex-1 max-[760px]:truncate">
+                    {isMixed ? (
+                      invitation.pets.map((pet, index) => (
+                        <span key={pet.petSn}>
+                          {index > 0 && ' · '}
+                          <span className="text-ink">{pet.petNm}</span>{' '}
+                          <span
+                            className={PET_RESULT_TEXT[pet.invtnSttsCd] ?? ''}
+                          >
+                            {STATUS_BADGES[pet.invtnSttsCd].label}
+                          </span>
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-ink">
+                        {invitation.pets.map((pet) => pet.petNm).join('·')}
+                      </span>
+                    )}
                   </span>
+                  <span className="max-[760px]:ml-2 max-[760px]:shrink-0 max-[760px]:text-xs max-[760px]:whitespace-nowrap max-[760px]:opacity-70">
+                    <span className="max-[760px]:hidden"> · </span>
+                    {dateText}
+                  </span>
+                </p>
+                <div className="col-start-2 row-span-2 row-start-1 self-start max-[760px]:col-start-1 max-[760px]:row-span-1 max-[760px]:row-start-2 max-[760px]:self-center">
                   <Badge tone={status.tone}>{status.label}</Badge>
-                </p>
-                <p className="mt-1 text-sm leading-[1.6] text-subtle">
-                  <b className="font-semibold text-ink">{pet.petNm}</b> ·{' '}
-                  {meta.join(' · ')}
-                  {pet.invtnSttsCd === INVTN_STTS.WAIT && (
-                    <>
-                      <br />
-                      {formatMonthDay(invitation.invtnExpryDt)}에 만료돼요
-                    </>
-                  )}
-                </p>
+                </div>
+                {menuItems.length > 0 ? (
+                  <MoreMenu
+                    label="보낸 초대 메뉴"
+                    items={menuItems}
+                    isPlainOnMobile
+                    className="col-start-3 row-span-2 row-start-1 self-start max-[760px]:row-span-1 max-[760px]:-mt-1"
+                  />
+                ) : (
+                  <span
+                    className="col-start-3 row-span-2 row-start-1 size-10 max-[760px]:hidden"
+                    aria-hidden="true"
+                  />
+                )}
               </li>
             );
           })}
         </ul>
+      )}
+      {dialog && (
+        <SentInvitationDialog
+          mode={dialog.mode}
+          invitation={dialog.invitation}
+          petNames={dialog.invitation.pets.map((pet) => pet.petNm)}
+          onClose={() => setDialog(null)}
+        />
       )}
     </section>
   );

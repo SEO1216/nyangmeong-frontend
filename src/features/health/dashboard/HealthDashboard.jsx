@@ -164,6 +164,7 @@ export default function HealthDashboard({
         <WidgetTutorialModal
           mode={openMode}
           mbrSn={mbrSn}
+          petSn={pet.petSn}
           petNm={pet.petNm}
           savedIds={shownIds}
           onClose={closeModal}

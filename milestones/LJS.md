@@ -2,6 +2,15 @@
 
 기준: 공통레이아웃_기능명세서_v0.4_20261001, AI매니저_기능명세서_v0.7_20261009 (DMS, 2026-10-17), 커뮤니티_기능명세서_v0.7_20261019 (CMU-005만, KSJ 마일스톤에서 옮김, 2026-10-21), AI매니저_기능명세서_v0.9_20261026 (SCR-AIM-013만, DMS 업로드 전 로컬 사본, 2026-10-26), 관리자_기능명세서_v0.2_20261030 (DMS, 2026-10-30. 화면설계서 `관리자_화면설계서_v0.1_20261030`, 순서는 백엔드 `docs/admin/implementation-plan.md` 3절 단계)
 
+## SCR-COM-002 기본 레이아웃 · 헤더 프로필 사진 · 플로팅 AI 말풍선·기본 캐릭터 · 바로가기 편집 반려동물 왼쪽 정렬 — 끝
+- 기능: 명세 기능 ID 추가 없음(사람 요청 2026-11-16), 걸치는 기능 FN-COM-002-15 헤더 프로필·FN-COM-002-19 플로팅 AI 버튼, 걸치는 화면 SCR-MAN-001 바로가기 편집 창
+- 기다리는 것: 없음(`GET /auth/me` `atchFileSn` 있음, 백엔드 `docs/api/member.md` AuthMeResponse)
+- 완료 조건: 기획(핸드오프 "지금 하는 것") P1~P4
+- 추가 요청: 추가-1 메인 말풍선 없음(추가-3으로 대체) · 추가-2 강아지 기본 전신 · 추가-3 메인 플로팅 버튼 없음 · 추가-4 고양이·강아지 512 전신 원본 · 추가-5 보이는 높이 PC 80·모바일 60 · 추가-6 그림 PC 4px·모바일 3px 왼쪽
+- 완료 조건 결과: 검증 `통과`(2026-11-16, 5회차까지 P1~P4·추가-1~6), 사람 확인 2026-11-16
+- 이번엔 안 함: 관리자 헤더 프로필 사진
+- 연결 남음: 없음
+
 ## SCR-HLT-011 종합 건강기록 · AI 건강분석 리포트 연결 — 끝
 - 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-HLT-011-12(명세는 자리만, 내용 미정). 사람 요청 2026-11-14 "ai 분석 리포트 먼저 붙이자". R1 API·훅 / R2 카드 / R3 640px 미만 띠 / R4 반려동물 전환
 - 기다리는 것: 없음(AI `GET·POST /ai/pets/{petSn}/health-report(/refresh)`, AI·Java develop에 있음, 계약 ai `docs/api/healthreport.md`)
@@ -1142,11 +1151,13 @@
 - 완료 조건 결과: 검증 `통과`(2026-11-10 1회차, 5180·8081 관리자), 사람 확인 2026-11-10
 - 연결 남음: 없음
 
-## SCR-ADM-081 키워드 사전 · 관리자 키워드 사전 API 연결 — 대기
-- 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-081-01·02
-- 기다리는 것: 백엔드 SCR-ADM-081 키워드 사전 · 프론트 연결 관리자 키워드 사전 API(LJS, 끝 2026-11-05). 계약은 백엔드 `docs/api/ai.md` "관리자 API" 절의 `/admin/ai/keywords` 네 행과 DTO 절
-- 완료 조건: `features/adminAiKeyword/api.js`의 가짜 네 함수를 실제 `GET /api/admin/ai/keywords?dictUsgCd=&kwrdClsfNm=`(배열, 페이지 없음)·`POST /api/admin/ai/keywords`(201 `{ kwrdDictSn }`)·`PATCH /api/admin/ai/keywords/{kwrdDictSn}`(보낸 칸만, 바뀐 행을 돌려줌)·`DELETE /api/admin/ai/keywords/{kwrdDictSn}`로 바꾸고 sessionStorage 가짜를 지운다. 가정과 다른 것: `useYn`은 true/false('Y' 아님), 행에 `mpngCdNm`(연결 코드 이름)이 더 있다, 없는 행 404 `AI_KEYWORD_NOT_FOUND`(가짜 `KEYWORD_NOT_FOUND` 아님), 수정에서 해석 결과·연결 코드·비고를 비우려면 빈 문자열(`null`은 그대로 둠), 용도·분류는 수정되지 않는다. 연결 코드는 `일정 종류`(HLTG19)·`검진유형`(HLTG01)·`가계부 카테고리`(MYPG05)만 필수이고 다른 분류에 보내면 400 `INVALID_INPUT_VALUE`. `kwrdClsfNm`은 서버가 글자 그대로 검사하므로 `SCR-ADM-081 키워드 사전 · 탭·칸 이름을 쉬운 말로` 절에서 바꾸는 것은 화면 표시만이다. 가계부 카테고리 초기 데이터 6건(병원~돌봄, 기타 없음)은 공용 DB에 있다
+## SCR-ADM-081 키워드 사전 · 화면 없애기 — 끝
+- 기능: FN-ADM-081-01·02·03 없앰(사람 결정 2026-11-16: AI가 도구 호출로 바뀌어 키워드 사전을 읽지 않음, AI 서버 develop `59ba84f` 확인)
+- 기다리는 것: 없음. 백엔드 API·테이블 지우기는 백엔드 저장소에서 따로, 문서 정리는 사람
+- 완료 조건: `features/adminAiKeyword/`·`AdminAiKeywordsPage.jsx`·라우트·`ADMIN_AI_KEYWORDS`·메뉴 항목·`docs/routes.md`·TC 문서의 키워드 사전 부분이 없고, 관리자 메뉴 AI 묶음의 남은 두 화면이 열린다. lint·build 0
+- 예전 계획(연결, 2026-11-16 취소): `features/adminAiKeyword/api.js`의 가짜 네 함수를 실제 `GET /api/admin/ai/keywords?dictUsgCd=&kwrdClsfNm=`(배열, 페이지 없음)·`POST /api/admin/ai/keywords`(201 `{ kwrdDictSn }`)·`PATCH /api/admin/ai/keywords/{kwrdDictSn}`(보낸 칸만, 바뀐 행을 돌려줌)·`DELETE /api/admin/ai/keywords/{kwrdDictSn}`로 바꾸고 sessionStorage 가짜를 지운다. 가정과 다른 것: `useYn`은 true/false('Y' 아님), 행에 `mpngCdNm`(연결 코드 이름)이 더 있다, 없는 행 404 `AI_KEYWORD_NOT_FOUND`(가짜 `KEYWORD_NOT_FOUND` 아님), 수정에서 해석 결과·연결 코드·비고를 비우려면 빈 문자열(`null`은 그대로 둠), 용도·분류는 수정되지 않는다. 연결 코드는 `일정 종류`(HLTG19)·`검진유형`(HLTG01)·`가계부 카테고리`(MYPG05)만 필수이고 다른 분류에 보내면 400 `INVALID_INPUT_VALUE`. `kwrdClsfNm`은 서버가 글자 그대로 검사하므로 `SCR-ADM-081 키워드 사전 · 탭·칸 이름을 쉬운 말로` 절에서 바꾸는 것은 화면 표시만이다. 가계부 카테고리 초기 데이터 6건(병원~돌봄, 기타 없음)은 공용 DB에 있다
 - 이미 바뀐 것: `features/adminAiKeyword/api.js`·`keywordLabels.js`(가짜)
+- 연결 남음: FN-ADM-081-01·02·03 (백엔드 연결 관리자·내부 키워드 사전 API 삭제, 백엔드 저장소에서 /start)
 
 ## SCR-ADM-082 처리 현황 · 검사결과지 분석 현황 API 연결 — 대기
 - 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-082-03
@@ -1160,6 +1171,13 @@
 - 완료 조건: `features/setting/api.js` 가짜를 실제 API로 바꿔 운영 설정 조회·저장이 화면에서 동작한다. 400 칸별 오류·403을 화면에 보인다
 - 참고(백엔드 2026-11-10): 서버 운영 설정에서 대시보드 케어 최대 노출 수(`dshbdCareMaxExpsrCnt`)를 지웠다. 응답에 없고 PATCH로 보내도 무시한다. 프론트 화면·가짜에는 원래 이 칸이 없다
 - 결과(2026-11-10): `features/setting/api.js` 실제 `GET`·`PATCH /api/admin/settings`, 묶음별 응답을 `settingFields.js` `resKey`로 읽음, 입력 자릿수를 서버 범위에 맞춤, 탈퇴 회원 보관 기간은 읽기 전용(사람 결정), 수정자 "관리자 #번호". 추가-1 저장 400이면 첫 오류 칸으로 스크롤·포커스. 검증 통과, 사람 확인
+
+## SCR-ADM-110 운영 설정 · 거래완료 글 숨김 기준 일수 — 끝
+- 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-110-01~04. 백엔드(KSJ, SCR-CMU-004, 백엔드 develop `13794f1`)가 `GET`·`PATCH /api/admin/settings` community 묶음에 `dlngCmptnHideCrtrDayCnt`(선택, 1~99, 기본 7)를 넣었다(요청 2026-11-16)
+- 기다리는 것: 검증 백엔드 8081이 백엔드 develop의 이 필드를 담은 코드로 떠 있어야 한다(백엔드 LJS 세션에 요청)
+- 완료 조건: 운영 설정 커뮤니티 묶음에 "거래완료 글 숨김 기준"(일) 입력칸이 보이고, 조회 값이 들어오며, 바꿔 저장하면 PATCH 본문에 그 키만 실려 저장된다
+- 결과(2026-11-16): `features/setting/shared/settingFields.js` 커뮤니티 묶음 "펫돌봄 매칭 무응답 종료 기준" 아래에 "거래완료 글 숨김 기준"(일, 1~99) 칸. 검증 1회차 `확인 못 함 있음`(칸 위치·1440·390 확인, 8081에 필드가 없어 조회·저장은 못 봄), 사람 확인
+- 연결 남음: S1 (검증 백엔드 8081을 `dlngCmptnHideCrtrDayCnt`가 든 코드로 다시 띄운 뒤 조회 값 7·PATCH 본문·새로고침 유지·0 입력 400 칸 오류 확인, 백엔드 LJS가 global/setting 검토 뒤 8081 재시작)
 
 ## SCR-ADM-001 대시보드 · 이용 통계 API 연결 — 끝
 - 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-001-04·05 (2026-11-10 대시보드 연결 절에 빠져 있어 따로 둠)
@@ -1350,12 +1368,16 @@
 - 배경: 핸드오프 다음에 할 것 "`/api/pets/main-shortcuts` 400"(검증 보고 2026-11-11)
 - 기다리는 것: 없음
 - 완료 조건: 핸드오프 기획 B1~B3
+- 넘김: 사람 2026-11-14 "이건 넘어가자"
 
-## SCR-MYP-010 픽셀 캐릭터 관리 · 이미지 주소 /api/files 전환 — 대기
+## SCR-MYP-010 픽셀 캐릭터 관리 · 이미지 주소 /api/files 전환 — 끝
 - 기능: 명세 기능 ID 추가 없음(백엔드 SCR-MYP-010 파일 저장 경로 재구성 2026-11-13의 프론트 연결). 걸치는 기능: 공통 파일 이미지, FN-ADM-040-02 공지 본문 이미지, FN-ADM-050-02 뉴스 썸네일
 - 기다리는 것: 백엔드 SCR-MYP-010 파일 저장 경로 재구성(백엔드 `LJS` 브랜치, develop 병합 전). 병합 전에도 백엔드는 예전 주소 `/api/files/public/{번호}`를 같은 동작으로 남긴다
 - 완료 조건: `src/utils/fileUrl.js`가 `/api/files/{atchFileSn}`을 만든다. 관리자 공지 편집기(`features/adminNotice/NoticeForm.jsx`)가 본문에 `![](/api/files/{atchFileSn})`를 넣는다. `components/PostBody.jsx`는 새 줄 `![](/api/files/숫자)`와 이미 저장된 공지 본문의 예전 줄 `![](/api/files/public/숫자)`를 둘 다 이미지로 그린다. 로그인 상태에서 게시글·프로필·캐릭터·공지·뉴스 이미지가 보이고, 이미지 요청이 `/api/files/{번호}`로 나간다(이제 두 주소 모두 로그인 필요, 비로그인 401)
 - 이미 바뀐 것: 없음(백엔드 계약은 백엔드 `docs/api/global.md` `GET /files/{atchFileSn}` 행, `community.md`·`support.md` 공지·뉴스 행)
+- 결정(사람 2026-11-14): 캐릭터 이미지는 `GET /pets/{petSn}/character-image`라 `publicFileUrl`을 안 써서 회귀 확인만
+- 완료 조건 결과: 검증 `확인 못 함 있음`(2026-11-16, 회차 2. 1회차 실패는 로컬 백엔드 DB 연결 문제로 화면 미확인), F2·F3 통과, F1 게시글 사진 통과, 사람 확인 2026-11-16
+- 연결 남음: F1 프로필·채팅 상대 프로필·뉴스 썸네일 그림 표시(기존 첨부 파일이 이 PC 디스크에 없어 새·예전 주소 모두 404 `FILE_NOT_FOUND`, 프론트 변경과 무관. LJS 백엔드)
 
 ## SCR-COM-008 설정(알림) · 취소 버튼 — 끝
 - 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-COM-008-14 저장 처리·008-15 저장 버튼 활성 제어
@@ -1384,6 +1406,12 @@
 - 완료 조건: 기획 R1(I1~I4)·R2(A1~A4·추가-1), 프론트 코드 변경 없음
 - 완료 조건 결과: 검증 `통과`(2026-11-14, 1회차, 8080 백엔드), 사람 확인 2026-11-14
 - 연결 남음: 없음
+
+## SCR-ADM-042 1:1 문의 · 캐릭터 무료 재생성 Python 호출 — 끝
+- 기능: 명세 기능 ID 추가 없음. 걸치는 기능 FN-ADM-042-07, FN-MYP-010-23
+- 기다리는 것: 백엔드 SCR-MYP-010 무료 재생성 Python 연결(끝 2026-11-16, develop 병합 전), ai 재생성 입구(ai-39 구현, 첫 생성 success의 photo는 다음 ai 세션)
+- 완료 조건: 캐릭터 오류 처리에서 CHRC0008(무료 재생성) 응답의 `regenJobSn`으로 Python `POST /ai/admin/characters/jobs/{regenJobSn}/regenerate`(관리자 쿠키, 202)를 부른다. 상세의 `regenJobSttsCd`·`regenJobSttsCdNm`으로 재생성 상태를 보여 주고, CHRC0004(실패)면 다시 처리(CHRC0008·CHRC0009) 버튼을 보인다. 진행 중 다시 처리는 409 `PIXEL_CHARACTER_CREATING`, 성공 뒤는 409 `ALREADY_PROCESSED`. 계약은 백엔드 `docs/api/support.md` character-error 행과 `AdminInquiryResponse`
+- 결과(2026-11-16): `features/adminInquiry/api.js` `regenerateAdminCharacter`, `queries.js` 무료 재생성 뒤 AI 서버 호출(실패해도 처리는 성공, 토스트로 알림)·요청·생성 중 5초 다시 받기, `InquiryCharacterError.jsx` 재생성 상태 표시·생성 실패면 다시 처리 버튼. 추가-1 요청·생성 중 로딩 아이콘과 안내. 검증 2회차 통과, 사람 확인
 
 ## 제외
 - FN-AIM-009-01~27: 화면 담당이 JAJ(milestone.md "화면과 API 담당이 다른 곳" — AIM-009 영수증 결과 규칙, 화면은 SCR-HLT-002)
