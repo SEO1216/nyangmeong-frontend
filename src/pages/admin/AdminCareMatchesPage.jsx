@@ -9,6 +9,8 @@ import { RCRT_STATUS_TABS } from '@/features/adminCommunity/careMatchLabels';
 import { useAdminCareRecruits } from '@/features/adminCommunity/queries';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 const PAGE_SIZE = 20;
 
@@ -60,18 +62,12 @@ export default function AdminCareMatchesPage() {
     if (recruits.isPending) return <CareRecruitSkeleton />;
     if (recruits.isError) {
       return (
-        <div role="alert" className="flex flex-col items-center gap-3 py-16">
-          <p className="text-base text-subtle">
-            {recruits.error?.message || '펫돌봄 모집글을 불러오지 못했어요.'}
-          </p>
-          <button
-            type="button"
-            className={BTN_SECONDARY}
-            onClick={() => recruits.refetch()}
-          >
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message={
+            recruits.error?.message || '펫돌봄 모집글을 불러오지 못했어요.'
+          }
+          onRetry={() => recruits.refetch()}
+        />
       );
     }
     if (recruits.data.content.length === 0) {
@@ -101,16 +97,14 @@ export default function AdminCareMatchesPage() {
 
   if (isForbiddenError(recruits.error)) {
     return (
-      <div className="mx-auto max-w-[1200px]">
-        <h1 className="mb-5 text-2xl font-bold text-ink">펫돌봄 거래</h1>
+      <AdminPageFrame title="펫돌봄 거래">
         <AdminForbidden message={recruits.error.message} />
-      </div>
+      </AdminPageFrame>
     );
   }
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">펫돌봄 거래</h1>
+    <AdminPageFrame title="펫돌봄 거래">
       <div
         role="tablist"
         aria-label="모집 상태"
@@ -144,6 +138,6 @@ export default function AdminCareMatchesPage() {
           onClose={() => setSelectedSn(null)}
         />
       )}
-    </div>
+    </AdminPageFrame>
   );
 }

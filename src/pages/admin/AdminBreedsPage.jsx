@@ -11,6 +11,8 @@ import { useAdminBreeds } from '@/features/adminBreed/queries';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import { PET_SE, PET_SE_OPTIONS } from '@/utils/petCodes';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 /** 등록 모달을 연 상태 */
 const NEW_BREED = 'new';
@@ -45,18 +47,10 @@ function BreedList({ petSeCd, breeds, onPetSeChange }) {
   const renderList = () => {
     if (breeds.isError) {
       return (
-        <div role="alert" className="flex flex-col items-center gap-3 py-16">
-          <p className="text-base text-subtle">
-            품종 목록을 불러오지 못했어요.
-          </p>
-          <button
-            type="button"
-            className={BTN_SECONDARY}
-            onClick={() => breeds.refetch()}
-          >
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message="품종 목록을 불러오지 못했어요."
+          onRetry={() => breeds.refetch()}
+        />
       );
     }
     if (breeds.data.length === 0) {
@@ -119,13 +113,12 @@ export default function AdminBreedsPage() {
     setSearchParams(nextPetSeCd === PET_SE.DOG ? {} : { petSeCd: nextPetSeCd });
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">품종</h1>
+    <AdminPageFrame title="품종">
       <BreedList
         petSeCd={petSeCd}
         breeds={breeds}
         onPetSeChange={handlePetSeChange}
       />
-    </div>
+    </AdminPageFrame>
   );
 }

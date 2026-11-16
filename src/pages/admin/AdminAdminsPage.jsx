@@ -11,6 +11,8 @@ import ReleaseAdminModal from '@/features/adminMember/ReleaseAdminModal';
 import { useMe } from '@/features/member/queries';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 const PAGE_SIZE = 20;
 
@@ -48,14 +50,10 @@ export default function AdminAdminsPage() {
     }
     if (admins.isError) {
       return (
-        <div role="alert" className="flex flex-col items-center gap-3 py-16">
-          <p className="text-base text-subtle">
-            관리자 목록을 불러오지 못했어요.
-          </p>
-          <button type="button" className={BTN_SECONDARY} onClick={handleRetry}>
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message="관리자 목록을 불러오지 못했어요."
+          onRetry={handleRetry}
+        />
       );
     }
     return (
@@ -97,13 +95,12 @@ export default function AdminAdminsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">관리자 계정</h1>
+    <AdminPageFrame title="관리자 계정">
       {renderBody()}
       {isAppointOpen && <AppointAdminModal onClose={handleAppointClose} />}
       {releaseTarget && (
         <ReleaseAdminModal admin={releaseTarget} onClose={handleReleaseClose} />
       )}
-    </div>
+    </AdminPageFrame>
   );
 }

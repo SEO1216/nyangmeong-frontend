@@ -2,7 +2,6 @@ import { useSearchParams } from 'react-router-dom';
 import PageSkeleton from '@/components/PageSkeleton';
 import Skeleton from '@/components/Skeleton';
 import SkeletonCard from '@/components/SkeletonCard';
-import DashboardError from '@/features/adminDashboard/DashboardError';
 import {
   DEFAULT_PERIOD_KEY,
   PERIOD_CUSTOM,
@@ -27,6 +26,8 @@ import { PATHS } from '@/routes/paths';
 import { addDays, getTodayYmd } from '@/utils/formatDate';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 /** 1:1 문의 미답변 상태(CSCG03) */
 const INQUIRY_STATUS_UNANSWERED = 'CSCC0012';
@@ -135,7 +136,8 @@ export default function AdminHomePage() {
     body = (
       <div className="flex flex-col gap-8">
         {overview.isError ? (
-          <DashboardError
+          <LoadError
+            className="rounded-[14px] border border-line bg-white py-16"
             message="운영 현황과 처리 대기를 불러오지 못했어요."
             onRetry={() => overview.refetch()}
           />
@@ -146,7 +148,8 @@ export default function AdminHomePage() {
           </>
         )}
         {stats.isError ? (
-          <DashboardError
+          <LoadError
+            className="rounded-[14px] border border-line bg-white py-16"
             message="이용 통계를 불러오지 못했어요."
             onRetry={() => stats.refetch()}
           />
@@ -168,12 +171,7 @@ export default function AdminHomePage() {
     );
   }
 
-  return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">대시보드</h1>
-      {body}
-    </div>
-  );
+  return <AdminPageFrame title="대시보드">{body}</AdminPageFrame>;
 }
 
 /** 첫 진입 로딩: 운영 현황·처리 대기·이용 통계 배치 */

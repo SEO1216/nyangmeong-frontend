@@ -13,6 +13,8 @@ import {
 } from '@/features/adminNotificationTemplate/queries';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 /** 안내 줄 + 채널 탭 + 표(머리 줄 + 20행, 높이는 행 높이로 계산한 값) */
 function TemplateListSkeleton() {
@@ -70,12 +72,7 @@ export default function AdminNotificationTemplatesPage() {
     setSearchParams(next ? { notiChnlCd: next } : {});
 
   const renderError = (message) => (
-    <div role="alert" className="flex flex-col items-center gap-3 py-16">
-      <p className="text-base text-subtle">{message}</p>
-      <button type="button" className={BTN_SECONDARY} onClick={handleRetry}>
-        다시 시도
-      </button>
-    </div>
+    <LoadError message={message} onRetry={handleRetry} />
   );
 
   const renderList = () => {
@@ -127,12 +124,11 @@ export default function AdminNotificationTemplatesPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">알림 템플릿</h1>
+    <AdminPageFrame title="알림 템플릿">
       {renderBody()}
       {editing && (
         <TemplateFormModal row={editing} onClose={() => setEditing(null)} />
       )}
-    </div>
+    </AdminPageFrame>
   );
 }

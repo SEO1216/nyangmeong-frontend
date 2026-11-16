@@ -15,6 +15,8 @@ import {
 import { PATHS } from '@/routes/paths';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 /** 버튼 줄 + 상세 + 첨부 + 답변 + 이력 자리 */
 function InquiryDetailSkeleton() {
@@ -102,12 +104,7 @@ export default function AdminInquiryDetailPage() {
     }
     if (inquiry.isError) {
       return (
-        <div role="alert" className="flex flex-col items-center gap-3 py-16">
-          <p className="text-base text-subtle">문의를 불러오지 못했어요.</p>
-          <button type="button" className={BTN_SECONDARY} onClick={handleRetry}>
-            다시 시도
-          </button>
-        </div>
+        <LoadError message="문의를 불러오지 못했어요." onRetry={handleRetry} />
       );
     }
 
@@ -123,10 +120,5 @@ export default function AdminInquiryDetailPage() {
     );
   };
 
-  return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">1:1 문의 상세</h1>
-      {renderBody()}
-    </div>
-  );
+  return <AdminPageFrame title="1:1 문의 상세">{renderBody()}</AdminPageFrame>;
 }
