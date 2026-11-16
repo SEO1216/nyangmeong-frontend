@@ -1,23 +1,21 @@
+import { PawPrint } from 'lucide-react';
 import { useState } from 'react';
 import Card from '@/components/Card';
-import ConfirmModal from '@/components/ConfirmModal';
 import Icon from '@/components/Icon';
 import SkeletonCard from '@/components/SkeletonCard';
 import { BTN_SECONDARY } from '@/components/buttonStyles';
-import { getHmOf, getTodayYmd } from '@/utils/formatDate';
-import CareItemModal from './CareItemModal';
+import { getTodayYmd } from '@/utils/formatDate';
 import CareManageModal from './CareManageModal';
 import CareProgressBox from './CareProgressBox';
 import CareRecordList from './CareRecordList';
 import CareTile from './CareTile';
-import { CARE_ZONE, MIN_CARE_COUNT, getCareErrorMessage } from './careDue';
+import { CARE_ZONE, MIN_CARE_COUNT } from './careDue';
 import DiaryTabs from './diary/DiaryTabs';
 import {
   useCancelCareRecord,
   useCancelLastDose,
   useCareItems,
   useCheckCareItem,
-  useDeleteCareItem,
 } from './queries';
 
 /** 640px 미만에서 구역마다 처음 보여 주는 칸 수 */
@@ -42,22 +40,19 @@ const EMPTY_TEXTS = {
 export default function CareList({ petSn, petNm, mission }) {
   const { data, isPending, isError, error, refetch } = useCareItems(petSn);
   const [isManaging, setIsManaging] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
-  const [deletingItem, setDeletingItem] = useState(null);
   const [zoneId, setZoneId] = useState(ZONE_TABS[0].id);
   /** 640px 미만에서 펼친 구역: 반려동물별 키라 반려동물을 바꾸면 다시 접힘 */
   const [expandedZones, setExpandedZones] = useState([]);
   const checkCareItem = useCheckCareItem();
   const cancelLastDose = useCancelLastDose();
   const cancelCareRecord = useCancelCareRecord();
-  const deleteCareItem = useDeleteCareItem();
 
   if (isPending || (!isError && mission === undefined)) {
     return (
       <div aria-busy="true" className="flex flex-col gap-5">
         {/** 불러온 뒤 두 카드의 높이 */}
-        <SkeletonCard className="h-[606px] max-[1100px]:h-[670px] max-sm:h-[691px]" />
-        <SkeletonCard className="h-[739px] max-sm:h-[727px]" />
+        <SkeletonCard className="h-[633px] max-[1100px]:h-[697px] max-sm:h-[829px]" />
+        <SkeletonCard className="h-[291px] max-[760px]:h-[463px]" />
       </div>
     );
   }
@@ -100,18 +95,36 @@ export default function CareList({ petSn, petNm, mission }) {
   const isTodayItem = (item) =>
     item.careZoneCd !== CARE_ZONE.REGULAR ||
     (item.nxtmPrnmntYmd === todayYmd && !isDoneToday(item));
-  const todayItems = shownItems.filter(isTodayItem);
+  /**
+   * 구역 안 묶음 (※신규 정책)
+   * - 위: 오늘의 미션 항목(todayMsnYn), 아래: 나머지
+   * - 오늘 할 케어(isDoneLast): 체크한 항목은 자기 묶음 안에서 맨 아래(묶음을 넘어가지 않음). 풀면 묶음 안 원래 자리
+   * - 다가오는 정기관리: 묶음 안 전체가 예정일 순. 오늘 완료한 항목도 새 다음 예정일 자리에 그대로
+   */
+  const toGroups = (items, isDoneLast) => {
+    const sinkDone = (list) =>
+      isDoneLast
+        ? [
+            ...list.filter((item) => !isDoneToday(item)),
+            ...list.filter(isDoneToday),
+          ]
+        : list;
+    return {
+      missionItems: sinkDone(items.filter((item) => item.todayMsnYn)),
+      restItems: sinkDone(items.filter((item) => !item.todayMsnYn)),
+    };
+  };
   const zones = {
-    'hlt003-care-today': [
-      ...todayItems.filter((item) => !isDoneToday(item)),
-      ...todayItems.filter(isDoneToday),
-    ],
+    'hlt003-care-today': toGroups(shownItems.filter(isTodayItem), true),
     /** 다가오는 정기관리: 예정일이 지났거나 아직 안 온 것 + 오늘 완료한 것(다음 예정일 기준), 예정일 빠른 순 */
-    'hlt003-care-upcoming': shownItems
-      .filter((item) => !isTodayItem(item))
-      .sort((a, b) =>
-        (a.nxtmPrnmntYmd ?? '9').localeCompare(b.nxtmPrnmntYmd ?? '9'),
-      ),
+    'hlt003-care-upcoming': toGroups(
+      shownItems
+        .filter((item) => !isTodayItem(item))
+        .sort((a, b) =>
+          (a.nxtmPrnmntYmd ?? '9').localeCompare(b.nxtmPrnmntYmd ?? '9'),
+        ),
+      false,
+    ),
   };
 
   /** 줄 클릭: 완료 전이면 체크, 완료한 항목은 오늘 기록 취소. 투약은 횟수를 채운 뒤에는 동작 없음 */
@@ -168,7 +181,8 @@ export default function CareList({ petSn, petNm, mission }) {
 
         <div className="mt-5 grid gap-x-8 min-[1101px]:grid-cols-2">
           {ZONE_TABS.map((zone) => {
-            const items = zones[zone.id];
+            const { missionItems, restItems } = zones[zone.id];
+            const items = [...missionItems, ...restItems];
             const zoneKey = `${petSn}:${zone.id}`;
             const isExpanded = expandedZones.includes(zoneKey);
             const hiddenCount = items.length - MOBILE_VISIBLE_COUNT;
@@ -194,35 +208,33 @@ export default function CareList({ petSn, petNm, mission }) {
                   </p>
                 ) : (
                   <div className="grid gap-y-2 pt-3 sm:gap-y-0 sm:pt-0">
-                    {items.map((item, index) => {
-                      const todayRecord = findTodayRecord(item);
-                      return (
-                        <CareTile
-                          key={item.careArtclSn}
-                          item={item}
-                          isDone={isDoneToday(item)}
-                          doneHm={
-                            todayRecord?.cmptnDt
-                              ? getHmOf(todayRecord.cmptnDt)
-                              : null
-                          }
-                          className={
-                            !isExpanded && index >= MOBILE_VISIBLE_COUNT
-                              ? 'max-sm:hidden'
-                              : ''
-                          }
-                          onCheck={handleCheck}
-                          onEdit={setEditingItem}
-                          onDelete={setDeletingItem}
-                          onCancelLastDose={(target) =>
-                            cancelLastDose.mutate({
-                              petSn,
-                              careArtclSn: target.careArtclSn,
-                            })
-                          }
-                        />
-                      );
-                    })}
+                    {/** 묶음 제목: 미션 항목이 있는 구역에만. 640px 미만 처음 3칸에는 세지 않음 */}
+                    {missionItems.length > 0 && (
+                      <p className="flex items-center gap-1.5 py-2 text-sm font-semibold text-warn tabular-nums">
+                        <PawPrint className="size-3.5" aria-hidden="true" />
+                        오늘의 미션 · {missionItems.length}개
+                      </p>
+                    )}
+                    {items.map((item, index) => (
+                      <CareTile
+                        key={item.careArtclSn}
+                        item={item}
+                        isDone={isDoneToday(item)}
+                        isMission={index < missionItems.length}
+                        className={
+                          !isExpanded && index >= MOBILE_VISIBLE_COUNT
+                            ? 'max-sm:hidden'
+                            : ''
+                        }
+                        onCheck={handleCheck}
+                        onCancelLastDose={(target) =>
+                          cancelLastDose.mutate({
+                            petSn,
+                            careArtclSn: target.careArtclSn,
+                          })
+                        }
+                      />
+                    ))}
                   </div>
                 )}
                 {hiddenCount > 0 && (
@@ -271,34 +283,6 @@ export default function CareList({ petSn, petNm, mission }) {
           careItems={careItems}
           isForced={isShort && !isManaging}
           onClose={closeManage}
-        />
-      )}
-      {editingItem && (
-        <CareItemModal
-          petSn={petSn}
-          item={editingItem}
-          onClose={() => setEditingItem(null)}
-        />
-      )}
-      {deletingItem && (
-        <ConfirmModal
-          title="관리 항목 삭제"
-          description={`${deletingItem.careArtclNm}을(를) 삭제할까요? 완료 기록도 함께 사라져요`}
-          confirmLabel="삭제"
-          isPending={deleteCareItem.isPending}
-          errorMessage={
-            deleteCareItem.error && getCareErrorMessage(deleteCareItem.error)
-          }
-          onCancel={() => {
-            deleteCareItem.reset();
-            setDeletingItem(null);
-          }}
-          onConfirm={() =>
-            deleteCareItem.mutate(
-              { petSn, careArtclSn: deletingItem.careArtclSn },
-              { onSuccess: () => setDeletingItem(null) },
-            )
-          }
         />
       )}
     </div>
