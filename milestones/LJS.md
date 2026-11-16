@@ -5,7 +5,11 @@
 ## SCR-COM-002 기본 레이아웃 · 공용 Modal 밖 dialog 뒤 스크롤 잠금 — 대기
 - 기능: 명세 기능 ID 추가 없음(버그, 사람 요청 2026-11-16 "다음 작업으로"), 걸치는 기능 FN-COM-002
 - 배경: `showModal()`을 직접 부르고 `useScrollLock`이 없는 창은 열린 채 뒤 페이지가 휠로 스크롤된다. 5180·8081에서 확인(2026-11-16): `ScheduleModal`(일정 추가·수정), `FormModal`(건강 일지 입력 틀, 관찰 항목 추가로 확인), `ConfirmModal`(단독, 게시글 삭제 확인), `ImageViewer`(첨부 이미지 크게 보기), `ExpenseDetailSheet`(390px 지출 상세). 공용 `Modal`(오늘 기록 추가·게시글 신고)은 막힘. 창을 연 채 `useScrollLock`과 같은 html 스타일을 걸면 막히는 것까지 확인(ConfirmModal·ImageViewer)
-- 정할 것: 다섯 곳에 `useScrollLock()` 한 줄씩(모양 그대로) vs `ConfirmModal`을 `Modal`(isConfirm)로 옮기기(320px 왼쪽 정렬 → 440px 가운데, 20개 파일 모양 바뀜). `FormModal`·`ScheduleModal`은 form이 푸터까지 감싸 `Modal`로 옮기려면 `Modal` 확장이 먼저, `ImageViewer`는 형태가 달라 맞지 않음
+- 정할 것: 스크롤만 막으려면 다섯 곳에 `useScrollLock()` 한 줄씩(모양 그대로). 공용 `Modal`로 옮기면 Esc 연타 강제 닫힘 방지(`Modal` `handleKeyDown`, `FormModal`·`ScheduleModal`에 없음)·스크롤 잠금 같은 수정이 한 곳에 모이고 그림자·모서리·배경색이 통일된다. 옮긴다면 단계안:
+  - 1단계 `ConfirmModal` → `Modal` `isConfirm`: 320px 왼쪽 정렬·버튼 오른쪽 → 440px 가운데·버튼 꽉 채움으로 20개 파일 모양이 바뀜. `errorMessage`와 열 때 취소 버튼 포커스를 `Modal`에 넣어야 함
+  - 1단계 `ExpenseDetailSheet` → `Modal` `isSheet`: 제목 줄 ✕ 자리에 [편집](`isCloseIconHidden` + 버튼 자리), PC에서 숨기는 동작이 다름
+  - 2단계 `FormModal`·`ScheduleModal`: `<form>`이 본문과 [저장]까지 감싸 Enter·[저장]이 submit인데 `Modal`은 본문·`footer`를 따로 그려 묶을 수 없음. `Modal`이 form으로 감싸는 기능을 먼저 받고 옮김(머리 아이콘·20px 모서리·회색 푸터도 다름)
+  - `ImageViewer`: 흰 판·제목·푸터 없이 화면 전체를 덮는 보기라 `Modal` 틀이 맞지 않음. `useScrollLock()`만 넣음
 - 함께 볼 것: `NavDrawer`·`AdminLayout` 드로어는 `body` 잠금(헤더 밀림 원인과 같은 방식), `LandingHeader` 모바일 메뉴는 잠금 없음(코드만 봄)
 - 기다리는 것: 없음. `features/health`(JAJ)·`features/expense`(SJM) 파일을 고치므로 담당에게 알림
 - 완료 조건 후보: 다섯 창을 연 채 배경 휠로 `scrollY`가 그대로, 창이 겹쳐 닫혀도 마지막에만 풀림
