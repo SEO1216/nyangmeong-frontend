@@ -3,10 +3,10 @@ import { isForbiddenError } from '@/utils/isForbiddenError';
 import CharacterJobTable from './CharacterJobTable';
 import { CHAR_JOB_STTS, CHAR_JOB_STTS_FAIL } from './processingLabels';
 import ProcessingFilter from './ProcessingFilter';
-import ProcessingListError from './ProcessingListError';
 import ProcessingSkeleton from './ProcessingSkeleton';
 import ProcessingStatCards from './ProcessingStatCards';
 import { useAdminCharacterJobs } from './queries';
+import LoadError from '@/components/LoadError';
 
 const PAGE_SIZE = 20;
 
@@ -59,7 +59,7 @@ export default function CharacterJobPanel({
   }
   if (jobs.isError) {
     return (
-      <ProcessingListError
+      <LoadError
         message="캐릭터 생성 현황을 불러오지 못했어요."
         onRetry={() => jobs.refetch()}
       />

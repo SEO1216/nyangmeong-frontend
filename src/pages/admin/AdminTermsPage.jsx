@@ -13,6 +13,8 @@ import {
 import { PATHS } from '@/routes/paths';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 /** 머리 줄 + 6행 표 */
 function TermsListSkeleton() {
@@ -79,18 +81,10 @@ export default function AdminTermsPage() {
     if (terms.isPending) return <TermsListSkeleton />;
     if (terms.isError) {
       return (
-        <div role="alert" className="flex flex-col items-center gap-3 py-16">
-          <p className="text-base text-subtle">
-            약관 목록을 불러오지 못했어요.
-          </p>
-          <button
-            type="button"
-            className={BTN_SECONDARY}
-            onClick={() => terms.refetch()}
-          >
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message="약관 목록을 불러오지 못했어요."
+          onRetry={() => terms.refetch()}
+        />
       );
     }
     return <TermsTable terms={terms.data} onHistory={setHistoryKind} />;
@@ -98,21 +92,21 @@ export default function AdminTermsPage() {
 
   if (isForbiddenError(terms.error)) {
     return (
-      <div className="mx-auto max-w-[1200px]">
-        <h1 className="mb-5 text-2xl font-bold text-ink">약관</h1>
+      <AdminPageFrame title="약관">
         <AdminForbidden message={terms.error.message} />
-      </div>
+      </AdminPageFrame>
     );
   }
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold text-ink">약관</h1>
+    <AdminPageFrame
+      title="약관"
+      actions={
         <Link to={PATHS.ADMIN_TERM_NEW} className={BTN_PRIMARY}>
           <Plus className="size-4" aria-hidden="true" />새 버전 등록
         </Link>
-      </div>
+      }
+    >
       {registeredTerms && (
         <RegisteredGuide terms={registeredTerms} onClose={handleGuideClose} />
       )}
@@ -126,6 +120,6 @@ export default function AdminTermsPage() {
           onClose={() => setHistoryKind(null)}
         />
       )}
-    </div>
+    </AdminPageFrame>
   );
 }

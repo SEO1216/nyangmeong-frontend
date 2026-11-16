@@ -2,10 +2,10 @@ import BoardPagination from '@/components/BoardPagination';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import PdfFailureTable from './PdfFailureTable';
 import ProcessingFilter from './ProcessingFilter';
-import ProcessingListError from './ProcessingListError';
 import ProcessingSkeleton from './ProcessingSkeleton';
 import ProcessingStatCards from './ProcessingStatCards';
 import { useAdminPdfAnalyses } from './queries';
+import LoadError from '@/components/LoadError';
 
 const PAGE_SIZE = 20;
 
@@ -66,7 +66,7 @@ export default function PdfAnalysisPanel({
         onSearch={handleSearch}
       />
       {analyses.isError ? (
-        <ProcessingListError
+        <LoadError
           message="검사결과지 분석 현황을 불러오지 못했어요."
           onRetry={() => analyses.refetch()}
         />

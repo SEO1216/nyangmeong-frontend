@@ -7,6 +7,7 @@ import { showToast } from '@/components/toastStore';
 import Toggle from '@/components/Toggle';
 import { useAdminFaq, useCreateAdminFaq, useUpdateAdminFaq } from './queries';
 import { toFieldErrors } from '@/utils/fieldErrors';
+import LoadError from '@/components/LoadError';
 
 const INPUT_CLASS =
   'block h-10 w-full rounded-[6px] border border-[#d3dae2] bg-white px-3 text-base leading-[1.4] text-[#1a3234] outline-none hover:border-[#b9c4c4] focus:border-[#285a5c] focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)]';
@@ -248,16 +249,11 @@ function FaqEditLoader({ faqSn, categories, onClose }) {
       }
     >
       {detail.isError ? (
-        <div role="alert" className="flex flex-col items-center gap-3 py-10">
-          <p className="text-base text-subtle">{detail.error.message}</p>
-          <button
-            type="button"
-            className={BTN_SECONDARY}
-            onClick={() => detail.refetch()}
-          >
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message={detail.error.message}
+          onRetry={() => detail.refetch()}
+          className="py-10"
+        />
       ) : (
         <div className="space-y-5" aria-busy="true">
           <Skeleton className="h-[66px] w-full" />

@@ -2,6 +2,7 @@ import BoardPagination from '@/components/BoardPagination';
 import { BTN_SECONDARY } from '@/components/buttonStyles';
 import SkeletonCard from '@/components/SkeletonCard';
 import { ADMIN_TABLE_BOX } from '@/components/adminTableStyles';
+import LoadError from '@/components/LoadError';
 
 /**
  * [회원 상세 탭 표]
@@ -21,18 +22,7 @@ export default function MemberTabTable({
 }) {
   if (query.isPending) return <SkeletonCard className="h-[150px]" />;
   if (query.isError) {
-    return (
-      <div role="alert" className="flex flex-col items-center gap-3 py-16">
-        <p className="text-base text-subtle">{errorText}</p>
-        <button
-          type="button"
-          className={BTN_SECONDARY}
-          onClick={() => query.refetch()}
-        >
-          다시 시도
-        </button>
-      </div>
-    );
+    return <LoadError message={errorText} onRetry={() => query.refetch()} />;
   }
 
   const rows = query.data.content ?? query.data;

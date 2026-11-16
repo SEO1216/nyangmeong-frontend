@@ -22,6 +22,8 @@ import {
 import { PATHS } from '@/routes/paths';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 const TABS = [
   { key: 'tips', label: '오늘의 건강팁' },
@@ -42,18 +44,6 @@ function ExposureSkeleton({ top, tableClassName }) {
         <Skeleton className="h-10 w-[112px]" />
       </div>
       <SkeletonCard className={tableClassName} />
-    </div>
-  );
-}
-
-/** 조회 오류: 다시 시도 */
-function LoadError({ message, onRetry }) {
-  return (
-    <div role="alert" className="flex flex-col items-center gap-3 py-16">
-      <p className="text-base text-subtle">{message}</p>
-      <button type="button" className={BTN_SECONDARY} onClick={onRetry}>
-        다시 시도
-      </button>
     </div>
   );
 }
@@ -317,8 +307,7 @@ export default function AdminExposurePage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">노출 콘텐츠</h1>
+    <AdminPageFrame title="노출 콘텐츠">
       <div
         role="tablist"
         aria-label="노출 콘텐츠"
@@ -345,6 +334,6 @@ export default function AdminExposurePage() {
         })}
       </div>
       <div role="tabpanel">{renderTab()}</div>
-    </div>
+    </AdminPageFrame>
   );
 }

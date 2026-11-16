@@ -9,6 +9,8 @@ import { BATCH_SE } from '@/features/batch/batchLabels';
 import { PATHS } from '@/routes/paths';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 const PAGE_SIZE = 20;
 
@@ -39,14 +41,10 @@ export default function AdminMembersWithdrawnPage() {
     }
     if (withdrawn.isError) {
       return (
-        <div role="alert" className="flex flex-col items-center gap-3 py-16">
-          <p className="text-base text-subtle">
-            탈퇴 회원 목록을 불러오지 못했어요.
-          </p>
-          <button type="button" className={BTN_SECONDARY} onClick={handleRetry}>
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message="탈퇴 회원 목록을 불러오지 못했어요."
+          onRetry={handleRetry}
+        />
       );
     }
     if (withdrawn.data.content.length === 0) {
@@ -72,8 +70,7 @@ export default function AdminMembersWithdrawnPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">탈퇴 회원</h1>
+    <AdminPageFrame title="탈퇴 회원">
       {renderBody()}
       <p className="mt-4 text-sm text-subtle">
         파기는 매일 배치가 처리해요. 결과는 배치 현황에서 볼 수 있어요.{' '}
@@ -84,6 +81,6 @@ export default function AdminMembersWithdrawnPage() {
           배치 현황
         </Link>
       </p>
-    </div>
+    </AdminPageFrame>
   );
 }
