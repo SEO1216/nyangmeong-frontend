@@ -2,9 +2,13 @@
 
 ## 지금 하는 것
 
-없음(2026-11-16 SCR-ADM-001 관리자 공통 · 페이지 틀·조회 오류 컴포넌트 정리 끝: 검증 1회차 통과, 사람 확인 2026-11-16)
+없음(2026-11-16 SCR-COM-002 공용 Modal 밖 dialog 뒤 스크롤 잠금 끝: 다섯 창에 `useScrollLock()`, 검증 2회차 통과(1회차는 백엔드 미기동), 사람 확인 2026-11-16)
 
 ## 다음에 할 것
+
+- SCR-COM-002 스크롤 잠금 팀 알림(2026-11-16, 결정 "PR 본문 + 팀 채널 한 줄"): JAJ에게 `features/health/ScheduleModal.jsx`·`features/health/diary/FormModal.jsx`, SJM에게 `features/expense/shared/ExpenseDetailSheet.jsx`에 `useScrollLock()` 한 줄을 넣어 창이 열린 동안 뒤 페이지가 스크롤되지 않는다고 알린다. 공용 `ConfirmModal`·`ImageViewer`도 같다. 앞으로 `showModal()`을 직접 부르는 창을 만들면 `useScrollLock()`을 같이 넣거나 공용 `Modal`을 쓴다
+- SCR-COM-002 스크롤 잠금 이번엔 안 함(2026-11-16): ① 다섯 창을 공용 `Modal`로 옮기기(마일스톤 절 단계안) ② `NavDrawer`·`AdminLayout` 드로어의 `body` 잠금을 `useScrollLock`으로 ③ `LandingHeader` 모바일 메뉴 잠금 없음. 하려면 새 마일스톤으로
+- SCR-COM-002 스크롤 잠금 참고(검증 보고 2026-11-16, 판정 밖): 창을 닫은 뒤 html `style` 속성이 없던 상태(null)에서 빈 문자열("")로 남는다. 화면 차이는 없다
 
 - SCR-ADM-081 연결 남음: FN-ADM-081-01·02·03 (백엔드 연결 관리자·내부 키워드 사전 API 삭제, 백엔드 저장소에서 /start — 백엔드 마일스톤 `SCR-ADM-081 키워드 사전 · 관리자·내부 키워드 사전 API 삭제` 진행 중). 2026-11-16 프론트 없앰: 프론트 화면·라우트·메뉴·TC 문서를 지움. 예전 "연결 남음"(관리자 API 연결·가계부 초기 키워드·AI 서버 DB 조회)은 모두 취소. 백엔드 API 지우기는 백엔드 LJS가 백엔드 저장소에서 기획 중(`KWRD_DICT`는 뉴스·건강 키워드가 써서 남김). 기획 문서(요구사항정의서·화면설계서·기능명세서 SCR-ADM-081·FN-ADM-081-01~03) 정리는 사람
 - SCR-ADM-042 백엔드 후보(2026-11-16, 사람이 정할 것, 백엔드 저장소에서 /start): ① 캐릭터가 "오류 확인 중"(`PIXEL_CHAR.BSC_CHAR_SBST_YN`)이 아니면 `finishErrorCheck`가 409 `ALREADY_PROCESSED`("이미 처리된 요청입니다")를 준다. 시드 픽셀 문의(1·7·82·149·195 등)가 이 경우다. 관리자 문의 상세에 `bscCharSbstYn`을 넣고 오류 코드를 나누면 프론트가 버튼을 숨기거나 맞는 문구를 보일 수 있다 ② AI 서버 호출이 실패한 요청 상태 재생성 작업은 시간 초과 배치(10분, 5분 주기)까지 기다려야 다시 처리할 수 있다. 바로 다시 시도하게 할지

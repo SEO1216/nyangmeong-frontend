@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight, ImageIcon, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import useScrollLock from '@/hooks/useScrollLock';
 
 const ARROW_CLASS =
   'absolute top-1/2 flex size-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-[rgba(15,23,35,0.62)] text-white hover:bg-[rgba(15,23,35,0.85)] max-[760px]:size-10';
@@ -13,6 +14,7 @@ const ARROW_CLASS =
  */
 export default function ImageViewer({ images, index, onChange, onClose }) {
   const dialogRef = useRef(null);
+  useScrollLock();
   const [loadedSrc, setLoadedSrc] = useState(null);
   const { src: url, name } = images[index];
   const isLoading = Boolean(url) && loadedSrc !== url;
