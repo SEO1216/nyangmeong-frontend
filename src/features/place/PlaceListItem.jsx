@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { Hospital, Star, Store } from 'lucide-react';
 import { CATEGORIES } from './placeData';
-import { formatDistance, openDetail } from './placeFormat';
+import { formatDistance } from './placeFormat';
 
 const HOSPITAL_CODE = CATEGORIES[0].code;
 
 // letter가 없으면 상단 고정된 즐겨찾기 줄이다
-// 카드를 누르면 카카오맵 업체 상세를 새 탭으로 연다. 지도에서 고르는 것은 핀만 한다
+// 카드를 누르면 핀을 누른 것처럼 지도를 그 업체로 옮기고 팝업을 연다(onSelect). 카카오맵 상세는 팝업 [상세보기]로 연다
 export default function PlaceListItem({
   place,
   letter,
@@ -15,6 +15,7 @@ export default function PlaceListItem({
   isOutside,
   isSelected,
   shouldScroll,
+  onSelect,
   onToggleFavorite,
 }) {
   const itemRef = useRef(null);
@@ -31,7 +32,7 @@ export default function PlaceListItem({
     if (event.target !== event.currentTarget) return;
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      openDetail(place);
+      onSelect(place.plcSn);
     }
   };
 
@@ -39,8 +40,8 @@ export default function PlaceListItem({
     <li
       ref={itemRef}
       tabIndex={0}
-      aria-label={`${place.plcConm} — 카카오맵 상세 보기`}
-      onClick={() => openDetail(place)}
+      aria-label={`${place.plcConm} — 지도에서 보기`}
+      onClick={() => onSelect(place.plcSn)}
       onKeyDown={handleKeyDown}
       className={`relative grid cursor-pointer grid-cols-[84px_minmax(0,1fr)] gap-4 border-b border-line-soft px-4 py-4 hover:bg-surface-2 md:px-5 lg:grid-cols-[88px_minmax(0,1fr)] ${
         isSelected

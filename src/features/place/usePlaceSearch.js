@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { showToast } from '@/components/toastStore';
 import { CATEGORIES, DEFAULT_SORT } from './placeData';
 import {
@@ -46,6 +46,23 @@ const isInside = (place, { swLat, swLot, neLat, neLot }) =>
   place.plcLot >= swLot &&
   place.plcLot <= neLot;
 
+// 받은 목록 안에서 상호명·주소에 검색어가 든 곳만 남긴다(서버를 부르지 않는다)
+const matchesKeyword = (place, keyword) => {
+  if (!keyword) return true;
+  const word = keyword.toLowerCase();
+  return [place.plcConm, place.plcAddr].some((text) =>
+    text?.toLowerCase().includes(word),
+  );
+};
+
+// 거리순은 가까운 순(거리를 모르면 맨 뒤), 이름순은 가나다순
+const compareBy = (sort) =>
+  sort === 'NAME'
+    ? (a, b) => a.plcConm.localeCompare(b.plcConm, 'ko')
+    : (a, b) =>
+        (a.distance ?? Infinity) - (b.distance ?? Infinity) ||
+        a.plcConm.localeCompare(b.plcConm, 'ko');
+
 export default function usePlaceSearch(category, onCategoryChange) {
   const home = useMyArea();
   const [search, setSearch] = useState(() =>
@@ -54,8 +71,8 @@ export default function usePlaceSearch(category, onCategoryChange) {
   const [syncedCategory, setSyncedCategory] = useState(category);
   const [isHomeApplied, setIsHomeApplied] = useState(!home.isLocating);
   const [sort, setSort] = useState(DEFAULT_SORT);
-  // 입력칸에 쳤지만 아직 검색하지 않은 글자. 그 글자를 친 검색(fitKey)에서만 쓴다
-  const draftRef = useRef(null);
+  // 입력칸에 치고 있는 글자. 그 글자를 친 검색(fitKey)에서만 쓰고, 칠 때마다 받은 목록을 거른다
+  const [draft, setDraft] = useState(null);
 
   // 주소창이나 GNB로 카테고리가 바뀌면 검색 상태를 처음으로 되돌린다
   if (syncedCategory !== category) {
@@ -75,15 +92,29 @@ export default function usePlaceSearch(category, onCategoryChange) {
 
   const { code } = categoryOf(category);
   const query = usePlaceSearchQuery(
-    { plcClsfCd: code, keyword: search.keyword, sort, ...search.area },
+    { plcClsfCd: code, ...search.area },
     { enabled: !home.isLocating },
   );
   const bookmarks = usePlaceBookmarks(code);
   const toggle = useTogglePlaceBookmark();
 
-  const results = (query.data?.pages ?? []).flatMap((page) => page.content);
+  const keyword =
+    draft?.fitKey === search.fitKey
+      ? searchTextOf(category, draft.text).keyword
+      : search.keyword;
+  // 받은 목록에서 검색 영역 안·검색어에 맞는 곳만, 고른 정렬대로
+  const results = useMemo(
+    () =>
+      (query.data?.content ?? [])
+        .filter(
+          (place) =>
+            isInside(place, search.area) && matchesKeyword(place, keyword),
+        )
+        .sort(compareBy(sort)),
+    [query.data, search.area, keyword, sort],
+  );
   const favorites = bookmarks.data ?? [];
-  const totalCount = query.data?.pages[0]?.totalElements ?? results.length;
+  const totalCount = results.length;
   const selectedPlace =
     [...results, ...favorites].find(
       (place) => place.plcSn === search.selected,
@@ -109,16 +140,19 @@ export default function usePlaceSearch(category, onCategoryChange) {
   const selectCategory = (next) =>
     changeCategory(next, initialSearch(next, home.area));
 
+  // 검색도 서버를 부르지 않고 받은 목록에서 거른다. 영역은 그대로 두고 결과에 맞춰 지도를 다시 맞춘다
   const submitSearch = (text) => {
-    setSearch({
-      ...initialSearch(category, home.area),
+    setSearch((prev) => ({
+      ...prev,
       ...searchTextOf(category, text),
-    });
+      fitKey: ++searchSeq,
+      isMoved: false,
+      selected: null,
+      selectedBy: '',
+    }));
   };
 
-  const typeSearch = (text) => {
-    draftRef.current = { fitKey: search.fitKey, text };
-  };
+  const typeSearch = (text) => setDraft({ fitKey: search.fitKey, text });
 
   const selectPlace = (plcSn, by) =>
     setSearch((prev) => ({
@@ -135,7 +169,6 @@ export default function usePlaceSearch(category, onCategoryChange) {
 
   // 지도를 옮긴 뒤 그 순간의 영역으로 다시 검색한다. 검색어는 지금 입력칸에 보이는 글자를 따르고 카테고리·정렬은 그대로 둔다
   const researchHere = (area) => {
-    const draft = draftRef.current;
     setSearch((prev) => ({
       ...prev,
       ...searchTextOf(
@@ -175,7 +208,7 @@ export default function usePlaceSearch(category, onCategoryChange) {
           : '전주시 전체';
 
   return {
-    search,
+    search: { ...search, keyword },
     sort,
     setSort,
     query,
