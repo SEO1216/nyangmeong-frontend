@@ -28,7 +28,7 @@ import {
   requestCareMatch,
 } from './api';
 import { retainChatRealtime, setViewingChatRoom } from './realtime';
-import { MSG_TYPE } from './shared/chatCodes';
+import { CHAT_ROOM_CLOSED, MSG_TYPE } from './shared/chatCodes';
 
 export const chatKeys = {
   lists: ['chat-rooms', 'list'],
@@ -206,6 +206,15 @@ export const useSendChatMessage = (otoChatRoomSn) => {
     mutationFn: (body) => createChatMessage({ otoChatRoomSn, ...body }),
     onSuccess: (message) => {
       prependMessage(queryClient, otoChatRoomSn, message);
+      queryClient.invalidateQueries({ queryKey: chatKeys.lists });
+    },
+    /** 화면은 열려 있는데 서버에서 방이 닫힌 경우: 방 정보를 다시 받아 입력을 막는다 */
+    onError: (error) => {
+      if (error.code !== CHAT_ROOM_CLOSED) return;
+      showToast(error.message);
+      queryClient.invalidateQueries({
+        queryKey: chatKeys.detail(otoChatRoomSn),
+      });
       queryClient.invalidateQueries({ queryKey: chatKeys.lists });
     },
   });

@@ -9,7 +9,11 @@ import { useEffect, useRef, useState } from 'react';
 import Icon from '@/components/Icon';
 import { showToast } from '@/components/toastStore';
 import { useSendChatMessage } from '../queries';
-import { MSG_TYPE, canShareAddress } from '../shared/chatCodes';
+import {
+  CHAT_ROOM_CLOSED,
+  MSG_TYPE,
+  canShareAddress,
+} from '../shared/chatCodes';
 import AddressShareModal from './AddressShareModal';
 
 const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -75,7 +79,11 @@ export default function ChatMessageInput({
         setFailed(null);
         onDone();
       },
-      onError: () => setFailed({ body, onDone }),
+      /** 방이 닫혀 거절된 전송은 다시 보내도 같으니 재시도 줄을 만들지 않는다(안내·입력 막기는 useSendChatMessage) */
+      onError: (error) => {
+        if (error.code === CHAT_ROOM_CLOSED) return;
+        setFailed({ body, onDone });
+      },
     });
   };
 
