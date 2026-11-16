@@ -2,7 +2,7 @@
  * [채팅 창]
  * - 채팅 모달의 [새 창으로 띄우기]·AI 대화창이 여는 새 창 (SCR-COM-009, SCR-CMU-005)
  * - 본문은 모달과 같은 ChatPanes(왼쪽 목록 | 오른쪽 대화, 760px 이하 한 칸)
- * - ?otoChatRoomSn= 선택 방, ?pstSn= 게시글 방 생성 후 그 방으로, ?listPstSn= 그 글의 채팅만 보기
+ * - ?otoChatRoomSn= 선택 방, ?pstSn= 게시글 방 생성 후 그 방으로, ?listPstSn= 보던 글(목록에서 그 글의 채팅을 맨 위에 둠)
  */
 import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -34,7 +34,11 @@ export default function ChatPage() {
       {
         onSuccess: ({ otoChatRoomSn }) =>
           setSearchParams(
-            { otoChatRoomSn: String(otoChatRoomSn) },
+            {
+              otoChatRoomSn: String(otoChatRoomSn),
+              /** 보던 글로 남겨 목록 맨 위에 그 글의 채팅을 둔다 */
+              listPstSn: String(pstSn),
+            },
             { replace: true },
           ),
       },
@@ -56,8 +60,6 @@ export default function ChatPage() {
 
   /** 나간 방은 뒤로 가기로 돌아오지 않게 */
   const handleLeft = () => setSearchParams(makeParams(null), { replace: true });
-
-  const handleClearPost = () => setSearchParams({});
 
   /** 주소창 직접 진입처럼 스크립트가 열지 않은 창은 닫히지 않아 메인으로 */
   const handleClose = () => {
@@ -89,7 +91,6 @@ export default function ChatPage() {
         onSelect={handleSelectRoom}
         onBack={handleBack}
         onLeft={handleLeft}
-        onClearPost={handleClearPost}
       />
     </div>
   );
