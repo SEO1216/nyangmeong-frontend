@@ -11,6 +11,7 @@ import {
   addCycle,
   isValidCycleDays,
 } from './careDue';
+import SegmentSwitch from './SegmentSwitch';
 import FieldError from './diary/FieldError';
 import CharCount from './shared/CharCount';
 
@@ -50,37 +51,11 @@ function Optional() {
   );
 }
 
-/** 시안 .seg: 회색 바탕 안에서 고른 칸만 흰색 */
-function Segment({ options, selected, onSelect, isLocked = false }) {
-  return (
-    <div className="flex h-10 rounded-[6px] border border-[#e6eaeb] bg-[#f1f3f4] p-[3px]">
-      {options.map((option) => {
-        const isSelected = selected === option.cd;
-        return (
-          <button
-            key={option.cd}
-            type="button"
-            aria-pressed={isSelected}
-            disabled={isLocked}
-            className={`flex flex-1 items-center justify-center rounded-[4px] whitespace-nowrap ${
-              isSelected
-                ? 'bg-white font-semibold text-[#1e4a4c] shadow-[0_1px_2px_rgba(26,50,52,0.08),0_0_0_1px_rgba(40,90,92,0.18)]'
-                : 'font-medium text-[#566465] hover:text-[#1a3234]'
-            }`}
-            onClick={() => onSelect(option.cd)}
-          >
-            {option.nm}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
 /**
  * [관리 항목 입력칸] (FN-HLT-003-21~24·38)
  * - fields·onChange: careDue.js의 입력칸 값과 바뀐 칸
  * - isBasic: 기본 항목 -> 주기만 수정. isEdit: 마지막으로 한 날은 수정 Body에 없어 숨김
+ * - isCycleOnly: 항목명·아이콘·반복 유형 칸과 다음 예정일 상자를 숨기고 주기 칸만(「케어 항목 관리」 모달의 기본 정기관리 주기 수정, ※신규 정책)
  * - lastCmptnYmd: 수정할 항목의 마지막 완료일(다음 예정일 계산용)
  */
 export default function CareItemFields({
@@ -88,6 +63,7 @@ export default function CareItemFields({
   onChange,
   isBasic = false,
   isEdit = false,
+  isCycleOnly = false,
   lastCmptnYmd = null,
   nameRef = null,
 }) {
@@ -116,75 +92,81 @@ export default function CareItemFields({
 
   return (
     <>
-      <label className="flex flex-col gap-1.5">
-        <span className={LABEL_CLASS}>
-          항목명
-          <Required />
-        </span>
-        <input
-          ref={nameRef}
-          value={fields.careArtclNm}
-          maxLength={MAX_NAME_LENGTH}
-          placeholder="예: 영양제"
-          disabled={isBasic}
-          className={`${INPUT_CLASS} disabled:bg-[#f4f6f6] disabled:text-[#667374]`}
-          onChange={(event) => onChange({ careArtclNm: event.target.value })}
-        />
-        {!isBasic && (
-          <CharCount value={fields.careArtclNm} max={MAX_NAME_LENGTH} />
-        )}
-      </label>
+      {!isCycleOnly && (
+        <>
+          <label className="flex flex-col gap-1.5">
+            <span className={LABEL_CLASS}>
+              항목명
+              <Required />
+            </span>
+            <input
+              ref={nameRef}
+              value={fields.careArtclNm}
+              maxLength={MAX_NAME_LENGTH}
+              placeholder="예: 영양제"
+              disabled={isBasic}
+              className={`${INPUT_CLASS} disabled:bg-[#f4f6f6] disabled:text-[#667374]`}
+              onChange={(event) =>
+                onChange({ careArtclNm: event.target.value })
+              }
+            />
+            {!isBasic && (
+              <CharCount value={fields.careArtclNm} max={MAX_NAME_LENGTH} />
+            )}
+          </label>
 
-      <fieldset className="flex flex-col gap-1.5">
-        <legend className={`${LABEL_CLASS} mb-1.5`}>
-          카테고리 대표 아이콘
-          <Optional />
-        </legend>
-        <div className="grid grid-cols-5 gap-2">
-          {ICONS.map((icon) => {
-            const isSelected = fields.rprsIconId === icon.name;
-            const isEtc = icon.name === DEFAULT_CARE_ICON;
-            return (
-              <button
-                key={icon.name}
-                type="button"
-                title={icon.label}
-                aria-label={icon.label}
-                aria-pressed={isSelected}
-                disabled={isBasic}
-                className={`grid h-10 place-items-center rounded-[6px] border disabled:opacity-40 ${
-                  isSelected
-                    ? 'border-[#285a5c] bg-[#e9f2f2] text-[#1e4a4c]'
-                    : `bg-white hover:border-[#b9c4c4] ${
-                        isEtc
-                          ? 'border-dashed border-[#e2e7e7] text-[#667374]'
-                          : 'border-[#e2e7e7] text-[#3d4a4b]'
-                      }`
-                }`}
-                onClick={() =>
-                  onChange({ rprsIconId: isSelected ? null : icon.name })
-                }
-              >
-                <Icon name={icon.name} />
-              </button>
-            );
-          })}
-        </div>
-        <p className={HELP_CLASS}>고르지 않으면 기본 아이콘으로 추가돼요</p>
-      </fieldset>
+          <fieldset className="flex flex-col gap-1.5">
+            <legend className={`${LABEL_CLASS} mb-1.5`}>
+              카테고리 대표 아이콘
+              <Optional />
+            </legend>
+            <div className="grid grid-cols-5 gap-2">
+              {ICONS.map((icon) => {
+                const isSelected = fields.rprsIconId === icon.name;
+                const isEtc = icon.name === DEFAULT_CARE_ICON;
+                return (
+                  <button
+                    key={icon.name}
+                    type="button"
+                    title={icon.label}
+                    aria-label={icon.label}
+                    aria-pressed={isSelected}
+                    disabled={isBasic}
+                    className={`grid h-10 place-items-center rounded-[6px] border disabled:opacity-40 ${
+                      isSelected
+                        ? 'border-[#285a5c] bg-[#e9f2f2] text-[#1e4a4c]'
+                        : `bg-white hover:border-[#b9c4c4] ${
+                            isEtc
+                              ? 'border-dashed border-[#e2e7e7] text-[#667374]'
+                              : 'border-[#e2e7e7] text-[#3d4a4b]'
+                          }`
+                    }`}
+                    onClick={() =>
+                      onChange({ rprsIconId: isSelected ? null : icon.name })
+                    }
+                  >
+                    <Icon name={icon.name} />
+                  </button>
+                );
+              })}
+            </div>
+            <p className={HELP_CLASS}>고르지 않으면 기본 아이콘으로 추가돼요</p>
+          </fieldset>
 
-      <fieldset className="flex flex-col gap-1.5">
-        <legend className={`${LABEL_CLASS} mb-1.5`}>
-          반복 유형
-          <Required />
-        </legend>
-        <Segment
-          options={ZONES}
-          selected={fields.careZoneCd}
-          isLocked={isBasic}
-          onSelect={(careZoneCd) => onChange({ careZoneCd })}
-        />
-      </fieldset>
+          <fieldset className="flex flex-col gap-1.5">
+            <legend className={`${LABEL_CLASS} mb-1.5`}>
+              반복 유형
+              <Required />
+            </legend>
+            <SegmentSwitch
+              options={ZONES}
+              selected={fields.careZoneCd}
+              isLocked={isBasic}
+              onSelect={(careZoneCd) => onChange({ careZoneCd })}
+            />
+          </fieldset>
+        </>
+      )}
 
       {isRegular && (
         <>
@@ -193,7 +175,7 @@ export default function CareItemFields({
               주기
               <Required />
             </legend>
-            <Segment
+            <SegmentSwitch
               options={CARE_CYCLES}
               selected={fields.careCycleCd}
               onSelect={(careCycleCd) => onChange({ careCycleCd })}
@@ -225,7 +207,7 @@ export default function CareItemFields({
           </fieldset>
 
           {isEdit ? (
-            nextDue
+            !isCycleOnly && nextDue
           ) : (
             <div className="flex flex-col gap-1.5">
               <label className="flex flex-col gap-1.5">
