@@ -10,8 +10,7 @@ import PetFormModal from '@/features/pet/list/PetFormModal';
 import PetSlide from '@/features/pet/list/PetSlide';
 import PetUnlinkDialog from '@/features/pet/list/PetUnlinkDialog';
 import SentInvitations from '@/features/pet/list/SentInvitations';
-import { MAX_OWN_PETS } from '@/utils/petCodes';
-import { usePets } from '@/features/pet/queries';
+import { usePetLimit, usePets } from '@/features/pet/queries';
 import SubPageLayout from '@/layouts/SubPageLayout';
 
 /** 같은 사이트 안의 주소만: "/"로 시작, "//"·역슬래시는 외부로 갈 수 있어 거른다 */
@@ -30,6 +29,7 @@ const withPetSn = (returnTo, petSn) => {
 
 export default function PetListPage() {
   const { data: pets = [], isPending } = usePets();
+  const limit = usePetLimit();
   const [searchParams, setSearchParams] = useSearchParams();
   /** 메인 바로가기(?edit=petSn)로 연 수정 대상: 주소에서 지운 뒤에도 쓰려고 처음 값만 둔다 */
   const [editPetSn] = useState(() => Number(searchParams.get('edit')) || null);
@@ -96,7 +96,6 @@ export default function PetListPage() {
     slideIndex ?? (newIndex >= 0 ? newIndex : Math.max(focusIndex, 0)),
     pets.length,
   );
-  const isFull = pets.length >= MAX_OWN_PETS;
 
   return (
     <SubPageLayout section="mypage">
@@ -109,7 +108,7 @@ export default function PetListPage() {
           </div>
         </PageSkeleton>
       ) : pets.length === 0 ? (
-        <PetEmpty onRegister={() => setModalPetSn(null)} />
+        <PetEmpty onRegister={() => setModalPetSn(null)} limit={limit} />
       ) : (
         <PetSlide
           pets={pets}
@@ -120,7 +119,7 @@ export default function PetListPage() {
           onUnlink={setUnlinkingPet}
           onInvite={setInvitingPet}
           onAdd={() => setModalPetSn(null)}
-          isFull={isFull}
+          limit={limit}
         />
       )}
       {!isPending && <SentInvitations />}
