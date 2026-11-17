@@ -5,8 +5,7 @@ import SkeletonCard from '@/components/SkeletonCard';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import { showToast } from '@/components/toastStore';
 import { PATHS } from '@/routes/paths';
-import { MAX_OWN_PETS } from '@/utils/petCodes';
-import { useAcceptInvitation, useInvitation } from '../queries';
+import { useAcceptInvitation, useInvitation, usePetLimit } from '../queries';
 import PetFace from '@/components/PetFace';
 import InvitationClosed from './InvitationClosed';
 import InvitationMismatch from './InvitationMismatch';
@@ -66,6 +65,7 @@ export default function InvitationAccept({
     isError,
   } = useInvitation(jntBrupInvtnSn);
   const acceptInvitation = useAcceptInvitation();
+  const petLimit = usePetLimit();
   const [isRejecting, setIsRejecting] = useState(false);
   /** null: 손대기 전(초대의 모든 동물이 선택된 상태) */
   const [selectedPetSns, setSelectedPetSns] = useState(null);
@@ -98,6 +98,8 @@ export default function InvitationAccept({
   const limit =
     limitOverride ?? invitation.remainingPetCount ?? invitation.pets.length;
   const isLimited = limit < invitation.pets.length;
+  /** 불러오는 중이거나 실패하면 undefined라 최대 수 문장을 뺀다 */
+  const petMaxCnt = petLimit.data?.petMaxCnt;
   const pickedPetSns = (
     selectedPetSns ?? invitation.pets.map((pet) => pet.petSn)
   ).slice(0, limit);
@@ -154,9 +156,11 @@ export default function InvitationAccept({
           >
             <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
             <span>
+              {petMaxCnt != null &&
+                `반려동물은 공동양육을 포함해 ${petMaxCnt}마리까지예요. `}
               {limit === 0
-                ? `반려동물은 공동양육을 포함해 ${MAX_OWN_PETS}마리까지예요. 지금은 더 받을 자리가 없어 수락할 수 없어요`
-                : `반려동물은 공동양육을 포함해 ${MAX_OWN_PETS}마리까지예요. ${limit}마리 더 받을 수 있어요`}
+                ? '지금은 더 받을 자리가 없어 수락할 수 없어요'
+                : `${limit}마리 더 받을 수 있어요`}
             </span>
           </p>
         )}
