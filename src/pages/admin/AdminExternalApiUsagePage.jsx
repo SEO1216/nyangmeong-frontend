@@ -18,6 +18,8 @@ import {
 import { addDays, getTodayYmd } from '@/utils/formatDate';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 const PAGE_SIZE = 20;
 /** 기본 기간: 오늘 포함 7일 */
@@ -36,18 +38,6 @@ function ApiUsageSkeleton() {
       <SkeletonCard className="h-[300px]" />
       <SkeletonCard className="h-[1030px]" />
       <Skeleton className="mx-auto h-9 w-64" />
-    </div>
-  );
-}
-
-/** 조회 실패 안내 */
-function LoadError({ message, onRetry }) {
-  return (
-    <div role="alert" className="flex flex-col items-center gap-3 py-16">
-      <p className="text-base text-subtle">{message}</p>
-      <button type="button" className={BTN_SECONDARY} onClick={onRetry}>
-        다시 시도
-      </button>
     </div>
   );
 }
@@ -215,9 +205,6 @@ export default function AdminExternalApiUsagePage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">외부 API 사용량</h1>
-      {renderBody()}
-    </div>
+    <AdminPageFrame title="외부 API 사용량">{renderBody()}</AdminPageFrame>
   );
 }

@@ -1,10 +1,11 @@
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SkeletonCard from '@/components/SkeletonCard';
 import { PATHS } from '@/routes/paths';
 import PetEmpty from '../list/PetEmpty';
-import { usePets } from '../queries';
+import PetFormModal from '../list/PetFormModal';
+import { usePetLimit, usePets } from '../queries';
 import PetMiniCard from './PetMiniCard';
 
 /** 처음 보이는 카드 수 */
@@ -13,7 +14,9 @@ const VISIBLE_COUNT = 6;
 export default function MyPetsSection() {
   const navigate = useNavigate();
   const { data: pets, isPending, isError, refetch } = usePets();
+  const limit = usePetLimit();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   const hiddenCount = Math.max((pets?.length ?? 0) - VISIBLE_COUNT, 0);
   const visiblePets = isExpanded ? pets : pets?.slice(0, VISIBLE_COUNT);
@@ -32,14 +35,29 @@ export default function MyPetsSection() {
             </small>
           )}
         </h2>
-        <Link
-          to={PATHS.MYPAGE_PETS}
-          className="inline-flex items-center font-medium text-muted hover:text-brand-600"
-        >
-          반려동물 관리
-          <ChevronRight className="size-4" />
-        </Link>
+        <div className="flex items-center gap-4">
+          {pets?.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setIsRegistering(true)}
+              className="inline-flex items-center gap-0.5 font-semibold text-brand-600 hover:text-brand-700"
+            >
+              <Plus className="size-4" aria-hidden="true" />
+              등록
+            </button>
+          )}
+          <Link
+            to={PATHS.MYPAGE_PETS}
+            className="inline-flex items-center font-medium text-muted hover:text-brand-600"
+          >
+            반려동물 관리
+            <ChevronRight className="size-4" />
+          </Link>
+        </div>
       </div>
+      {isRegistering && (
+        <PetFormModal onClose={() => setIsRegistering(false)} />
+      )}
       {isPending ? (
         <div
           aria-busy="true"
@@ -63,7 +81,10 @@ export default function MyPetsSection() {
           </button>
         </p>
       ) : pets.length === 0 ? (
-        <PetEmpty onRegister={() => navigate(PATHS.MYPAGE_PETS)} />
+        <PetEmpty
+          onRegister={() => navigate(PATHS.MYPAGE_PETS)}
+          limit={limit}
+        />
       ) : (
         <>
           <ul className="grid grid-cols-1 gap-3 min-[761px]:grid-cols-2 min-[1281px]:grid-cols-3 max-[760px]:gap-0 max-[760px]:overflow-hidden max-[760px]:rounded-card max-[760px]:border max-[760px]:border-line max-[760px]:bg-white max-[760px]:[&>li+li]:border-t max-[760px]:[&>li+li]:border-line-soft">

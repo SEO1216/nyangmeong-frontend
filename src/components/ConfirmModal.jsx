@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import useScrollLock from '@/hooks/useScrollLock';
 
 export default function ConfirmModal({
   title,
@@ -11,6 +12,7 @@ export default function ConfirmModal({
   onCancel,
 }) {
   const dialogRef = useRef(null);
+  useScrollLock();
   const cancelRef = useRef(null);
 
   /** showModal로 top layer 사용 */

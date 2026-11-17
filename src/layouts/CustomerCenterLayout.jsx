@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { Outlet, useLocation, useMatch, useNavigate } from 'react-router-dom';
+import { useInquiries } from '@/features/inquiry/queries';
 import { PATHS } from '@/routes/paths';
 import SubPageLayout from './SubPageLayout';
 
@@ -32,16 +33,27 @@ export default function CustomerCenterLayout() {
   /** 1:1 문의 작성·수정은 경로에 한 단계 추가 */
   const isInquiryNew = useMatch(PATHS.INQUIRY_NEW);
   const isInquiryEdit = useMatch(PATHS.INQUIRY_EDIT);
+  /** 문의 이력이 하나도 없으면 돌아갈 목록이 없으니 작성 화면의 ← 목록으로를 숨긴다 */
+  const { data: firstPage } = useInquiries(
+    { page: 1, size: 1, status: '' },
+    { enabled: Boolean(isInquiryNew) },
+  );
+  const hasNoInquiry = firstPage?.totalElements === 0;
   let title;
   if (isInquiryNew) title = '문의 작성';
   if (isInquiryEdit) title = '문의 수정';
+  /** 공지·1:1 문의 상세와 문의 작성은 본문 박스 위에 ← 목록으로(수정은 없음, 문의 이력이 없으면 작성에도 없음) */
+  const isNoticeDetail = useMatch(PATHS.NOTICE_DETAIL);
+  const isInquiryDetail = useMatch(PATHS.INQUIRY_DETAIL) && !isInquiryNew;
 
   return (
     <SubPageLayout
       section="support"
       menu={menu}
       title={title}
-      back={false}
+      back={Boolean(
+        (isInquiryNew && !hasNoInquiry) || isNoticeDetail || isInquiryDetail,
+      )}
       description={DESCRIPTIONS[menu]}
       onLeave={onLeave}
       contentClassName="min-[1101px]:pt-4"

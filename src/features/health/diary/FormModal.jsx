@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import useScrollLock from '@/hooks/useScrollLock';
 import Icon from '@/components/Icon';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 
@@ -12,7 +13,7 @@ import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 export default function FormModal({
   icon,
   title,
-  submitLabel = '저장하기',
+  submitLabel = '저장',
   cancelLabel = '취소',
   isPending = false,
   isSubmitDisabled = false,
@@ -25,6 +26,7 @@ export default function FormModal({
   children,
 }) {
   const dialogRef = useRef(null);
+  useScrollLock();
 
   useEffect(() => {
     const dialog = dialogRef.current;

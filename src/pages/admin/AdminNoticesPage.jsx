@@ -14,6 +14,8 @@ import { useAdminNotices } from '@/features/adminNotice/queries';
 import { PATHS } from '@/routes/paths';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 const PAGE_SIZE = 20;
 
@@ -61,18 +63,10 @@ export default function AdminNoticesPage() {
     const renderList = () => {
       if (notices.isError) {
         return (
-          <div role="alert" className="flex flex-col items-center gap-3 py-16">
-            <p className="text-base text-subtle">
-              공지 목록을 불러오지 못했어요.
-            </p>
-            <button
-              type="button"
-              className={BTN_SECONDARY}
-              onClick={handleRetry}
-            >
-              다시 시도
-            </button>
-          </div>
+          <LoadError
+            message="공지 목록을 불러오지 못했어요."
+            onRetry={handleRetry}
+          />
         );
       }
       if (notices.data.content.length === 0) {
@@ -118,10 +112,5 @@ export default function AdminNoticesPage() {
     );
   };
 
-  return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">공지사항</h1>
-      {renderBody()}
-    </div>
-  );
+  return <AdminPageFrame title="공지사항">{renderBody()}</AdminPageFrame>;
 }

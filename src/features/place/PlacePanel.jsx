@@ -1,13 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
 import { MapPinOff } from 'lucide-react';
 import DropdownSelect from '@/components/DropdownSelect';
 import PlaceListItem from './PlaceListItem';
 import PlaceSearchForm from './PlaceSearchForm';
 import { SORT_OPTIONS } from './placeData';
 import { PLACE_LIST_ID } from './placeFormat';
-
-// 목록 끝에서 이만큼 남았을 때 다음 쪽을 부른다
-const END_MARGIN_PX = 120;
 
 const groupTitle =
   'flex items-baseline gap-1.5 px-4 pt-4 text-sm font-semibold text-ink-2 md:px-5';
@@ -25,33 +21,11 @@ export default function PlacePanel({
   isCollapsed,
   sheet,
   onSearch,
+  onType,
   onSortChange,
+  onSelectPlace,
   onToggleFavorite,
 }) {
-  const scrollRef = useRef(null);
-  const sentinelRef = useRef(null);
-  const [isEndInView, setIsEndInView] = useState(false);
-
-  // 목록 스크롤 영역을 기준으로 끝이 보이는지 본다(화면 기준이면 스크롤 영역에 잘려 보이지 않는다)
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsEndInView(entry.isIntersecting),
-      { root: scrollRef.current, rootMargin: `0px 0px ${END_MARGIN_PX}px 0px` },
-    );
-    observer.observe(sentinelRef.current);
-    return () => observer.disconnect();
-  }, []);
-  const { hasNextPage, isFetchingNextPage, fetchNextPage } = query;
-
-  // 목록 끝이 보이면 다음 쪽을 이어 불러온다(최대 3쪽).
-  // 새 쪽이 막 그려져 감시 결과가 아직 이전 값일 수 있어 위치를 한 번 더 잰다
-  useEffect(() => {
-    if (!isEndInView || !hasNextPage || isFetchingNextPage) return;
-    const rootBottom = scrollRef.current.getBoundingClientRect().bottom;
-    const endTop = sentinelRef.current.getBoundingClientRect().top;
-    if (endTop <= rootBottom + END_MARGIN_PX) fetchNextPage();
-  }, [isEndInView, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
   return (
     <section
       id={PLACE_LIST_ID}
@@ -79,7 +53,13 @@ export default function PlacePanel({
         <h1 className="text-2xl font-bold leading-[1.3] tracking-[-0.02em] text-ink">
           반려동물 플레이스
         </h1>
-        <PlaceSearchForm id="place-q" q={search.q} onSearch={onSearch} />
+        <PlaceSearchForm
+          id="place-q"
+          q={search.q}
+          category={search.category}
+          onSearch={onSearch}
+          onType={onType}
+        />
       </div>
 
       <div className="flex min-h-12 items-center justify-between gap-3 border-y border-line bg-surface-2 px-5 max-md:border-t-0 max-md:bg-white max-md:px-4 md:min-h-[52px]">
@@ -100,10 +80,7 @@ export default function PlacePanel({
         />
       </div>
 
-      <div
-        ref={scrollRef}
-        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
-      >
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {favorites.length > 0 && (
           <section
             aria-labelledby="place-fav-title"
@@ -128,6 +105,7 @@ export default function PlacePanel({
                     search.selected === place.plcSn &&
                     search.selectedBy === 'pin'
                   }
+                  onSelect={onSelectPlace}
                   onToggleFavorite={onToggleFavorite}
                 />
               ))}
@@ -138,9 +116,11 @@ export default function PlacePanel({
         <section aria-labelledby="place-result-title">
           <h2 id="place-result-title" className={groupTitle}>
             검색 결과 <b className="text-brand-600">{totalCount}</b>
-            <small className="ml-auto text-sm font-normal text-subtle">
-              “{search.q}”
-            </small>
+            {search.keyword && (
+              <small className="ml-auto text-sm font-normal text-subtle">
+                “{search.keyword}”
+              </small>
+            )}
           </h2>
           {query.isPending ? (
             <p className="px-6 py-12 text-center text-muted">
@@ -184,21 +164,16 @@ export default function PlacePanel({
                       search.selected === place.plcSn &&
                       search.selectedBy === 'pin'
                     }
+                    onSelect={onSelectPlace}
                     onToggleFavorite={onToggleFavorite}
                   />
                 ))}
               </ul>
               <p className="px-5 pb-10 pt-6 text-center text-sm text-subtle">
-                {isFetchingNextPage
-                  ? '검색 결과를 더 불러오는 중이에요'
-                  : hasNextPage
-                    ? ' '
-                    : '마지막 검색 결과예요'}
+                마지막 검색 결과예요
               </p>
             </>
           )}
-          {/* 감시 줄은 결과와 상관없이 항상 두어 처음 그릴 때부터 감시한다 */}
-          <div ref={sentinelRef} aria-hidden="true" className="h-px" />
         </section>
       </div>
     </section>

@@ -1,6 +1,7 @@
 import {
+  CalendarClock,
   CalendarDays,
-  ChevronLeft,
+  Clock,
   Flag,
   HeartHandshake,
   MapPin,
@@ -11,6 +12,7 @@ import { useState } from 'react';
 import { generatePath, Link, useLocation, useNavigate } from 'react-router-dom';
 import Avatar from '@/components/Avatar';
 import Badge from '@/components/Badge';
+import { TEXT_ACTION, TEXT_ACTION_DANGER } from '@/components/buttonStyles';
 import ConfirmModal from '@/components/ConfirmModal';
 import ImageViewer from '@/components/ImageViewer';
 import LikeButton from '@/components/LikeButton';
@@ -18,11 +20,11 @@ import PostBody from '@/components/PostBody';
 import ReportModal from '@/components/ReportModal';
 import SharePanel from '@/components/SharePanel';
 import { showToast } from '@/components/toastStore';
-import useChatWindow from '@/hooks/useChatWindow';
+import { useChatModal } from '@/context/chatModal';
 import { PATHS } from '@/routes/paths';
-import { formatDate } from '@/utils/formatDate';
+import { formatDate, getTodayYmd } from '@/utils/formatDate';
 import { publicFileUrl } from '@/utils/fileUrl';
-import { getCostLabel, getPetBadges } from '../careCodes';
+import { getCostLabel, getPetBadges, isOpen, RCRT_STTS } from '../careCodes';
 import {
   useDeleteCare,
   useReportCare,
@@ -62,7 +64,7 @@ const Dot = () => <i className="text-line-strong not-italic">·</i>;
 export default function CareDetail({ post }) {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const openChatWindow = useChatWindow();
+  const { open: openChatModal } = useChatModal();
   const toggleLike = useToggleCareLike(post.petPrtcRcrtSn);
   const remove = useDeleteCare();
   const report = useReportCare();
@@ -73,15 +75,11 @@ export default function CareDetail({ post }) {
   const isLiked = post.liked;
   const badges = [...new Set([...getShapeNames(post), ...getPetBadges(post)])];
   const schedule = formatScheduleDetail(post);
-
-  /** 클릭 핸들러에서 바로 열기: 요청을 기다린 뒤 열면 팝업 차단 */
-  const handleChat = (params) => {
-    if (!openChatWindow(params)) {
-      showToast(
-        '팝업이 차단되어 채팅 창을 열지 못했어요. 팝업을 허용해 주세요',
-      );
-    }
-  };
+  /** 매칭완료인데 돌봄 종료일이 지났으면 거래 마무리를 안내(일정 협의 글은 종료일이 없어 제외) */
+  const isScheduleOver =
+    post.rcrtSttsCd === RCRT_STTS.MATCHED &&
+    Boolean(post.prtcEndDt) &&
+    post.prtcEndDt.slice(0, 10) < getTodayYmd();
 
   const closeModal = () => setModal('');
 
@@ -90,7 +88,7 @@ export default function CareDetail({ post }) {
       <article className={ARTICLE_CLASS} aria-labelledby="care-title">
         <div className="flex flex-wrap gap-1.5">
           {post.owner && (
-            <Badge tone="amber" bordered>
+            <Badge tone="mine" bordered>
               내 글
             </Badge>
           )}
@@ -122,12 +120,12 @@ export default function CareDetail({ post }) {
             <span>조회 {post.inqCnt}</span>
           </p>
           {isMine && (
-            <p className="flex items-center gap-2 text-sm font-medium text-muted">
+            <p className="flex items-center gap-2">
               <Link
                 to={generatePath(PATHS.COMMUNITY_PETCARE_EDIT, {
                   petPrtcRcrtSn: post.petPrtcRcrtSn,
                 })}
-                className="hover:text-ink"
+                className={TEXT_ACTION}
               >
                 수정
               </Link>
@@ -135,13 +133,23 @@ export default function CareDetail({ post }) {
               <button
                 type="button"
                 onClick={() => setModal('delete')}
-                className="cursor-pointer hover:text-ink"
+                className={`${TEXT_ACTION_DANGER} cursor-pointer`}
               >
                 삭제
               </button>
             </p>
           )}
         </div>
+
+        {isScheduleOver && (
+          <p
+            role="note"
+            className="mt-4 flex items-center gap-2 rounded-box bg-warn-soft px-4 py-3 text-sm font-medium text-warn"
+          >
+            <CalendarClock size={18} aria-hidden="true" className="shrink-0" />
+            돌봄 일정이 지났어요. 거래를 마무리해 주세요.
+          </p>
+        )}
 
         <PostBody content={post.pstCn}>
           {post.imgs.length > 0 && (
@@ -188,12 +196,19 @@ export default function CareDetail({ post }) {
                 </span>
               </InfoRow>
               <InfoRow icon={<CalendarDays {...iconProps} />} label="돌봄 일정">
-                {schedule.date}
-                {schedule.time && (
-                  <span className="mt-0.5 block text-sm text-muted">
-                    {schedule.time}
-                  </span>
-                )}
+                <span className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                  <span>{schedule.date}</span>
+                  {schedule.time && (
+                    <span className="inline-flex items-center gap-1">
+                      <Clock
+                        size={16}
+                        aria-hidden="true"
+                        className="text-subtle"
+                      />
+                      시간: {schedule.time}
+                    </span>
+                  )}
+                </span>
               </InfoRow>
               <InfoRow icon={<Wallet {...iconProps} />} label="비용">
                 <span className="text-lg font-bold tabular-nums">
@@ -216,56 +231,42 @@ export default function CareDetail({ post }) {
         </p>
 
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-line pt-4">
-          <Link
-            to={listTo}
-            className="inline-flex min-h-9 items-center gap-2 text-base leading-normal font-medium text-muted transition-colors hover:text-ink"
-          >
-            <ChevronLeft size={14} aria-hidden="true" />
-            <span>
-              목록<span className="max-[760px]:hidden">으로</span>
-            </span>
-          </Link>
-          <div className="ml-auto flex items-center gap-2 max-[760px]:gap-1">
+          <div className="flex items-center gap-2 max-[760px]:gap-1">
             <LikeButton
               isLiked={isLiked}
               count={post.rcmdtnCnt}
               disabled={toggleLike.isPending}
+              locked={!isOpen(post)}
               onToggle={() =>
                 toggleLike.mutate({ pstSn: post.pstSn, liked: isLiked })
               }
             />
             <i className="mx-1 h-3.5 w-px bg-line-strong" aria-hidden="true" />
-            <SharePanel title={post.pstTtl} />
-            {!isMine && (
-              <>
-                <i
-                  className="mx-1 h-3.5 w-px bg-line-strong"
-                  aria-hidden="true"
-                />
-                <button
-                  type="button"
-                  aria-label="신고"
-                  onClick={() => setModal('report')}
-                  className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 px-1 text-sm font-medium text-subtle hover:text-ink max-[760px]:min-w-9 max-[760px]:justify-center"
-                >
-                  <Flag
-                    size={20}
-                    aria-hidden="true"
-                    className="min-[761px]:hidden"
-                  />
-                  <span className="max-[760px]:hidden">신고</span>
-                </button>
-              </>
-            )}
+            <SharePanel title={post.pstTtl} locked={!isOpen(post)} />
           </div>
+          {!isMine && (
+            <button
+              type="button"
+              aria-label="신고"
+              onClick={() => setModal('report')}
+              className="ml-auto inline-flex min-h-9 cursor-pointer items-center gap-1.5 px-1 text-sm font-medium text-subtle hover:text-ink max-[760px]:min-w-9 max-[760px]:justify-center"
+            >
+              <Flag
+                size={20}
+                aria-hidden="true"
+                className="min-[761px]:hidden"
+              />
+              <span className="max-[760px]:hidden">신고</span>
+            </button>
+          )}
         </div>
       </article>
 
       <div className="flex min-w-0 flex-col gap-8">
         <CareSideBox
           post={post}
-          onChat={() => handleChat({ pstSn: post.pstSn })}
-          onOpenList={() => handleChat({ listPstSn: post.pstSn })}
+          onChat={() => openChatModal({ pstSn: post.pstSn })}
+          onOpenList={() => openChatModal({ listPstSn: post.pstSn })}
         />
         <CareCheckGuide />
       </div>
@@ -305,7 +306,7 @@ export default function CareDetail({ post }) {
       {modal === 'report' && (
         <ReportModal
           title="게시글 신고하기"
-          targetLabel={`대상: 게시글 · "${post.pstTtl}"`}
+          targetLabel={`"${post.pstTtl}"`}
           isPending={report.isPending}
           errorMessage={report.isError && report.error.message}
           onSubmit={(values) =>

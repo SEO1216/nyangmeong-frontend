@@ -15,8 +15,12 @@ import ScheduleDayDetail from '@/features/health/ScheduleDayDetail';
 import ScheduleModal from '@/features/health/ScheduleModal';
 import UpcomingSchedules from '@/features/health/UpcomingSchedules';
 import SubPageLayout from '@/layouts/SubPageLayout';
-import { useSchedules } from '@/features/health/queries';
+import {
+  useCareMissionProgress,
+  useSchedules,
+} from '@/features/health/queries';
 import { useMe } from '@/features/member/queries';
+import { useCareMissions } from '@/features/point/queries';
 import {
   addMonths,
   getDaysInMonth,
@@ -31,7 +35,7 @@ import { pickJosa } from '@/utils/josa';
 /** 공용 페이지 머리·사이드 메뉴 설정 */
 const LAYOUT_PROPS = {
   section: 'health',
-  description: '모든 반려동물의 일정을 한눈에 확인하는 통합 캘린더',
+  description: '모든 반려동물의 일정을 한눈에 확인하는 캘린더',
   contentClassName: 'gap-7 min-[1101px]:pt-6',
 };
 
@@ -109,6 +113,44 @@ function CareCalendarContent() {
   });
   /** 월 이동 가능 여부용: 기간 없이 반려동물마다 1건 */
   const { data: anyData } = useSchedules({ petSns: allPetSns, size: 1 });
+
+  /**
+   * 케어리스트 진행 상자의 오늘 케어미션 (※신규 정책)
+   * - 주양육자: 포인트 화면과 같은 daily-missions로 완료 수·포인트 계산, 못 받으면 mission-progress 수만
+   * - 공동양육자: mission-progress의 수만(포인트 없음)
+   */
+  const isCareTab = sectionId === 'hlt003-care';
+  const progress = useCareMissionProgress(
+    isCareTab ? (selectedPet?.petSn ?? null) : null,
+  );
+  const isPrimary = progress.data?.prmyYn === true;
+  const missions = useCareMissions(
+    todayYmd,
+    isPrimary ? [{ petSn: selectedPet.petSn, petNm: selectedPet.petNm }] : [],
+  );
+  const missionList = isPrimary ? missions.data?.pets[0]?.missions : null;
+  const getCareMission = () => {
+    if (progress.isError) return null;
+    if (!progress.data || (isPrimary && !missions.data)) return undefined;
+    if (!missionList)
+      return {
+        prmyYn: progress.data.prmyYn,
+        doneCount: progress.data.cmptnCnt,
+        totalCount: progress.data.totCnt,
+        earnedPoint: null,
+        totalPoint: null,
+      };
+    const doneList = missionList.filter((mission) => mission.cmptnYn);
+    const sumPoint = (list) =>
+      list.reduce((sum, mission) => sum + mission.scorPnt, 0);
+    return {
+      prmyYn: true,
+      doneCount: doneList.length,
+      totalCount: missionList.length,
+      earnedPoint: sumPoint(doneList),
+      totalPoint: sumPoint(missionList),
+    };
+  };
 
   /** 첫 진입: 반려동물·이번 달·다가오는 일정이 모두 올 때까지 */
   if (
@@ -251,7 +293,11 @@ function CareCalendarContent() {
         >
           {/* 반려동물은 공통 카드에서 고른 아이. 새 일정 모달 기본값에도 쓰인다 */}
           {selectedPet && (
-            <CareList petSn={selectedPet.petSn} />
+            <CareList
+              petSn={selectedPet.petSn}
+              petNm={selectedPet.petNm}
+              mission={getCareMission()}
+            />
           )}
         </div>
       )}
@@ -274,7 +320,7 @@ function CareCalendarContent() {
 /**
  * 로딩 자리: 탭 막대(48px) + 처음 열릴 탭의 모양. 높이는 불러온 뒤 실측값
  * - 캘린더: 달력(5줄 달, 640px 미만은 점 표시 달력) + 날짜 상세·다가오는 일정. 1101px 이상은 오른쪽 두 장의 합이 달력과 같음
- * - 케어리스트: 토탈 케어리스트 카드 한 장(CareList 로딩 자리와 같은 높이)
+ * - 케어리스트: 케어리스트 카드 + 최근 케어 기록 카드(CareList 로딩 자리와 같은 높이)
  */
 function CalendarSkeleton({ sectionId }) {
   return (
@@ -288,7 +334,10 @@ function CalendarSkeleton({ sectionId }) {
       </div>
       <div className="mt-7">
         {sectionId === 'hlt003-care' ? (
-          <SkeletonCard className="h-[1486px] max-sm:h-[1678px]" />
+          <div className="flex flex-col gap-5">
+            <SkeletonCard className="h-[606px] max-[1100px]:h-[670px] max-sm:h-[691px]" />
+            <SkeletonCard className="h-[739px] max-sm:h-[727px]" />
+          </div>
         ) : (
           <div className="grid gap-5 min-[1101px]:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
             <SkeletonCard className="h-[664px] max-sm:h-[468px]" />

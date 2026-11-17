@@ -1,40 +1,25 @@
 import { useState } from 'react';
-import { ITEM_PART_OPTIONS } from '../shared/petCodes';
 import ItemImage from './ItemImage';
+import PartTabs, { ALL } from './PartTabs';
 
 /**
  * [보관함 · 부위 탭] (FN-MYP-010-14)
- * - 보유 아이템을 부위별 4열로 보여 주고 2줄(8개) 높이를 넘으면 안에서 스크롤
+ * - [전체]가 기본이고, 보유 아이템을 전체 또는 부위별 4열로 보여 주고 2줄(8개) 높이를 넘으면 안에서 스크롤
  */
 export default function ItemStorage({ items, worn, onToggle }) {
-  const [part, setPart] = useState(ITEM_PART_OPTIONS[0].code);
-  const partItems = items.filter((item) => item.itemRegnCd === part);
+  const [part, setPart] = useState(ALL);
+  const partItems =
+    part === ALL ? items : items.filter((item) => item.itemRegnCd === part);
 
   return (
     <div className="flex flex-col gap-4">
-      <div role="group" aria-label="부위" className="flex flex-wrap gap-2">
-        {ITEM_PART_OPTIONS.map((option) => (
-          <button
-            key={option.code}
-            type="button"
-            aria-pressed={option.code === part}
-            onClick={() => setPart(option.code)}
-            className={`inline-flex h-9 items-center rounded-full border px-3.5 font-semibold ${
-              option.code === part
-                ? 'border-brand-500 bg-brand-500 text-white'
-                : 'border-line bg-white text-ink-2 hover:border-line-strong'
-            }`}
-          >
-            {option.name}
-          </button>
-        ))}
-      </div>
+      <PartTabs value={part} onChange={setPart} />
       {partItems.length === 0 ? (
         <p className="text-sm text-subtle">보유한 아이템이 없어요</p>
       ) : (
         <div className="grid max-h-[296px] grid-cols-4 gap-2 overflow-y-auto">
           {partItems.map((item) => {
-            const isOn = worn[part]?.hldItemSn === item.hldItemSn;
+            const isOn = worn[item.itemRegnCd]?.hldItemSn === item.hldItemSn;
             return (
               <button
                 key={item.hldItemSn}
@@ -50,7 +35,9 @@ export default function ItemStorage({ items, worn, onToggle }) {
                 <span className="grid aspect-square w-full place-items-center overflow-hidden rounded-sm bg-white text-xs text-subtle">
                   <ItemImage item={item} />
                 </span>
-                <span className="break-all">{item.itemNm}</span>
+                <span className="break-keep [overflow-wrap:anywhere]">
+                  {item.itemNm}
+                </span>
               </button>
             );
           })}

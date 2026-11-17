@@ -77,6 +77,11 @@ export const SETTING_GROUPS = [
         fields: [dayField('mtchNoRspnsEndCrtrDayCnt')],
       },
       {
+        label: '거래완료 글 숨김 기준',
+        hint: '거래완료 뒤 이 일수가 지나면 공개 목록에서 숨김',
+        fields: [dayField('dlngCmptnHideCrtrDayCnt')],
+      },
+      {
         label: '최저시급 적용 연도 · 금액',
         fields: [
           { key: 'lowstHrwgAplcnYr', kind: 'year', unit: '년', maxDigits: 4 },

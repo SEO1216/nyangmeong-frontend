@@ -8,6 +8,7 @@ import { formatDate, formatDateTime } from '@/utils/formatDate';
 import { publicFileUrl } from '@/utils/fileUrl';
 import { getLostStatusLabel, LOST_STATUS } from './lostReportLabels';
 import { useAdminLostReport } from './queries';
+import LoadError from '@/components/LoadError';
 
 /** 라벨·값 한 줄 */
 function InfoRow({ label, children }) {
@@ -82,18 +83,11 @@ export default function LostReportDetailModal({ lostTpofSn, onClose }) {
     }
     if (report.isError) {
       return (
-        <div role="alert" className="flex flex-col items-center gap-3 py-8">
-          <p className="text-base text-subtle">
-            {report.error?.message || '실종제보를 불러오지 못했어요.'}
-          </p>
-          <button
-            type="button"
-            className={BTN_SECONDARY}
-            onClick={() => report.refetch()}
-          >
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message={report.error?.message || '실종제보를 불러오지 못했어요.'}
+          onRetry={() => report.refetch()}
+          className="py-8"
+        />
       );
     }
     const isFound = report.data.lostTpofSttsCd === LOST_STATUS.FOUND;

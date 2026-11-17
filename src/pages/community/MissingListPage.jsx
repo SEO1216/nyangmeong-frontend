@@ -1,8 +1,8 @@
-import { useSearchParams } from 'react-router-dom';
+import { Pencil } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { BTN_PRIMARY } from '@/components/buttonStyles';
 import {
   PET_SE_BY_FILTER,
-  STTS_BY_TAB,
-  STATUS_TABS,
   PET_FILTERS,
   PERIOD_FILTERS,
   WTNS_PRD_BY_PERIOD,
@@ -39,29 +39,27 @@ function MissingCardSkeleton() {
   );
 }
 
-/** 로딩 자리: 탭·검색 줄 + 필터(회색 박스) + 카드 한 쪽 개수(3칸) + 오른쪽 레일(실제 목록과 같은 배치) */
+/** 로딩 자리: 왼쪽(필터 2열 + 건수 줄 + 카드 한 쪽 개수 3칸 + 쪽 번호)과 오른쪽 레일(실제 목록과 같은 배치) */
 function MissingListSkeleton() {
   return (
     <div
       aria-busy="true"
-      className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-4 max-[1100px]:grid-cols-1 max-[1100px]:gap-y-10"
+      className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 border-t border-line pt-6 max-[1100px]:grid-cols-1"
     >
-      <div
-        aria-hidden="true"
-        className="col-span-full flex min-w-0 flex-col gap-4"
-      >
-        <div className="flex flex-wrap items-end justify-between gap-3 border-b border-input-line px-4 pt-6 pb-3 max-[760px]:flex-col max-[760px]:items-stretch">
-          <div className="flex gap-8 pb-1">
-            {Array.from({ length: 3 }, (_, index) => (
-              <Skeleton key={index} className="h-5 w-20" />
-            ))}
-          </div>
-          <Skeleton className="h-10 w-[300px] max-[760px]:w-full" />
+      <div className="flex min-w-0 flex-col gap-5">
+        <div
+          aria-hidden="true"
+          className="grid grid-cols-2 gap-x-9 gap-y-5 max-[760px]:grid-cols-1 max-[760px]:gap-y-4"
+        >
+          <Skeleton className="h-16" />
+          <Skeleton className="h-16 max-[760px]:hidden" />
+          <Skeleton className="h-16 max-[760px]:hidden" />
+          <Skeleton className="h-16 max-[760px]:hidden" />
+          <Skeleton className="hidden h-10 max-[760px]:block" />
         </div>
-        <Skeleton className="h-[202px] rounded-[14px] max-[760px]:hidden" />
-        <Skeleton className="hidden h-10 max-[760px]:block" />
-      </div>
-      <div className="flex min-w-0 flex-col gap-4">
+        <div className="border-t border-line pt-4">
+          <Skeleton className="h-9 w-full" />
+        </div>
         <ul className="grid grid-cols-3 gap-4 max-[1100px]:grid-cols-2 max-[560px]:grid-cols-1">
           {Array.from({ length: PAGE_SIZE }, (_, index) => (
             <li key={index}>
@@ -69,10 +67,7 @@ function MissingListSkeleton() {
             </li>
           ))}
         </ul>
-        <div aria-hidden="true" className="flex flex-col gap-4">
-          <Skeleton className="ml-auto h-10 w-28" />
-          <Skeleton className="mx-auto h-9 w-64" />
-        </div>
+        <Skeleton aria-hidden="true" className="mx-auto h-9 w-64" />
       </div>
       <div
         aria-hidden="true"
@@ -87,10 +82,20 @@ function MissingListSkeleton() {
   );
 }
 
+/** 오른쪽 레일 맨 위 등록 버튼 */
+const writeAction = (
+  <Link
+    to={PATHS.COMMUNITY_MISSING_NEW}
+    className={`${BTN_PRIMARY} h-10! w-full text-base`}
+  >
+    <Pencil size={16} aria-hidden="true" />
+    실종 신고 등록
+  </Link>
+);
+
 export default function MissingListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page')) || 1;
-  const stts = pick(searchParams.get('stts'), STATUS_TABS);
   /** 지역은 지역 번호(rgnSn). 숫자가 아니면 전체 */
   const region = /^\d+$/.test(searchParams.get('rgn') ?? '')
     ? searchParams.get('rgn')
@@ -103,7 +108,7 @@ export default function MissingListPage() {
   const period = pick(searchParams.get('period'), PERIOD_FILTERS);
   const keyword = searchParams.get('q') ?? '';
   const mine = searchParams.get('mine') === '1';
-  const filters = { stts, mine, region, dong, pet, period, keyword };
+  const filters = { mine, region, dong, pet, period, keyword };
 
   const {
     data: posts,
@@ -112,7 +117,6 @@ export default function MissingListPage() {
   } = useMissingList({
     page,
     size: PAGE_SIZE,
-    lostTpofSttsCd: STTS_BY_TAB[stts] ?? '',
     rgnSn: dong || region,
     petSeCd: PET_SE_BY_FILTER[pet] ?? '',
     wtnsPrd: WTNS_PRD_BY_PERIOD[period] ?? '',
@@ -126,7 +130,6 @@ export default function MissingListPage() {
     setSearchParams(
       Object.fromEntries(
         Object.entries({
-          stts: merged.stts,
           mine: merged.mine ? '1' : '',
           rgn: merged.region,
           dong: merged.dong,
@@ -157,6 +160,7 @@ export default function MissingListPage() {
         onChange={(next) => setQuery({ ...next, page: 1 })}
         onReset={() => setSearchParams({})}
         onPageChange={(nextPage) => setQuery({ page: nextPage })}
+        action={writeAction}
       />
     );
   }

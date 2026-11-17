@@ -1,9 +1,17 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Icon from '@/components/Icon';
 import Modal from '@/components/Modal';
+import Skeleton from '@/components/Skeleton';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import { showToast } from '@/components/toastStore';
-import { useSaveHealthWidgets } from '../queries';
+import CareChipPicker from '../CareChipPicker';
+import { MIN_CARE_COUNT, isLinkedCareItem } from '../careDue';
+import { toCareIcon } from '../careIcons';
+import {
+  useCareItems,
+  useSaveCareIndications,
+  useSaveHealthWidgets,
+} from '../queries';
 import WidgetPicker from './WidgetPicker';
 import {
   RECOMMENDED_IDS,
@@ -13,17 +21,20 @@ import {
   orderWidgetIds,
 } from './widgetItems';
 
-const STEPS = ['시작', '기록 고르기', '완료'];
+const STEPS = ['시작', '기록 고르기', '케어 고르기', '완료'];
+const LAST_STEP = STEPS.length;
 
 /**
  * [튜토리얼 · 기록 항목 편집 모달] (※신규 정책, 흐름도 D1~D7·D10)
- * - mode 'tutorial': 1 시작 → 2 기록 고르기 → 3 완료. 1·2단계의 [나중에 할래요]·×·Esc·배경은 추천 3개 저장(D3), 3단계 ×는 [건강기록 보러 가기]와 같음
+ * - mode 'tutorial': 1 시작 → 2 기록 고르기 → 3 케어 고르기 → 4 완료. 1~3단계의 [나중에 할래요]·×·Esc·배경은 추천 3개 저장(D3)이고 케어는 저장하지 않음, 4단계 ×는 [건강기록 보러 가기]와 같음
+ * - 3단계 케어 고르기: 5개 이상, 처방·반복 예방 연동 항목은 항상 표시. 4단계에서 기록 항목과 함께 저장(케어 먼저: 기록 항목이 저장되면 튜토리얼이 닫힘)
  * - mode 'edit': 2단계만. [저장]은 고른 항목 저장, [취소]·×·Esc·배경은 저장 없이 닫음(D7)
- * - 저장 실패: 서버 message 토스트. [나중에 할래요]·×·Esc는 그래도 닫고(다음에 들어오면 다시 열림), 3단계·편집 저장은 모달을 유지해 다시 시도
+ * - 저장 실패: 서버 message 토스트. [나중에 할래요]·×·Esc는 그래도 닫고(다음에 들어오면 다시 열림), 4단계·편집 저장은 모달을 유지해 다시 시도(저장된 케어는 다시 보내지 않음)
  */
 export default function WidgetTutorialModal({
   mode,
   mbrSn,
+  petSn,
   petNm,
   savedIds,
   onClose,
@@ -34,9 +45,32 @@ export default function WidgetTutorialModal({
   const [pickedIds, setPickedIds] = useState(isEdit ? savedIds : null);
   const [lastPickedId, setLastPickedId] = useState(null);
   const saveWidgets = useSaveHealthWidgets();
+  /** 케어 고르기: 사람이 칩을 누르기 전에는 null -> 서버의 indctYn 그대로 */
+  const care = useCareItems(isEdit ? null : petSn);
+  const [pickedCareSns, setPickedCareSns] = useState(null);
+  const saveIndications = useSaveCareIndications();
+  /** 저장을 마친 케어 목록: 기록 항목 저장만 실패했을 때 다시 보내지 않기 위한 값 */
+  const savedCareKeyRef = useRef(null);
+  const isSaving = saveWidgets.isPending || saveIndications.isPending;
+
+  const careItems = care.data?.careItems ?? [];
+  const careSns =
+    pickedCareSns ??
+    careItems.filter((item) => item.indctYn).map((item) => item.careArtclSn);
+  const isCareOn = (item) =>
+    isLinkedCareItem(item) || careSns.includes(item.careArtclSn);
+  const pickedCareItems = careItems.filter(isCareOn);
+  const isCareShort = pickedCareItems.length < MIN_CARE_COUNT;
+
+  const handleToggleCare = (item) =>
+    setPickedCareSns(
+      careSns.includes(item.careArtclSn)
+        ? careSns.filter((sn) => sn !== item.careArtclSn)
+        : [...careSns, item.careArtclSn],
+    );
 
   /** 시작 항목: [나중에 할래요] 저장값과 2단계 처음 미리 체크가 같음 */
-  const startIds = RECOMMENDED_IDS;
+  const startIds = orderWidgetIds(RECOMMENDED_IDS);
   const draftIds = pickedIds ?? startIds;
   const isEmpty = draftIds.length === 0;
 
@@ -44,13 +78,8 @@ export default function WidgetTutorialModal({
   const save = (widgetIds, message, isClosedOnError = false) => {
     if (saveWidgets.isPending) return;
     saveWidgets.mutate(
-      /** 편집은 저장 순서 + 새 항목 맨 뒤, 튜토리얼 첫 저장은 4묶음 순서 */
-      {
-        mbrSn,
-        widgetIds: isEdit
-          ? keepWidgetOrder(widgetIds)
-          : orderWidgetIds(widgetIds),
-      },
+      /** 미리보기 순서(고른 순서 + 새 항목 맨 뒤, 끌어서 바꾼 순서) 그대로 저장. 튜토리얼 시작 항목은 4묶음 순서 */
+      { mbrSn, widgetIds: keepWidgetOrder(widgetIds) },
       {
         onSuccess: () => {
           showToast(message);
@@ -71,7 +100,21 @@ export default function WidgetTutorialModal({
     );
   };
 
-  const saveFinish = () => save(draftIds, `${petNm}의 대시보드를 만들었어요`);
+  const saveFinish = async () => {
+    if (isSaving) return;
+    const careArtclSns = pickedCareItems.map((item) => item.careArtclSn);
+    const careKey = careArtclSns.join(',');
+    try {
+      if (savedCareKeyRef.current !== careKey) {
+        await saveIndications.mutateAsync({ petSn, careArtclSns });
+        savedCareKeyRef.current = careKey;
+      }
+    } catch {
+      /** 토스트는 useSaveCareIndications가 표시 */
+      return;
+    }
+    save(draftIds, `${petNm}의 건강기록을 준비했어요`);
+  };
 
   const saveEdit = () => {
     const removedIds = savedIds.filter((id) => !draftIds.includes(id));
@@ -85,7 +128,7 @@ export default function WidgetTutorialModal({
 
   const handleDismiss = () => {
     if (isEdit) onClose();
-    else if (step === 3) saveFinish();
+    else if (step === LAST_STEP) saveFinish();
     else saveLater();
   };
 
@@ -97,6 +140,8 @@ export default function WidgetTutorialModal({
     setLastPickedId(isOn ? null : id);
   };
 
+  const handleReorder = (ids) => setPickedIds(ids);
+
   const handleRecommend = (ids) => {
     setPickedIds(ids);
     setLastPickedId(null);
@@ -105,10 +150,12 @@ export default function WidgetTutorialModal({
   const title = isEdit
     ? '기록 항목 편집'
     : step === 1
-      ? `${petNm}에게 필요한 기록만 골라요`
+      ? `${petNm}에게 필요한 기록과 케어를 골라요`
       : step === 2
         ? '기록 고르기'
-        : `${petNm}의 대시보드가 준비됐어요`;
+        : step === 3
+          ? '케어 고르기'
+          : `${petNm}의 건강기록이 준비됐어요`;
 
   const footer =
     step === 1 ? (
@@ -157,11 +204,40 @@ export default function WidgetTutorialModal({
           {isEdit ? '저장' : '다음'}
         </button>
       </>
+    ) : step === 3 ? (
+      <>
+        <p className="mr-auto flex flex-wrap items-center gap-x-3 self-center text-sm">
+          {care.data && isCareShort && (
+            <span role="alert" className="font-semibold text-danger">
+              5개 이상 골라 주세요
+            </span>
+          )}
+          <span className="text-muted">
+            <b className="text-ink">{pickedCareItems.length}개</b> 골랐어요
+          </span>
+        </p>
+        <button
+          type="button"
+          className={`${BTN_SECONDARY} min-w-20`}
+          onClick={() => setStep(2)}
+        >
+          이전
+        </button>
+        <button
+          type="button"
+          disabled={!care.data || isCareShort}
+          className={`${BTN_PRIMARY} min-w-20`}
+          onClick={() => setStep(LAST_STEP)}
+        >
+          다음
+        </button>
+      </>
     ) : (
       <>
         <button
           type="button"
           className={`${BTN_SECONDARY} mr-auto`}
+          disabled={isSaving}
           onClick={() => {
             setPickedIds(draftIds);
             setStep(2);
@@ -171,7 +247,7 @@ export default function WidgetTutorialModal({
         </button>
         <button
           type="button"
-          disabled={saveWidgets.isPending}
+          disabled={isSaving}
           className={BTN_PRIMARY}
           onClick={saveFinish}
         >
@@ -186,7 +262,7 @@ export default function WidgetTutorialModal({
       footer={footer}
       isWide
       width={720}
-      isPending={saveWidgets.isPending}
+      isPending={isSaving}
       onClose={handleDismiss}
     >
       {!isEdit && <StepBar current={step} />}
@@ -194,14 +270,15 @@ export default function WidgetTutorialModal({
       {step === 1 && (
         <div className="flex flex-col items-center gap-4 py-4 text-center">
           <p className="leading-[1.6] text-muted">
-            고른 기록만 대시보드와 건강 일지에 보여요.
+            고른 기록은 대시보드와 건강 일지에, 고른 케어는 케어리스트에 보여요.
             <br />
-            지금 안 골라도 나중에 [기록 항목 편집]에서 바꿀 수 있어요.
+            지금 안 골라도 나중에 [기록 항목 편집]·[항목 관리]에서 바꿀 수
+            있어요.
           </p>
           <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-ink-2">
             <span className="inline-flex items-center gap-1.5">
               <Icon name="check_circle" className="text-brand-500" />
-              1개 이상만 고르면 돼요
+              기록은 1개 이상, 케어는 5개 이상 골라요
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Icon name="check_circle" className="text-brand-500" />
@@ -219,25 +296,65 @@ export default function WidgetTutorialModal({
           lastPickedId={lastPickedId}
           onToggle={handleToggle}
           onRecommend={handleRecommend}
+          onReorder={handleReorder}
         />
       )}
 
       {step === 3 && (
+        <div className="flex flex-col gap-4">
+          <p className="text-muted">
+            {petNm}에게 챙겨 줄 케어를 5개 이상 골라요. 고른 케어만 케어리스트에
+            보여요.
+          </p>
+          {care.isError ? (
+            <p role="alert" className="flex items-center gap-3 text-muted">
+              {care.error.message}
+              <button
+                type="button"
+                className="underline"
+                onClick={() => care.refetch()}
+              >
+                다시 시도
+              </button>
+            </p>
+          ) : care.data ? (
+            <CareChipPicker
+              items={careItems}
+              isOn={isCareOn}
+              onToggle={handleToggleCare}
+            />
+          ) : (
+            <Skeleton className="h-40" />
+          )}
+        </div>
+      )}
+
+      {step === LAST_STEP && (
         <div className="flex flex-col items-center gap-4 py-2 text-center">
           <Icon name="task_alt" className="text-[44px] text-brand-500" />
           <p className="text-muted">
-            고른 기록만 건강기록 대시보드에 카드로 보여요
+            고른 기록은 건강 대시보드에, 고른 케어는 케어리스트에 보여요
           </p>
-          <ul className="flex flex-wrap justify-center gap-2">
+          <DoneRow label="기록">
             <DoneChip icon="auto_awesome" name="AI 건강분석 리포트" />
-            {orderWidgetIds(draftIds).map((id) => {
+            {keepWidgetOrder(draftIds).map((id) => {
               const item = findWidgetItem(id);
               return <DoneChip key={id} icon={item.icon} name={item.nm} />;
             })}
-          </ul>
+          </DoneRow>
+          <DoneRow label="케어">
+            {pickedCareItems.map((item) => (
+              <DoneChip
+                key={item.careArtclSn}
+                icon={toCareIcon(item.rprsIconId)}
+                name={item.careArtclNm}
+              />
+            ))}
+          </DoneRow>
           <p className="flex items-center gap-1.5 text-sm text-muted">
             <Icon name="tune" className="text-subtle" />
-            건강기록 화면의 [기록 항목 편집]에서 언제든 더하거나 뺄 수 있어요
+            [기록 항목 편집]과 케어리스트 [항목 관리]에서 언제든 더하거나 뺄 수
+            있어요
           </p>
         </div>
       )}
@@ -245,7 +362,7 @@ export default function WidgetTutorialModal({
   );
 }
 
-/** 1·2·3단계 표시 */
+/** 단계 표시 */
 function StepBar({ current }) {
   return (
     <ol className="mb-5 flex items-center gap-2 overflow-x-auto">
@@ -277,6 +394,16 @@ function StepBar({ current }) {
         );
       })}
     </ol>
+  );
+}
+
+/** 완료 단계의 칩 한 줄: 「기록」·「케어」 */
+function DoneRow({ label, children }) {
+  return (
+    <div className="flex w-full flex-col items-center gap-2">
+      <b className="text-sm text-ink">{label}</b>
+      <ul className="flex flex-wrap justify-center gap-2">{children}</ul>
+    </div>
   );
 }
 

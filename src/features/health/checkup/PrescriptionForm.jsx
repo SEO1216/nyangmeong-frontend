@@ -8,6 +8,7 @@ import {
   BTN_PRIMARY,
   BTN_SECONDARY,
 } from '@/components/buttonStyles';
+import CareShortageNotice from '../CareShortageNotice';
 import FieldError from '../diary/FieldError';
 import { INPUT_CLASS, LABEL_CLASS } from '../diary/formStyles';
 import CharCount from '../shared/CharCount';
@@ -26,7 +27,7 @@ const REQUIRED = <span className="ml-0.5 font-bold text-danger">*</span>;
 /**
  * [처방약 입력 영역]
  * - 약품명·복용 시작일·종료일·1일 복용 횟수·복용 상태 모두 필수, 종료일은 시작일 이후만 (FN-HLT-005-03)
- * - 주기 체크 ON으로 저장하면 케어 캘린더 일상관리에 투약 항목이 생김
+ * - 주기 체크를 켜고 저장하면 케어 캘린더 일상관리에 투약 항목이 생김
  * - prescription이 있으면 기존 값이 채워진 수정 상태이고 [삭제] 제공
  */
 export default function PrescriptionForm({
@@ -191,7 +192,7 @@ export default function PrescriptionForm({
             onChange={setCycleChckYn}
           />
           <span className="text-sm text-muted">
-            ON 시 토탈 케어리스트에 투약 항목 자동 추가
+            ON 시 케어리스트에 투약 항목 자동 추가
           </span>
         </span>
       </div>
@@ -247,7 +248,13 @@ export default function PrescriptionForm({
               </button>
             </>
           }
-        />
+        >
+          {/** 지우면 케어리스트가 5개 미만이 될 때만 안내 (※신규 정책) */}
+          <CareShortageNotice
+            petSn={petSn}
+            isTarget={(item) => item.prscSn === prescription.prscSn}
+          />
+        </Modal>
       )}
     </form>
   );

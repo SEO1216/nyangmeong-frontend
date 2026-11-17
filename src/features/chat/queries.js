@@ -28,7 +28,7 @@ import {
   requestCareMatch,
 } from './api';
 import { retainChatRealtime, setViewingChatRoom } from './realtime';
-import { MSG_TYPE } from './shared/chatCodes';
+import { CHAT_ROOM_CLOSED, MSG_TYPE } from './shared/chatCodes';
 
 export const chatKeys = {
   lists: ['chat-rooms', 'list'],
@@ -171,9 +171,7 @@ export const useAddressPoint = (shrnAddr) => {
     queryKey: ['chat-address-point', shrnAddr],
     queryFn: async () => {
       const [first] = await searchPlaces(kakao, toAddressSearchText(shrnAddr));
-      return first
-        ? { lat: first.wtnsPlcLat, lng: first.wtnsPlcLot }
-        : null;
+      return first ? { lat: first.wtnsPlcLat, lng: first.wtnsPlcLot } : null;
     },
     enabled: Boolean(kakao && shrnAddr),
     staleTime: Infinity,
@@ -208,6 +206,15 @@ export const useSendChatMessage = (otoChatRoomSn) => {
     mutationFn: (body) => createChatMessage({ otoChatRoomSn, ...body }),
     onSuccess: (message) => {
       prependMessage(queryClient, otoChatRoomSn, message);
+      queryClient.invalidateQueries({ queryKey: chatKeys.lists });
+    },
+    /** 화면은 열려 있는데 서버에서 방이 닫힌 경우: 방 정보를 다시 받아 입력을 막는다 */
+    onError: (error) => {
+      if (error.code !== CHAT_ROOM_CLOSED) return;
+      showToast(error.message);
+      queryClient.invalidateQueries({
+        queryKey: chatKeys.detail(otoChatRoomSn),
+      });
       queryClient.invalidateQueries({ queryKey: chatKeys.lists });
     },
   });
@@ -258,6 +265,31 @@ export const useDealAction = (room) => {
       queryClient.invalidateQueries({ queryKey: chatKeys.lists });
     },
     onError: (error) => showToast(error.message),
+  });
+};
+
+/**
+ * 여러 방 나가기(목록의 선택 삭제): 방마다 나가기를 부르고 성공·실패한 방 번호를 돌려준다
+ * - 일부가 실패해도 나머지는 처리된 채로 두고, 끝나면 목록·안 읽음 수를 다시 받는다
+ */
+export const useLeaveChatRooms = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (otoChatRoomSns) => {
+      const results = await Promise.allSettled(
+        otoChatRoomSns.map((otoChatRoomSn) => leaveChatRoom(otoChatRoomSn)),
+      );
+      return {
+        succeeded: otoChatRoomSns.filter(
+          (_, index) => results[index].status === 'fulfilled',
+        ),
+        failed: otoChatRoomSns.filter(
+          (_, index) => results[index].status === 'rejected',
+        ),
+      };
+    },
+    onSettled: () => invalidateSummaries(queryClient),
   });
 };
 

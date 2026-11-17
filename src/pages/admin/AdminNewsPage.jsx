@@ -10,10 +10,7 @@ import { showToast } from '@/components/toastStore';
 import AdminNewsFormModal from '@/features/adminNews/AdminNewsFormModal';
 import AdminNewsTable from '@/features/adminNews/AdminNewsTable';
 import NewsKeywordPanel from '@/features/adminNews/NewsKeywordPanel';
-import {
-  NEWS_CATEGORIES,
-  NEWS_SOURCES,
-} from '@/features/adminNews/newsLabels';
+import { NEWS_CATEGORIES, NEWS_SOURCES } from '@/features/adminNews/newsLabels';
 import {
   useAdminNewsKeywords,
   useAdminNewsList,
@@ -24,6 +21,8 @@ import { useBatches, useRunBatch } from '@/features/batch/queries';
 import { PATHS } from '@/routes/paths';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 const TABS = [
   { key: 'news', label: '뉴스' },
@@ -75,18 +74,6 @@ function KeywordSkeleton() {
           <SkeletonCard key={code} className="h-[186px]" />
         ))}
       </div>
-    </div>
-  );
-}
-
-/** 조회 오류: 다시 시도 */
-function LoadError({ message, onRetry }) {
-  return (
-    <div role="alert" className="flex flex-col items-center gap-3 py-16">
-      <p className="text-base text-subtle">{message}</p>
-      <button type="button" className={BTN_SECONDARY} onClick={onRetry}>
-        다시 시도
-      </button>
     </div>
   );
 }
@@ -313,8 +300,7 @@ export default function AdminNewsPage() {
     setSearchParams(nextTab === 'news' ? {} : { tab: nextTab });
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">펫뉴스</h1>
+    <AdminPageFrame title="펫뉴스">
       <div
         role="tablist"
         aria-label="펫뉴스"
@@ -343,6 +329,6 @@ export default function AdminNewsPage() {
       <div role="tabpanel">
         {tab === 'keywords' ? <KeywordsTab /> : <NewsTab />}
       </div>
-    </div>
+    </AdminPageFrame>
   );
 }

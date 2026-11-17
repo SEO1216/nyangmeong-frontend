@@ -8,10 +8,13 @@ const ITEMS = [
   ['얼굴이 잘 보이는 사진', '첫 번째 사진이 목록 대표 사진이 돼요'],
 ];
 
-/** 글쓰기·글수정 오른쪽 「이렇게 쓰면 매칭이 빨라요」 */
+/** 글쓰기·글수정 오른쪽 「이렇게 쓰면 매칭이 빨라요」(1101px 이상: 스크롤해도 헤더(64px) 아래에 고정) */
 export default function CareWriteGuide() {
   return (
-    <aside aria-label="글쓰기 안내" className="min-w-0 max-[1101px]:mt-6">
+    <aside
+      aria-label="글쓰기 안내"
+      className="min-w-0 max-[1101px]:mt-6 min-[1101px]:sticky min-[1101px]:top-24"
+    >
       <section aria-labelledby="care-guide-title">
         <h2
           id="care-guide-title"

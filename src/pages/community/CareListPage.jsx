@@ -1,11 +1,11 @@
-import { useSearchParams } from 'react-router-dom';
+import { Pencil } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { BTN_PRIMARY } from '@/components/buttonStyles';
 import {
   PET_FILTERS,
   PET_SE_BY_FILTER,
   SIZE_BY_FILTER,
   SIZE_FILTERS,
-  STATUS_TABS,
-  STTS_BY_TAB,
 } from '@/features/community/careCodes';
 import { useCareList } from '@/features/community/careQueries';
 import CareList from '@/features/community/care/CareList';
@@ -57,38 +57,33 @@ function CareCardSkeleton({ hasThumbOnMobile }) {
   );
 }
 
-/** 로딩 자리: 탭 줄 + 필터(회색 박스) + 카드 한 쪽 개수 + 오른쪽 안내(실제 목록과 같은 배치) */
+/** 로딩 자리: 왼쪽(필터 2열 + 건수 줄 + 카드 한 쪽 개수 + 쪽 번호)과 오른쪽 안내(실제 목록과 같은 배치) */
 function CareListSkeleton() {
   return (
     <div
       aria-busy="true"
-      className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-4 max-[1101px]:grid-cols-1"
+      className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 border-t border-line pt-6 max-[1101px]:grid-cols-1"
     >
-      <div
-        aria-hidden="true"
-        className="col-span-full flex min-w-0 flex-col gap-4"
-      >
-        <div className="flex flex-wrap items-end justify-between gap-x-4 border-b border-input-line px-4 pt-6 pb-3">
-          <div className="flex gap-8 pb-1">
-            {Array.from({ length: 3 }, (_, index) => (
-              <Skeleton key={index} className="h-5 w-20" />
-            ))}
-          </div>
-          <Skeleton className="h-5 w-12" />
+      <div className="flex min-w-0 flex-col gap-5">
+        <div
+          aria-hidden="true"
+          className="grid grid-cols-2 gap-x-9 gap-y-5 max-[760px]:grid-cols-1 max-[760px]:gap-y-4"
+        >
+          <Skeleton className="hidden h-10 max-[760px]:block" />
+          <Skeleton className="h-16 max-[760px]:hidden" />
+          <Skeleton className="h-16 max-[760px]:hidden" />
+          <Skeleton className="h-16 max-[760px]:hidden" />
+          <Skeleton className="h-16 max-[760px]:hidden" />
         </div>
-        <Skeleton className="h-[202px] rounded-[14px] max-[760px]:hidden" />
-        <Skeleton className="hidden h-10 max-[760px]:block" />
-      </div>
-      <div className="flex min-w-0 flex-col gap-4">
+        <div className="border-t border-line pt-4">
+          <Skeleton className="h-9 w-full" />
+        </div>
         <div className="flex flex-col gap-3">
           {Array.from({ length: PAGE_SIZE }, (_, index) => (
             <CareCardSkeleton key={index} hasThumbOnMobile={index % 2 === 0} />
           ))}
         </div>
-        <div aria-hidden="true" className="flex flex-col gap-4">
-          <Skeleton className="ml-auto h-10 w-28" />
-          <Skeleton className="mx-auto h-9 w-64" />
-        </div>
+        <Skeleton aria-hidden="true" className="mx-auto h-9 w-64" />
       </div>
       <div
         aria-hidden="true"
@@ -103,10 +98,20 @@ function CareListSkeleton() {
   );
 }
 
+/** 오른쪽 레일 맨 위 등록 버튼 */
+const writeAction = (
+  <Link
+    to={PATHS.COMMUNITY_PETCARE_NEW}
+    className={`${BTN_PRIMARY} h-10! w-full text-base`}
+  >
+    <Pencil size={16} aria-hidden="true" />
+    돌봄 요청 등록
+  </Link>
+);
+
 export default function CareListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page')) || 1;
-  const stts = pick(searchParams.get('stts'), STATUS_TABS);
   const mine = searchParams.get('mine') === '1';
   /** 지역은 지역 번호(rgnSn). 숫자가 아니면 전체 */
   const region = /^\d+$/.test(searchParams.get('rgn') ?? '')
@@ -122,7 +127,7 @@ export default function CareListPage() {
   /** 고양이는 반려견 크기를 선택 불가 */
   const size =
     pet === 'cat' ? '' : pick(searchParams.get('size'), SIZE_FILTERS);
-  const filters = { stts, mine, region, dong, from, to, pet, size };
+  const filters = { mine, region, dong, from, to, pet, size };
 
   const {
     data: posts,
@@ -131,7 +136,6 @@ export default function CareListPage() {
   } = useCareList({
     page,
     size: PAGE_SIZE,
-    rcrtSttsCd: STTS_BY_TAB[stts] ?? '',
     mineYn: mine,
     rgnSn: dong || region,
     fromDate: from,
@@ -146,7 +150,6 @@ export default function CareListPage() {
     setSearchParams(
       Object.fromEntries(
         Object.entries({
-          stts: merged.stts,
           mine: merged.mine ? '1' : '',
           rgn: merged.region,
           dong: merged.dong,
@@ -177,6 +180,7 @@ export default function CareListPage() {
         onChange={(next) => setQuery({ ...next, page: 1 })}
         onReset={() => setSearchParams({})}
         onPageChange={(nextPage) => setQuery({ page: nextPage })}
+        action={writeAction}
       />
     );
   }

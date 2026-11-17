@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import useScrollLock from '@/hooks/useScrollLock';
 import DropdownSelect from '@/components/DropdownSelect';
 import DatePicker from '@/components/DatePicker';
 import TimeSelect from '@/components/TimeSelect';
@@ -17,6 +18,7 @@ import {
   useDeleteSchedule,
   useUpdateSchedule,
 } from './queries';
+import SegmentSwitch from './SegmentSwitch';
 import CharCount from './shared/CharCount';
 
 const MAX_HOSPITAL_NAME_LENGTH = 80;
@@ -45,7 +47,7 @@ function FieldError({ message }) {
   );
 }
 
-// 일정 등록·수정 모달(FN-HLT-003-32~37). schedule이 있으면 수정, 없으면 등록이다
+// 일정 추가·수정 모달(FN-HLT-003-32~37). schedule이 있으면 수정, 없으면 등록이다
 export default function ScheduleModal({
   pets,
   schedule,
@@ -55,6 +57,7 @@ export default function ScheduleModal({
   onCreateNew,
 }) {
   const dialogRef = useRef(null);
+  useScrollLock();
   const isEdit = schedule != null;
   const onlyPetSn = pets.length === 1 ? pets[0].petSn : null;
   const [form, setForm] = useState(() =>
@@ -170,7 +173,7 @@ export default function ScheduleModal({
   return (
     <dialog
       ref={dialogRef}
-      aria-label="일정 등록·수정"
+      aria-label="일정 추가·수정"
       className="m-auto w-[min(720px,calc(100%-32px))] rounded-[20px] bg-white p-0 shadow-[0_24px_64px_-12px_rgba(15,23,35,0.35)] backdrop:bg-[rgba(15,23,35,0.45)] backdrop:backdrop-blur-[2px]"
       onCancel={handleCancel}
     >
@@ -180,7 +183,7 @@ export default function ScheduleModal({
             <Icon name="calendar_month" />
           </span>
           <h2 className="flex-1 text-xl leading-[1.35] font-bold text-[#1a3234]">
-            {isEdit ? '일정 수정' : '일정 등록'}
+            {isEdit ? '일정 수정' : '일정 추가'}
           </h2>
           <button
             type="button"
@@ -213,26 +216,11 @@ export default function ScheduleModal({
             <legend className={`${labelClass} mb-1.5`}>
               일정 종류{required}
             </legend>
-            <div className="flex h-10 rounded-[6px] border border-[#e6eaeb] bg-[#f1f3f4] p-[3px]">
-              {SCHEDULE_TYPES.map((type) => {
-                const isSelected = form.schdlKndCd === type.cd;
-                return (
-                  <button
-                    key={type.cd}
-                    type="button"
-                    aria-pressed={isSelected}
-                    className={`flex flex-1 items-center justify-center rounded-[4px] whitespace-nowrap ${
-                      isSelected
-                        ? 'bg-white font-semibold text-[#1e4a4c] shadow-[0_1px_2px_rgba(26,50,52,0.08),0_0_0_1px_rgba(40,90,92,0.18)]'
-                        : 'font-medium text-[#566465] hover:text-[#1a3234]'
-                    }`}
-                    onClick={() => handleTypeChange(type.cd)}
-                  >
-                    {type.nm}
-                  </button>
-                );
-              })}
-            </div>
+            <SegmentSwitch
+              options={SCHEDULE_TYPES}
+              selected={form.schdlKndCd}
+              onSelect={handleTypeChange}
+            />
             <FieldError message={fieldError('schdlKndCd')} />
           </fieldset>
 
@@ -371,7 +359,7 @@ export default function ScheduleModal({
               className="mr-auto text-base font-semibold text-[#1e4a4c] hover:underline hover:underline-offset-[3px]"
               onClick={onCreateNew}
             >
-              새 일정 등록
+              새 일정 추가
             </button>
           ) : (
             <p className="mr-auto text-[#566465]">
@@ -402,7 +390,7 @@ export default function ScheduleModal({
             disabled={!canSubmit}
             className="inline-flex h-10 min-w-24 items-center justify-center rounded-[6px] bg-[#285a5c] px-4 text-base font-semibold whitespace-nowrap text-white hover:bg-[#1e4a4c] disabled:opacity-40"
           >
-            {isEdit ? '일정 수정하기' : '저장하기'}
+            저장
           </button>
         </footer>
       </form>

@@ -14,6 +14,8 @@ import {
 } from '@/features/adminPoint/queries';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import AdminPageFrame from './AdminPageFrame';
+import LoadError from '@/components/LoadError';
 
 const PAGE_SIZE = 20;
 
@@ -81,18 +83,10 @@ export default function AdminPointsPage() {
           onSearch={handleSearch}
         />
         {ledgers.isError ? (
-          <div role="alert" className="flex flex-col items-center gap-3 py-16">
-            <p className="text-base text-subtle">
-              포인트 원장을 불러오지 못했어요.
-            </p>
-            <button
-              type="button"
-              className={BTN_SECONDARY}
-              onClick={handleRetry}
-            >
-              다시 시도
-            </button>
-          </div>
+          <LoadError
+            message="포인트 원장을 불러오지 못했어요."
+            onRetry={handleRetry}
+          />
         ) : ledgers.data.content.length === 0 ? (
           <p className="rounded-[14px] border border-line bg-white py-16 text-center text-base text-subtle">
             조건에 맞는 포인트 거래가 없어요
@@ -120,9 +114,9 @@ export default function AdminPointsPage() {
     mbrSn && member.data ? { mbrSn, mbrNcnm: member.data.mbrNcnm } : null;
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold text-ink">포인트</h1>
+    <AdminPageFrame
+      title="포인트"
+      actions={
         <button
           type="button"
           className={BTN_PRIMARY}
@@ -130,7 +124,8 @@ export default function AdminPointsPage() {
         >
           포인트 조정
         </button>
-      </div>
+      }
+    >
       {renderBody()}
       {isAdjusting && (
         <PointAdjustModal
@@ -138,6 +133,6 @@ export default function AdminPointsPage() {
           onClose={() => setIsAdjusting(false)}
         />
       )}
-    </div>
+    </AdminPageFrame>
   );
 }

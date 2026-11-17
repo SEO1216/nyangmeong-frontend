@@ -9,7 +9,7 @@ const LEGACY_ICONS = {
   EAR: 'hearing',
 };
 
-// CareItemModal의 아이콘 목록과 같은 이름. 이 밖의 값은 글꼴에 없어 글자로 깨진다
+// CareItemFields의 아이콘 목록과 같은 이름. 이 밖의 값은 글꼴에 없어 글자로 깨진다
 const MATERIAL_ICONS = new Set([
   'brush',
   'cleaning_services',

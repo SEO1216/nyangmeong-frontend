@@ -1,4 +1,4 @@
-import { ChevronLeft, Info, MapPin } from 'lucide-react';
+import { Info, MapPin } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import DatePicker from '@/components/DatePicker';
 import AmountInput from '@/components/AmountInput';
@@ -7,6 +7,7 @@ import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import ImageAttach from '@/components/ImageAttach';
 import Select from '@/components/Select';
 import { PATHS } from '@/routes/paths';
+import { addDays, getTodayYmd } from '@/utils/formatDate';
 import { PET_SE } from '@/utils/petCodes';
 import {
   CST_UNIT,
@@ -40,6 +41,22 @@ const TIME_OPTIONS = (placeholder) => [
   ...CARE_TIMES.map((time) => ({ value: time, label: time })),
 ];
 
+/** 종료가 시작과 같은 날이거나 날짜가 덜 골라졌으면, 종료 시간은 시작 시간 뒤만 고를 수 있다 */
+const isSameDayOrOpen = ({ fromDate, toDate }) =>
+  !fromDate || !toDate || fromDate === toDate;
+
+const toTimeOptions = (values) => {
+  const limit = isSameDayOrOpen(values) ? values.fromTime : '';
+  return [
+    { value: '', label: '종료' },
+    ...CARE_TIMES.map((time) => ({
+      value: time,
+      label: time,
+      disabled: Boolean(limit) && time <= limit,
+    })),
+  ];
+};
+
 const REGION_ERROR_CODE = 'CARE_REGION_NOT_ALLOWED';
 
 const snapshot = (values) =>
@@ -61,7 +78,14 @@ const breedError = (breed) => {
 };
 
 /** 돌봄 기간·시간 검사: 비우려면 「일정은 채팅으로 협의할게요」, 일부만 채우기 불가 */
-const whenError = ({ fromDate, fromTime, toDate, toTime, nego }) => {
+/** 돌봄 기간 기한: 시작일은 오늘부터 90일 이내, 종료일은 시작일부터 30일 이내 */
+const START_LIMIT_DAYS = 90;
+const PERIOD_LIMIT_DAYS = 30;
+
+const whenError = (
+  { fromDate, fromTime, toDate, toTime, nego },
+  initialWhen = {},
+) => {
   const filled = [fromDate, fromTime, toDate, toTime].filter(Boolean).length;
   if (filled === 0) {
     return nego
@@ -71,6 +95,20 @@ const whenError = ({ fromDate, fromTime, toDate, toTime, nego }) => {
   if (filled < 4) return '시작과 종료의 날짜 · 시간을 모두 골라 주세요';
   if (new Date(`${toDate}T${toTime}`) <= new Date(`${fromDate}T${fromTime}`)) {
     return '종료 일시는 시작 일시보다 뒤여야 해요';
+  }
+  /** 수정에서 바꾸지 않은 날짜는 이미 지난 값이어도 그대로 둔다 */
+  const today = getTodayYmd();
+  if (
+    fromDate !== initialWhen.fromDate &&
+    (fromDate < today || fromDate > addDays(today, START_LIMIT_DAYS))
+  ) {
+    return `시작일은 오늘부터 ${START_LIMIT_DAYS}일 이내로 골라 주세요`;
+  }
+  if (
+    toDate !== initialWhen.toDate &&
+    toDate > addDays(fromDate, PERIOD_LIMIT_DAYS)
+  ) {
+    return `돌봄 기간은 ${PERIOD_LIMIT_DAYS}일을 넘을 수 없어요`;
   }
   return '';
 };
@@ -150,6 +188,7 @@ export default function CareForm({
   const formRef = useRef(null);
 
   const isEdit = mode === 'edit';
+  const today = getTodayYmd();
   /** 전북 밖 좌표는 서버 메시지를 장소 칸에, 그 밖의 서버 오류는 폼 아래에 */
   const isRegionError = submitError?.code === REGION_ERROR_CODE;
   const placeError =
@@ -181,7 +220,19 @@ export default function CareForm({
   }, [isDirty]);
 
   const set = (patch, clear = []) => {
-    setValues((prev) => ({ ...prev, ...patch }));
+    setValues((prev) => {
+      const next = { ...prev, ...patch };
+      /** 바꾼 뒤 종료 시간이 시작 시간 이전이 되면 비운다 */
+      if (
+        next.toTime &&
+        next.fromTime &&
+        isSameDayOrOpen(next) &&
+        next.toTime <= next.fromTime
+      ) {
+        next.toTime = '';
+      }
+      return next;
+    });
     setErrors((prev) => {
       const next = { ...prev };
       clear.forEach((key) => delete next[key]);
@@ -215,7 +266,7 @@ export default function CareForm({
     if (values.shapes.length === 0) {
       next.shapes = '돌봄 형태를 하나 이상 골라 주세요';
     }
-    const when = whenError(values);
+    const when = whenError(values, initial);
     if (when) next.when = when;
     const amount = Number(values.amount);
     if (!amount) next.amount = '비용을 입력해 주세요';
@@ -429,7 +480,8 @@ export default function CareForm({
                     <DatePicker
                       label="시작일"
                       value={values.fromDate}
-                      max={values.toDate || undefined}
+                      min={today}
+                      max={values.toDate || addDays(today, START_LIMIT_DAYS)}
                       onChange={(value) => set({ fromDate: value }, ['when'])}
                       invalid={Boolean(errors.when)}
                       className="min-w-0 flex-1"
@@ -440,7 +492,12 @@ export default function CareForm({
                     <DatePicker
                       label="종료일"
                       value={values.toDate}
-                      min={values.fromDate || undefined}
+                      min={values.fromDate || today}
+                      max={
+                        values.fromDate
+                          ? addDays(values.fromDate, PERIOD_LIMIT_DAYS)
+                          : addDays(today, START_LIMIT_DAYS + PERIOD_LIMIT_DAYS)
+                      }
                       onChange={(value) => set({ toDate: value }, ['when'])}
                       invalid={Boolean(errors.when)}
                       className="min-w-0 flex-1"
@@ -466,7 +523,7 @@ export default function CareForm({
                     <Select
                       label="종료 시간"
                       value={values.toTime}
-                      options={TIME_OPTIONS('종료')}
+                      options={toTimeOptions(values)}
                       onChange={(toTime) => set({ toTime }, ['when'])}
                       className="min-w-0 flex-1"
                     />
@@ -569,24 +626,25 @@ export default function CareForm({
                 상세 설명
                 <Required />
               </label>
-              <AutoTextarea
-                id="care-body"
-                value={values.body}
-                maxLength={BODY_MAX}
-                placeholder="반려동물의 성격, 주의사항과 부탁할 돌봄 내용을 적어 주세요"
-                aria-required="true"
-                aria-invalid={Boolean(errors.body)}
-                onChange={(event) =>
-                  set({ body: event.target.value }, ['body'])
-                }
-                className={`${TEXTAREA_BASE} max-h-[600px] min-h-[240px] resize-y py-3 leading-[1.7] ${borderOf(errors.body)}`}
-              />
-              <div className="flex items-start justify-between gap-3">
-                <FieldError message={errors.body} />
-                <span className="ml-auto shrink-0">
+              {/** 글자 수는 높이를 차지하지 않고 칸 사이 간격 안 오른쪽에 둔다. 오류 문구만 흐름에 있어 다른 칸과 간격이 같다 */}
+              <div className="relative">
+                <AutoTextarea
+                  id="care-body"
+                  value={values.body}
+                  maxLength={BODY_MAX}
+                  placeholder="반려동물의 성격, 주의사항과 부탁할 돌봄 내용을 적어 주세요"
+                  aria-required="true"
+                  aria-invalid={Boolean(errors.body)}
+                  onChange={(event) =>
+                    set({ body: event.target.value }, ['body'])
+                  }
+                  className={`${TEXTAREA_BASE} max-h-[600px] min-h-[200px] resize-y py-3 leading-[1.7] ${borderOf(errors.body)}`}
+                />
+                <span className="absolute top-full right-0 mt-1.5">
                   <Counter value={values.body} max={BODY_MAX} />
                 </span>
               </div>
+              <FieldError message={errors.body} />
             </div>
 
             <ImageAttach
@@ -642,9 +700,7 @@ export default function CareForm({
               <FieldError message={placeError} />
             </div>
 
-            <div
-              className={`flex flex-col gap-1.5 rounded-lg border px-4 py-3.5 ${errors.agree ? 'border-danger' : 'border-line'} bg-surface-2`}
-            >
+            <div className="flex flex-col gap-1.5">
               <label className="flex min-h-8 cursor-pointer items-start gap-2.5">
                 <input
                   type="checkbox"
@@ -672,14 +728,6 @@ export default function CareForm({
         )}
 
         <div className="mt-2 flex items-center justify-end gap-2 border-t border-line pt-6 max-[760px]:flex-wrap max-[760px]:pt-5">
-          <button
-            type="button"
-            onClick={() => onLeave(PATHS.COMMUNITY_PETCARE)}
-            className="mr-auto inline-flex min-h-9 cursor-pointer items-center gap-1.5 text-base leading-normal font-medium text-muted hover:text-ink max-[760px]:order-3 max-[760px]:mr-0 max-[760px]:w-full max-[760px]:justify-center"
-          >
-            <ChevronLeft size={14} aria-hidden="true" />
-            목록으로
-          </button>
           <button
             type="button"
             onClick={() => onLeave(cancelTo)}

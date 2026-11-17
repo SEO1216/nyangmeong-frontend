@@ -24,13 +24,15 @@ export const RCRT_STTS_LABEL = {
   [RCRT_STTS.DONE]: '거래완료',
 };
 
-export const STATUS_TABS = [
-  { value: '', label: '전체' },
-  { value: 'open', label: '모집중' },
-];
+/**
+ * 글의 상태 이름. 거래완료(PCAC0003)인데 매칭 이력이 없으면(matched=false) 일정이 지나 마감된 글이라 「모집 종료」
+ * matched가 없으면(서버가 안 준 경우) 기존대로 「거래완료」
+ */
+export const isClosedWithoutMatch = (post) =>
+  post.rcrtSttsCd === RCRT_STTS.DONE && post.matched === false;
 
-/** URL ?stts= 값 → 서버에 보낼 상태 코드 */
-export const STTS_BY_TAB = { open: RCRT_STTS.OPEN };
+export const getRcrtSttsLabel = (post) =>
+  isClosedWithoutMatch(post) ? '모집 종료' : RCRT_STTS_LABEL[post.rcrtSttsCd];
 
 export const CST_UNIT = { HOUR: 'PCAC0004', CASE: 'PCAC0005' };
 
@@ -45,7 +47,7 @@ export const PRTC_SHP_OPTIONS = [
   { code: 'PCAC0008', name: '산책' },
   { code: 'PCAC0009', name: '놀이' },
   { code: 'PCAC0010', name: '훈련' },
-  { code: 'PCAC0011', name: '그 외' },
+  { code: 'PCAC0011', name: '기타' },
 ];
 
 /** 강아지 몸무게 구간(petSizeCd). 고양이는 비움 */
@@ -57,9 +59,9 @@ export const PET_SIZE_OPTIONS = [
 
 export const SIZE_FILTERS = [
   { value: '', label: '전체' },
-  { value: 's', label: '소형' },
-  { value: 'm', label: '중형' },
-  { value: 'l', label: '대형' },
+  { value: 's', label: '소형견' },
+  { value: 'm', label: '중형견' },
+  { value: 'l', label: '대형견' },
 ];
 
 export const SIZE_BY_FILTER = Object.fromEntries(

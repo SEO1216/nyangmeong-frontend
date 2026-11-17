@@ -8,6 +8,8 @@ import {
 import { showToast } from '@/components/toastStore';
 import { expenseKeys } from '@/features/expense/queries';
 import { notificationKeys } from '@/features/notification/queries';
+import { petKeys } from '@/features/pet/queries';
+import { pointKeys } from '@/features/point/queries';
 import {
   cancelCareRecord,
   cancelLastDose,
@@ -17,10 +19,13 @@ import {
   deleteCareItem,
   deleteSchedule,
   getCareItems,
+  getCareMissionProgress,
   getMyPets,
   getPetDetail,
+  getPetLimit,
   getPixelCharacters,
   getSchedules,
+  saveCareIndications,
   updateCareItem,
   updateSchedule,
 } from './api';
@@ -74,8 +79,10 @@ import {
 } from './receiptApi';
 import {
   getHealthIndicators,
+  getHealthReport,
   getHealthWidgets,
   getRecentStools,
+  refreshHealthReport,
   removeOldHealthWidgets,
   saveHealthWidgets,
 } from './dashboardApi';
@@ -90,6 +97,8 @@ export const healthKeys = {
   scheduleList: (params) => ['health', 'schedules', params],
   careItems: ['health', 'care-items'],
   careItemList: (petSn) => ['health', 'care-items', petSn],
+  careMissions: ['health', 'care-missions'],
+  careMissionProgress: (petSn) => ['health', 'care-missions', petSn],
   dailyRecords: ['health', 'daily-records'],
   dailyRecordList: (petSn) => ['health', 'daily-records', petSn],
   dailyTrend: (petSn, dailyRcdIdctCd) => [
@@ -125,6 +134,7 @@ export const healthKeys = {
   /** 일상 기록을 바꾸면 같이 다시 읽도록 daily-records 아래 */
   indicators: (petSn) => ['health', 'daily-records', petSn, 'indicators'],
   recentStools: (petSn) => ['health', 'daily-records', petSn, 'stools'],
+  healthReport: (petSn) => ['health', 'health-report', petSn],
 };
 
 const showErrorToast = (error) => showToast(error.message);
@@ -132,6 +142,10 @@ const showErrorToast = (error) => showToast(error.message);
 /** 내 반려동물 목록(GET /pets) */
 export const useMyPets = () =>
   useQuery({ queryKey: healthKeys.myPets, queryFn: getMyPets });
+
+/** 반려동물 한도. 마이페이지에서 등록·삭제·수락하면 같이 갱신되게 petKeys.limit()를 쓴다 */
+export const usePetLimit = () =>
+  useQuery({ queryKey: petKeys.limit(), queryFn: getPetLimit });
 
 /** 반려동물 상세(GET /pets/{petSn}), 체중 그래프 목표선용. isEnabled가 false면 요청하지 않는다 */
 export const usePetDetail = (petSn, isEnabled) =>
@@ -188,16 +202,32 @@ export const useCareItems = (petSn) =>
     enabled: petSn != null,
   });
 
-const useCareMutation = (mutationFn) => {
+/** 케어 항목·오늘 케어미션 진행·포인트 미션 캐시 무효화 */
+const invalidateCare = (queryClient) => {
+  queryClient.invalidateQueries({ queryKey: healthKeys.careItems });
+  queryClient.invalidateQueries({ queryKey: healthKeys.careMissions });
+  queryClient.invalidateQueries({ queryKey: pointKeys.all });
+};
+
+const useCareMutation = (mutationFn, { hasErrorToast = true } = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn,
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: healthKeys.careItems }),
-    onError: showErrorToast,
+    onSuccess: () => invalidateCare(queryClient),
+    onError: (error) => {
+      if (hasErrorToast) showErrorToast(error);
+    },
   });
 };
+
+/** 오늘 케어미션 완료 수·전체 수·주양육자 여부 (※신규 정책) */
+export const useCareMissionProgress = (petSn) =>
+  useQuery({
+    queryKey: healthKeys.careMissionProgress(petSn),
+    queryFn: () => getCareMissionProgress(petSn),
+    enabled: petSn != null,
+  });
 
 export const useCheckCareItem = () => useCareMutation(checkCareItem);
 
@@ -207,9 +237,62 @@ export const useCancelCareRecord = () => useCareMutation(cancelCareRecord);
 
 export const useCreateCareItem = () => useCareMutation(createCareItem);
 
-export const useUpdateCareItem = () => useCareMutation(updateCareItem);
+/** 튜토리얼의 케어 고르기 저장 (※신규 정책) */
+export const useSaveCareIndications = () =>
+  useCareMutation(saveCareIndications);
 
-export const useDeleteCareItem = () => useCareMutation(deleteCareItem);
+/**
+ * 「케어 항목 관리」 저장: 생성 -> 수정 -> 고른 항목 저장 -> 삭제 (※신규 정책)
+ * - done: 끝난 단계 기록. 다시 시도하면 남은 단계만 보냄
+ */
+const saveCareChanges = async ({ petSn, items, removedSns, done }) => {
+  for (const item of items) {
+    if (item.careArtclSn == null) {
+      /** 새 항목: 이미 만들었으면 그 뒤 고친 값만 수정으로 반영 */
+      const createdSn = done.createdSns[item.chipKey];
+      const bodyKey = JSON.stringify(item.createBody);
+      if (createdSn == null) {
+        const created = await createCareItem({ petSn, body: item.createBody });
+        done.createdSns[item.chipKey] = created.careArtclSn;
+        done.updatedBodies[created.careArtclSn] = bodyKey;
+      } else if (done.updatedBodies[createdSn] !== bodyKey) {
+        await updateCareItem({
+          petSn,
+          careArtclSn: createdSn,
+          body: { ...item.createBody, lastCmptnYmd: undefined },
+        });
+        done.updatedBodies[createdSn] = bodyKey;
+      }
+      continue;
+    }
+    const bodyKey = JSON.stringify(item.updateBody ?? {});
+    if (bodyKey === '{}' || done.updatedBodies[item.careArtclSn] === bodyKey)
+      continue;
+    await updateCareItem({
+      petSn,
+      careArtclSn: item.careArtclSn,
+      body: item.updateBody,
+    });
+    done.updatedBodies[item.careArtclSn] = bodyKey;
+  }
+  const careArtclSns = items
+    .filter((item) => item.isOn)
+    .map((item) => item.careArtclSn ?? done.createdSns[item.chipKey]);
+  const indicationKey = careArtclSns.join(',');
+  if (done.indicationKey !== indicationKey) {
+    await saveCareIndications({ petSn, careArtclSns });
+    done.indicationKey = indicationKey;
+  }
+  for (const careArtclSn of removedSns) {
+    if (done.deletedSns.includes(careArtclSn)) continue;
+    await deleteCareItem({ petSn, careArtclSn });
+    done.deletedSns.push(careArtclSn);
+  }
+};
+
+/** 오류는 모달 안에 표시 */
+export const useSaveCareChanges = () =>
+  useCareMutation(saveCareChanges, { hasErrorToast: false });
 
 export const useDailyRecords = (petSn) =>
   useQuery({
@@ -374,7 +457,7 @@ const useCheckupMutation = (mutationFn, onError = showErrorToast) => {
 
 export const useCreateCheckup = () => useCheckupMutation(createCheckup);
 
-/** 오류(409 RECEIPT_ALREADY_SAVED·404 RECEIPT_NOT_FOUND 등)는 검진기록 등록 모달 안에 보인다 */
+/** 오류(409 RECEIPT_ALREADY_SAVED·404 RECEIPT_NOT_FOUND 등)는 검진기록 추가 모달 안에 보인다 */
 export const useCreateReceiptCheckup = () =>
   useCheckupMutation(createReceiptCheckup, null);
 
@@ -535,6 +618,29 @@ export const useHealthIndicators = (petSn) =>
     queryFn: () => getHealthIndicators(petSn),
     enabled: petSn != null,
   });
+
+/**
+ * AI 건강분석 리포트. 실패는 카드 안에서 [다시 시도]
+ * - 저절로 다시 부르지 않음: 시간 초과(504)는 LLM을 다시 부르는 비용이 든다
+ */
+export const useHealthReport = (petSn) =>
+  useQuery({
+    queryKey: healthKeys.healthReport(petSn),
+    queryFn: () => getHealthReport(petSn),
+    enabled: petSn != null,
+    retry: false,
+  });
+
+/** AI 건강분석 리포트 새로고침. 성공하면 받은 리포트로 바꾸고, 실패 안내는 카드 안에서 */
+export const useRefreshHealthReport = (petSn) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => refreshHealthReport(petSn),
+    onSuccess: (report) =>
+      queryClient.setQueryData(healthKeys.healthReport(petSn), report),
+  });
+};
 
 /** 배변 상태 카드용 최근 기록 */
 export const useRecentStools = (petSn, isEnabled) =>

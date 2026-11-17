@@ -6,7 +6,12 @@ import {
   User,
 } from 'lucide-react';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
-import { RCRT_STTS, RCRT_STTS_LABEL, isOpen } from '../careCodes';
+import {
+  RCRT_STTS,
+  getRcrtSttsLabel,
+  isClosedWithoutMatch,
+  isOpen,
+} from '../careCodes';
 import CareStatusBadge from './CareStatusBadge';
 import { formatArea, formatScheduleShort, unitText } from './careUtils';
 
@@ -58,7 +63,9 @@ function OwnerPanel({ post, onOpenList }) {
       <div className="mt-4 rounded-lg bg-surface-2 px-3.5 py-3">
         <CareStatusBadge post={post} />
         <p className="mt-1.5 text-sm leading-[1.6] text-muted">
-          {AUTO_HELP[post.rcrtSttsCd]}
+          {isClosedWithoutMatch(post)
+            ? '모집이 마감된 글이에요'
+            : AUTO_HELP[post.rcrtSttsCd]}
         </p>
       </div>
       {!isOpen(post) && post.mtchSitterNcnm && (
@@ -112,7 +119,7 @@ function VisitorPanel({ post, onChat }) {
           />
           내 채팅
           <span className="ml-auto inline-flex h-6 items-center rounded-full bg-tone-gray-bg px-2.5 text-[13px] font-semibold text-tone-gray-fg">
-            {isOpen(post) ? '매칭 전' : RCRT_STTS_LABEL[post.rcrtSttsCd]}
+            {isOpen(post) ? '매칭 전' : getRcrtSttsLabel(post)}
           </span>
         </p>
         <button
@@ -133,7 +140,9 @@ function VisitorPanel({ post, onChat }) {
         disabled
         className={`${BTN_PRIMARY} mt-[18px] w-full`}
       >
-        모집이 끝났어요
+        {post.rcrtSttsCd === RCRT_STTS.MATCHED
+          ? '매칭이 완료되었어요'
+          : '모집이 끝났어요'}
       </button>
     );
   }

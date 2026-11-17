@@ -18,6 +18,8 @@ import SuspendModal from '@/features/adminMember/SuspendModal';
 import { PATHS } from '@/routes/paths';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 const PAGE_SIZE = 20;
 
@@ -100,14 +102,10 @@ export default function AdminMemberDetailPage() {
     }
     if (member.isError) {
       return (
-        <div role="alert" className="flex flex-col items-center gap-3 py-16">
-          <p className="text-base text-subtle">
-            회원 정보를 불러오지 못했어요.
-          </p>
-          <button type="button" className={BTN_SECONDARY} onClick={handleRetry}>
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message="회원 정보를 불러오지 못했어요."
+          onRetry={handleRetry}
+        />
       );
     }
 
@@ -178,10 +176,5 @@ export default function AdminMemberDetailPage() {
     );
   };
 
-  return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">회원 상세</h1>
-      {renderBody()}
-    </div>
-  );
+  return <AdminPageFrame title="회원 상세">{renderBody()}</AdminPageFrame>;
 }

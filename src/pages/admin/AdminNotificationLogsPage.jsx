@@ -13,6 +13,8 @@ import {
 } from '@/features/adminNotificationLog/queries';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 const PAGE_SIZE = 20;
 
@@ -90,18 +92,10 @@ export default function AdminNotificationLogsPage() {
             {logs.error.message}
           </p>
         ) : logs.isError ? (
-          <div role="alert" className="flex flex-col items-center gap-3 py-16">
-            <p className="text-base text-subtle">
-              발송 이력을 불러오지 못했어요.
-            </p>
-            <button
-              type="button"
-              className={BTN_SECONDARY}
-              onClick={handleRetry}
-            >
-              다시 시도
-            </button>
-          </div>
+          <LoadError
+            message="발송 이력을 불러오지 못했어요."
+            onRetry={handleRetry}
+          />
         ) : logs.data.content.length === 0 ? (
           <p className="rounded-[14px] border border-line bg-white py-16 text-center text-base text-subtle">
             발송 이력이 없어요
@@ -128,10 +122,5 @@ export default function AdminNotificationLogsPage() {
     );
   };
 
-  return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">발송 이력</h1>
-      {renderBody()}
-    </div>
-  );
+  return <AdminPageFrame title="발송 이력">{renderBody()}</AdminPageFrame>;
 }

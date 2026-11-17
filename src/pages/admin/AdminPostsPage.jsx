@@ -11,6 +11,8 @@ import { useAdminPosts } from '@/features/adminCommunity/queries';
 import { PATHS } from '@/routes/paths';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 const PAGE_SIZE = 20;
 
@@ -61,7 +63,7 @@ function PostsTab() {
     return <AdminForbidden message={posts.error.message} />;
   }
 
-  /** 입력값 오류는 서버 문구, 그 밖의 오류는 다시 시도 */
+  /** 입력값 오류는 서버 문구, 그 밖의 오류는 조회 오류 안내(LoadError) */
   const renderList = () => {
     if (posts.error?.code === 'INVALID_INPUT_VALUE') {
       return (
@@ -72,14 +74,10 @@ function PostsTab() {
     }
     if (posts.isError) {
       return (
-        <div role="alert" className="flex flex-col items-center gap-3 py-16">
-          <p className="text-base text-subtle">
-            게시글 목록을 불러오지 못했어요.
-          </p>
-          <button type="button" className={BTN_SECONDARY} onClick={handleRetry}>
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message="게시글 목록을 불러오지 못했어요."
+          onRetry={handleRetry}
+        />
       );
     }
     if (posts.data.content.length === 0) {
@@ -153,8 +151,7 @@ export default function AdminPostsPage() {
     setSearchParams(nextTab === 'comments' ? { tab: nextTab } : {});
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">게시글·댓글</h1>
+    <AdminPageFrame title="게시글·댓글">
       <div
         role="tablist"
         aria-label="게시글·댓글"
@@ -183,6 +180,6 @@ export default function AdminPostsPage() {
       <div role="tabpanel">
         {tab === 'comments' ? <CommentsTab /> : <PostsTab />}
       </div>
-    </div>
+    </AdminPageFrame>
   );
 }

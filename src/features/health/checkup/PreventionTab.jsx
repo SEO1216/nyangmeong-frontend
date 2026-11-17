@@ -5,6 +5,7 @@ import Icon from '@/components/Icon';
 import Modal from '@/components/Modal';
 import { BTN_DANGER, BTN_SECONDARY } from '@/components/buttonStyles';
 import { formatDate } from '@/utils/formatDate';
+import CareShortageNotice from '../CareShortageNotice';
 import { getCycleName } from '../careDue';
 import EmptyBox from '../diary/EmptyBox';
 import { useCancelPrevention } from '../queries';
@@ -29,7 +30,7 @@ export default function PreventionTab({ petSn, ckupRcdSn, preventions }) {
     );
 
   return (
-    <Card title="반복 예방 관리" sub="선택 입력">
+    <Card title="반복 예방" sub="선택">
       {preventions.length === 0 ? (
         <EmptyBox
           icon="pest_control"
@@ -59,7 +60,7 @@ export default function PreventionTab({ petSn, ckupRcdSn, preventions }) {
                     ` · 다음 예정 ${formatDate(prevention.nxtmPrnmntYmd)}`}
                 </span>
               </span>
-              <Badge tone="brand">처방약 연동</Badge>
+              <Badge tone="brand">케어리스트 연동</Badge>
               <button
                 type="button"
                 className={TEXT_BTN_DEL}
@@ -117,7 +118,14 @@ export default function PreventionTab({ petSn, ckupRcdSn, preventions }) {
               </button>
             </>
           }
-        />
+        >
+          {/** 지우면 케어리스트가 5개 미만이 될 때만 안내 (※신규 정책) */}
+          <CareShortageNotice
+            petSn={petSn}
+            verb="해지하면"
+            isTarget={(item) => item.reptPrvntMngSn === cancelSn}
+          />
+        </Modal>
       )}
     </Card>
   );
