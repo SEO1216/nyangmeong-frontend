@@ -9,6 +9,9 @@ export const getNotifications = ({ tab }) =>
 export const readNotification = (inappNotiSn) =>
   api.post(`/notifications/${inappNotiSn}/read`);
 
+/** 탭과 상관없이 숨김 기준 안의 미읽음 전부. 응답 본문은 쓰지 않음 */
+export const readAllNotifications = () => api.post('/notifications/read-all');
+
 export const getNotificationSettings = () =>
   api.get('/members/me/notification-settings');
 
