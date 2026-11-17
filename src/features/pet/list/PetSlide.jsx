@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 import { useLayoutEffect, useRef, useState } from 'react';
 import PetFace from '@/components/PetFace';
-import { BRUP_ROLE, MAX_OWN_PETS, PET_SE } from '@/utils/petCodes';
+import Skeleton from '@/components/Skeleton';
+import { BRUP_ROLE, PET_SE } from '@/utils/petCodes';
 import { useCaregiversOf } from '../queries';
 import FamilySection, { OwnerLine } from './FamilySection';
 import MoreMenu from './MoreMenu';
@@ -48,8 +49,10 @@ export default function PetSlide({
   onUnlink,
   onInvite,
   onAdd,
-  isFull,
+  limit,
 }) {
+  /** 한도를 불러오기 전·실패면 isFull을 정하지 않는다(null) */
+  const isFull = limit.data ? limit.data.remainingPetCount <= 0 : null;
   const total = pets.length + 1;
   /** 넘길 때 가족 영역이 캐시에서 바로 그려지도록 모든 동물의 양육자를 미리 받아 둔다 */
   useCaregiversOf(pets.map((pet) => pet.petSn));
@@ -82,7 +85,7 @@ export default function PetSlide({
       >
         <SlideHeight>
           {isAddSlide ? (
-            <AddSlide isFull={isFull} onAdd={onAdd}>
+            <AddSlide limit={limit} isFull={isFull} onAdd={onAdd}>
               {dots}
             </AddSlide>
           ) : (
@@ -210,11 +213,11 @@ function PetDots({ pets, index, isFull, onMove }) {
           className={dotClass(dotIndex === index)}
         />
       ))}
-      {isFull ? (
+      {isFull !== false ? (
         <button
           type="button"
           onClick={() => onMove(pets.length)}
-          aria-label="등록 한도 안내"
+          aria-label={isFull ? '등록 한도 안내' : '마지막 카드'}
           aria-current={index === pets.length ? 'true' : undefined}
           className={dotClass(index === pets.length)}
         />
@@ -239,35 +242,58 @@ function PetDots({ pets, index, isFull, onMove }) {
   );
 }
 
-/** 마지막 슬라이드: 등록 / 한도 안내 */
-function AddSlide({ isFull, onAdd, children }) {
+/** 마지막 슬라이드: 등록 / 한도 안내 (한도를 불러오는 중·실패면 숫자 없이 스켈레톤·재시도) */
+function AddSlide({ limit, isFull, onAdd, children }) {
+  const petMaxCnt = limit.data?.petMaxCnt;
   return (
     <article
-      aria-labelledby="pet-add-title"
+      aria-labelledby={limit.data ? 'pet-add-title' : undefined}
+      aria-busy={limit.isPending}
       className={`relative flex min-h-[470px] flex-col items-center justify-center gap-3 rounded-modal border-[1.5px] border-dashed border-line-strong p-5 pb-16 text-center max-[760px]:min-h-[360px] ${isFull ? 'bg-surface-2' : 'bg-white'}`}
     >
-      <span
-        aria-hidden="true"
-        className={`mb-2 grid size-[72px] place-items-center rounded-full ${isFull ? 'bg-white text-[22px] font-bold' : 'bg-brand-50 text-brand-600'}`}
-      >
-        {isFull ? MAX_OWN_PETS : <Plus className="size-9" />}
-      </span>
-      <h2 id="pet-add-title" className="text-xl font-bold">
-        {isFull ? '반려동물을 모두 등록했어요' : '새 반려동물 등록'}
-      </h2>
-      <p className="break-keep text-subtle">
-        {isFull
-          ? `반려동물은 공동양육을 포함해 최대 ${MAX_OWN_PETS}마리까지 등록할 수 있어요`
-          : '함께 사는 반려동물을 추가하면 건강기록·케어미션을 같이 관리할 수 있어요'}
-      </p>
-      {!isFull && (
-        <button
-          type="button"
-          onClick={onAdd}
-          className="mt-2 inline-flex h-10 items-center justify-center rounded-md bg-brand-500 px-4 font-semibold text-white hover:bg-brand-600"
-        >
-          반려동물 등록하기
-        </button>
+      {limit.isPending ? (
+        <>
+          <Skeleton className="mb-2 size-[72px] rounded-full" />
+          <Skeleton className="h-7 w-48" />
+          <Skeleton className="h-5 w-72 max-w-full" />
+        </>
+      ) : limit.isError ? (
+        <p className="text-muted">
+          반려동물 등록 가능 수를 불러오지 못했어요{' '}
+          <button
+            type="button"
+            onClick={() => limit.refetch()}
+            className="font-semibold text-brand-600 underline"
+          >
+            다시 시도
+          </button>
+        </p>
+      ) : (
+        <>
+          <span
+            aria-hidden="true"
+            className={`mb-2 grid size-[72px] place-items-center rounded-full ${isFull ? 'bg-white text-[22px] font-bold' : 'bg-brand-50 text-brand-600'}`}
+          >
+            {isFull ? petMaxCnt : <Plus className="size-9" />}
+          </span>
+          <h2 id="pet-add-title" className="text-xl font-bold">
+            {isFull ? '반려동물을 모두 등록했어요' : '새 반려동물 등록'}
+          </h2>
+          <p className="break-keep text-subtle">
+            {isFull
+              ? `반려동물은 공동양육을 포함해 최대 ${petMaxCnt}마리까지 등록할 수 있어요`
+              : '함께 사는 반려동물을 추가하면 건강기록·케어미션을 같이 관리할 수 있어요'}
+          </p>
+          {!isFull && (
+            <button
+              type="button"
+              onClick={onAdd}
+              className="mt-2 inline-flex h-10 items-center justify-center rounded-md bg-brand-500 px-4 font-semibold text-white hover:bg-brand-600"
+            >
+              반려동물 등록하기
+            </button>
+          )}
+        </>
       )}
       {children}
     </article>

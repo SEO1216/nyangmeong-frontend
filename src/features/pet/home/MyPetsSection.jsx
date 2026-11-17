@@ -5,7 +5,7 @@ import SkeletonCard from '@/components/SkeletonCard';
 import { PATHS } from '@/routes/paths';
 import PetEmpty from '../list/PetEmpty';
 import PetFormModal from '../list/PetFormModal';
-import { usePets } from '../queries';
+import { usePetLimit, usePets } from '../queries';
 import PetMiniCard from './PetMiniCard';
 
 /** 처음 보이는 카드 수 */
@@ -14,6 +14,7 @@ const VISIBLE_COUNT = 6;
 export default function MyPetsSection() {
   const navigate = useNavigate();
   const { data: pets, isPending, isError, refetch } = usePets();
+  const limit = usePetLimit();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
 
@@ -80,7 +81,10 @@ export default function MyPetsSection() {
           </button>
         </p>
       ) : pets.length === 0 ? (
-        <PetEmpty onRegister={() => navigate(PATHS.MYPAGE_PETS)} />
+        <PetEmpty
+          onRegister={() => navigate(PATHS.MYPAGE_PETS)}
+          limit={limit}
+        />
       ) : (
         <>
           <ul className="grid grid-cols-1 gap-3 min-[761px]:grid-cols-2 min-[1281px]:grid-cols-3 max-[760px]:gap-0 max-[760px]:overflow-hidden max-[760px]:rounded-card max-[760px]:border max-[760px]:border-line max-[760px]:bg-white max-[760px]:[&>li+li]:border-t max-[760px]:[&>li+li]:border-line-soft">

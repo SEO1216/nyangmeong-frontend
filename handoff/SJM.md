@@ -2,14 +2,18 @@
 
 ## 지금 하는 것
 
-SCR-MYP-001·002·003·005·040 반려동물 10마리 한도 연결·등록 진입점·[사진 제거] — 끝 (2026-11-16, 검증 `통과` 3회차, lint·build 0, 사람 확인 완료. 추가-1·2는 사람이 요청한 것으로 확인)
+SCR-MYP-003 반려동물 최대 수를 운영 설정값(`GET /pets/limit`)으로 — 끝 (2026-11-17, 검증 `통과` 1회차·추가-1 재검증 통과, lint·build 0, 사람 확인 완료. 추가-1은 사람이 요청한 것으로 확인)
 
-- 바꾼 것: FN-MYP-002-01 `PetListPage.jsx` 한도 판정을 공동양육 포함 `pets.length >= 10`으로, 한도 카드·0마리 안내(`PetSlide.jsx`·`PetEmpty.jsx`) 문구에 "공동양육을 포함해". FN-MYP-005-05 `invite/InvitationAccept.jsx`가 `remainingPetCount`까지만 선택(처음 선택은 앞에서부터, 안 고른 카드 비활성, 목록 위 안내, 0이면 [수락] 비활성과 아래 안내 숨김, 수락 400이면 `data.remainingPetCount`로 다시 맞춤). FN-MYP-002-02 점 줄 ＋를 초록 테두리 원·hover 안내로. FN-MYP-001-01 `home/MyPetsSection.jsx`에 [＋ 등록](`PetFormModal`). FN-MYP-040-02 [기본 이미지로] → [사진 제거]. FN-MYP-003-01 등록 400은 기존 `error.message` 토스트 그대로
+- 바꾼 것: `features/pet/api.js` `getPetLimit`, `queries.js` `petKeys.limit`·`usePetLimit`(`refreshAfterPetGone`·`useDeleteCaregiver`에서 limit 무효화). `PetListPage`는 `limit`을 `PetSlide`·`PetEmpty`에 넘긴다. `PetSlide`는 `remainingPetCount <= 0`으로 한도 카드를 정하고 숫자·문구는 `petMaxCnt`, 불러오는 중은 스켈레톤, 실패는 "반려동물 등록 가능 수를 불러오지 못했어요 [다시 시도]"(등록 버튼·숫자 없음, 점 줄 끝은 보통 점). `PetEmpty`는 한도 안내 줄만 `petMaxCnt`·스켈레톤·숨김, 등록 버튼은 항상 표시. `MAX_OWN_PETS`는 지우지 않았다(`InvitationAccept`·JAJ `PetSwitcher`가 씀). 접근성 속성 `aria-busy`·`aria-labelledby`(한도 불러온 뒤만)는 사람이 그대로 두기로 했다
+- 추가-1: 마이페이지 홈 `home/MyPetsSection.jsx`가 `PetEmpty`를 `limit` 없이 써서 0마리일 때 TypeError. `usePetLimit()`을 불러 넘기도록 고쳤다. 홈은 반려동물이 있어도 `/api/pets/limit`을 한 번 더 요청하며 사람이 그대로 두기로 했다
+- 정리: 공용 DB 변경 없음(응답 가로채기로만 확인)
+- 390px `PetEmpty` 한도 안내 줄이 불러오는 중 한 줄 → 불러온 뒤 두 줄이라 카드 높이가 20px 늘어난다(1440px은 같음). 완료 조건 밖이라 두었다
 
 ## 다음에 할 것
 
 ### 내 코드 작업
 
+- SCR-MYP-005 `InvitationAccept`: 안내 문구의 `MAX_OWN_PETS`를 `usePetLimit`의 `petMaxCnt`(또는 서버 `message`)로 바꾼다. 고르는 수는 `remainingPetCount`로 이미 막고 있다. 마일스톤 `SCR-MYP-005 … 수락 화면 안내 문구를 운영 설정값으로`(대기). 그 뒤 `MAX_OWN_PETS`를 쓰는 곳은 JAJ `PetSwitcher`뿐(JAJ에 알린다)
 - (선택) 꾸미기 슬롯 아이템 이름이 390px에서 단어 중간에서 끊긴다("방울 목걸/이"). 슬롯은 이미지 자리라 이번엔 두었다
 - JAJ·LJS 알림: 공용 `components/AnalyzeProgress.jsx`를 새로 만들었다(영수증 분석 게이지, `label` prop). JAJ의 `features/ai/receipt/ReceiptUploadModal.jsx`는 함수·상수를 지우고 import만 바꿨고 화면 동작은 같다. 새 분석 화면에 게이지가 필요하면 이 컴포넌트를 쓴다
 - SCR-MYP-002 10마리 보유 때 삭제하면 등록 카드로 바뀌는지 화면 확인(데이터가 없어 못 함)
