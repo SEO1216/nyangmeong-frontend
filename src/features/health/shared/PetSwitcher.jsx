@@ -3,8 +3,8 @@ import { ChevronDown, ChevronsUpDown, Plus } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import PetFace from '@/components/PetFace';
 import { PATHS } from '@/routes/paths';
-import { BRUP_ROLE, MAX_OWN_PETS } from '@/utils/petCodes';
 import { formatAge, getVrtyName } from '@/utils/petFormat';
+import { usePetLimit } from '../queries';
 import { useSelectedPet } from './selectedPet';
 
 /** 이름 아래 나이·품종 줄. 비어 있는 값은 줄을 그리지 않음 */
@@ -84,6 +84,7 @@ const useStickBelowMenu = (ref, isEnabled, layoutKey) => {
  */
 export default function PetSwitcher({ variant }) {
   const { pets, pet, selectPet, isPending, isError } = useSelectedPet();
+  const { data: limit } = usePetLimit();
   const { pathname, search, hash } = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef(null);
@@ -141,9 +142,8 @@ export default function PetSwitcher({ variant }) {
     );
   }
 
-  const isFull =
-    pets.filter((item) => item.brupRoleCd === BRUP_ROLE.PRIMARY).length >=
-    MAX_OWN_PETS;
+  // 한도를 못 불러왔으면(불러오는 중·실패) [등록]을 숨긴다
+  const canRegister = limit?.remainingPetCount > 0;
   const handleSelect = (petSn) => {
     setIsOpen(false);
     if (petSn !== pet.petSn) selectPet(petSn);
@@ -258,7 +258,7 @@ export default function PetSwitcher({ variant }) {
                 );
               })}
             </div>
-            {!isFull && (
+            {canRegister && (
               <Link
                 to={getRegisterPath(returnTo)}
                 className="flex min-w-0 flex-col items-center gap-1 rounded-box px-1 py-2 text-sm font-medium text-ink-2 hover:bg-surface-2 hover:text-ink"

@@ -8,6 +8,7 @@ import {
 import { showToast } from '@/components/toastStore';
 import { expenseKeys } from '@/features/expense/queries';
 import { notificationKeys } from '@/features/notification/queries';
+import { petKeys } from '@/features/pet/queries';
 import { pointKeys } from '@/features/point/queries';
 import {
   cancelCareRecord,
@@ -21,6 +22,7 @@ import {
   getCareMissionProgress,
   getMyPets,
   getPetDetail,
+  getPetLimit,
   getPixelCharacters,
   getSchedules,
   saveCareIndications,
@@ -140,6 +142,10 @@ const showErrorToast = (error) => showToast(error.message);
 /** 내 반려동물 목록(GET /pets) */
 export const useMyPets = () =>
   useQuery({ queryKey: healthKeys.myPets, queryFn: getMyPets });
+
+/** 반려동물 한도. 마이페이지에서 등록·삭제·수락하면 같이 갱신되게 petKeys.limit()를 쓴다 */
+export const usePetLimit = () =>
+  useQuery({ queryKey: petKeys.limit(), queryFn: getPetLimit });
 
 /** 반려동물 상세(GET /pets/{petSn}), 체중 그래프 목표선용. isEnabled가 false면 요청하지 않는다 */
 export const usePetDetail = (petSn, isEnabled) =>

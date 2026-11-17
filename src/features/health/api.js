@@ -12,6 +12,9 @@ export const getQueryParam = (name) =>
 /** 내 반려동물 목록 GET /pets (SJM 백엔드, 케어 캘린더) */
 export const getMyPets = () => api.get('/pets');
 
+/** 반려동물 한도 GET /pets/limit (SJM 백엔드, 반려동물 바꾸기의 [등록] 버튼) → { petMaxCnt, linkedPetCount, remainingPetCount } */
+export const getPetLimit = () => api.get('/pets/limit');
+
 /** 반려동물 상세 GET /pets/{petSn} (SJM 백엔드, 건강 일지 체중 그래프의 목표체중 goalBdwg) */
 export const getPetDetail = (petSn) => api.get(`/pets/${petSn}`);
 
