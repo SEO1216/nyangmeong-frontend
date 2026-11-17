@@ -7,6 +7,7 @@ import NotificationItem from '@/features/notification/shared/NotificationItem';
 import { NOTI_TABS, NOTI_TYPE } from '@/features/notification/shared/notiTabs';
 import {
   useNotifications,
+  useReadAllNotifications,
   useReadNotification,
   useUnreadCount,
 } from '@/features/notification/queries';
@@ -19,6 +20,7 @@ function NotificationPanel({ unreadCount, onClose, onDismiss }) {
   const [tab, setTab] = useState(NOTI_TABS[0]);
   const { data, isPending } = useNotifications(tab);
   const readNotification = useReadNotification();
+  const readAll = useReadAllNotifications();
   const navigate = useNavigate();
   const { open: openChatModal } = useChatModal();
 
@@ -61,6 +63,14 @@ function NotificationPanel({ unreadCount, onClose, onDismiss }) {
             미읽음{' '}
             <span className="font-bold text-[#f44b21]">{unreadCount}</span>
           </p>
+          <button
+            type="button"
+            className="ml-1 h-8 rounded-full px-2 text-sm font-semibold leading-[18px] tracking-[-0.03em] text-[#285a5c] hover:bg-[#f4f6f6] disabled:text-[#a3adae] disabled:hover:bg-transparent"
+            disabled={unreadCount === 0 || readAll.isPending}
+            onClick={() => readAll.mutate()}
+          >
+            모두 읽음
+          </button>
           <button
             type="button"
             className="-my-[3px] -mr-2 flex h-8 w-8 items-center justify-center rounded-full text-[#566465] hover:bg-[#f4f6f6]"
