@@ -252,7 +252,7 @@
 - 기다리는 것: 백엔드 `GET /pets/limit` → `{petMaxCnt, linkedPetCount, remainingPetCount}` (SJM, 백엔드 끝남)
 - 완료 조건: `PetListPage`·`PetSlide`·`PetEmpty`의 "10마리"와 등록 비활성 판정이 `petMaxCnt`·`remainingPetCount`를 따르고, 불러오는 중·실패 때 숫자를 임의로 보여 주지 않는다. `MAX_OWN_PETS`는 지우지 않는다(`InvitationAccept`·JAJ `PetSwitcher`가 아직 쓴다). `yarn -s lint`, `yarn -s build` 종료 코드 0
 
-## SCR-MYP-005 공동양육자 추가 · 수락 화면 안내 문구를 운영 설정값으로 — 대기
+## SCR-MYP-005 공동양육자 추가 · 수락 화면 안내 문구를 운영 설정값으로 — 끝
 
 - 기능: 명세 기능 ID 추가 없음. FN-MYP-005-05 수락 화면 안내 문구의 "10마리"를 운영 설정값으로 바꾼다
 - 기다리는 것: 백엔드 `GET /pets/limit`·`GET /caregiver-invitations/{sn}`의 `remainingPetCount`·수락 400 `PET_LIMIT_EXCEEDED`의 `message`와 `data.remainingPetCount` (SJM, 백엔드 끝남)
