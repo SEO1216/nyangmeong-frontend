@@ -1448,7 +1448,13 @@
 - 열린 질문(`/start`에서 사람이 정함): 5건 제한 유지 + [전체 보기] 화면 추가 / 제한 늘리기(명세 FN-COM-004-05·백엔드 limit 같이 변경)
 - 결정(2026-11-17): FN-COM-004-16(전체 페이지 없음)에 따라 5건 제한·[전체 보기] 없음 유지. 디자인은 화면설계서 기준(추천안대로)
 - 결과(2026-11-17): `features/notification/api.js` `readAllNotifications`, `queries.js` `useReadAllNotifications`(성공 시 미읽음 수·목록 무효화·토스트, 실패 토스트), `layouts/NotificationDropdown.jsx` 머리 [모두 읽음](미읽음 0·요청 중 비활성). 검증 1회차 통과(route 흉내), 사람 확인 2026-11-17
-- 연결 남음: FN-COM-004 모두 읽음 (백엔드 연결 `POST /api/notifications/read-all`, 백엔드 저장소에서 /start)
+- 연결 남음: FN-COM-004 모두 읽음 (백엔드 연결 `POST /api/notifications/read-all`, 백엔드 저장소에서 /start) → 해소(2026-11-17, "모두 읽음 서버 연결" 절)
+
+## SCR-COM-004 알림 드롭다운 · 모두 읽음 서버 연결 — 끝
+- 기능: FN-COM-004 모두 읽음(DMS 기능 ID 추가 전, 백엔드 제안 FN-COM-004-17). 걸치는 기능 FN-COM-004-02·05
+- 배경: 백엔드 `POST /api/notifications/read-all`이 develop에 들어옴(백엔드 PR #261). 응답 `{count}`(바꾼 건수, 0건도 200). 프론트 코드는 이미 같은 주소를 부른다
+- 완료 조건: 실제 API로 [모두 읽음] 성공 흐름(토스트 "모두 읽었어요"·배지 사라짐·"미읽음 0"·목록 읽음 모양) 확인. 코드 변경이 필요 없으면 확인만 하고 끝낸다
+- 결과(2026-11-17): 코드 변경 없음. 검증 1회차 통과(8081 실제 API, 미읽음 2건 → `count` 2·토스트·배지 사라짐·미읽음 0, 0건 회원은 버튼 비활성), 사람 확인 2026-11-17
 
 ## 제외
 - FN-AIM-009-01~27: 화면 담당이 JAJ(milestone.md "화면과 API 담당이 다른 곳" — AIM-009 영수증 결과 규칙, 화면은 SCR-HLT-002)
