@@ -2,9 +2,11 @@
 
 ## 지금 하는 것
 
-없음(2026-11-16 SCR-COM-002 공용 Modal 밖 dialog 뒤 스크롤 잠금 끝: 다섯 창에 `useScrollLock()`, 검증 2회차 통과(1회차는 백엔드 미기동), 사람 확인 2026-11-16)
+없음(2026-11-17 SCR-ADM-082 검사결과지 분석 현황 API 연결 끝: `getAdminPdfAnalyses` 가짜를 실제 `GET /api/admin/processing/pdf-analyses`로, 검증 1회차 통과, 사람 확인 2026-11-17)
 
 ## 다음에 할 것
+
+- SCR-ADM-082 참고(검증 보고 2026-11-17, 판정 밖): 390 폭 관리자 헤더에서 관리자 이름이 "냥멍관…"으로 잘린다(이번 변경과 무관한 `AdminLayout` 헤더)
 
 - SCR-COM-002 스크롤 잠금 팀 알림(2026-11-16, 결정 "PR 본문 + 팀 채널 한 줄"): JAJ에게 `features/health/ScheduleModal.jsx`·`features/health/diary/FormModal.jsx`, SJM에게 `features/expense/shared/ExpenseDetailSheet.jsx`에 `useScrollLock()` 한 줄을 넣어 창이 열린 동안 뒤 페이지가 스크롤되지 않는다고 알린다. 공용 `ConfirmModal`·`ImageViewer`도 같다. 앞으로 `showModal()`을 직접 부르는 창을 만들면 `useScrollLock()`을 같이 넣거나 공용 `Modal`을 쓴다
 - SCR-COM-002 스크롤 잠금 이번엔 안 함(2026-11-16): ① 다섯 창을 공용 `Modal`로 옮기기(마일스톤 절 단계안) ② `NavDrawer`·`AdminLayout` 드로어의 `body` 잠금을 `useScrollLock`으로 ③ `LandingHeader` 모바일 메뉴 잠금 없음. 하려면 새 마일스톤으로

@@ -1179,11 +1179,13 @@
 - 이미 바뀐 것: `features/adminAiKeyword/api.js`·`keywordLabels.js`(가짜)
 - 연결 남음: FN-ADM-081-01·02·03 (백엔드 연결 관리자·내부 키워드 사전 API 삭제, 백엔드 저장소에서 /start)
 
-## SCR-ADM-082 처리 현황 · 검사결과지 분석 현황 API 연결 — 대기
+## SCR-ADM-082 처리 현황 · 검사결과지 분석 현황 API 연결 — 끝
 - 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-082-03
 - 기다리는 것: 백엔드 SCR-ADM-082 처리 현황 · 검사결과지 분석 현황 API(LJS, 끝 2026-11-05). 계약은 백엔드 `docs/api/global.md` `/admin/processing/pdf-analyses` 행
 - 완료 조건: `features/adminProcessing/api.js`의 `getAdminPdfAnalyses` 가짜를 실제 `GET /api/admin/processing/pdf-analyses?fromYmd=&toYmd=&page=&size=20`로 바꾼다. 응답은 `{ summary: { totCnt, scsCnt, tmotCnt, errCnt }, content: [{ extlApiCallLogSn, callRsltCd, failRsn, callDt }], page, size, totalElements, totalPages, hasNext }`로 가짜와 같은 모양이다. 기간은 둘 다 선택(호출일 양끝 포함), `fromYmd`가 `toYmd`보다 뒤면 400 `INVALID_INPUT_VALUE`. 검사결과지가 아닌 파일은 Python이 성공(SYSC0021)으로 통지해 `scsCnt`·`totCnt`에 들어가고 실패 목록에는 없다. 결과 코드 SYSC0021 성공·SYSC0022 실패(API 오류)·SYSC0023 시간초과
 - 이미 바뀐 것: `features/adminProcessing/api.js`(가짜 `getAdminPdfAnalyses`)
+- 완료 조건 결과(2026-11-17): `getAdminPdfAnalyses`를 실제 API로 바꾸고 가짜·`?fake=`를 지움, 빈 값 빼기를 `compactParams`로 묶음. 검증 `통과`(1회차, 5180·8081 관리자), 사람 확인 2026-11-17
+- 연결 남음: 없음
 
 ## SCR-ADM-110 운영 설정 · 운영 설정 API 연결 — 끝
 - 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-110-01~04 (2026-11-10 SCR-ADM-110 절 "연결 남음"에서 옮김)
