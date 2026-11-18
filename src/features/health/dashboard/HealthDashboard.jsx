@@ -26,9 +26,13 @@ const INDICATOR_IDS = ['weight', 'meal', 'water', 'walk'];
 /** 검진기록 카드 줄 수 */
 const CHECKUP_COUNT = 5;
 
-/** 1100px 이상 3열, 그 아래 2열(760px 미만은 요약 타일 2열) */
+/**
+ * 열 수는 화면 폭이 아니라 그리드를 감싸는 컨테이너(GRID_WRAP_CLASS) 폭으로 정함(추가-6)
+ * - 컨테이너 1000px 이상 3열, 그 미만 2열(760px 미만은 요약 타일 2열·gap-3)
+ */
+const GRID_WRAP_CLASS = '@container';
 const GRID_CLASS =
-  'grid grid-cols-3 gap-5 max-[1100px]:grid-cols-2 max-[760px]:gap-3';
+  'grid grid-cols-3 gap-5 @max-[1000px]:grid-cols-2 max-[760px]:gap-3';
 
 /**
  * [건강 대시보드] 종합 건강기록 히어로 아래 (※신규 정책, 흐름도 D1~D10)
@@ -160,22 +164,24 @@ export default function HealthDashboard({
           onRetry={() => widgets.refetch()}
         />
       ) : (
-        <div className={GRID_CLASS}>
-          <AiReportCard key={pet.petSn} pet={pet} />
-          {shownIds.map((id) =>
-            isItemPending(id) ? (
-              <SkeletonCard
-                key={id}
-                className={`h-[260px] max-[760px]:h-28 ${MOBILE_HIDDEN_IDS.includes(id) ? 'max-[760px]:hidden' : ''}`}
-              />
-            ) : (
-              <WidgetCard
-                key={`${id}-${pet.petSn}`}
-                item={findWidgetItem(id)}
-                sources={sources}
-              />
-            ),
-          )}
+        <div className={GRID_WRAP_CLASS}>
+          <div className={GRID_CLASS}>
+            <AiReportCard key={pet.petSn} pet={pet} />
+            {shownIds.map((id) =>
+              isItemPending(id) ? (
+                <SkeletonCard
+                  key={id}
+                  className={`h-[300px] max-[760px]:h-28 ${MOBILE_HIDDEN_IDS.includes(id) ? 'max-[760px]:hidden' : ''}`}
+                />
+              ) : (
+                <WidgetCard
+                  key={`${id}-${pet.petSn}`}
+                  item={findWidgetItem(id)}
+                  sources={sources}
+                />
+              ),
+            )}
+          </div>
         </div>
       )}
 
@@ -202,11 +208,14 @@ export function DashboardSkeleton() {
         <Skeleton className="h-7 w-56" />
         <Skeleton className="h-5 w-72 max-w-full" />
       </div>
-      <div className={GRID_CLASS}>
-        <SkeletonCard className="col-span-2 h-16 min-[760px]:hidden" />
-        <SkeletonCard className="h-[260px] max-[760px]:h-28" />
-        <SkeletonCard className="h-[260px] max-[760px]:h-28" />
-        <SkeletonCard className="h-[260px] max-[1100px]:hidden" />
+      <div className={GRID_WRAP_CLASS}>
+        <div className={GRID_CLASS}>
+          <SkeletonCard className="col-span-2 h-16 min-[760px]:hidden" />
+          <SkeletonCard className="h-[300px] max-[760px]:h-28" />
+          <SkeletonCard className="h-[300px] max-[760px]:h-28" />
+          {/* 셋째 칸은 3열(컨테이너 1000px 이상)일 때만 */}
+          <SkeletonCard className="h-[300px] @max-[1000px]:hidden" />
+        </div>
       </div>
     </div>
   );
