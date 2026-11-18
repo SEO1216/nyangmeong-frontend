@@ -12,7 +12,7 @@ const CHIP_TONES = {
 };
 
 /**
- * [대시보드 요약 타일] 640px 미만 2열 (※신규 정책)
+ * [대시보드 요약 타일] 760px 미만 2열 (※신규 정책)
  * - 아이콘·이름 / 큰 값 / 칩 0~1개 / 보조 줄. 그래프·목록 없음
  * - 타일 전체가 카드 [더보기]와 같은 곳으로 가는 링크
  */
@@ -25,7 +25,7 @@ export default function WidgetTile({ item, content, petSn, petNm }) {
       to={content?.moveTo ?? item.moveTo}
       state={getMoveState(item, petSn)}
       aria-label={`${petNm}의 ${item.nm} 기록 화면으로 이동`}
-      className="flex min-w-0 flex-col gap-1 rounded-card border border-line bg-white p-3.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 sm:hidden"
+      className="flex min-w-0 flex-col gap-1 rounded-card border border-line bg-white p-3.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 min-[760px]:hidden"
     >
       <span className="flex min-w-0 items-center gap-1.5">
         <Icon name={item.icon} className="shrink-0 text-lg text-brand-500" />
@@ -37,7 +37,7 @@ export default function WidgetTile({ item, content, petSn, petNm }) {
           aria-hidden="true"
         />
       </span>
-      <b className="mt-1 truncate text-xl font-bold text-ink">
+      <b className="mt-1 truncate text-lg font-bold text-ink">
         {tile ? tile.value : '기록이 없어요'}
       </b>
       {tile?.chip && (

@@ -9,9 +9,9 @@ export default function EmptyBox({ icon, title, description, action }) {
     <div className="rounded-[10px] border border-dashed border-line-strong">
       <div className="flex flex-col items-center gap-2.5 px-6 py-14 text-center text-muted">
         <span className="grid size-16 place-items-center rounded-full bg-surface-2 text-line-strong">
-          <Icon name={icon} className="text-[32px]" />
+          <Icon name={icon} className="text-[28px]" />
         </span>
-        <p className="text-lg/[1.6] font-bold text-ink">{title}</p>
+        <p className="text-lg font-bold text-ink">{title}</p>
         <p>{description}</p>
         {action}
       </div>

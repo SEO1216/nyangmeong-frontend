@@ -36,19 +36,17 @@ const ZONES = [
 ];
 
 const LABEL_CLASS =
-  'flex items-center gap-0.5 text-base leading-[1.4] font-semibold text-[#1a3234]';
+  'flex items-center gap-0.5 text-base leading-[1.4] font-semibold text-ink';
 const INPUT_CLASS =
-  'block h-10 w-full rounded-[6px] border border-[#d3dae2] bg-white px-3 text-base leading-[1.4] text-[#1a3234] outline-none hover:border-[#b9c4c4] focus:border-[#285a5c] focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)]';
-const HELP_CLASS = 'text-sm leading-normal text-[#566465]';
+  'block h-10 w-full rounded-[6px] border border-input-line bg-white px-3 text-base leading-[1.4] text-ink outline-none hover:border-line-strong focus:border-brand-500 focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)]';
+const HELP_CLASS = 'text-sm leading-normal text-muted';
 
 function Required() {
-  return <span className="ml-0.5 font-bold text-[#b4473a]">*</span>;
+  return <span className="ml-0.5 font-bold text-danger">*</span>;
 }
 
 function Optional() {
-  return (
-    <span className="ml-1 text-[13px] font-medium text-[#667374]">선택</span>
-  );
+  return <span className="ml-1 text-[13px] font-medium text-subtle">선택</span>;
 }
 
 /**
@@ -85,7 +83,7 @@ export default function CareItemFields({
         )
       : null;
   const nextDue = nextDueYmd && (
-    <p className="rounded-xl bg-[#f4f6f6] px-4 py-3 tabular-nums">
+    <p className="rounded-xl bg-surface-2 px-4 py-3 tabular-nums">
       다음 예정일 {formatYmdWeekday(nextDueYmd)}
     </p>
   );
@@ -105,7 +103,7 @@ export default function CareItemFields({
               maxLength={MAX_NAME_LENGTH}
               placeholder="예: 영양제"
               disabled={isBasic}
-              className={`${INPUT_CLASS} disabled:bg-[#f4f6f6] disabled:text-[#667374]`}
+              className={`${INPUT_CLASS} disabled:bg-surface-2 disabled:text-subtle`}
               onChange={(event) =>
                 onChange({ careArtclNm: event.target.value })
               }
@@ -134,11 +132,11 @@ export default function CareItemFields({
                     disabled={isBasic}
                     className={`grid h-10 place-items-center rounded-[6px] border disabled:opacity-40 ${
                       isSelected
-                        ? 'border-[#285a5c] bg-[#e9f2f2] text-[#1e4a4c]'
-                        : `bg-white hover:border-[#b9c4c4] ${
+                        ? 'border-brand-500 bg-brand-50 text-brand-600'
+                        : `bg-white hover:border-line-strong ${
                             isEtc
-                              ? 'border-dashed border-[#e2e7e7] text-[#667374]'
-                              : 'border-[#e2e7e7] text-[#3d4a4b]'
+                              ? 'border-dashed border-line text-subtle'
+                              : 'border-line text-ink-2'
                           }`
                     }`}
                     onClick={() =>
@@ -196,7 +194,7 @@ export default function CareItemFields({
                       onChange({ cycleDrctInptDayCnt: event.target.value })
                     }
                   />
-                  <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[#667374]">
+                  <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-subtle">
                     일마다
                   </span>
                 </div>

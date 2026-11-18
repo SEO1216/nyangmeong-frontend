@@ -92,7 +92,7 @@ export default function ReceiptPetLink({
                 options={options}
                 placeholder="반려동물 선택"
                 label={`영수증 '${tab.sectionNm}' 반려동물 선택`}
-                className={`w-48 max-sm:w-full ${
+                className={`w-48 max-[760px]:w-full ${
                   isError
                     ? '[&>button]:border-danger [&>button]:ring-error'
                     : isLinked

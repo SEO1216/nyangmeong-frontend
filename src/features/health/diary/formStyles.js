@@ -4,10 +4,10 @@
  */
 
 export const LABEL_CLASS =
-  'flex items-center gap-0.5 text-base leading-[1.4] font-semibold text-[#1a3234]';
+  'flex items-center gap-0.5 text-base leading-[1.4] font-semibold text-ink';
 
 export const INPUT_CLASS =
-  'block h-10 w-full rounded-[6px] border border-[#d3dae2] bg-white px-3 text-base leading-[1.4] text-[#1a3234] outline-none placeholder:text-[#8c9899] hover:border-[#b9c4c4] focus:border-[#285a5c] focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)] aria-invalid:border-[#b4473a] disabled:bg-[#f4f6f6] disabled:text-[#667374]';
+  'block h-10 w-full rounded-[6px] border border-input-line bg-white px-3 text-base leading-[1.4] text-ink outline-none placeholder:text-placeholder hover:border-line-strong focus:border-brand-500 focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)] aria-invalid:border-danger disabled:bg-surface-2 disabled:text-subtle';
 
 export const SELECT_CLASS = `${INPUT_CLASS} appearance-none pt-px pr-9`;
 

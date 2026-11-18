@@ -35,7 +35,7 @@ export default function PrescriptionTab({ petSn, ckupRcdSn, prescriptions }) {
               <span className="min-w-0 flex-1">
                 <button
                   type="button"
-                  className="text-left text-lg/[1.6] font-semibold text-ink underline underline-offset-4 hover:text-brand-600"
+                  className="text-left text-lg font-semibold text-ink underline underline-offset-4 hover:text-brand-600"
                   onClick={() => setForm({ prescription, token: Date.now() })}
                 >
                   {prescription.mdcnNm}

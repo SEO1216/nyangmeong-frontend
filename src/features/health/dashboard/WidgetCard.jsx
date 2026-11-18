@@ -33,7 +33,7 @@ import { MOBILE_HIDDEN_IDS } from './widgetItems';
 
 /**
  * [대시보드 고른 항목 카드] (※신규 정책)
- * - 항목마다 본문 { period, body, tile } 계산. 기록이 없으면 null(빈 상태). tile은 640px 미만 요약 타일 값
+ * - 항목마다 본문 { period, body, tile } 계산. 기록이 없으면 null(빈 상태). tile은 760px 미만 요약 타일 값
  * - 문구·배치는 프로토타입 원문, 값은 실제 API
  */
 
@@ -95,7 +95,7 @@ function BigValue({ value, unit }) {
     <p className="flex max-w-full min-w-0 items-baseline gap-1">
       <b
         className={`leading-none font-bold tracking-[-0.02em] text-ink ${
-          typeof value === 'number' ? 'text-[34px]' : 'truncate text-[22px]'
+          typeof value === 'number' ? 'text-[28px]' : 'truncate text-2xl'
         }`}
         title={typeof value === 'string' ? value : undefined}
       >
@@ -531,7 +531,7 @@ function ObservationFigure({ petSn, label, cycle, cycleNo, diffText }) {
           petSn={petSn}
           obsrvCyclSn={cycle.obsrvCyclSn}
           className="size-full object-cover"
-          fallback={<Icon name="photo_camera" className="text-[32px]" />}
+          fallback={<Icon name="photo_camera" className="text-[28px]" />}
         />
       </div>
       <figcaption className="mt-1.5 text-center text-xs/[1.5] text-subtle">
@@ -757,7 +757,7 @@ const WIDGET_BODIES = {
   care: careBody,
 };
 
-/** 고른 항목 카드 한 장(640px 이상)과 요약 타일(640px 미만) */
+/** 고른 항목 카드 한 장(760px 이상)과 요약 타일(760px 미만) */
 export default function WidgetCard({ item, sources }) {
   const content = WIDGET_BODIES[item.id](sources);
   return (
@@ -767,7 +767,7 @@ export default function WidgetCard({ item, sources }) {
         content={content}
         petSn={sources.petSn}
         petNm={sources.petNm}
-        className="max-sm:hidden"
+        className="max-[760px]:hidden"
       />
       {!MOBILE_HIDDEN_IDS.includes(item.id) && (
         <WidgetTile

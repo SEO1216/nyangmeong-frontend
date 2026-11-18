@@ -44,7 +44,7 @@ export default function ReceiptInfoBlock({
 
   return (
     <div className="mt-5 rounded-xl bg-surface-2 p-4">
-      <h4 className="mb-3 text-lg/[1.6] font-semibold text-[#1a3234]">
+      <h4 className="mb-3 text-lg font-semibold text-ink">
         영수증에서 읽은 정보
       </h4>
 
@@ -129,8 +129,8 @@ export default function ReceiptInfoBlock({
                     </button>
                   </div>
 
-                  {/* 640px 미만은 날짜가 잘리지 않게 시작일·종료일을 위아래로 */}
-                  <div className="grid grid-cols-2 items-start gap-2 max-sm:grid-cols-1">
+                  {/* 760px 미만은 날짜가 잘리지 않게 시작일·종료일을 위아래로 */}
+                  <div className="grid grid-cols-2 items-start gap-2 max-[760px]:grid-cols-1">
                     <label className="flex min-w-0 flex-col gap-1">
                       <span className={DRUG_LABEL}>시작일</span>
                       <DatePicker
@@ -224,7 +224,7 @@ export default function ReceiptInfoBlock({
             type="checkbox"
             checked={canLedger && tab.isLedger}
             disabled={!canLedger}
-            className="size-5 accent-[#285a5c]"
+            className="size-5 accent-brand-500"
             onChange={(event) => onLedgerChange(event.target.checked)}
           />
           <span>가계부에도 기록</span>

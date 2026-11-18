@@ -47,9 +47,7 @@ export default function ObservationDetail({
   return (
     <div aria-live="polite" className="min-w-0">
       <div className="mb-4 flex flex-wrap items-baseline gap-2 border-b border-line pb-3">
-        <h3 className="text-lg/[1.6] font-bold text-ink">
-          {item.obsrvArtclNm}
-        </h3>
+        <h3 className="text-lg font-bold text-ink">{item.obsrvArtclNm}</h3>
         <span className="text-placeholder tabular-nums">
           {formatPart(item)} · {cycles.length}회차
         </span>
@@ -76,7 +74,7 @@ export default function ObservationDetail({
                   : 'border-dashed border-line-strong hover:border-brand-500'
               }`}
             >
-              <span className="text-lg/[1.6] font-bold text-brand-500 tabular-nums">
+              <span className="text-lg font-bold text-brand-500 tabular-nums">
                 +{hiddenCount}
               </span>
               <span className="text-sm/[1.6] text-subtle">이전 회차</span>

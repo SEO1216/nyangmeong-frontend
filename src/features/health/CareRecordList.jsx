@@ -36,8 +36,10 @@ export default function CareRecordList({ records, regularSns, onCancel }) {
     <Card
       title="최근 케어 기록"
       sub={
-        /** 640px 미만은 조회기간 드롭다운과 겹쳐 여러 줄로 접히므로 숨김 (※신규 정책) */
-        <span className="max-sm:hidden">일상관리·정기관리 완료 기록 통합</span>
+        /** 760px 미만은 조회기간 드롭다운과 겹쳐 여러 줄로 접히므로 숨김 (※신규 정책) */
+        <span className="max-[760px]:hidden">
+          일상관리·정기관리 완료 기록 통합
+        </span>
       }
       action={
         <DropdownSelect
@@ -56,15 +58,15 @@ export default function CareRecordList({ records, regularSns, onCancel }) {
       }
     >
       {dates.length === 0 ? (
-        <div className="rounded-[10px] border border-dashed border-[#b9c4c4]">
+        <div className="rounded-[10px] border border-dashed border-line-strong">
           <div className="flex flex-col items-center gap-2 px-4 py-6 text-center">
-            <span className="grid size-10 place-items-center rounded-full bg-[#f4f6f6] text-[#667374]">
+            <span className="grid size-10 place-items-center rounded-full bg-surface-2 text-subtle">
               <Icon name="task_alt" />
             </span>
-            <p className="text-sm font-semibold text-[#1a3234]">
+            <p className="text-sm font-semibold text-ink">
               최근 {periodDays}일 동안 완료한 케어가 없어요
             </p>
-            <p className="text-sm text-[#566465]">
+            <p className="text-sm text-muted">
               위 케어 항목을 누르면 완료로 표시되고 여기에 날짜별로 쌓여요
             </p>
           </div>
@@ -74,9 +76,9 @@ export default function CareRecordList({ records, regularSns, onCancel }) {
           {pageDates.map((ymd) => (
             <li
               key={ymd}
-              className="flex items-start gap-3.5 border-b border-[#edf1f1] py-3.5 last:border-b-0"
+              className="flex items-start gap-3.5 border-b border-line-soft py-3.5 last:border-b-0"
             >
-              <span className="w-[88px] flex-none text-[#3d4a4b] tabular-nums">
+              <span className="w-[88px] flex-none text-ink-2 tabular-nums">
                 {ymd === todayYmd
                   ? `오늘 · ${formatMonthDayDot(ymd)}`
                   : formatMonthDayDot(ymd)}
@@ -89,10 +91,10 @@ export default function CareRecordList({ records, regularSns, onCancel }) {
                       key={record.careCmptnHstrySn}
                       type="button"
                       aria-label={`${formatMonthDayDot(ymd)} ${record.careArtclNm} 완료 기록 취소`}
-                      className="group inline-flex items-center gap-1 text-[#1a3234]"
+                      className="group inline-flex items-center gap-1 text-ink"
                       onClick={() => onCancel(record)}
                     >
-                      <span className="relative grid size-7 place-items-center rounded-full bg-[#ebf0f0] text-[#566465] group-hover:bg-[#fbeeec] group-hover:text-[#b4473a]">
+                      <span className="relative grid size-7 place-items-center rounded-full bg-surface-3 text-muted group-hover:bg-danger-soft group-hover:text-danger">
                         <Icon
                           name={toCareIcon(record.rprsIconId)}
                           className="text-[18px] group-hover:hidden"
@@ -104,7 +106,7 @@ export default function CareRecordList({ records, regularSns, onCancel }) {
                         {regularSns.has(record.careArtclSn) && (
                           <span
                             aria-hidden="true"
-                            className="absolute -top-1 -left-1 grid size-4 place-items-center rounded-full bg-[#5f49b0] text-[13px] leading-none font-semibold text-white"
+                            className="absolute -top-1 -left-1 grid size-4 place-items-center rounded-full bg-tone-violet-fg text-[13px] leading-none font-semibold text-white"
                           >
                             R
                           </span>
@@ -127,7 +129,7 @@ export default function CareRecordList({ records, regularSns, onCancel }) {
             type="button"
             aria-label="이전 페이지"
             disabled={currentPage === 1}
-            className={`${pagerClass} text-[#3d4a4b] hover:bg-[#ebf0f0] disabled:pointer-events-none disabled:text-[#b9c4c4]`}
+            className={`${pagerClass} text-ink-2 hover:bg-surface-3 disabled:pointer-events-none disabled:text-line-strong`}
             onClick={() => setPage(currentPage - 1)}
           >
             <Icon name="chevron_left" />
@@ -140,8 +142,8 @@ export default function CareRecordList({ records, regularSns, onCancel }) {
                 aria-current={number === currentPage ? 'page' : undefined}
                 className={`${pagerClass} ${
                   number === currentPage
-                    ? 'bg-[#285a5c] font-bold text-white'
-                    : 'text-[#3d4a4b] hover:bg-[#ebf0f0]'
+                    ? 'bg-brand-500 font-bold text-white'
+                    : 'text-ink-2 hover:bg-surface-3'
                 }`}
                 onClick={() => setPage(number)}
               >
@@ -153,7 +155,7 @@ export default function CareRecordList({ records, regularSns, onCancel }) {
             type="button"
             aria-label="다음 페이지"
             disabled={currentPage === pageCount}
-            className={`${pagerClass} text-[#3d4a4b] hover:bg-[#ebf0f0] disabled:pointer-events-none disabled:text-[#b9c4c4]`}
+            className={`${pagerClass} text-ink-2 hover:bg-surface-3 disabled:pointer-events-none disabled:text-line-strong`}
             onClick={() => setPage(currentPage + 1)}
           >
             <Icon name="chevron_right" />

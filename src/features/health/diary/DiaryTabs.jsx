@@ -27,9 +27,9 @@ export default function DiaryTabs({
             role="tab"
             aria-selected={isActive}
             aria-controls={item.id}
-            className={`relative inline-flex h-12 items-center px-4 text-lg/[1.6] ${
+            className={`relative inline-flex h-12 items-center px-4 text-lg ${
               isActive
-                ? "font-bold text-[#2f6f57] after:absolute after:right-3 after:bottom-0 after:left-3 after:h-0.5 after:rounded-sm after:bg-[#2f6f57] after:content-['']"
+                ? "font-bold text-ok after:absolute after:right-3 after:bottom-0 after:left-3 after:h-0.5 after:rounded-sm after:bg-ok after:content-['']"
                 : 'font-semibold text-muted hover:text-ink'
             }`}
             onClick={() => onSelect(item.id)}

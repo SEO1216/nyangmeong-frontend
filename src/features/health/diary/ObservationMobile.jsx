@@ -153,7 +153,7 @@ export function ObservationMobileDetail({
         >
           <Icon name="chevron_left" />
         </button>
-        <h3 className="min-w-0 flex-1 truncate text-lg/[1.6] font-semibold text-ink">
+        <h3 className="min-w-0 flex-1 truncate text-lg font-semibold text-ink">
           {item.obsrvArtclNm}
         </h3>
         <Badge tone={isEnded ? 'gray' : 'ok'}>
@@ -205,7 +205,7 @@ export function ObservationMobileDetail({
                   : 'border-dashed border-line-strong hover:border-brand-500'
               }`}
             >
-              <span className="text-lg/[1.6] font-bold text-brand-500 tabular-nums">
+              <span className="text-lg font-bold text-brand-500 tabular-nums">
                 +{hiddenCount}
               </span>
               <span className="text-sm/[1.6] text-subtle">이전 회차</span>
@@ -281,7 +281,7 @@ export function ObservationMobileDetail({
         </p>
         {cycle.obsrvSz != null && (
           <>
-            <p className="mt-1 text-xl font-semibold text-ink tabular-nums">
+            <p className="mt-1 text-lg font-semibold text-ink tabular-nums">
               {formatSize(cycle.obsrvSz)}
             </p>
             {sizeDiff && (
@@ -306,17 +306,17 @@ export function ObservationMobileDetail({
         <div className="mt-3 flex items-center gap-2 border-t border-line pt-3">
           <button
             type="button"
-            className={`${BTN_SECONDARY} h-8! px-3!`}
+            className={`${BTN_SECONDARY}`}
             onClick={() => onEditCycle(cycle)}
           >
             수정
           </button>
           <button
             type="button"
-            className={`${BTN_SECONDARY} h-8! px-3!`}
+            className={`${BTN_SECONDARY}`}
             onClick={() => onDeleteCycle(cycle)}
           >
-            삭제
+            삭제하기
           </button>
           <button
             type="button"

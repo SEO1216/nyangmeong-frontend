@@ -22,9 +22,9 @@ export default function DetailTabs({ selectedKey, counts, onSelect }) {
             id={getTabId(tab.key)}
             aria-controls={getPanelId(tab.key)}
             aria-selected={isSelected}
-            className={`relative inline-flex h-12 shrink-0 items-center gap-1.5 px-4 text-lg/[1.6] whitespace-nowrap ${
+            className={`relative inline-flex h-12 shrink-0 items-center gap-1.5 px-4 text-lg whitespace-nowrap ${
               isSelected
-                ? 'font-bold text-[#2f6f57] after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-sm after:bg-[#2f6f57]'
+                ? 'font-bold text-ok after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-sm after:bg-ok'
                 : 'font-semibold text-muted hover:text-ink'
             }`}
             onClick={() => onSelect(tab.key)}

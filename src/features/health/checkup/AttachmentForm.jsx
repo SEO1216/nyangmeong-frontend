@@ -66,7 +66,7 @@ export default function AttachmentForm({ petSn, ckupRcdSn, onClose }) {
       className={`${SUB_BOX} grid gap-5`}
       onSubmit={handleSubmit}
     >
-      <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+      <div className="grid gap-x-8 gap-y-5 min-[760px]:grid-cols-2">
         <label className="flex flex-col gap-1.5">
           <span className={LABEL_CLASS}>파일 유형{REQUIRED}</span>
           <DropdownSelect
@@ -100,7 +100,7 @@ export default function AttachmentForm({ petSn, ckupRcdSn, onClose }) {
       </div>
 
       {isImage && (
-        <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+        <div className="grid gap-x-8 gap-y-5 min-[760px]:grid-cols-2">
           <label className="flex flex-col gap-1.5">
             <span className={LABEL_CLASS}>영상 종류{REQUIRED}</span>
             <DropdownSelect

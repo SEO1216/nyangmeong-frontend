@@ -109,25 +109,25 @@ export default function ItemSelect({
         aria-activedescendant={isOpen ? `${listId}-${activeIndex}` : undefined}
         onClick={() => (isOpen ? close() : open())}
         onKeyDown={handleKeyDown}
-        className={`flex h-10 w-full cursor-pointer items-center gap-2 rounded-md border bg-white pr-9 pl-3 text-left text-base hover:enabled:border-[#b9c4c4] focus:outline-none disabled:cursor-not-allowed disabled:bg-[#f4f6f6] disabled:text-[#667374] aria-invalid:border-[#b4473a] max-[760px]:h-11 ${isOpen ? 'border-[#285a5c] shadow-[0_0_0_3px_rgba(182,218,172,0.5)]' : 'border-[#d3dae2]'}`}
+        className={`flex h-10 w-full cursor-pointer items-center gap-2 rounded-md border bg-white pr-9 pl-3 text-left text-base hover:enabled:border-line-strong focus:outline-none disabled:cursor-not-allowed disabled:bg-surface-2 disabled:text-subtle aria-invalid:border-danger max-[760px]:h-11 ${isOpen ? 'border-brand-500 shadow-[0_0_0_3px_rgba(182,218,172,0.5)]' : 'border-input-line'}`}
       >
         <span className="flex min-w-0 flex-1 items-center gap-2 truncate">
           {selectedBlood ? (
             <>
               <span className={TAG}>{selectedBlood.tagNm}</span>
               {selectedBlood.ab}
-              <span className="text-[#667374]">{selectedBlood.kn}</span>
+              <span className="text-subtle">{selectedBlood.kn}</span>
             </>
           ) : selected ? (
             '직접입력'
           ) : (
-            <span className="text-[#8c9899]">검사 항목을 선택해 주세요</span>
+            <span className="text-placeholder">검사 항목을 선택해 주세요</span>
           )}
         </span>
         <ChevronDown
           size={20}
           aria-hidden="true"
-          className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-[#566465]"
+          className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-muted"
         />
       </button>
       {isOpen && (
@@ -136,7 +136,7 @@ export default function ItemSelect({
           id={listId}
           role="listbox"
           aria-labelledby={labelId}
-          className="absolute right-0 left-0 z-30 mt-1.5 max-h-64 overflow-y-auto rounded-lg border border-[#e2e7e7] bg-white p-1 shadow-[0_12px_32px_-8px_rgba(15,23,35,0.18),0_2px_6px_rgba(15,23,35,0.06)]"
+          className="absolute right-0 left-0 z-30 mt-1.5 max-h-64 overflow-y-auto rounded-lg border border-line bg-white p-1 shadow-[0_12px_32px_-8px_rgba(15,23,35,0.18),0_2px_6px_rgba(15,23,35,0.06)]"
         >
           {ROWS.map((row) => {
             if (row.type === 'group') {
@@ -144,7 +144,7 @@ export default function ItemSelect({
                 <li
                   key={row.key}
                   role="presentation"
-                  className="px-3 pt-2 pb-1 text-sm text-[#667374]"
+                  className="px-3 pt-2 pb-1 text-sm text-subtle"
                 >
                   {row.label}
                 </li>
@@ -162,19 +162,19 @@ export default function ItemSelect({
                 aria-selected={isSelected}
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => pick(index)}
-                className={`${ROW_CLASS} ${isDirect ? 'mt-1 rounded-none border-t border-[#e2e7e7] pl-2.5' : 'pl-5'} ${isSelected ? 'bg-[#e9f2f2] font-semibold text-[#1e4a4c]' : 'text-[#1a3234]'} ${index === activeIndex && !isSelected ? 'bg-[#f4f6f6]' : ''} ${isSelected ? '' : 'hover:bg-[#f4f6f6]'}`}
+                className={`${ROW_CLASS} ${isDirect ? 'mt-1 rounded-none border-t border-line pl-2.5' : 'pl-5'} ${isSelected ? 'bg-brand-50 font-semibold text-brand-600' : 'text-ink'} ${index === activeIndex && !isSelected ? 'bg-surface-2' : ''} ${isSelected ? '' : 'hover:bg-surface-2'}`}
               >
                 {isDirect ? (
                   <>
                     직접입력
-                    <span className="font-normal text-[#667374]">
+                    <span className="font-normal text-subtle">
                       — 태그·이름 없음
                     </span>
                   </>
                 ) : (
                   <>
                     <span className="min-w-14">{row.ab}</span>
-                    <span className="font-normal text-[#667374]">{row.kn}</span>
+                    <span className="font-normal text-subtle">{row.kn}</span>
                   </>
                 )}
               </li>

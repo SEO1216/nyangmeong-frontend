@@ -52,7 +52,7 @@ function Chart({ width, points, formatValue, ariaLabel }) {
     >
       <path
         d={`M${PAD.left} ${height - PAD.bottom}H${width - right}`}
-        stroke="#e2e7e7"
+        stroke="var(--color-line)"
         strokeWidth="1"
       />
       {points.map((point, index) => {
@@ -65,14 +65,18 @@ function Chart({ width, points, formatValue, ariaLabel }) {
               width={barWidth}
               height={getY(0) - getY(point.value)}
               rx={4}
-              fill={index === lastIndex ? '#285a5c' : '#cde0e0'}
+              fill={
+                index === lastIndex
+                  ? 'var(--color-brand-500)'
+                  : 'var(--color-brand-100)'
+              }
             />
             <text
               x={centerX}
               y={getY(point.value) - 8}
               textAnchor="middle"
               fontSize="14"
-              fill="#1a3234"
+              fill="var(--color-ink)"
             >
               {point.value}
             </text>
@@ -82,7 +86,7 @@ function Chart({ width, points, formatValue, ariaLabel }) {
                 y={height - 8}
                 textAnchor="middle"
                 fontSize="14"
-                fill="#667374"
+                fill="var(--color-subtle)"
               >
                 {point.label}
               </text>
@@ -92,7 +96,7 @@ function Chart({ width, points, formatValue, ariaLabel }) {
       })}
       <path
         d={`M${PAD.left} ${getY(average)}H${width - right + 8}`}
-        stroke="#285a5c"
+        stroke="var(--color-brand-500)"
         strokeWidth="1.5"
         strokeDasharray="6 4"
       />
@@ -100,7 +104,7 @@ function Chart({ width, points, formatValue, ariaLabel }) {
         x={width - right + 14}
         y={getY(average) + 5}
         fontSize="14"
-        fill="#1e4a4c"
+        fill="var(--color-brand-600)"
       >
         평균 {formatValue(round2(average))}
       </text>

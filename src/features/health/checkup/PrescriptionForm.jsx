@@ -121,7 +121,7 @@ export default function PrescriptionForm({
         {isInvalid('name') && <FieldError>약품명을 입력해 주세요</FieldError>}
       </label>
 
-      <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+      <div className="grid gap-x-8 gap-y-5 min-[760px]:grid-cols-2">
         <label className="flex flex-col gap-1.5">
           <span className={LABEL_CLASS}>복용 시작일{REQUIRED}</span>
           <DatePicker
@@ -150,7 +150,7 @@ export default function PrescriptionForm({
         </label>
       </div>
 
-      <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+      <div className="grid gap-x-8 gap-y-5 min-[760px]:grid-cols-2">
         <label className="flex flex-col gap-1.5">
           <span className={LABEL_CLASS}>1일 복용 횟수{REQUIRED}</span>
           <span className="relative">

@@ -16,7 +16,7 @@ export default function CountBars({ counts, total }) {
           <span className="h-2.5 flex-1 overflow-hidden rounded-full bg-surface-3">
             <span
               className={`block h-full rounded-full ${
-                state.cd === NORMAL_STOOL ? 'bg-brand-500' : 'bg-[#9a5c0c]'
+                state.cd === NORMAL_STOOL ? 'bg-brand-500' : 'bg-tone-amber-fg'
               }`}
               style={{ width: `${(state.count / total) * 100}%` }}
             />

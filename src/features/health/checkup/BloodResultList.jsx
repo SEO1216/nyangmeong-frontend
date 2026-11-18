@@ -8,14 +8,7 @@ import { formatDate } from '@/utils/formatDate';
 import { round2 } from '../numberFormat';
 import { useDeleteInspections } from '../queries';
 import BloodResultForm from './BloodResultForm';
-import {
-  ADD_ROW,
-  BTN_SM,
-  ROW_LINE,
-  TAG,
-  TAG_STRONG,
-  TEXT_BTN,
-} from './checkupStyles';
+import { ADD_ROW, ROW_LINE, TAG, TAG_STRONG, TEXT_BTN } from './checkupStyles';
 import { findBloodItem } from '../labInput/bloodItems';
 import { FUNCTION_TAGS, findName, getInspectionName } from './checkupTypes';
 
@@ -91,7 +84,7 @@ export default function BloodResultList({ checkup, items }) {
       ) : (
         <>
           <div className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-2">
-            <h3 className="text-lg/[1.6] font-semibold">혈액검사</h3>
+            <h3 className="text-lg font-semibold">혈액검사</h3>
             <span className="text-subtle tabular-nums">
               검사일 {formatDate(checkup.ckupYmd)} · {checkup.hsptlNm} ·{' '}
               {items.length}건
@@ -127,7 +120,7 @@ export default function BloodResultList({ checkup, items }) {
             <button
               type="button"
               disabled={selectedSns.length === 0}
-              className={`${BTN_SECONDARY} ${BTN_SM} ml-auto`}
+              className={`${BTN_SECONDARY} ml-auto`}
               onClick={() => setIsConfirmOpen(true)}
             >
               선택 삭제 ({selectedSns.length})
@@ -170,7 +163,7 @@ export default function BloodResultList({ checkup, items }) {
                         pathname: inputPath,
                         search: `?mode=edit&item=${item.inspNvlSn}`,
                       }}
-                      className="text-lg/[1.6] font-semibold text-ink underline underline-offset-4 hover:text-brand-600"
+                      className="text-lg font-semibold text-ink underline underline-offset-4 hover:text-brand-600"
                       onClick={(event) => event.stopPropagation()}
                     >
                       {getInspectionName(item)}
@@ -183,7 +176,7 @@ export default function BloodResultList({ checkup, items }) {
                     )}
                   </span>
                   <span
-                    className={`text-right text-lg/[1.6] font-semibold whitespace-nowrap tabular-nums ${direction ? 'text-danger' : ''}`}
+                    className={`text-right text-lg font-semibold whitespace-nowrap tabular-nums ${direction ? 'text-danger' : ''}`}
                   >
                     {round2(item.rsltNvl)}{' '}
                     <span className="text-sm font-normal text-subtle">

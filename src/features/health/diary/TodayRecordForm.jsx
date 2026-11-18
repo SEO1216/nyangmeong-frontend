@@ -3,7 +3,7 @@ import DropdownSelect from '@/components/DropdownSelect';
 import Modal from '@/components/Modal';
 import TimeSelect from '@/components/TimeSelect';
 import Icon from '@/components/Icon';
-import { BTN_PRIMARY } from '@/components/buttonStyles';
+import { BTN_PRIMARY, CHIP, CHIP_ON } from '@/components/buttonStyles';
 import { getNowHm, getTodayYmd, makeDateTime } from '@/utils/formatDate';
 import { DAILY_ITEMS, keepWidgetOrder } from '../dashboard/widgetItems';
 import {
@@ -182,7 +182,7 @@ export default function TodayRecordForm({
               <div
                 role="radiogroup"
                 aria-label="기록 종류"
-                className="flex h-10 w-full rounded-[6px] border border-[#e6eaeb] bg-[#f1f3f4] p-[3px] sm:w-auto"
+                className="flex h-10 w-full rounded-[6px] border border-line bg-surface-3 p-1 min-[760px]:w-auto"
               >
                 {recordTypes.map((item) => {
                   const isSelected = item.cd === typeCd;
@@ -192,7 +192,7 @@ export default function TodayRecordForm({
                       type="button"
                       role="radio"
                       aria-checked={isSelected}
-                      className={`flex flex-1 items-center justify-center rounded-[4px] whitespace-nowrap sm:flex-none sm:px-3 ${
+                      className={`flex flex-1 items-center justify-center rounded-[4px] whitespace-nowrap min-[760px]:flex-none min-[760px]:px-3 ${
                         isSelected
                           ? 'bg-white font-semibold text-brand-600 shadow-[0_1px_2px_rgba(26,50,52,0.08),0_0_0_1px_rgba(40,90,92,0.18)]'
                           : 'font-medium text-muted hover:text-ink'
@@ -210,11 +210,7 @@ export default function TodayRecordForm({
                 type="button"
                 aria-expanded={isEditOpen}
                 aria-controls="hlt002-record-edit"
-                className={`inline-flex h-10 items-center gap-1 rounded-full border px-3.5 whitespace-nowrap ${
-                  isEditOpen
-                    ? 'border-brand-500 bg-brand-500 font-semibold text-white'
-                    : 'border-line-strong bg-white text-ink-2 hover:border-brand-500 hover:text-brand-600'
-                }`}
+                className={isEditOpen ? CHIP_ON : CHIP}
                 onClick={() => setIsEditOpen((isOpen) => !isOpen)}
               >
                 <Icon name="tune" className="text-lg" />
@@ -243,11 +239,7 @@ export default function TodayRecordForm({
                     type="button"
                     aria-pressed={isOn}
                     disabled={saveWidgets.isPending || isLastOn}
-                    className={`inline-flex h-9 items-center gap-1 rounded-full border px-3.5 whitespace-nowrap disabled:cursor-not-allowed ${
-                      isOn
-                        ? 'border-brand-500 bg-brand-500 font-semibold text-white'
-                        : 'border-line bg-white text-subtle hover:border-line-strong hover:text-ink'
-                    }`}
+                    className={isOn ? CHIP_ON : CHIP}
                     onClick={() => handleToggle(item)}
                   >
                     <Icon name={isOn ? 'check' : 'add'} className="text-lg" />
@@ -260,7 +252,7 @@ export default function TodayRecordForm({
                 <span aria-hidden="true" className="h-6 w-px bg-line" />
                 <button
                   type="button"
-                  className={`${BTN_PRIMARY} h-9! px-3.5!`}
+                  className={`${BTN_PRIMARY}`}
                   onClick={() => setIsEditOpen(false)}
                 >
                   완료

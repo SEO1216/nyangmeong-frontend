@@ -13,7 +13,7 @@ import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 export default function FormModal({
   icon,
   title,
-  submitLabel = '저장',
+  submitLabel = '저장하기',
   cancelLabel = '취소',
   isPending = false,
   isSubmitDisabled = false,
@@ -56,18 +56,16 @@ export default function FormModal({
         className="flex min-h-0 flex-1 flex-col"
         onSubmit={handleSubmit}
       >
-        <header className="flex items-start gap-3.5 border-b border-[#edf1f1] px-7 pt-6 pb-5">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#e9f2f2] text-[#285a5c]">
+        <header className="flex items-start gap-3.5 border-b border-line-soft px-7 pt-6 pb-5">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-500">
             <Icon name={icon} />
           </span>
-          <h2 className="flex-1 pt-1.5 text-xl leading-[1.35] font-bold text-[#1a3234]">
-            {title}
-          </h2>
+          <h2 className="flex-1 pt-1.5 text-lg font-bold text-ink">{title}</h2>
           <button
             type="button"
             aria-label="닫기"
             disabled={isPending}
-            className="-mt-1 -mr-2 grid size-9 shrink-0 place-items-center rounded-[10px] text-[#566465] hover:bg-[#ebf0f0] hover:text-[#1a3234]"
+            className="-mt-1 -mr-2 grid size-9 shrink-0 place-items-center rounded-[10px] text-muted hover:bg-surface-3 hover:text-ink"
             onClick={onClose}
           >
             <Icon name="close" />
@@ -79,10 +77,10 @@ export default function FormModal({
         </div>
 
         {hasFooter && (
-          <footer className="flex items-center justify-end gap-2 rounded-b-[20px] border-t border-[#e2e7e7] bg-[#fbfcfd] px-7 py-4">
+          <footer className="flex items-center justify-end gap-2 rounded-b-[20px] border-t border-line bg-surface-2 px-7 py-4">
             {hasRequiredNote && (
-              <p className="mr-auto text-[#566465]">
-                <span className="font-bold text-[#b4473a]">*</span> 표시는 필수
+              <p className="mr-auto text-muted">
+                <span className="font-bold text-danger">*</span> 표시는 필수
                 항목이에요
               </p>
             )}

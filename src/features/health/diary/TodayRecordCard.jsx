@@ -66,7 +66,7 @@ export default function TodayRecordCard({
         <button
           type="button"
           aria-haspopup="dialog"
-          className={`${BTN_PRIMARY} h-8! px-3!`}
+          className={`${BTN_PRIMARY}`}
           onClick={() => onAddRecord(shownTypeCds[0])}
         >
           오늘 기록 추가
@@ -74,7 +74,7 @@ export default function TodayRecordCard({
       }
     >
       <ul
-        className={`flex flex-col sm:max-[1100px]:grid sm:max-[1100px]:grid-cols-5 ${hasRecords ? 'px-4.5 sm:px-5.5' : ''}`}
+        className={`flex flex-col min-[760px]:max-[1100px]:grid min-[760px]:max-[1100px]:grid-cols-5 ${hasRecords ? 'px-4.5 min-[760px]:px-5.5' : ''}`}
       >
         {shownTypeCds.map((typeCd) => (
           <TodayRow
@@ -87,7 +87,7 @@ export default function TodayRecordCard({
       </ul>
 
       {hasHiddenTypes && (
-        <p className="flex flex-1 items-center justify-center px-4.5 py-4 text-center text-sm text-subtle sm:px-5.5">
+        <p className="flex flex-1 items-center justify-center px-4.5 py-4 text-center text-sm text-subtle min-[760px]:px-5.5">
           꺼 둔 항목은 [항목 편집]에서 켤 수 있어요
         </p>
       )}
@@ -136,7 +136,7 @@ function TodayRow({ typeCd, summary, isCompact }) {
 
   return (
     <li
-      className={`grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 border-b border-line-soft last:border-b-0 sm:max-[1100px]:flex sm:max-[1100px]:flex-col sm:max-[1100px]:border-b-0 sm:max-[1100px]:px-3 sm:max-[1100px]:not-first:border-l sm:max-[1100px]:first:pl-0 sm:max-[1100px]:last:pr-0 ${isCompact ? 'py-2.5' : 'py-3'}`}
+      className={`grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 border-b border-line-soft last:border-b-0 min-[760px]:max-[1100px]:flex min-[760px]:max-[1100px]:flex-col min-[760px]:max-[1100px]:border-b-0 min-[760px]:max-[1100px]:px-3 min-[760px]:max-[1100px]:not-first:border-l min-[760px]:max-[1100px]:first:pl-0 min-[760px]:max-[1100px]:last:pr-0 ${isCompact ? 'py-2.5' : 'py-3'}`}
     >
       <p className="flex items-baseline gap-2 text-ink">
         <Icon name={TYPE_ICONS[typeCd]} className="self-center text-muted" />
@@ -145,7 +145,7 @@ function TodayRow({ typeCd, summary, isCompact }) {
           {count}회
         </span>
       </p>
-      <p className="min-w-0 text-sm/[1.6] text-subtle tabular-nums sm:max-[1100px]:hidden">
+      <p className="min-w-0 text-sm/[1.6] text-subtle tabular-nums min-[760px]:max-[1100px]:hidden">
         {count === 0 ? (
           <span className="text-line-strong">-</span>
         ) : isLatestOnly ? (
@@ -157,30 +157,28 @@ function TodayRow({ typeCd, summary, isCompact }) {
             .join(' · ')
         )}
       </p>
-      <div className="col-start-2 row-span-2 row-start-1 flex flex-col items-end justify-center text-right tabular-nums sm:max-[1100px]:items-start sm:max-[1100px]:text-left">
+      <div className="col-start-2 row-span-2 row-start-1 flex flex-col items-end justify-center text-right tabular-nums min-[760px]:max-[1100px]:items-start min-[760px]:max-[1100px]:text-left">
         {count === 0 ? (
           <>
-            <span className="text-sm/[1.6] text-muted sm:max-[1100px]:hidden">
+            <span className="text-sm/[1.6] text-muted min-[760px]:max-[1100px]:hidden">
               {typeCd === STOOL ? '기록이 없어요' : '-'}
             </span>
-            <b className="hidden text-lg/[1.6] font-semibold text-line-strong sm:max-[1100px]:block">
+            <b className="hidden text-lg font-semibold text-line-strong min-[760px]:max-[1100px]:block">
               -
             </b>
           </>
         ) : (
           <>
             {!isLatestOnly && (
-              <span className="text-sm/[1.6] text-muted sm:max-[1100px]:hidden">
+              <span className="text-sm/[1.6] text-muted min-[760px]:max-[1100px]:hidden">
                 합계
               </span>
             )}
-            <b className="text-lg/[1.6] font-semibold text-ink">
-              {valueText()}
-            </b>
+            <b className="text-lg font-semibold text-ink">{valueText()}</b>
           </>
         )}
       </div>
-      <p className="hidden text-badge text-subtle tabular-nums sm:max-[1100px]:block">
+      <p className="hidden text-badge text-subtle tabular-nums min-[760px]:max-[1100px]:block">
         {tabletSubText()}
       </p>
     </li>

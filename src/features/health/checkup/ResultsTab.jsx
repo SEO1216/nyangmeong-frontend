@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FILTER_CHIP, FILTER_CHIP_ON } from '@/components/buttonStyles';
 import { ATTACHMENT_IMAGE, INSPECTION_KINDS } from './checkupTypes';
 import BloodResultList from './BloodResultList';
 import EtcResultList from './EtcResultList';
@@ -22,7 +23,7 @@ export default function ResultsTab({ detail, onGoAttachments }) {
   };
 
   return (
-    <div className="px-[18px] pt-4 pb-[18px] sm:px-[22px] sm:pt-5 sm:pb-[22px]">
+    <div className="p-4 min-[760px]:p-5">
       <div
         role="group"
         aria-label="검사 종류"
@@ -35,11 +36,7 @@ export default function ResultsTab({ detail, onGoAttachments }) {
               key={item.key}
               type="button"
               aria-pressed={isSelected}
-              className={`inline-flex h-9 items-center rounded-full border px-3.5 ${
-                isSelected
-                  ? 'border-brand-100 bg-brand-50 font-semibold text-brand-600'
-                  : 'border-line bg-white text-ink hover:bg-surface-2'
-              }`}
+              className={isSelected ? FILTER_CHIP_ON : FILTER_CHIP}
               onClick={() => setKind(item.key)}
             >
               {item.nm} {counts[item.key]}

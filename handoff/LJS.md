@@ -2,13 +2,17 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 UI 통일 1-B · LJS 담당 화면 적용 (2026-11-18, 검증 통과·추가-1 포함 재검증 통과, 사람 확인). LJS 폴더 직접 hex 343곳 → 토큰, 단계 밖 글자 크기 8곳, 분기점 짝 760/760·1100/1100(components·layouts·JS 조건 포함, `ui.md` "화면 폭 분기점" 절), 버튼 문구 등록하기·저장하기·삭제하기, 설정 H1 28px·채팅/AI 창 H1 18px(별도 창 예외), 추가-1 옛 분기점 주석
+끝남: SCR-COM-002 UI 통일 2-A · 건강기록(JAJ) 값·문구·칩 정리 (2026-11-18, 검증 1회차 통과, 사람 확인). `features/health`·`pages/health`의 직접 hex 173곳 → 토큰, 단계 밖 글자 크기, 분기점 640·761·901·1101 → 760·1100(JS 조건 3곳 포함, 640~759px는 모바일 배치로), 섹션 제목 행간, 4px 간격, 버튼 `h-8!` 덮어쓰기 제거·공용 버튼, 칩 `CHIP`·`FILTER_CHIP`, 버튼 문구 등록하기·저장하기·삭제하기
 
 ## 다음에 할 것
 
 ### SCR-COM-002 UI 통일 다음 단계(사람 결정 2026-11-18)
 
-- 다음 /start: `UI 통일 2 · 다른 담당 폴더 적용`(마일스톤 대기, 도메인 하나씩, 담당자 알림). 분기점은 `ui.md` "화면 폭 분기점"대로 `min-[761px]`→`min-[760px]`, `min-[1101px]`→`min-[1100px]`, JS `(width < 760px)`. 결정: 글자 단계는 체크리스트 V1(12·13·14·15·16·18·24·28px, 짝수 규칙보다 우선), 분기점 390·760·1100, 칩은 항목 선택 `CHIP`(1번 채움)·필터 `FILTER_CHIP`(2번 연한 바탕+연한 테두리, 건강기록·케어미션), 랜딩 항목(17px·굵기 800·색·H1·PAWEVER·푸터 대비)은 랜딩 교체(SCR-MAN-002) 때
+- 다음 /start: `UI 통일 2 · 다른 담당 폴더 적용`의 다음 조각. 건강기록 부품 교체(Badge 56·모달 틀 58·차트 68·탭 69·폼 상수 71·FieldError 72·Checkbox 73·NoticeBox 83·스켈레톤 26·LoadError 27)부터, 그다음 SJM·KSJ·YAY 도메인
+- 2-A 팀 알림(PR 본문 + 팀 채널, JAJ): ① 건강기록 640~759px 폭이 모바일 배치로 바뀜(`sm:`·`lg:` → 760·1100) ② 칩이 공용 `CHIP`·`FILTER_CHIP`, 작은 버튼이 높이 40px ③ 버튼 문구 등록하기·저장하기·삭제하기 ④ 버그 후보 82 `ZONES` 순서는 그대로 둠
+- 2-A 사람이 정할 것(검증 보고, 판정 밖): 줄 안 글자형 [삭제] 6곳(`diary/CheckupListCard`·`DayRecordEditModal`, `checkup/PrescriptionForm`·`AttachmentTab`·`EtcResultList`, ⋮ 메뉴 `CareItemMenu`)은 "삭제" 그대로. 확인 창 버튼은 "삭제하기". 규칙에 넣을지 정한다
+- 2-A 참고(판정 밖): `ui.md` "로딩 표시" 예시 코드에 옛 분기점 `min-[1101px]`이 남음. 콘솔의 `GET /api/pets/1/character-image?part=face` 404는 `PetFace` 데이터 문제(/main에서도 남)
+- 이전 메모: `UI 통일 2 · 다른 담당 폴더 적용`(마일스톤 대기, 도메인 하나씩, 담당자 알림). 분기점은 `ui.md` "화면 폭 분기점"대로 `min-[761px]`→`min-[760px]`, `min-[1101px]`→`min-[1100px]`, JS `(width < 760px)`. 결정: 글자 단계는 체크리스트 V1(12·13·14·15·16·18·24·28px, 짝수 규칙보다 우선), 분기점 390·760·1100, 칩은 항목 선택 `CHIP`(1번 채움)·필터 `FILTER_CHIP`(2번 연한 바탕+연한 테두리, 건강기록·케어미션), 랜딩 항목(17px·굵기 800·색·H1·PAWEVER·푸터 대비)은 랜딩 교체(SCR-MAN-002) 때
 - 팀 알림(PR 본문 + 팀 채널): ① `ConfirmModal`이 공용 `Modal isConfirm` 모양(440px·[취소][확인] 꽉 참)으로 바뀌어 커뮤니티·건강기록·가계부·고객센터·회원 확인 창이 파일 수정 없이 같이 바뀜 ② 토큰 값 변경: `--color-subtle` #5f6b6c, `--color-cat-hosp-fg` #496f97, `--color-tone-gray-bg` #f4f6f6, 알림 배지 #d4411c ③ 새 공용 부품·칩 규격을 2단계에서 쓴다 ④ SJM: `routes/paths.js` `MYPAGE_CAREGIVERS`(화면 없음, `docs/routes.md` MYP-004)는 그대로 두고 AI 바로가기만 `/mypage/pets`로 보냄. 상수·문서·AI 서버 매핑 정리 여부는 SJM이 정함
 - 버그 후보 알림: KSJ `community/PostDetail.jsx` 내 글에도 신고 버튼(체크리스트 78), JAJ `health/CareChipPicker.jsx`·`CareItemFields.jsx` `ZONES` 순서 반대(82)
 - 1-B 팀 알림(PR 본문 + 팀 채널): ① components·layouts의 `min-[761px]`·`min-[1101px]`이 `760`·`1100`으로, JS 조건이 `(width < 760px)`·`(width >= 1100px)`로 바뀌어 폭이 정확히 760·1100px일 때 PC 모양이 나옴 ② 분기점 규칙이 `docs/convention/ui.md`에 들어감 ③ 메인 검색창 [AI 매니저] 버튼은 760 미만에서 아이콘만(전에는 480 이하)
