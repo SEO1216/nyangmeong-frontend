@@ -1409,8 +1409,15 @@
 - 결과(2026-11-18): K1~K9 검증 1회차 통과, 사람 확인. 기획과 달라진 것: 94 나머지 세 쌍은 사람 결정(인증번호 보내기·중복확인·회원가입), SNS 로그인 버튼 그대로, K2 grep은 2-J `profileStyles` `SIDE_BTN` 5줄이 걸려 auth 쪽 0건으로 판단
 - 연결 남음: 없음
 
+## SCR-COM-002 UI 통일 2-L · 플레이스(YAY) 값·부품 정리 — 끝
+- 기능: (2 마일스톤의 열두 번째 조각, 2026-11-18, 기준 `docs/ui-checklist.csv`) `features/place`와 `pages/place/PlacePage`에 체크리스트 2·5·9·12·15·16·26·27·37·56·62·66·98과 분기점 규칙 적용
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 L1~L9 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): L1~L9 검증 2회차 통과(1회차는 로컬 카카오 지도 키 없음으로 L2·L5·L8 화면 확인 못 함, 코드 변경 없이 키를 넣고 통과), 사람 확인. 기획과 달라진 것: H1은 28px 대신 24px 유지(사람 결정, 체크리스트 5행과 다름)
+- 연결 남음: 없음
+
 ## SCR-COM-002 UI 통일 2 · 다른 담당 폴더 적용 — 대기
-- 남은 것(2026-11-18): 건강기록은 2-A·2-B, 가계부는 2-C, 반려동물(`pet`)은 2-D, 포인트(`point`)는 2-E, 고객센터·펫뉴스(`inquiry`·`notice`·`faq`·`news`)는 2-F, 펫이야기·커뮤니티 공용 부품은 2-G, 펫돌봄(`care/`)은 2-H, 실종센터(`missing/`)는 2-I, 회원정보·탈퇴(`member/profile`·`withdraw`)는 2-J, 로그인·가입 계열은 2-K로 끝. 남은 것 YAY `place`(2-L). 아래 다른 도메인(기준 `docs/ui-checklist.csv`), 회원 `profileStyles` → `components/formStyles`, 삭제 확인 창 `isDanger`
+- 남은 것(2026-11-18): 건강기록은 2-A·2-B, 가계부는 2-C, 반려동물(`pet`)은 2-D, 포인트(`point`)는 2-E, 고객센터·펫뉴스(`inquiry`·`notice`·`faq`·`news`)는 2-F, 펫이야기·커뮤니티 공용 부품은 2-G, 펫돌봄(`care/`)은 2-H, 실종센터(`missing/`)는 2-I, 회원정보·탈퇴(`member/profile`·`withdraw`)는 2-J, 로그인·가입 계열은 2-K, 플레이스(`place`)는 2-L로 끝. 담당 폴더 조각은 모두 끝남(이 마일스톤을 끝낼지는 사람이 정함). 아래 다른 도메인(기준 `docs/ui-checklist.csv`), 회원 `profileStyles` → `components/formStyles`, 삭제 확인 창 `isDanger`
 - 기능: 같은 기준을 `features/health`(JAJ), `pet`·`point`·`expense`(SJM), `community`·`inquiry`·`notice`·`faq`·`news`(KSJ), `member`·`place`(YAY)에 적용. 도메인 하나씩 나눠 진행하고 PR 본문·팀 채널로 담당자에게 알린다. 체크리스트 6·12·15·16·18·26·27·31·37·56·58·62·66·68·69·71~74·76·79·80·83·84·94·96·98
 - 버그 후보(담당자에게 먼저 알림): 78 펫이야기 상세 내 글에도 신고 버튼(`community/PostDetail.jsx`, KSJ), 82 `ZONES` 순서 반대(`health/CareChipPicker.jsx`·`CareItemFields.jsx`, JAJ)
 - 이번엔 안 함: 기준 미정 18행(55·57·61·63·64·65·67·70·77·81·85·88~91), 메모 "변경없음"·"잠시 패스"·"정하지 않음" 행(8·17·19·21·25·30·35·75·86·97)
