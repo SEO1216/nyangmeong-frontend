@@ -23,6 +23,7 @@ const WIDTH_CLASSES = {
  * headerLead: 제목 줄 왼쪽에 제목 대신 둘 요소(예: 「‹ 다시 검색」). isTitleHidden와 함께 쓴다
  * isHeaderBorderHidden: 제목 줄 아래 구분선을 없앤다
  * isTitleHidden: 제목 글자를 화면에서 숨긴다(화면 읽기용 이름은 유지, ✕는 오른쪽에 그대로)
+ * isTitleSmall: 제목을 18px(확인 창 제목과 같은 크기)로 줄인다. 기본은 22px
  * isDismissDisabled: 배경 클릭·ESC로 닫지 않는다(입력 유실 방지). ✕·푸터 버튼으로만 닫힌다
  * isSpacious: isConfirm과 함께 쓴다. 본문 안쪽 여백을 넓혀(가로 40px, 위 40px) 좁은 문구 확인 창에 맞춘다
  * 열려 있는 동안 페이지 스크롤을 잠근다(useScrollLock, 창이 겹쳐도 마지막이 닫힐 때 풀린다)
@@ -44,6 +45,7 @@ export default function Modal({
   isSpacious = false,
   isTop = false,
   isTitleHidden = false,
+  isTitleSmall = false,
   headerLead = null,
   isHeaderBorderHidden = false,
   isDismissDisabled = false,
@@ -137,7 +139,11 @@ export default function Modal({
             {headerLead}
             <h2
               id={titleId}
-              className={isTitleHidden ? 'sr-only' : 'text-[22px] font-bold'}
+              className={
+                isTitleHidden
+                  ? 'sr-only'
+                  : `font-bold ${isTitleSmall ? 'text-lg' : 'text-[22px]'}`
+              }
             >
               {title}
             </h2>
