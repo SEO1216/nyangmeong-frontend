@@ -74,6 +74,7 @@ export default function AddressShareModal({
       isWide
       isTop
       isTitleHidden={Boolean(selected)}
+      isTitleSmall
       isHeaderBorderHidden
       headerLead={
         selected && (

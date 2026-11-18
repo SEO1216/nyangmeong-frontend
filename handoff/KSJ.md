@@ -28,6 +28,8 @@ SCR-CMU-001 커뮤니티 · 댓글 답글 「@닉네임」 (시작 2026-11-18) �
 | 추가-4 | `src/features/chat/room/AddressShareModal.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 채팅 [주소 공유] 모달의 장소 검색 단계에 제목 「주소 공유」가 보이고, 장소를 고른 단계(‹ 다시 검색)에서는 지금처럼 제목이 숨는다 | 요청 2026-11-18 "채팅창에서 장소 검색 모달 타이틀 추가" |
 | 추가-5 | `src/features/community/care/CareSideBox.jsx`, `src/features/chat/room/ChatRoomList.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 펫돌봄 상세 작성자 패널의 버튼이 모집 중·마감 모두 초록 기본 버튼 「채팅 목록 보기」(모집 중에는 「· N명」)이고, 눌러 열린 채팅 목록 맨 위에 그 글의 방들이 왼쪽 초록 띠와 옅은 초록 배경으로 구분된다(선택한 방은 기존 배경) | 요청 2026-11-18 "채팅 목록 보기로 통일, 버튼 컬러 기존 그린, 그 글의 방이 눈에 띄게" |
 | 추가-6 | `src/features/chat/room/ChatRoomList.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: PC 채팅 모달에서 왼쪽 「내 글·지원한 글」 탭 줄(편집 모드 줄 포함)의 높이가 오른쪽 상대방 이름 줄(60px)과 같고 아래 선이 이어진다 | 요청 2026-11-18 "내글 지원한글 영역과 오른쪽 냥멍테스터 상단 영역 높이를 동일하게" |
+| 추가-7 | `src/components/Modal.jsx`, `src/features/chat/room/AddressShareModal.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 주소 공유 모달 제목이 18px(확인 창 제목과 같은 크기)로 보이고, 다른 모달 제목(22px)은 그대로다 | 요청 2026-11-18 "모달 타이틀이 너무 크다, 가이드에 맞는 더 작은 타이틀로" |
+| 추가-8 | `src/features/chat/room/ChatRoomList.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 채팅 목록 하단 안내 문구(「거래는 채팅방 위 카드에서…」)가 12px이고, 그 줄(윗선 포함) 높이가 오른쪽 입력 영역과 같은 65px이다 | 요청 2026-11-18 "왼쪽 리스트 하단 안내 텍스트 12px, 오른쪽 채팅 영역 높이 동일하게" |
 
 ## 다음에 할 것
 

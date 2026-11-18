@@ -433,8 +433,8 @@ export default function ChatRoomList({
         )}
       </div>
 
-      <p className="flex shrink-0 gap-2 border-t border-line px-5 py-3 text-xs text-subtle">
-        <Icon name="info" className="mt-0.5 text-lg" />
+      <p className="flex h-16.25 shrink-0 items-center gap-2 border-t border-line px-5 text-[12px] leading-4 text-subtle">
+        <Icon name="info" className="shrink-0 text-lg" />
         거래는 채팅방 위 카드에서 단계별로 진행해요. 냥멍케어는 결제를 대신하지
         않아요.
       </p>
