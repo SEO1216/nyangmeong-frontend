@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import LoadError from '@/components/LoadError';
 import SkeletonCard from '@/components/SkeletonCard';
 import HealthDashboard, {
   DashboardSkeleton,
@@ -17,7 +18,7 @@ import SubPageLayout from '@/layouts/SubPageLayout';
 const LAYOUT_PROPS = {
   section: 'health',
   description: '우리 아이의 지금까지의 건강 이력을 한눈에 확인할 수 있어요',
-  contentClassName: 'gap-7 tabular-nums antialiased min-[1101px]:pt-6',
+  contentClassName: 'gap-7 tabular-nums antialiased min-[1100px]:pt-6',
 };
 
 /** 0마리 [반려동물 등록] 뒤 돌아올 때 붙이는 표시: 있으면 튜토리얼을 엶 (※신규 정책) */
@@ -41,7 +42,7 @@ export default function HealthSummaryPage() {
 }
 
 /**
- * 공용 페이지 틀 + 공통 반려동물 카드(1101px 이상 사이드 메뉴 아래, 1100px 이하 본문 맨 위 알약) (※신규 정책)
+ * 공용 페이지 틀 + 공통 반려동물 카드(1100px 이상 사이드 메뉴 아래, 1100px 미만 본문 맨 위 알약) (※신규 정책)
  * - isNoPet: 0마리면 대시보드 자리 등록 안내와 겹치지 않게 반려동물 카드를 그리지 않음(이 화면만, ※신규 정책)
  * - onOpenDashboardEdit: 대시보드가 있을 때만 넘겨 둘러보기 3장 링크를 보임
  */
@@ -91,10 +92,13 @@ function HealthSummaryContent({ mbrSn }) {
     pet: selectedPet,
     isPending: isPetsPending,
     isError: isPetsError,
+    refetch: refetchPets,
   } = useSelectedPet();
-  const { data: summary, isError: isSummaryError } = useHealthSummary(
-    selectedPet?.petSn ?? null,
-  );
+  const {
+    data: summary,
+    isError: isSummaryError,
+    refetch: refetchSummary,
+  } = useHealthSummary(selectedPet?.petSn ?? null);
 
   if (isPetsPending) {
     return (
@@ -106,9 +110,10 @@ function HealthSummaryContent({ mbrSn }) {
   if (isPetsError || isSummaryError) {
     return (
       <HealthLayout>
-        <p role="alert" className="text-muted">
-          건강기록을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요
-        </p>
+        <LoadError
+          message="건강기록을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요"
+          onRetry={() => (isPetsError ? refetchPets() : refetchSummary())}
+        />
       </HealthLayout>
     );
   }
@@ -148,7 +153,7 @@ function HealthSummaryContent({ mbrSn }) {
 function SummarySkeleton() {
   return (
     <div aria-busy="true" className="flex flex-col gap-7">
-      <SkeletonCard className="h-52 max-sm:h-96" />
+      <SkeletonCard className="h-52 max-[760px]:h-96" />
       <DashboardSkeleton />
     </div>
   );

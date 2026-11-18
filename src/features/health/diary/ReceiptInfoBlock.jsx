@@ -1,8 +1,9 @@
+import Checkbox from '@/components/Checkbox';
 import DropdownSelect from '@/components/DropdownSelect';
 import DatePicker from '@/components/DatePicker';
 import Icon from '@/components/Icon';
-import FieldError from './FieldError';
-import { INPUT_CLASS, LABEL_CLASS } from './formStyles';
+import FieldError from '@/components/FieldError';
+import { INPUT, LABEL } from '@/components/formStyles';
 import {
   DRUG_STATUSES,
   formatAmount,
@@ -10,7 +11,7 @@ import {
   toAmount,
 } from './receiptUtils';
 
-const CELL_INPUT = `${INPUT_CLASS} h-9 px-2`;
+const CELL_INPUT = `${INPUT} h-9 px-2`;
 
 /** 약품 카드 칸 이름표 */
 const DRUG_LABEL = 'text-sm text-subtle';
@@ -44,12 +45,12 @@ export default function ReceiptInfoBlock({
 
   return (
     <div className="mt-5 rounded-xl bg-surface-2 p-4">
-      <h4 className="mb-3 text-lg/[1.6] font-semibold text-[#1a3234]">
+      <h4 className="mb-3 text-lg font-semibold text-ink">
         영수증에서 읽은 정보
       </h4>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor={`rcpt-amt-${tab.id}`} className={LABEL_CLASS}>
+        <label htmlFor={`rcpt-amt-${tab.id}`} className={LABEL}>
           금액
         </label>
         <div className="relative">
@@ -60,7 +61,7 @@ export default function ReceiptInfoBlock({
             value={
               tab.amt === '' ? '' : Number(tab.amt).toLocaleString('ko-KR')
             }
-            className={`${INPUT_CLASS} pr-11 text-right tabular-nums ${aiClass(!tab.edited.amt && tab.amt !== '')}`}
+            className={`${INPUT} pr-11 text-right tabular-nums ${aiClass(!tab.edited.amt && tab.amt !== '')}`}
             onChange={(event) =>
               onAmountChange(
                 event.target.value
@@ -83,7 +84,7 @@ export default function ReceiptInfoBlock({
       </div>
 
       <div className="mt-5 flex flex-col gap-1.5">
-        <span className={LABEL_CLASS}>처방 약품</span>
+        <span className={LABEL}>처방 약품</span>
         {tab.drugs.length > 0 && (
           /** 약품마다 카드 3줄: 약품명·금액·삭제 / 시작일·종료일 / 1일 복용 횟수·상태 (2026-11-08) */
           <ul className="flex flex-col gap-2">
@@ -129,8 +130,8 @@ export default function ReceiptInfoBlock({
                     </button>
                   </div>
 
-                  {/* 640px 미만은 날짜가 잘리지 않게 시작일·종료일을 위아래로 */}
-                  <div className="grid grid-cols-2 items-start gap-2 max-sm:grid-cols-1">
+                  {/* 760px 미만은 날짜가 잘리지 않게 시작일·종료일을 위아래로 */}
+                  <div className="grid grid-cols-2 items-start gap-2 max-[760px]:grid-cols-1">
                     <label className="flex min-w-0 flex-col gap-1">
                       <span className={DRUG_LABEL}>시작일</span>
                       <DatePicker
@@ -219,14 +220,12 @@ export default function ReceiptInfoBlock({
       </div>
 
       <div className="mt-4 flex flex-col gap-1">
-        <label className="flex w-fit cursor-pointer items-center gap-2 has-disabled:cursor-not-allowed">
-          <input
-            type="checkbox"
-            checked={canLedger && tab.isLedger}
-            disabled={!canLedger}
-            className="size-5 accent-[#285a5c]"
-            onChange={(event) => onLedgerChange(event.target.checked)}
-          />
+        <Checkbox
+          checked={canLedger && tab.isLedger}
+          disabled={!canLedger}
+          className="w-fit"
+          onChange={(event) => onLedgerChange(event.target.checked)}
+        >
           <span>가계부에도 기록</span>
           {ledgerAmount != null && (
             <span className="text-sm text-subtle tabular-nums">
@@ -234,7 +233,7 @@ export default function ReceiptInfoBlock({
               {hospNm.trim() || '병원명'}
             </span>
           )}
-        </label>
+        </Checkbox>
         {!canLedger && (
           <p className="text-sm/[1.5] text-muted">
             금액이 있어야 가계부에 기록돼요

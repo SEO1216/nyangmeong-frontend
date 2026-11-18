@@ -10,13 +10,16 @@ import {
   BTN_DANGER,
   BTN_PRIMARY,
   BTN_SECONDARY,
+  FILTER_CHIP,
+  FILTER_CHIP_ON,
 } from '@/components/buttonStyles';
 import { PATHS } from '@/routes/paths';
 import { formatDate, getTodayYmd, getYear } from '@/utils/formatDate';
 import { useCheckupYears, useCheckups, useDeleteCheckup } from '../queries';
 import CareShortageNotice from '../CareShortageNotice';
 import CheckupModal from './CheckupModal';
-import EmptyBox from './EmptyBox';
+import EmptyResult from '@/components/EmptyResult';
+import Icon from '@/components/Icon';
 
 /** 한 페이지에 고정으로 보여 주는 검진기록 수 */
 const PAGE_SIZE = 10;
@@ -96,12 +99,7 @@ export default function CheckupListCard({ pet, pets, onReceipt }) {
       },
     );
 
-  const chipClass = (isActive) =>
-    `inline-flex h-9 items-center rounded-full border px-3.5 ${
-      isActive
-        ? 'border-brand-100 bg-brand-50 font-semibold text-brand-600'
-        : 'border-line bg-white text-ink hover:bg-surface-2'
-    }`;
+  const chipClass = (isActive) => (isActive ? FILTER_CHIP_ON : FILTER_CHIP);
 
   /** 연도 선택은 제목 바로 옆(Card의 sub 자리), 등록 버튼은 제목줄 오른쪽 끝 */
   const yearSelect = (
@@ -120,15 +118,15 @@ export default function CheckupListCard({ pet, pets, onReceipt }) {
       }}
     />
   );
-  /** 760px 이하는 제목줄이 좁아 지속 관찰처럼 작은 [+ 추가], 761px 이상은 [검진기록 추가] */
+  /** 760px 미만은 제목줄이 좁아 지속 관찰처럼 짧은 [+ 추가], 760px 이상은 [검진기록 추가] */
   const registerButton = (
     <button
       type="button"
-      className={`${BTN_PRIMARY} h-8! shrink-0 px-3! min-[761px]:h-10! min-[761px]:px-4!`}
+      className={`${BTN_PRIMARY} shrink-0`}
       onClick={() => setIsModalOpen(true)}
     >
-      <span className="min-[761px]:hidden">+ 추가</span>
-      <span className="hidden min-[761px]:inline">검진기록 추가</span>
+      <span className="min-[760px]:hidden">+ 추가</span>
+      <span className="hidden min-[760px]:inline">검진기록 추가</span>
     </button>
   );
 
@@ -163,8 +161,14 @@ export default function CheckupListCard({ pet, pets, onReceipt }) {
       </div>
 
       {pageCheckups.length === 0 ? (
-        <EmptyBox
-          icon="local_hospital"
+        <EmptyResult
+          isCompact
+          icon={
+            <Icon
+              name="local_hospital"
+              className="text-[28px] text-line-strong"
+            />
+          }
           title="등록된 검진기록이 없어요"
           description="병원에 다녀왔다면 직접 입력하거나 영수증으로 등록해 보세요"
         />
@@ -174,7 +178,7 @@ export default function CheckupListCard({ pet, pets, onReceipt }) {
             {pageCheckups.map((checkup) => (
               <li
                 key={checkup.ckupRcdSn}
-                className="flex items-start gap-3 border-b border-line-soft px-[18px] py-4 hover:bg-surface-2"
+                className="flex items-start gap-3 border-b border-line-soft px-4 py-4 hover:bg-surface-2"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline gap-x-3">
@@ -183,7 +187,7 @@ export default function CheckupListCard({ pet, pets, onReceipt }) {
                         petSn,
                         ckupRcdSn: checkup.ckupRcdSn,
                       })}
-                      className="text-lg/[1.6] font-semibold text-ink underline-offset-4 hover:text-brand-600 hover:underline"
+                      className="text-lg font-semibold text-ink underline-offset-4 hover:text-brand-600 hover:underline"
                     >
                       {checkup.hsptlNm}
                     </Link>

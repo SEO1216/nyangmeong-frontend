@@ -3,6 +3,11 @@ import { ChevronDown, ChevronsUpDown, Plus } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
 import PetFace from '@/components/PetFace';
+import {
+  BTN_PRIMARY,
+  BTN_SECONDARY,
+  TEXT_ACTION,
+} from '@/components/buttonStyles';
 import { formatAge, getVrtyName } from '@/utils/petFormat';
 import { usePetLimit } from '../queries';
 import HealthGuideModal from './HealthGuideModal';
@@ -17,7 +22,7 @@ const CELL_FACE_CLASS =
   'size-12 shrink-0 overflow-hidden rounded-full border border-line bg-white text-subtle';
 
 /**
- * 1101px 이상: 바로 앞 사이드 메뉴(sticky)가 스크롤에 붙을 때 이 카드도 메뉴 바로 아래에 같이 붙는다
+ * 1100px 이상: 바로 앞 사이드 메뉴(sticky)가 스크롤에 붙을 때 이 카드도 메뉴 바로 아래에 같이 붙는다
  * - 붙는 높이 = 메뉴의 계산된 top + 메뉴 높이 + 이 카드의 위 여백. 값은 화면에서 읽어 따로 적지 않는다
  * - 메뉴가 sticky가 아니면(1100px 이하 등 top이 auto) 비워 둔다
  * - 사이드 열 끝에 닿아 카드가 밀려 올라가면 메뉴도 같은 만큼 올림: 카드가 메뉴를 덮지 않게
@@ -74,7 +79,7 @@ const useStickBelowMenu = (ref, isEnabled, layoutKey) => {
 /**
  * [건강기록 공통 반려동물 카드] (※신규 정책)
  * - 건강기록 3개 화면(종합 건강기록·건강 일지·케어 캘린더)이 같은 아이를 보게 하는 선택 위치
- * - variant="card": 1101px 이상, 사이드 메뉴 아래. 사진 + 「선택한 아이」 + 이름 / 나이 / 품종(줄마다 하나) + ⇅. 팝오버는 카드 아래에 왼쪽 끝을 맞춰 열림
+ * - variant="card": 1100px 이상, 사이드 메뉴 아래. 사진 + 「선택한 아이」 + 이름 / 나이 / 품종(줄마다 하나) + ⇅. 팝오버는 카드 아래에 왼쪽 끝을 맞춰 열림
  * - variant="pill": 1100px 이하, 페이지 제목 아래 알약 버튼(사진 + 이름 + ▾). 같은 팝오버가 버튼 아래에 열림
  * - 반려동물 1마리여도 눌러서 팝오버를 열 수 있다(그 아이 1칸 + 「+ 등록」)
  * - 반려동물 0마리면 카드 대신 점선 박스와 [반려동물 등록]
@@ -94,7 +99,7 @@ export default function PetSwitcher({ variant, onOpenDashboardEdit }) {
   const buttonRef = useRef(null);
   const panelId = useId();
   const isCard = variant === 'card';
-  const visibility = isCard ? 'max-[1101px]:hidden' : 'min-[1101px]:hidden';
+  const visibility = isCard ? 'max-[1100px]:hidden' : 'min-[1100px]:hidden';
   const returnTo = `${pathname}${search}${hash}`;
 
   useEffect(() => {
@@ -128,17 +133,14 @@ export default function PetSwitcher({ variant, onOpenDashboardEdit }) {
       <div
         ref={rootRef}
         className={`${visibility} flex flex-col items-start gap-2 rounded-card border border-dashed border-line-strong p-4 ${
-          isCard ? 'mt-6 min-[1101px]:sticky' : ''
+          isCard ? 'mt-6 min-[1100px]:sticky' : ''
         }`}
       >
         <p className="font-semibold text-ink">등록된 반려동물이 없어요</p>
         <p className="text-sm text-muted">
           등록하면 건강기록을 시작할 수 있어요
         </p>
-        <Link
-          to={getRegisterPath(returnTo)}
-          className="inline-flex h-8 items-center rounded-box bg-brand-500 px-3 text-sm font-semibold text-white hover:bg-brand-600"
-        >
+        <Link to={getRegisterPath(returnTo)} className={BTN_PRIMARY}>
           반려동물 등록
         </Link>
       </div>
@@ -156,7 +158,7 @@ export default function PetSwitcher({ variant, onOpenDashboardEdit }) {
       ref={rootRef}
       className={`${visibility} ${
         isCard
-          ? 'z-20 mt-6 border-t border-line pt-6 min-[1101px]:sticky'
+          ? 'z-20 mt-6 border-t border-line pt-6 min-[1100px]:sticky'
           : 'flex flex-col items-start gap-2 self-start'
       }`}
     >
@@ -273,7 +275,7 @@ export default function PetSwitcher({ variant, onOpenDashboardEdit }) {
                   >
                     <Plus className="size-5" />
                   </span>
-                  <span className="w-full truncate text-center">등록</span>
+                  <span className="w-full truncate text-center">등록하기</span>
                 </Link>
               )}
             </div>
@@ -298,7 +300,7 @@ export default function PetSwitcher({ variant, onOpenDashboardEdit }) {
           <button
             type="button"
             aria-haspopup="dialog"
-            className="mt-2.5 h-9 w-full rounded-box bg-white text-sm font-semibold text-brand-600 hover:bg-brand-100"
+            className={`${BTN_SECONDARY} mt-2.5 w-full text-brand-600`}
             onClick={() => setIsGuideOpen(true)}
           >
             같이 둘러보기
@@ -308,7 +310,7 @@ export default function PetSwitcher({ variant, onOpenDashboardEdit }) {
         <button
           type="button"
           aria-haspopup="dialog"
-          className="inline-flex max-w-full items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1.5 text-sm text-ink-2 hover:bg-brand-100"
+          className={`${TEXT_ACTION} max-w-full gap-1.5`}
           onClick={() => setIsGuideOpen(true)}
         >
           <span className="min-w-0 truncate">{pet.petNm} 기록하는 법</span>
@@ -335,14 +337,14 @@ export default function PetSwitcher({ variant, onOpenDashboardEdit }) {
  * [건강기록 상세 화면 반려동물 표시] (※신규 정책) FN-HLT-005-16 · 007-07 — 보기 전용, 공통 선택값 변경 없음
  * - 검진상세·검사 수치 입력에서 주소의 petSn 아이를 보여 준다. 누를 수 없는 정보 칸(div, 포커스 없음)
  * - 배치·크기는 PetSwitcher와 같고, 면 bg-surface-3·테두리 없음, ⇅·▾·팝오버 없음
- * - variant="card": 1101px 이상, 사이드 메뉴 아래. 사진 + 「이 기록의 아이」 + 이름 / 나이 / 품종(줄마다 하나)
+ * - variant="card": 1100px 이상, 사이드 메뉴 아래. 사진 + 「이 기록의 아이」 + 이름 / 나이 / 품종(줄마다 하나)
  * - variant="pill": 1100px 이하, 페이지 제목 아래. 사진 + 이름
  * - pet이 없으면(목록을 받는 중·실패·목록에 없음) 그리지 않는다
  */
 export function PetBadge({ pet, variant }) {
   const rootRef = useRef(null);
   const isCard = variant === 'card';
-  const visibility = isCard ? 'max-[1101px]:hidden' : 'min-[1101px]:hidden';
+  const visibility = isCard ? 'max-[1100px]:hidden' : 'min-[1100px]:hidden';
 
   useStickBelowMenu(rootRef, isCard && Boolean(pet), 'card');
 
@@ -368,7 +370,7 @@ export function PetBadge({ pet, variant }) {
   return (
     <div
       ref={rootRef}
-      className={`${visibility} z-20 mt-6 border-t border-line pt-6 min-[1101px]:sticky`}
+      className={`${visibility} z-20 mt-6 border-t border-line pt-6 min-[1100px]:sticky`}
     >
       <div className="flex w-full items-center gap-3 rounded-card border border-transparent bg-surface-3 p-3">
         <PetFace

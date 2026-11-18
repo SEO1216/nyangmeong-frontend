@@ -9,7 +9,7 @@ import { DIARY_EXAM_PATH, DIARY_OBS_PATH } from '../summary/summaryUtils';
  * - 이름·설명·빈 상태 문구·링크는 프로토타입 원문
  * - moveTo: 카드 오른쪽 위 이동 링크가 가는 곳 (※신규 정책, 대시보드 카드 이동). 빈 상태 링크가 같은 곳이면 빼고 이동 링크만 둠
  * - moveText: 이동 링크 글자(「기록하기 ›」·「검진 기록 보기 ›」 등)
- * - typeCd가 있는 매일 기록 5개의 「기록하기 ›」·640px 미만 타일은 건강 일지 「오늘 기록하기」 모달을 그 항목으로 엶 (※신규 정책)
+ * - typeCd가 있는 매일 기록 5개의 「기록하기 ›」·760px 미만 타일은 건강 일지 「오늘 기록하기」 모달을 그 항목으로 엶 (※신규 정책)
  */
 
 const DIARY_GRAPH_PATH = `${PATHS.HEALTH_DIARY}#hlt002-graph`;
@@ -204,7 +204,7 @@ export const getMoveState = (item, petSn) => {
 /** 처음 추천 항목: 체중·식사량·음수량 (D4 수정) (※신규 정책) */
 export const RECOMMENDED_IDS = ['weight', 'meal', 'water'];
 
-/** 휴대폰(640px 미만)에서 그리지 않는 항목: 요약 띠와 같은 정보 (※신규 정책) */
+/** 휴대폰(760px 미만)에서 그리지 않는 항목: 요약 띠와 같은 정보 (※신규 정책) */
 export const MOBILE_HIDDEN_IDS = ['ckup', 'insp'];
 
 /** 매일 기록 5개(건강 일지 [오늘 기록하기] 종류와 짝) */

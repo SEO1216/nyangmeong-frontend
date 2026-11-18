@@ -5,7 +5,7 @@ export default function PartnersSection() {
   return (
     <section
       id="partners"
-      className="relative flex w-full scroll-mt-20 flex-col items-center justify-center overflow-hidden bg-[#fdfcfb] py-20 lg:h-[870px] lg:py-0"
+      className="relative flex w-full scroll-mt-20 flex-col items-center justify-center overflow-hidden bg-[#fdfcfb] min-h-[calc(100dvh-5rem)] py-20 lg:min-h-[max(870px,calc(100dvh-5rem))] lg:py-0"
     >
       <div className="flex w-full flex-col items-center px-4">
         <FadeIn delay={100} className="mb-12 text-center lg:mb-20">

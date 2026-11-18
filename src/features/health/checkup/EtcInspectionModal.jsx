@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import FieldError from '../diary/FieldError';
+import FieldError, { Required } from '@/components/FieldError';
 import FormModal from '../diary/FormModal';
-import { INPUT_CLASS, LABEL_CLASS, TEXTAREA_CLASS } from '../diary/formStyles';
+import { INPUT, LABEL, TEXTAREA } from '@/components/formStyles';
 import { useCreateEtcInspection, useUpdateEtcInspection } from '../queries';
 import CharCount from '../shared/CharCount';
 
@@ -9,7 +9,7 @@ const MAX_NAME_LENGTH = 100;
 const MAX_RESULT_LENGTH = 500;
 const MAX_MEMO_LENGTH = 200;
 
-const REQUIRED = <span className="ml-0.5 font-bold text-danger">*</span>;
+const REQUIRED = <Required />;
 const OPTIONAL = (
   <span className="ml-1 text-[13px] font-medium text-subtle">선택</span>
 );
@@ -59,21 +59,21 @@ export default function EtcInspectionModal({
 
   return (
     <FormModal
-      icon="assignment"
       title="기타검사 추가"
-      widthClassName="w-[min(560px,calc(100%-32px))]"
+      submitLabel="등록하기"
+      width={560}
       isPending={isPending}
       onSubmit={handleSubmit}
       onClose={onClose}
     >
       <label className="flex flex-col gap-1.5">
-        <span className={LABEL_CLASS}>검사명{REQUIRED}</span>
+        <span className={LABEL}>검사명{REQUIRED}</span>
         <input
           value={inspNm}
           maxLength={MAX_NAME_LENGTH}
           placeholder="예: 체온, 소변검사, 알레르기 검사"
           aria-invalid={isInvalid('name')}
-          className={INPUT_CLASS}
+          className={INPUT}
           onChange={(event) => setInspNm(event.target.value)}
         />
         <CharCount value={inspNm} max={MAX_NAME_LENGTH} />
@@ -81,12 +81,12 @@ export default function EtcInspectionModal({
       </label>
 
       <label className="flex flex-col gap-1.5">
-        <span className={LABEL_CLASS}>검사 결과{REQUIRED}</span>
+        <span className={LABEL}>검사 결과{REQUIRED}</span>
         <textarea
           value={rsltCn}
           maxLength={MAX_RESULT_LENGTH}
           aria-invalid={isInvalid('result')}
-          className={TEXTAREA_CLASS}
+          className={TEXTAREA}
           onChange={(event) => setRsltCn(event.target.value)}
         />
         <CharCount value={rsltCn} max={MAX_RESULT_LENGTH} />
@@ -96,11 +96,11 @@ export default function EtcInspectionModal({
       </label>
 
       <label className="flex flex-col gap-1.5">
-        <span className={LABEL_CLASS}>메모{OPTIONAL}</span>
+        <span className={LABEL}>메모{OPTIONAL}</span>
         <textarea
           value={memoCn}
           maxLength={MAX_MEMO_LENGTH}
-          className={TEXTAREA_CLASS}
+          className={TEXTAREA}
           onChange={(event) => setMemoCn(event.target.value)}
         />
         <CharCount value={memoCn} max={MAX_MEMO_LENGTH} />

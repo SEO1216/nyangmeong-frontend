@@ -4,7 +4,7 @@ import Card from '@/components/Card';
 import Icon from '@/components/Icon';
 import { BTN_SECONDARY } from '@/components/buttonStyles';
 import { formatDate } from '@/utils/formatDate';
-import EmptyBox from '../diary/EmptyBox';
+import EmptyResult from '@/components/EmptyResult';
 import PrescriptionForm from './PrescriptionForm';
 import { ADD_ROW, ROW_LINE } from './checkupStyles';
 import { DOSING } from './checkupTypes';
@@ -21,7 +21,13 @@ export default function PrescriptionTab({ petSn, ckupRcdSn, prescriptions }) {
   return (
     <Card title="처방·투약" sub="선택">
       {prescriptions.length === 0 ? (
-        <EmptyBox icon="medication" title="이 검진에서 받은 처방약이 없어요" />
+        <EmptyResult
+          isCompact
+          icon={
+            <Icon name="medication" className="text-[28px] text-line-strong" />
+          }
+          title="이 검진에서 받은 처방약이 없어요"
+        />
       ) : (
         <ul>
           {prescriptions.map((prescription) => (
@@ -35,7 +41,7 @@ export default function PrescriptionTab({ petSn, ckupRcdSn, prescriptions }) {
               <span className="min-w-0 flex-1">
                 <button
                   type="button"
-                  className="text-left text-lg/[1.6] font-semibold text-ink underline underline-offset-4 hover:text-brand-600"
+                  className="text-left text-lg font-semibold text-ink underline underline-offset-4 hover:text-brand-600"
                   onClick={() => setForm({ prescription, token: Date.now() })}
                 >
                   {prescription.mdcnNm}

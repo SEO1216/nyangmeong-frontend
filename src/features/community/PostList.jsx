@@ -4,9 +4,11 @@ import { generatePath, Link, useLocation } from 'react-router-dom';
 import Avatar from '@/components/Avatar';
 import BoardPagination from '@/components/BoardPagination';
 import EmptyResult from '@/components/EmptyResult';
+import FileImage from '@/components/FileImage';
 import { PATHS } from '@/routes/paths';
 import { formatRelativeTime } from '@/utils/formatDate';
 import { publicFileUrl } from '@/utils/fileUrl';
+import ImagePlaceholder from './ImagePlaceholder';
 import PostBadges from './PostBadges';
 import PostFilters from './PostFilters';
 import StoryRail from './StoryRail';
@@ -96,11 +98,12 @@ export default function PostList({
                       aria-hidden="true"
                       className="relative col-start-2 row-span-2 row-start-1 min-h-[124px] self-stretch overflow-hidden rounded-[10px] bg-[#f4f6f6] max-[760px]:order-1 max-[760px]:col-start-1 max-[760px]:row-span-1 max-[760px]:row-start-auto max-[760px]:aspect-[16/9] max-[760px]:min-h-0"
                     >
-                      <img
+                      <FileImage
                         src={publicFileUrl(item.thumbAtchFileSn)}
-                        alt=""
-                        loading="lazy"
                         className="absolute inset-0 size-full object-cover"
+                        fallback={
+                          <ImagePlaceholder className="absolute inset-0" />
+                        }
                       />
                     </span>
                   )}
@@ -138,7 +141,7 @@ export default function PostList({
           </ul>
         )}
 
-        <div className="mt-5">
+        <div className="mt-7 max-[760px]:mt-3">
           <BoardPagination
             page={page}
             totalPages={totalPages}

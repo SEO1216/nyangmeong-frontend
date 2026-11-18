@@ -1320,6 +1320,40 @@
 - 완료 조건: 칩 취두부에서 "까미 …" 새 대화 → 방 태그·칩·카드 모두 까미 / 이름 없음·둘 이상이면 칩 태그 / 열린 방은 그대로
 - 완료 조건 결과: 검증 `통과`(2026-11-09, 1회차), 사람 확인 2026-11-09
 
+## SCR-COM-002 UI 통일 1-A · 공용 기반(토큰·components·layouts·404) — 끝
+- 기능: (사람 지시 2026-11-18 "UI 체크리스트_결정반영" CSV 86행, 명세 FN 추가 없음) 결정된 기준 중 공용 파일(`index.html`·`assets/index.css`·`components/`·`layouts/`·`routes/`)에 들어가는 것
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 U1~U12 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): U1~U12 검증 2회차 통과(1회차 실패: 새 토큰 `--color-page`가 `--text-page`와 겹침 → `--color-page-bg`), 사람 확인. 기획과 달라진 것: 404는 `pages/notFound/NotFoundPage.jsx`, `MYPAGE_CAREGIVERS`는 지우지 않고 AI `SCR-MYP-004`만 `/mypage/pets`로, 서랍·채팅 창 닫기는 760px 이하 44px
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 1-B · LJS 담당 화면 적용(메인·AI·채팅·설정·관리자) — 끝
+- 기능: 1-A 공용 기반을 LJS 담당 폴더(`features/dashboard`·`ai`·`chat`·`notification`·`admin*`, `pages/` 같은 화면)에 적용. 체크리스트 2(20·22·26·30·32px → 단계 안 값)·5·11·29·42(분기점 390·760·1100)·92·93·95. 랜딩 항목(2의 17px·3·4·32 PAWEVER·36 랜딩 푸터·39 H1)은 빼고 랜딩 교체(SCR-MAN-002) 때(사람 2026-11-18)
+- 완료 조건: LJS 폴더에 단계 밖 글자 크기·직접 쓴 hex·761/1101/1281 분기점이 남지 않는다 / 설정 H1 28px, 채팅·AI 창 H1은 별도 창 예외 18px(사람 2026-11-18)
+- 결과(2026-11-18): B1~B6·Q1 검증 1회차 통과, 추가-1(옛 분기점 주석) 재검증 통과, 사람 확인. 기획과 달라진 것: `CareDealCard` 559/560은 컨테이너 쿼리라 그대로, `HeroAsk`는 760 미만 아이콘만(390 아님), JS 조건 5곳 더(`AdminLayout`·`NavDrawer`·`useAiDock`·`ChatInput`·`HeroAsk`)
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 2-A · 건강기록(JAJ) 값·문구·칩 정리 — 끝
+- 기능: (2 마일스톤을 도메인 하나씩 나눈 첫 조각, 2026-11-18) `features/health`·`pages/health`에 체크리스트 2·6·11·12·15·29·42·62·93·98 적용(색 토큰, 글자 단계, 분기점 390·760·1100, 섹션 제목 행간, 4px 간격, 버튼·칩 규격, 버튼 문구)
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 H1~H8 / `yarn -s lint`·`yarn -s build` 0
+- 다음 조각: 건강기록 부품 교체(56·58·68·69·72·73·83·26·27·71)는 아래 2 마일스톤에 남김
+- 결과(2026-11-18): H1~H8 검증 1회차 통과, 사람 확인. 기획과 달라진 것: `BTN_SM`(checkupStyles) 없앰, 오늘 기록 항목 편집·튜토리얼 완료 칩도 `CHIP`, 반려동물 고르기 [등록] 타일 → "등록하기"
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 2-B · 건강기록(JAJ) 부품 교체 — 끝
+- 기능: (2 마일스톤의 두 번째 조각, 2026-11-18, 기준 `docs/ui-checklist.csv`) `features/health`·`pages/health`에서 직접 만든 UI를 공용 부품으로. 체크리스트 26(스켈레톤)·27(LoadError)·56(Badge)·58(공용 Modal 틀)·68(차트 한 벌, 건강 일지 차트를 공용으로)·69(UnderlineTabs)·71(폼 상수, 회원정보 모양)·72(FieldError)·73(Checkbox)·83(NoticeBox)
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 P1~P10 + 추가-1~6 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): P1~P10 검증 통과(1회차), 추가-1~6 재검증 통과(3회차), 사람 확인. 기획과 달라진 것: 추가-1(28px)·추가-2(py-4)는 추가-3(입력 모달 제목 22px·제목 줄 py-3)·추가-5(확인 창 제목 18px)로 바뀜, 추가-4 isLarge가 아닌 모달 본문 안쪽 스크롤, 추가-6 `ConfirmModal` `isDanger`(일정 삭제만). P10은 `SelectedPetProvider`에 `refetch`, P1은 `summaryUtils` `toneKey`·`ItemSelect`도 고침
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 2 · 다른 담당 폴더 적용 — 대기
+- 남은 것(2026-11-18): 건강기록은 2-A·2-B로 끝. 아래 다른 도메인(기준 `docs/ui-checklist.csv`), 회원 `profileStyles` → `components/formStyles`, 삭제 확인 창 `isDanger`
+- 기능: 같은 기준을 `features/health`(JAJ), `pet`·`point`·`expense`(SJM), `community`·`inquiry`·`notice`·`faq`·`news`(KSJ), `member`·`place`(YAY)에 적용. 도메인 하나씩 나눠 진행하고 PR 본문·팀 채널로 담당자에게 알린다. 체크리스트 6·12·15·16·18·26·27·31·37·56·58·62·66·68·69·71~74·76·79·80·83·84·94·96·98
+- 버그 후보(담당자에게 먼저 알림): 78 펫이야기 상세 내 글에도 신고 버튼(`community/PostDetail.jsx`, KSJ), 82 `ZONES` 순서 반대(`health/CareChipPicker.jsx`·`CareItemFields.jsx`, JAJ)
+- 이번엔 안 함: 기준 미정 18행(55·57·61·63·64·65·67·70·77·81·85·88~91), 메모 "변경없음"·"잠시 패스"·"정하지 않음" 행(8·17·19·21·25·30·35·75·86·97)
+
 ## SCR-COM-002 공통 ⋮ 메뉴 공통화 — 대기
 - 기능: (사람 지시 2026-11-08 "리팩토링 때 한번에", 명세 FN 추가 없음) A1 `components/KebabMenu.jsx` variant 추가, A2 `CareItemMenu`·A3 `ExpenseMenu`를 KebabMenu 껍데기로, A4 `MainShortcuts`의 `ShortcutMenu`를 KebabMenu로
 - 기다리는 것: 없음
@@ -1434,6 +1468,27 @@
 - 기다리는 것: 백엔드 SCR-MYP-010 무료 재생성 Python 연결(끝 2026-11-16, develop 병합 전), ai 재생성 입구(ai-39 구현, 첫 생성 success의 photo는 다음 ai 세션)
 - 완료 조건: 캐릭터 오류 처리에서 CHRC0008(무료 재생성) 응답의 `regenJobSn`으로 Python `POST /ai/admin/characters/jobs/{regenJobSn}/regenerate`(관리자 쿠키, 202)를 부른다. 상세의 `regenJobSttsCd`·`regenJobSttsCdNm`으로 재생성 상태를 보여 주고, CHRC0004(실패)면 다시 처리(CHRC0008·CHRC0009) 버튼을 보인다. 진행 중 다시 처리는 409 `PIXEL_CHARACTER_CREATING`, 성공 뒤는 409 `ALREADY_PROCESSED`. 계약은 백엔드 `docs/api/support.md` character-error 행과 `AdminInquiryResponse`
 - 결과(2026-11-16): `features/adminInquiry/api.js` `regenerateAdminCharacter`, `queries.js` 무료 재생성 뒤 AI 서버 호출(실패해도 처리는 성공, 토스트로 알림)·요청·생성 중 5초 다시 받기, `InquiryCharacterError.jsx` 재생성 상태 표시·생성 실패면 다시 처리 버튼. 추가-1 요청·생성 중 로딩 아이콘과 안내. 검증 2회차 통과, 사람 확인
+
+## SCR-ADM-070 아이템 · 그림 교체 뒤 전체 굽기 다시 시작 — 대기
+- 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-070-03
+- 기다리는 것: 백엔드 SCR-ADM-070 아이템 · 굽기를 그림 참고로만(LJS 백엔드, 끝 2026-11-17). 굽기 지시(`bakeHint`)가 요청·응답에서 없어졌고, 굽기 대상은 `bakeImgRefYn: true` 아이템뿐이다. 굽기 대상 아이템(수정 후 true)의 그림을 `PATCH /admin/items/{itemSn}` `image`로 바꾸면 백엔드가 그 아이템의 착용 시트·실패 표시를 지워 모든 캐릭터가 다시 대상이 된다
+- 완료 조건: 수정 모달에서 굽기 대상 아이템의 그림을 바꿔 저장하면 등록 때처럼 전체 굽기(`POST /ai/items/{itemSn}/bake` 반복)가 자동 시작된다. `bakeImgRefYn`만 바꾸면 시작하지 않는다. `features/adminItem/api.js` 목록 주석과 `useItemBake.js` `canBakeItem`에서 `bakeHint`를 뺀다. 이미 그렇게 동작하면 확인만 하고 끝낸다
+
+## SCR-COM-004 알림 드롭다운 · 모두 읽음 — 끝
+- 기능: 명세 기능 ID 새로 필요(FN-COM-004 "모두 읽음", DMS 수정은 사람). 걸치는 기능 FN-COM-004-05
+- 배경: 헤더 알림 목록은 서버가 최대 5건(안 읽음 우선)만 주고 전체 알림 화면이 없다. 미읽음이 5건을 넘으면 배지 숫자와 목록이 어긋나고 뒤 알림은 앞을 읽어야 올라온다(사람 2026-11-17)
+- 기다리는 것: 백엔드 "모두 읽음" API(LJS 백엔드, 2026-11-17 backend 세션에 요청). 제안 계약 `POST /api/notifications/read-all`: 탭과 상관없이 숨김 기준(기본 7일) 안의 내 미읽음 알림 전부 읽음 처리
+- 완료 조건 후보: 패널 머리 "미읽음 N" 옆 [모두 읽음] 버튼(미읽음 0이면 비활성, 요청 중 잠금, 확인창 없음) → 성공하면 배지 0·목록 전부 읽음 모양·토스트 "모두 읽었어요". 성공 뒤 `notificationKeys.unreadCount`·`list` 무효화
+- 열린 질문(`/start`에서 사람이 정함): 5건 제한 유지 + [전체 보기] 화면 추가 / 제한 늘리기(명세 FN-COM-004-05·백엔드 limit 같이 변경)
+- 결정(2026-11-17): FN-COM-004-16(전체 페이지 없음)에 따라 5건 제한·[전체 보기] 없음 유지. 디자인은 화면설계서 기준(추천안대로)
+- 결과(2026-11-17): `features/notification/api.js` `readAllNotifications`, `queries.js` `useReadAllNotifications`(성공 시 미읽음 수·목록 무효화·토스트, 실패 토스트), `layouts/NotificationDropdown.jsx` 머리 [모두 읽음](미읽음 0·요청 중 비활성). 검증 1회차 통과(route 흉내), 사람 확인 2026-11-17
+- 연결 남음: FN-COM-004 모두 읽음 (백엔드 연결 `POST /api/notifications/read-all`, 백엔드 저장소에서 /start) → 해소(2026-11-17, "모두 읽음 서버 연결" 절)
+
+## SCR-COM-004 알림 드롭다운 · 모두 읽음 서버 연결 — 끝
+- 기능: FN-COM-004 모두 읽음(DMS 기능 ID 추가 전, 백엔드 제안 FN-COM-004-17). 걸치는 기능 FN-COM-004-02·05
+- 배경: 백엔드 `POST /api/notifications/read-all`이 develop에 들어옴(백엔드 PR #261). 응답 `{count}`(바꾼 건수, 0건도 200). 프론트 코드는 이미 같은 주소를 부른다
+- 완료 조건: 실제 API로 [모두 읽음] 성공 흐름(토스트 "모두 읽었어요"·배지 사라짐·"미읽음 0"·목록 읽음 모양) 확인. 코드 변경이 필요 없으면 확인만 하고 끝낸다
+- 결과(2026-11-17): 코드 변경 없음. 검증 1회차 통과(8081 실제 API, 미읽음 2건 → `count` 2·토스트·배지 사라짐·미읽음 0, 0건 회원은 버튼 비활성), 사람 확인 2026-11-17
 
 ## 제외
 - FN-AIM-009-01~27: 화면 담당이 JAJ(milestone.md "화면과 API 담당이 다른 곳" — AIM-009 영수증 결과 규칙, 화면은 SCR-HLT-002)

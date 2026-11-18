@@ -55,7 +55,7 @@ export default function CareList({
           </ul>
         )}
 
-        <div className="mt-5">
+        <div className="mt-7 max-[760px]:mt-3">
           <BoardPagination
             page={page}
             totalPages={totalPages}

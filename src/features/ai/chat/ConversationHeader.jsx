@@ -7,10 +7,10 @@ const formatDate = (regDt) => regDt.slice(0, 10).replaceAll('-', '.');
 
 /** 새 대화 헤더와 같이 씀 */
 export const chatHeaderClass =
-  'flex h-16 shrink-0 items-center gap-3 border-b border-[#e2e7e7] bg-white px-6 max-[760px]:h-14 max-[760px]:gap-2 max-[760px]:px-2';
+  'flex h-16 shrink-0 items-center gap-3 border-b border-line bg-white px-6 max-[760px]:h-14 max-[760px]:gap-2 max-[760px]:px-2';
 
 const mobileIconButton =
-  'hidden size-9 shrink-0 items-center justify-center rounded-full text-[#3d4a4b] hover:bg-[#f4f6f6] max-[760px]:flex';
+  'hidden size-9 shrink-0 items-center justify-center rounded-full text-ink-2 hover:bg-surface-2 max-[760px]:flex';
 
 /**
  * 대화 제목 줄 오른쪽 끝 AI 매니저 닫기(모달만, 모든 폭 같은 자리)
@@ -20,7 +20,7 @@ export function CloseButton({ onClick, hasDivider = false }) {
   return (
     <>
       {hasDivider ? (
-        <span aria-hidden="true" className="h-5 w-px shrink-0 bg-[#e2e7e7]" />
+        <span aria-hidden="true" className="h-5 w-px shrink-0 bg-line" />
       ) : (
         <span aria-hidden="true" className="ml-auto" />
       )}
@@ -28,7 +28,7 @@ export function CloseButton({ onClick, hasDivider = false }) {
         type="button"
         aria-label="AI 매니저 닫기"
         title="닫기"
-        className="flex size-9 shrink-0 items-center justify-center rounded-full text-[#3d4a4b] hover:bg-[#f4f6f6]"
+        className="flex size-9 shrink-0 items-center justify-center rounded-full text-ink-2 hover:bg-surface-2"
         onClick={onClick}
       >
         <X size={20} aria-hidden="true" />
@@ -79,19 +79,19 @@ export default function ConversationHeader({
   return (
     <header className={chatHeaderClass}>
       <DrawerButton onClick={onOpenDrawer} />
-      <h1 className="truncate text-lg font-bold text-[#1a3234] max-[760px]:text-base">
+      <h1 className="truncate text-lg font-bold text-ink max-[760px]:text-base">
         {conversation.cnvrsTtl}
       </h1>
-      <span className="shrink-0 rounded-full bg-[#e9f2f2] px-2.5 py-0.5 text-xs font-medium text-[#285a5c]">
+      <span className="shrink-0 rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-500">
         {pets?.find((pet) => pet.petSn === conversation.petSn)?.petNm ?? '전체'}
       </span>
-      <span className="truncate text-sm text-[#667374] max-[760px]:hidden">
+      <span className="truncate text-sm text-subtle max-[760px]:hidden">
         {formatDate(conversation.regDt)}
       </span>
       <button
         type="button"
         aria-label="삭제"
-        className="ml-auto flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-[#285a5c] hover:bg-[#f4f6f6] max-[760px]:size-9 max-[760px]:justify-center max-[760px]:rounded-full max-[760px]:p-0"
+        className="ml-auto flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-brand-500 hover:bg-surface-2 max-[760px]:size-9 max-[760px]:justify-center max-[760px]:rounded-full max-[760px]:p-0"
         onClick={() => setIsConfirming(true)}
       >
         <Trash2 size={16} aria-hidden="true" />

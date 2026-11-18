@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import LoadError from '@/components/LoadError';
 import PageSkeleton from '@/components/PageSkeleton';
 import Skeleton from '@/components/Skeleton';
 import SkeletonCard from '@/components/SkeletonCard';
 import Toggle from '@/components/Toggle';
 import { showToast } from '@/components/toastStore';
 import CareList from '@/features/health/CareList';
-import DiaryTabs from '@/features/health/diary/DiaryTabs';
+import UnderlineTabs from '@/components/UnderlineTabs';
 import MonthCalendar from '@/features/health/MonthCalendar';
 import PetSwitcher from '@/features/health/shared/PetSwitcher';
 import SelectedPetProvider from '@/features/health/shared/SelectedPetProvider';
@@ -36,7 +37,7 @@ import { pickJosa } from '@/utils/josa';
 const LAYOUT_PROPS = {
   section: 'health',
   description: '모든 반려동물의 일정을 한눈에 확인하는 캘린더',
-  contentClassName: 'gap-7 min-[1101px]:pt-6',
+  contentClassName: 'gap-7 min-[1100px]:pt-6',
 };
 
 /** 다가오는 케어 일정 최대 건수(FN-HLT-003-40) */
@@ -96,6 +97,7 @@ function CareCalendarContent() {
     selectPet,
     isPending: isPetsPending,
     isError: isPetsError,
+    refetch: refetchPets,
   } = useSelectedPet();
   const year = getYear(viewMonthYmd);
   const month = getMonth(viewMonthYmd);
@@ -166,9 +168,10 @@ function CareCalendarContent() {
   if (isPetsError) {
     return (
       <CalendarLayout>
-        <p role="alert" className="text-[#566465]">
-          반려동물 정보를 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요
-        </p>
+        <LoadError
+          message="반려동물 정보를 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요"
+          onRetry={() => refetchPets()}
+        />
       </CalendarLayout>
     );
   }
@@ -237,11 +240,12 @@ function CareCalendarContent() {
 
   return (
     <CalendarLayout>
-      <DiaryTabs
+      <UnderlineTabs
         items={SECTION_TABS}
         activeId={sectionId}
         onSelect={setSectionId}
         label="케어 캘린더 묶음"
+        className="mt-2"
       />
 
       {sectionId === 'hlt003-calendar' && (
@@ -249,7 +253,7 @@ function CareCalendarContent() {
           id="hlt003-calendar"
           role="tabpanel"
           aria-labelledby="hlt003-calendar-tab"
-          className="mt-5 grid items-start gap-5 min-[1101px]:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]"
+          className="mt-5 grid items-start gap-5 min-[1100px]:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]"
         >
           <MonthCalendar
             year={year}
@@ -281,10 +285,10 @@ function CareCalendarContent() {
           />
 
           {/* 넓은 화면에서는 이 열의 높이를 캘린더 카드에 맞추고, 날짜 상세 : 다가오는 일정 = 7 : 3으로 나눈다. 다가오는 일정은 3건이 다 보이는 높이보다 줄지 않고, 모자란 만큼 날짜 상세가 줄며 안에서 스크롤 */}
-          <div className="flex min-w-0 flex-col gap-5 min-[1101px]:h-0 min-[1101px]:min-h-full min-[1101px]:self-stretch">
+          <div className="flex min-w-0 flex-col gap-5 min-[1100px]:h-0 min-[1100px]:min-h-full min-[1100px]:self-stretch">
             <ScheduleDayDetail
-              className="min-[1101px]:min-h-0 min-[1101px]:flex-7"
-              bodyClassName="min-[1101px]:min-h-0 min-[1101px]:overflow-y-auto"
+              className="min-[1100px]:min-h-0 min-[1100px]:flex-7"
+              bodyClassName="min-[1100px]:min-h-0 min-[1100px]:overflow-y-auto"
               ymd={selectedYmd}
               schedules={monthSchedules}
               petLabel={petLabel}
@@ -294,7 +298,7 @@ function CareCalendarContent() {
             <UpcomingSchedules
               schedules={upcomingSchedules}
               onSelectSchedule={showScheduleDay}
-              className="min-[1101px]:min-h-fit min-[1101px]:flex-3"
+              className="min-[1100px]:min-h-fit min-[1100px]:flex-3"
             />
           </div>
         </div>
@@ -335,7 +339,7 @@ function CareCalendarContent() {
 
 /**
  * 로딩 자리: 탭 막대(48px) + 처음 열릴 탭의 모양. 높이는 불러온 뒤 실측값
- * - 캘린더: 달력(5줄 달, 640px 미만은 점 표시 달력) + 날짜 상세·다가오는 일정. 1101px 이상은 오른쪽 두 장의 합이 달력과 같음
+ * - 캘린더: 달력(5줄 달, 760px 미만은 점 표시 달력) + 날짜 상세·다가오는 일정. 1100px 이상은 오른쪽 두 장의 합이 달력과 같음
  * - 케어리스트: 케어리스트 카드 + 최근 케어 기록 카드(CareList 로딩 자리와 같은 높이)
  */
 function CalendarSkeleton({ sectionId }) {
@@ -351,12 +355,12 @@ function CalendarSkeleton({ sectionId }) {
       <div className="mt-7">
         {sectionId === 'hlt003-care' ? (
           <div className="flex flex-col gap-5">
-            <SkeletonCard className="h-[606px] max-[1100px]:h-[670px] max-sm:h-[691px]" />
-            <SkeletonCard className="h-[739px] max-sm:h-[727px]" />
+            <SkeletonCard className="h-[606px] max-[1100px]:h-[670px] max-[760px]:h-[691px]" />
+            <SkeletonCard className="h-[739px] max-[760px]:h-[727px]" />
           </div>
         ) : (
-          <div className="grid gap-5 min-[1101px]:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-            <SkeletonCard className="h-[664px] max-sm:h-[468px]" />
+          <div className="grid gap-5 min-[1100px]:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+            <SkeletonCard className="h-[664px] max-[760px]:h-[468px]" />
             <div className="flex flex-col gap-5">
               <SkeletonCard className="h-[281px] max-[1100px]:h-[222px]" />
               <SkeletonCard className="h-[363px] max-[1100px]:h-[351px]" />

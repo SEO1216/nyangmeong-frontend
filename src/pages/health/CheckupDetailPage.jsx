@@ -6,6 +6,7 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom';
+import LoadError from '@/components/LoadError';
 import PageSkeleton from '@/components/PageSkeleton';
 import SkeletonCard from '@/components/SkeletonCard';
 import AttachmentTab from '@/features/health/checkup/AttachmentTab';
@@ -33,7 +34,7 @@ const LAYOUT_PROPS = {
   title: '검진상세',
   back: false,
   description: '병원에서 받은 검사 결과와 처방을 한곳에서 확인해요',
-  contentClassName: 'gap-7 tabular-nums antialiased min-[1101px]:pt-6',
+  contentClassName: 'gap-7 tabular-nums antialiased min-[1100px]:pt-6',
 };
 
 const DEFAULT_TAB = 'result';
@@ -73,6 +74,7 @@ function CheckupDetail({ petSn, ckupRcdSn }) {
     isPending,
     isError,
     error,
+    refetch,
   } = useCheckupDetail({ petSn, ckupRcdSn });
   const { data: pets, isPending: isPetsPending } = useMyPets();
 
@@ -88,11 +90,16 @@ function CheckupDetail({ petSn, ckupRcdSn }) {
   if (isError) {
     return (
       <SubPageLayout {...LAYOUT_PROPS}>
-        <p role="alert" className="text-[#566465]">
-          {NOT_FOUND_CODES.includes(error?.code)
-            ? '검진기록을 찾을 수 없어요'
-            : '검진기록을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요'}
-        </p>
+        {NOT_FOUND_CODES.includes(error?.code) ? (
+          <p role="alert" className="text-muted">
+            검진기록을 찾을 수 없어요
+          </p>
+        ) : (
+          <LoadError
+            message="검진기록을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요"
+            onRetry={() => refetch()}
+          />
+        )}
       </SubPageLayout>
     );
   }

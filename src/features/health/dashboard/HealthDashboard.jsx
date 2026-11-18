@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import LoadError from '@/components/LoadError';
 import { showToast } from '@/components/toastStore';
 import Skeleton from '@/components/Skeleton';
 import SkeletonCard from '@/components/SkeletonCard';
@@ -26,9 +27,9 @@ const INDICATOR_IDS = ['weight', 'meal', 'water', 'walk'];
 /** 검진기록 카드 줄 수 */
 const CHECKUP_COUNT = 5;
 
-/** 1101px 이상 3열, 그 아래 2열(640px 미만은 요약 타일 2열) */
+/** 1100px 이상 3열, 그 아래 2열(760px 미만은 요약 타일 2열) */
 const GRID_CLASS =
-  'grid grid-cols-3 gap-5 max-[1100px]:grid-cols-2 max-sm:gap-3';
+  'grid grid-cols-3 gap-5 max-[1100px]:grid-cols-2 max-[760px]:gap-3';
 
 /**
  * [건강 대시보드] 종합 건강기록 히어로 아래 (※신규 정책, 흐름도 D1~D10)
@@ -40,7 +41,7 @@ const GRID_CLASS =
  * - isTutorialRequested: 부모의 튜토리얼 요청(0마리에서 등록하고 돌아옴). 1단계부터 열고 닫으면 onTutorialClose (※신규 정책)
  * - 이미 고른 항목이 있는 회원이 튜토리얼을 다시 열면 2단계 처음 체크가 고른 항목이고, 끝까지 가지 않고 닫으면 저장하지 않음(isReplay) (※신규 정책)
  * - isEditRequested: 부모의 편집 모달 요청(둘러보기 「대시보드 편집 바로 열기 ›」). 고른 항목이 있을 때만 열고 닫으면 onEditClose (※신규 정책)
- * - 640px 미만: AI 띠 + 요약 타일 2열, 기준일은 요약 띠에만 (※신규 정책)
+ * - 760px 미만: AI 띠 + 요약 타일 2열, 기준일은 요약 띠에만 (※신규 정책)
  */
 export default function HealthDashboard({
   mbrSn,
@@ -126,19 +127,19 @@ export default function HealthDashboard({
   return (
     <section
       aria-labelledby="hlt011-dashboard"
-      className="flex flex-col gap-4 max-sm:mt-8"
+      className="flex flex-col gap-4 max-[760px]:mt-8"
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
           <h2
             id="hlt011-dashboard"
-            className="text-[22px] leading-[1.35] font-bold tracking-[-0.02em] text-ink"
+            className="text-2xl leading-[1.35] font-bold tracking-[-0.02em] text-ink"
           >
             {pet.petNm}의 건강 대시보드
           </h2>
           <p className="mt-1 text-muted">
             고른 기록만 보여요
-            <span className="max-sm:hidden">
+            <span className="max-[760px]:hidden">
               {' '}
               · 기준일{' '}
               {formatDate(getTodayYmd(), { weekday: true, weekdayGap: '' })}
@@ -148,7 +149,7 @@ export default function HealthDashboard({
         {savedIds && (
           <button
             type="button"
-            className={`${BTN_SECONDARY} h-9! gap-1! px-3.5! text-sm`}
+            className={BTN_SECONDARY}
             onClick={() => setModalMode('edit')}
           >
             <Icon name="tune" className="text-lg" />
@@ -158,9 +159,10 @@ export default function HealthDashboard({
       </div>
 
       {widgets.isError ? (
-        <p role="alert" className="text-muted">
-          기록 항목을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요
-        </p>
+        <LoadError
+          message="기록 항목을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요"
+          onRetry={() => widgets.refetch()}
+        />
       ) : (
         <div className={GRID_CLASS}>
           <AiReportCard key={pet.petSn} pet={pet} />
@@ -168,7 +170,7 @@ export default function HealthDashboard({
             isItemPending(id) ? (
               <SkeletonCard
                 key={id}
-                className={`h-[260px] max-sm:h-28 ${MOBILE_HIDDEN_IDS.includes(id) ? 'max-sm:hidden' : ''}`}
+                className={`h-[260px] max-[760px]:h-28 ${MOBILE_HIDDEN_IDS.includes(id) ? 'max-[760px]:hidden' : ''}`}
               />
             ) : (
               <WidgetCard
@@ -196,7 +198,7 @@ export default function HealthDashboard({
   );
 }
 
-/** 고른 항목을 불러오는 동안: 머리 + 카드 한 줄(640px 미만 AI 띠 + 타일 2칸) */
+/** 고른 항목을 불러오는 동안: 머리 + 카드 한 줄(760px 미만 AI 띠 + 타일 2칸) */
 export function DashboardSkeleton() {
   return (
     <div aria-busy="true" className="flex flex-col gap-4">
@@ -205,9 +207,9 @@ export function DashboardSkeleton() {
         <Skeleton className="h-5 w-72 max-w-full" />
       </div>
       <div className={GRID_CLASS}>
-        <SkeletonCard className="col-span-2 h-16 sm:hidden" />
-        <SkeletonCard className="h-[260px] max-sm:h-28" />
-        <SkeletonCard className="h-[260px] max-sm:h-28" />
+        <SkeletonCard className="col-span-2 h-16 min-[760px]:hidden" />
+        <SkeletonCard className="h-[260px] max-[760px]:h-28" />
+        <SkeletonCard className="h-[260px] max-[760px]:h-28" />
         <SkeletonCard className="h-[260px] max-[1100px]:hidden" />
       </div>
     </div>

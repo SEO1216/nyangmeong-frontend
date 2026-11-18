@@ -19,14 +19,14 @@ import place from '@/assets/landing/banner/place.png';
 export const LANDING_NAV = [
   { name: '서비스 소개', id: 'service' },
   { name: '서비스 과정', id: 'process' },
-  { name: '냥멍 데이터', id: 'stats' },
+  { name: 'pawever 데이터', id: 'stats' },
   { name: '자주 묻는 질문', id: 'features' },
 ];
 
 export const HERO_SLIDES = [
   {
     image: banner1,
-    sub: '냥멍케어',
+    sub: 'pawever',
     title1: '우리 아이의 건강을',
     title2: '한곳에 기록해요',
     desc: [
@@ -36,7 +36,7 @@ export const HERO_SLIDES = [
   },
   {
     image: banner2,
-    sub: '냥멍케어',
+    sub: 'pawever',
     title1: '궁금한 건 말로 물어보세요',
     title2: 'AI 매니저가 찾아줘요',
     desc: [
@@ -46,20 +46,17 @@ export const HERO_SLIDES = [
   },
   {
     image: banner3,
-    sub: '냥멍케어',
+    sub: 'pawever',
     title1: '매일의 케어가',
     title2: '미션이 됩니다',
     desc: ['식사·음수·산책·약 복용을 체크하고', '포인트도 함께 모아 보세요'],
   },
   {
     image: banner4,
-    sub: '냥멍케어',
+    sub: 'pawever',
     title1: '병원부터 이웃까지',
     title2: '함께하는 반려생활',
-    desc: [
-      '근처 플레이스와 커뮤니티, 실종센터까지',
-      '냥멍케어 안에서 이어져요',
-    ],
+    desc: ['근처 플레이스와 커뮤니티, 실종센터까지', 'pawever 안에서 이어져요'],
   },
 ];
 
@@ -76,7 +73,7 @@ export const SERVICE_CARDS = [
 export const PROCESS_STEPS = [
   {
     step: 'STEP 01',
-    title: '냥멍케어 회원가입',
+    title: 'pawever 회원가입',
     description: '이메일 인증이나 SNS 계정으로 간편하게 가입해요.',
     icon: step1,
   },
@@ -134,9 +131,9 @@ export const COUNT_DATA = [
 
 export const FAQS = [
   {
-    question: '냥멍케어는 무료로 사용할 수 있나요?',
+    question: 'pawever는 무료로 사용할 수 있나요?',
     answer:
-      '냥멍케어는 이메일 또는 SNS 계정으로 간편하게 가입할 수 있으며 누구에게나 무료로 제공됩니다.',
+      'pawever는 이메일 또는 SNS 계정으로 간편하게 가입할 수 있으며 누구에게나 무료로 제공됩니다.',
   },
   {
     question: '반려동물을 여러 마리 등록하고 가족과 같이 관리할 수 있나요?',

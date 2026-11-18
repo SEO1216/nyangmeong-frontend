@@ -29,7 +29,7 @@ export default function LikeButton({
       aria-label="좋아요"
       disabled={disabled || locked}
       onClick={onToggle}
-      className={`inline-flex min-h-9 items-center gap-1.5 px-1 text-base font-semibold text-ink-2 ${locked ? 'opacity-50' : 'cursor-pointer'} ${isLiked ? '[&_svg]:text-[#f44b21]' : '[&_svg]:text-line-strong'}`}
+      className={`inline-flex min-h-9 items-center gap-1.5 px-1 text-base font-semibold text-ink-2 ${locked ? 'opacity-50' : 'cursor-pointer'} ${isLiked ? '[&_svg]:text-alert' : '[&_svg]:text-line-strong'}`}
     >
       <Heart
         size={22}

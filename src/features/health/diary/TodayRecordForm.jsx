@@ -3,7 +3,7 @@ import DropdownSelect from '@/components/DropdownSelect';
 import Modal from '@/components/Modal';
 import TimeSelect from '@/components/TimeSelect';
 import Icon from '@/components/Icon';
-import { BTN_PRIMARY } from '@/components/buttonStyles';
+import { BTN_PRIMARY, CHIP, CHIP_ON } from '@/components/buttonStyles';
 import { getNowHm, getTodayYmd, makeDateTime } from '@/utils/formatDate';
 import { DAILY_ITEMS, keepWidgetOrder } from '../dashboard/widgetItems';
 import {
@@ -21,8 +21,8 @@ import {
 } from '../diaryTypes';
 import { useCreateDailyRecord, useSaveHealthWidgets } from '../queries';
 import { DECIMAL_MESSAGE, hasOverTwoDecimals } from '../numberFormat';
-import FieldError from './FieldError';
-import { INPUT_CLASS, LABEL_CLASS } from './formStyles';
+import FieldError from '@/components/FieldError';
+import { INPUT, LABEL } from '@/components/formStyles';
 
 /**
  * [오늘 기록하기 모달] (※신규 정책, 2026-11-14 페이지 영역 → 모달)
@@ -176,13 +176,13 @@ export default function TodayRecordForm({
         <p className="text-subtle">기록 종류를 선택하고 내용을 입력해주세요</p>
 
         <div className="flex flex-col gap-1.5">
-          <span className={LABEL_CLASS}>종류</span>
+          <span className={LABEL}>종류</span>
           <div className="flex flex-wrap items-center gap-2">
             {recordTypes.length > 0 && (
               <div
                 role="radiogroup"
                 aria-label="기록 종류"
-                className="flex h-10 w-full rounded-[6px] border border-[#e6eaeb] bg-[#f1f3f4] p-[3px] sm:w-auto"
+                className="flex h-10 w-full rounded-[6px] border border-line bg-surface-3 p-1 min-[760px]:w-auto"
               >
                 {recordTypes.map((item) => {
                   const isSelected = item.cd === typeCd;
@@ -192,7 +192,7 @@ export default function TodayRecordForm({
                       type="button"
                       role="radio"
                       aria-checked={isSelected}
-                      className={`flex flex-1 items-center justify-center rounded-[4px] whitespace-nowrap sm:flex-none sm:px-3 ${
+                      className={`flex flex-1 items-center justify-center rounded-[4px] whitespace-nowrap min-[760px]:flex-none min-[760px]:px-3 ${
                         isSelected
                           ? 'bg-white font-semibold text-brand-600 shadow-[0_1px_2px_rgba(26,50,52,0.08),0_0_0_1px_rgba(40,90,92,0.18)]'
                           : 'font-medium text-muted hover:text-ink'
@@ -210,11 +210,7 @@ export default function TodayRecordForm({
                 type="button"
                 aria-expanded={isEditOpen}
                 aria-controls="hlt002-record-edit"
-                className={`inline-flex h-10 items-center gap-1 rounded-full border px-3.5 whitespace-nowrap ${
-                  isEditOpen
-                    ? 'border-brand-500 bg-brand-500 font-semibold text-white'
-                    : 'border-line-strong bg-white text-ink-2 hover:border-brand-500 hover:text-brand-600'
-                }`}
+                className={isEditOpen ? CHIP_ON : CHIP}
                 onClick={() => setIsEditOpen((isOpen) => !isOpen)}
               >
                 <Icon name="tune" className="text-lg" />
@@ -243,11 +239,7 @@ export default function TodayRecordForm({
                     type="button"
                     aria-pressed={isOn}
                     disabled={saveWidgets.isPending || isLastOn}
-                    className={`inline-flex h-9 items-center gap-1 rounded-full border px-3.5 whitespace-nowrap disabled:cursor-not-allowed ${
-                      isOn
-                        ? 'border-brand-500 bg-brand-500 font-semibold text-white'
-                        : 'border-line bg-white text-subtle hover:border-line-strong hover:text-ink'
-                    }`}
+                    className={isOn ? CHIP_ON : CHIP}
                     onClick={() => handleToggle(item)}
                   >
                     <Icon name={isOn ? 'check' : 'add'} className="text-lg" />
@@ -260,7 +252,7 @@ export default function TodayRecordForm({
                 <span aria-hidden="true" className="h-6 w-px bg-line" />
                 <button
                   type="button"
-                  className={`${BTN_PRIMARY} h-9! px-3.5!`}
+                  className={`${BTN_PRIMARY}`}
                   onClick={() => setIsEditOpen(false)}
                 >
                   완료
@@ -276,7 +268,7 @@ export default function TodayRecordForm({
         {type && (
           <div className="flex flex-wrap items-end gap-x-4 gap-y-10">
             <div className="relative flex min-w-40 flex-1 flex-col gap-1.5">
-              <span className={LABEL_CLASS}>시간</span>
+              <span className={LABEL}>시간</span>
               <TimeSelect ref={timeRef} value={rcdTm} onChange={setRcdTm} />
               {/* 값 칸 안내와 같이 입력칸 아래에 겹쳐 띄운다 */}
               {timeError && (
@@ -287,7 +279,7 @@ export default function TodayRecordForm({
             </div>
             {isStool ? (
               <label className="flex min-w-40 flex-1 flex-col gap-1.5">
-                <span className={LABEL_CLASS}>{type.valueLabel}</span>
+                <span className={LABEL}>{type.valueLabel}</span>
                 <DropdownSelect
                   value={crsdSttsCd}
                   options={STOOL_STATES.map((state) => ({
@@ -299,7 +291,7 @@ export default function TodayRecordForm({
               </label>
             ) : (
               <label className="relative flex min-w-40 flex-1 flex-col gap-1.5">
-                <span className={LABEL_CLASS}>{type.valueLabel}</span>
+                <span className={LABEL}>{type.valueLabel}</span>
                 <span className="relative block">
                   <input
                     type="number"
@@ -307,7 +299,7 @@ export default function TodayRecordForm({
                     step="any"
                     inputMode="decimal"
                     value={value}
-                    className={`${INPUT_CLASS} pr-12 text-right tabular-nums`}
+                    className={`${INPUT} pr-12 text-right tabular-nums`}
                     onChange={(event) => setValue(event.target.value)}
                   />
                   <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-muted">

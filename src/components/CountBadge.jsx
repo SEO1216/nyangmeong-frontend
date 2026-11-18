@@ -4,7 +4,7 @@ export default function CountBadge({ count, className = '' }) {
 
   return (
     <span
-      className={`flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#f44b21] px-1 text-xs font-bold text-white ${className}`}
+      className={`flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-alert px-1 text-xs font-bold text-white ${className}`}
     >
       {count > 99 ? '99+' : count}
     </span>

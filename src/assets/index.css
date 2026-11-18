@@ -38,7 +38,7 @@
   --color-ink: #1a3234;
   --color-ink-2: #3d4a4b;
   --color-muted: #566465;
-  --color-subtle: #667374;
+  --color-subtle: #5f6b6c; /* 대비 4.5:1(brand-50·surface-3 바탕 포함), 2026-11-18 */
   --color-placeholder: #8c9899;
 
   /** 면·선 */
@@ -48,16 +48,26 @@
   --color-line-soft: #edf1f1;
   --color-line-strong: #b9c4c4;
   --color-input-line: #d3dae2;
+  /** 화면 바탕·푸터(따뜻한 미색) */
+  --color-page-bg: #faf8f5;
+  --color-footer: #f5f2ee;
+  --color-footer-line: #eae6e0;
+  /** 창 뒤 딤(투명도는 /45처럼 붙인다)·사진 보기 바탕 */
+  --color-dim: #0f1723;
+  --color-viewer: #2b2b2b;
 
   /** 포인트(노랑)·상태·뱃지 */
   --color-accent-300: #f9eaa6;
   --color-accent-ink: #1a3234;
   --color-ok: #2f6f57;
   --color-danger: #b4473a;
+  --color-danger-600: #983a2f;
+  /** 알림 개수 배지: 흰 글자 대비 4.5:1 */
+  --color-alert: #d4411c;
   --color-danger-soft: #fbeeec;
   --color-tone-green-bg: #e6f4ec;
   --color-tone-green-fg: #22744a;
-  --color-tone-gray-bg: #eef1f4;
+  --color-tone-gray-bg: #f4f6f6;
   --color-tone-gray-fg: #59636e;
   --color-tone-blue-bg: #eaf1fc;
   --color-tone-blue-fg: #2d5fb8;
@@ -70,7 +80,7 @@
   /* 가계부 카테고리 색 (10-24): 도넛·범례·뱃지·앱 상세 막대 공통 */
   --color-cat-hosp: #6fb0f5;
   --color-cat-hosp-bg: #e5f1fd;
-  --color-cat-hosp-fg: #4f78a3;
+  --color-cat-hosp-fg: #496f97;
   --color-cat-food: #f59a4a;
   --color-cat-food-bg: #fdedde;
   --color-cat-food-fg: #a26a39;

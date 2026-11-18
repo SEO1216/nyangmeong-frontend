@@ -5,6 +5,7 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom';
+import LoadError from '@/components/LoadError';
 import PageSkeleton from '@/components/PageSkeleton';
 import SkeletonCard from '@/components/SkeletonCard';
 import { useChatReceiptResult } from '@/features/ai/queries';
@@ -40,7 +41,7 @@ import { getTodayYmd } from '@/utils/formatDate';
 const LAYOUT_PROPS = {
   section: 'health',
   description: '일상 기록과 지속 관찰, 검진기록을 한곳에서 남기고 확인해요',
-  contentClassName: 'gap-7 tabular-nums antialiased min-[1101px]:pt-6',
+  contentClassName: 'gap-7 tabular-nums antialiased min-[1100px]:pt-6',
 };
 
 const SECTION_TABS = [
@@ -199,6 +200,7 @@ function HealthDiaryContent({ mbrSn }) {
     pet: selectedPet,
     isPending: isPetsPending,
     isError: isPetsError,
+    refetch: refetchPets,
   } = useSelectedPet();
   const selectedPetSn = selectedPet?.petSn ?? null;
   /** 반려동물을 바꾸면 다른 반려동물의 관찰 항목 번호가 주소에 남지 않게 삭제 */
@@ -230,7 +232,7 @@ function HealthDiaryContent({ mbrSn }) {
     return (
       <HealthLayout petNm={selectedPet?.petNm}>
         <PageSkeleton tabs={SECTION_TABS.length}>
-          <div className="grid gap-5 min-[1101px]:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+          <div className="grid gap-5 min-[1100px]:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
             <SkeletonCard className="h-[485px] max-[760px]:h-[424px]" />
             <SkeletonCard className="h-[485px] max-[760px]:h-[498px]" />
           </div>
@@ -243,9 +245,10 @@ function HealthDiaryContent({ mbrSn }) {
   if (isPetsError) {
     return (
       <HealthLayout petNm={selectedPet?.petNm}>
-        <p role="alert" className="text-[#566465]">
-          반려동물 정보를 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요
-        </p>
+        <LoadError
+          message="반려동물 정보를 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요"
+          onRetry={() => refetchPets()}
+        />
       </HealthLayout>
     );
   }
@@ -293,7 +296,7 @@ function HealthDiaryContent({ mbrSn }) {
           aria-labelledby="hlt002-graph-tab"
           className="flex min-w-0 flex-col gap-7"
         >
-          <div className="grid items-stretch gap-5 min-[1101px]:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+          <div className="grid items-stretch gap-5 min-[1100px]:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
             <DailyTrendCard
               pet={selectedPet}
               widgetIds={widgetIds}

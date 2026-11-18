@@ -1,6 +1,7 @@
 import { useId, useState } from 'react';
 import { ChevronRight, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import LoadError from '@/components/LoadError';
 import { BTN_SECONDARY } from '@/components/buttonStyles';
 import Card from '@/components/Card';
 import Icon from '@/components/Icon';
@@ -70,7 +71,7 @@ export default function DashboardCard({
             className={
               item.emptyText.length > LONG_EMPTY_TEXT
                 ? 'leading-[1.6] font-semibold text-ink-2'
-                : 'text-[22px] leading-tight font-bold text-ink'
+                : 'text-2xl leading-tight font-bold text-ink'
             }
           >
             {item.emptyText}
@@ -102,7 +103,7 @@ const toCreatedAt = (crtDt) =>
 
 /**
  * [AI 건강분석 리포트] 항상 맨 앞(D9)
- * - 640px 이상 격자 한 줄 전체 폭 띠(왼쪽 메인 색 세로 막대), 640px 미만 두 칸 폭 한 줄 띠(핀 없음) (※신규 정책)
+ * - 760px 이상 격자 한 줄 전체 폭 띠(왼쪽 메인 색 세로 막대), 760px 미만 두 칸 폭 한 줄 띠(핀 없음) (※신규 정책)
  * - 내용은 AI 계약(ai docs/api/healthreport.md): 제목 줄 · 팁 1~3개(" · "로 이어 한 줄) · 고정 안내 · 만든 시각
  * - 고정 안내(notice)는 ⓘ에 마우스를 올리거나 ⓘ를 누르면 보임
  * - 14일 기록이 없으면(dataLackYn) 제목 줄 없이 고정 안내 팁만
@@ -122,7 +123,7 @@ export function AiReportCard({ pet }) {
       <AiReportBand pet={pet} report={report} />
       <section
         aria-labelledby="hlt011-ai-report"
-        className="relative col-span-full flex min-w-0 flex-col gap-2 rounded-card border border-line bg-white py-4 pr-5 pl-7 max-sm:hidden"
+        className="relative col-span-full flex min-w-0 flex-col gap-2 rounded-card border border-line bg-white py-4 pr-5 pl-7 max-[760px]:hidden"
       >
         <span
           aria-hidden="true"
@@ -223,7 +224,7 @@ function NoticeInfo({ notice }) {
   );
 }
 
-/** 640px 이상 띠 본문: 불러오는 중 · 실패 · 데이터 부족 · 리포트 */
+/** 760px 이상 띠 본문: 불러오는 중 · 실패 · 데이터 부족 · 리포트 */
 function AiReportBody({ pet, report, isRefreshing }) {
   if (report.isPending || isRefreshing) {
     return (
@@ -236,18 +237,11 @@ function AiReportBody({ pet, report, isRefreshing }) {
 
   if (report.isError) {
     return (
-      <div className="flex flex-wrap items-center gap-3">
-        <p role="alert" className="leading-[1.6] font-semibold text-ink-2">
-          {report.error.message}
-        </p>
-        <button
-          type="button"
-          onClick={() => report.refetch()}
-          className={BTN_SECONDARY}
-        >
-          다시 시도
-        </button>
-      </div>
+      <LoadError
+        message={report.error.message}
+        onRetry={() => report.refetch()}
+        className="py-2"
+      />
     );
   }
 
@@ -256,7 +250,7 @@ function AiReportBody({ pet, report, isRefreshing }) {
   return (
     <div className="flex flex-col gap-1">
       {!dataLackYn && (
-        <p className="text-xl leading-tight font-bold text-ink">
+        <p className="text-lg leading-tight font-bold text-ink">
           {toReportTitle(pet.petNm, rptTtl)}
         </p>
       )}
@@ -268,7 +262,7 @@ function AiReportBody({ pet, report, isRefreshing }) {
   );
 }
 
-/** 640px 미만 AI 건강분석 리포트 띠: 제목 줄 한 줄(말줄임) */
+/** 760px 미만 AI 건강분석 리포트 띠: 제목 줄 한 줄(말줄임) */
 function AiReportBand({ pet, report }) {
   const data = report.data;
   let text = '건강 코멘트를 준비하고 있어요';
@@ -284,7 +278,7 @@ function AiReportBand({ pet, report }) {
     <section
       aria-labelledby="hlt011-ai-band"
       aria-busy={report.isPending}
-      className="col-span-2 flex items-center gap-3 rounded-card border border-line bg-white px-4 py-3 sm:hidden"
+      className="col-span-2 flex items-center gap-3 rounded-card border border-line bg-white px-4 py-3 min-[760px]:hidden"
     >
       <Icon name="auto_awesome" className="shrink-0 text-brand-500" />
       <div className="min-w-0 grow">

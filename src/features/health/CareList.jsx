@@ -1,5 +1,6 @@
 import { PawPrint } from 'lucide-react';
 import { useState } from 'react';
+import LoadError from '@/components/LoadError';
 import Card from '@/components/Card';
 import Icon from '@/components/Icon';
 import SkeletonCard from '@/components/SkeletonCard';
@@ -10,7 +11,7 @@ import CareProgressBox from './CareProgressBox';
 import CareRecordList from './CareRecordList';
 import CareTile from './CareTile';
 import { CARE_ZONE, MIN_CARE_COUNT } from './careDue';
-import DiaryTabs from './diary/DiaryTabs';
+import UnderlineTabs from '@/components/UnderlineTabs';
 import {
   useCancelCareRecord,
   useCancelLastDose,
@@ -18,7 +19,7 @@ import {
   useCheckCareItem,
 } from './queries';
 
-/** 640px 미만에서 구역마다 처음 보여 주는 칸 수 */
+/** 760px 미만에서 구역마다 처음 보여 주는 칸 수 */
 const MOBILE_VISIBLE_COUNT = 3;
 
 /** 1100px 이하에서 두 구역을 전환하는 탭 */
@@ -41,7 +42,7 @@ export default function CareList({ petSn, petNm, mission }) {
   const { data, isPending, isError, error, refetch } = useCareItems(petSn);
   const [isManaging, setIsManaging] = useState(false);
   const [zoneId, setZoneId] = useState(ZONE_TABS[0].id);
-  /** 640px 미만에서 펼친 구역: 반려동물별 키라 반려동물을 바꾸면 다시 접힘 */
+  /** 760px 미만에서 펼친 구역: 반려동물별 키라 반려동물을 바꾸면 다시 접힘 */
   const [expandedZones, setExpandedZones] = useState([]);
   const checkCareItem = useCheckCareItem();
   const cancelLastDose = useCancelLastDose();
@@ -51,23 +52,13 @@ export default function CareList({ petSn, petNm, mission }) {
     return (
       <div aria-busy="true" className="flex flex-col gap-5">
         {/** 불러온 뒤 두 카드의 높이 */}
-        <SkeletonCard className="h-[633px] max-[1100px]:h-[697px] max-sm:h-[829px]" />
+        <SkeletonCard className="h-[633px] max-[1100px]:h-[697px] max-[760px]:h-[829px]" />
         <SkeletonCard className="h-[291px] max-[760px]:h-[463px]" />
       </div>
     );
   }
   if (isError) {
-    return (
-      <div
-        role="alert"
-        className="flex items-center gap-3 text-sm text-[#566465]"
-      >
-        {error.message}
-        <button type="button" className="underline" onClick={() => refetch()}>
-          다시 시도
-        </button>
-      </div>
-    );
+    return <LoadError message={error.message} onRetry={() => refetch()} />;
   }
 
   const { careItems, careRecords } = data;
@@ -171,15 +162,15 @@ export default function CareList({ petSn, petNm, mission }) {
           mission={mission}
         />
 
-        <DiaryTabs
+        <UnderlineTabs
           items={ZONE_TABS}
           activeId={zoneId}
           onSelect={setZoneId}
           label="케어리스트 구역"
-          className="mt-4 shadow-[inset_0_-1px_0_var(--color-line)] min-[1101px]:hidden"
+          className="mt-4 min-[1100px]:hidden"
         />
 
-        <div className="mt-5 grid gap-x-8 min-[1101px]:grid-cols-2">
+        <div className="mt-5 grid gap-x-8 min-[1100px]:grid-cols-2">
           {ZONE_TABS.map((zone) => {
             const { missionItems, restItems } = zones[zone.id];
             const items = [...missionItems, ...restItems];
@@ -207,8 +198,8 @@ export default function CareList({ petSn, petNm, mission }) {
                     {EMPTY_TEXTS[zone.id]}
                   </p>
                 ) : (
-                  <div className="grid gap-y-2 pt-3 sm:gap-y-0 sm:pt-0">
-                    {/** 묶음 제목: 미션 항목이 있는 구역에만. 640px 미만 처음 3칸에는 세지 않음 */}
+                  <div className="grid gap-y-2 pt-3 min-[760px]:gap-y-0 min-[760px]:pt-0">
+                    {/** 묶음 제목: 미션 항목이 있는 구역에만. 760px 미만 처음 3칸에는 세지 않음 */}
                     {missionItems.length > 0 && (
                       <p className="flex items-center gap-1.5 py-2 text-sm font-semibold text-warn tabular-nums">
                         <PawPrint className="size-3.5" aria-hidden="true" />
@@ -224,7 +215,7 @@ export default function CareList({ petSn, petNm, mission }) {
                         isMission={index < missionItems.length}
                         className={
                           !isExpanded && index >= MOBILE_VISIBLE_COUNT
-                            ? 'max-sm:hidden'
+                            ? 'max-[760px]:hidden'
                             : ''
                         }
                         onCheck={handleCheck}
@@ -242,7 +233,7 @@ export default function CareList({ petSn, petNm, mission }) {
                   <button
                     type="button"
                     aria-expanded={isExpanded}
-                    className="mt-2 flex h-10 w-full items-center justify-center gap-1 rounded-[10px] border border-line bg-white text-sm font-semibold text-ink-2 hover:bg-surface-2 sm:hidden"
+                    className="mt-2 flex h-10 w-full items-center justify-center gap-1 rounded-[10px] border border-line bg-white text-sm font-semibold text-ink-2 hover:bg-surface-2 min-[760px]:hidden"
                     onClick={() =>
                       setExpandedZones((prev) =>
                         isExpanded
@@ -254,7 +245,7 @@ export default function CareList({ petSn, petNm, mission }) {
                     {isExpanded ? '접기' : `더보기 (+${hiddenCount})`}
                     <Icon
                       name={isExpanded ? 'expand_less' : 'expand_more'}
-                      className="text-xl"
+                      className="text-lg"
                     />
                   </button>
                 )}

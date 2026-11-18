@@ -46,10 +46,10 @@ const EDIT_HINT = '고칠 항목을 눌러 주세요';
  * [케어 항목 관리 모달] (※신규 정책)
  * - 왼쪽 맨 위 [고르기 | 수정] 전환(처음 고르기)
  *   - 고르기: 칩으로 켜고 끔(5개 이상), 오른쪽은 새 항목 만들기
- *   - 수정: 칩을 누르면 오른쪽에서 고침. 직접 만든 항목은 전체 칸 + [이 항목 삭제], 기본 정기관리는 주기만
+ *   - 수정: 칩을 누르면 오른쪽에서 고침. 직접 만든 항목은 전체 칸 + [삭제하기], 기본 정기관리는 주기만
  *   - 상태를 바꾸면 [수정 반영]한 내용은 남고 고치던 칸은 버림
- * - [이 항목 삭제]: 확인창 뒤 칩만 빠지고 실제 삭제는 [저장] 때
- * - [저장]: 생성 -> 수정 -> 고른 항목 저장 -> 삭제. 실패하면 닫지 않고 남은 단계만 다시 시도
+ * - [삭제하기]: 확인창 뒤 칩만 빠지고 실제 삭제는 [저장하기] 때
+ * - [저장하기]: 생성 -> 수정 -> 고른 항목 저장 -> 삭제. 실패하면 닫지 않고 남은 단계만 다시 시도
  * - isForced: 보이는 항목이 5개 미만이라 자동으로 열린 상태 -> 5개를 맞춰 저장해야 닫힘
  */
 export default function CareManageModal({
@@ -231,7 +231,7 @@ export default function CareManageModal({
           disabled={isShort || saveChanges.isPending}
           onClick={handleSave}
         >
-          저장
+          저장하기
         </button>
       </div>
     </>
@@ -249,7 +249,7 @@ export default function CareManageModal({
       isPending={saveChanges.isPending}
       onClose={onClose}
     >
-      <div className="grid gap-6 px-6 py-5 min-[901px]:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid gap-6 px-6 py-5 min-[1100px]:grid-cols-[minmax(0,1fr)_360px]">
         <div className="flex min-w-0 flex-col gap-4">
           {/** 더 고를 개수 = 5 − 지금 보이는 개수 (※신규 정책) */}
           {isForced && (
@@ -347,7 +347,7 @@ export default function CareManageModal({
                     className={`${TEXT_ACTION_DANGER} self-center`}
                     onClick={() => setDeletingItem(editingItem)}
                   >
-                    이 항목 삭제
+                    삭제하기
                   </button>
                 )}
               </>
@@ -365,11 +365,11 @@ export default function CareManageModal({
         )}
       </div>
 
-      {/** 삭제 확인: [삭제]를 눌러도 칩만 빠지고 실제 DELETE는 [저장] 때 (※신규 정책) */}
+      {/** 삭제 확인: [삭제하기]를 눌러도 칩만 빠지고 실제 DELETE는 [저장하기] 때 (※신규 정책) */}
       {deletingItem && (
         <Modal
           title={`${deletingItem.careArtclNm}을(를) 삭제할까요?`}
-          description="완료 기록도 함께 사라져요. 모달 아래 [저장]을 눌러야 최종으로 삭제돼요."
+          description="완료 기록도 함께 사라져요. 모달 아래 [저장하기]를 눌러야 최종으로 삭제돼요."
           isConfirm
           onClose={() => setDeletingItem(null)}
           footer={
@@ -386,7 +386,7 @@ export default function CareManageModal({
                 className={BTN_DANGER}
                 onClick={() => handleDelete(deletingItem)}
               >
-                삭제
+                삭제하기
               </button>
             </>
           }

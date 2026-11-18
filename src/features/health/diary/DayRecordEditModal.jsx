@@ -28,8 +28,8 @@ import {
   hasOverTwoDecimals,
   toInputText,
 } from '../numberFormat';
-import FieldError from './FieldError';
-import { INPUT_CLASS } from './formStyles';
+import FieldError from '@/components/FieldError';
+import { INPUT } from '@/components/formStyles';
 import { formatAmount, summarizeType } from './recordUtils';
 
 /** 묶음 머리에 합계를 붙이지 않는 종류 */
@@ -234,7 +234,7 @@ export default function DayRecordEditModal({
               disabled={isSaving}
               onClick={handleSave}
             >
-              저장
+              저장하기
             </button>
           </>
         }
@@ -374,7 +374,7 @@ function RecordRow({
                 aria-label={`${type.nm}(${type.unit})`}
                 value={draft.value}
                 disabled={isDisabled}
-                className={`${INPUT_CLASS} pr-11 text-right tabular-nums`}
+                className={`${INPUT} pr-11 text-right tabular-nums`}
                 onChange={(event) => onChange({ value: event.target.value })}
               />
               <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-muted">

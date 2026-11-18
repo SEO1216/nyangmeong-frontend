@@ -5,7 +5,7 @@ import { PATHS } from '@/routes/paths';
 
 const BOX_CLASS = 'flex min-w-0 flex-col rounded-box px-5 pt-4 pb-5';
 const TITLE_CLASS = 'flex items-center gap-1.5 text-sm font-semibold';
-const NUMBER_CLASS = 'text-[32px] leading-[1.2] tabular-nums';
+const NUMBER_CLASS = 'text-[28px] leading-[1.2] tabular-nums';
 const UNIT_CLASS = 'text-base font-semibold';
 /** 막대는 상자 맨 아래에 붙임: 한쪽 문구가 두 줄이 돼도 두 막대 높이가 같음 */
 const BAR_CLASS = 'mt-auto h-2.5 flex-none overflow-hidden rounded-full';
@@ -15,7 +15,7 @@ const toPercent = (doneCount, totalCount) =>
 
 /**
  * [케어리스트 진행 상자] (※신규 정책)
- * - 같은 높이의 두 상자. 640px 미만은 위아래(케어리스트 위, 미션 아래)
+ * - 같은 높이의 두 상자. 760px 미만은 위아래(케어리스트 위, 미션 아래)
  * - 왼쪽 「케어리스트」: 오늘 완료 수 / 케어리스트에 보이는 항목 수 + 진행 막대
  * - 오른쪽 「오늘의 케어미션 · 전체」: 주양육자는 받은 포인트와 상자 전체가 포인트 화면 링크, 공동양육자는 적립 안내만(누를 수 없음)
  * - mission: { prmyYn, doneCount, totalCount, earnedPoint, totalPoint }, 못 불러오면 null -> 케어리스트 상자가 전체 폭
@@ -24,7 +24,7 @@ export default function CareProgressBox({ doneCount, totalCount, mission }) {
   const percent = toPercent(doneCount, totalCount);
 
   return (
-    <div className={`grid gap-3 ${mission ? 'sm:grid-cols-2' : ''}`}>
+    <div className={`grid gap-3 ${mission ? 'min-[760px]:grid-cols-2' : ''}`}>
       <div className={`${BOX_CLASS} bg-surface-2`}>
         <p className={`${TITLE_CLASS} text-muted`}>케어리스트</p>
         <div className="mt-1 mb-3 flex items-baseline justify-between gap-3">
@@ -35,7 +35,7 @@ export default function CareProgressBox({ doneCount, totalCount, mission }) {
               / {totalCount} 완료
             </small>
           </b>
-          <span className="text-xl font-bold text-brand-600 tabular-nums">
+          <span className="text-lg font-bold text-brand-600 tabular-nums">
             {percent}%
           </span>
         </div>
@@ -68,7 +68,7 @@ function MissionBox({ mission }) {
         <PawPrint className="size-[18px] flex-none" aria-hidden="true" />
         오늘의 케어미션 · 전체
         {mission.prmyYn && (
-          <Icon name="chevron_right" className="ml-auto text-xl" />
+          <Icon name="chevron_right" className="ml-auto text-lg" />
         )}
       </p>
       <div className="mt-1 mb-3 flex flex-wrap items-baseline justify-between gap-x-3">
@@ -77,7 +77,7 @@ function MissionBox({ mission }) {
           <small className={UNIT_CLASS}> / {mission.totalCount} 완료</small>
         </b>
         {hasPoint && (
-          <span className="text-xl font-bold tabular-nums">
+          <span className="text-lg font-bold tabular-nums">
             {mission.earnedPoint.toLocaleString()}P /{' '}
             {mission.totalPoint.toLocaleString()}P
           </span>

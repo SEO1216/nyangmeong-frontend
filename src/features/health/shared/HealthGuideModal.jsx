@@ -2,7 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Check } from 'lucide-react';
 import Icon from '@/components/Icon';
 import Modal from '@/components/Modal';
-import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import {
+  BTN_PRIMARY,
+  BTN_SECONDARY,
+  CHIP,
+  TEXT_ACTION,
+} from '@/components/buttonStyles';
 import guide01PetCard from '@/assets/health-guide/guide-01-pet-card.png';
 import guide02RecordLink from '@/assets/health-guide/guide-02-record-link.png';
 import guide02TodayModal from '@/assets/health-guide/guide-02-today-modal.png';
@@ -158,8 +163,8 @@ const GROUPS = [...new Set(CHAPTERS.map((chapter) => chapter.group))];
 /**
  * [건강기록 둘러보기 모달] (※신규 정책)
  * - 사이드 아이 말풍선 [같이 둘러보기]로 1장부터 엶. 반려동물과 상관없이 같은 내용 8장
- * - 761px 이상: 왼쪽 회색 목차(화면별 3묶음, 지금 장 흰 칸 + 초록 번호, 지난 장 체크, 남은 장 회색 번호, 누르면 그 장으로), 오른쪽 장 내용
- * - 760px 이하: 목차 대신 맨 위 「n / 8」과 진행 점, 그림 2장은 위아래로 쌓음
+ * - 760px 이상: 왼쪽 회색 목차(화면별 3묶음, 지금 장 흰 칸 + 초록 번호, 지난 장 체크, 남은 장 회색 번호, 누르면 그 장으로), 오른쪽 장 내용
+ * - 760px 미만: 목차 대신 맨 위 「n / 8」과 진행 점, 그림 2장은 위아래로 쌓음
  * - 장 내용: 묶음 이름 → 제목 → 그림 → 설명 → TIP 상자. 마지막 장은 footer 왼쪽 회색 안내 + [시작해 볼게요]로 닫음
  * - onOpenDashboardEdit이 있으면(종합 건강기록) 3장 TIP 상자 오른쪽 「대시보드 편집 바로 열기 ›」: 이 모달을 닫고 대시보드 편집을 엶. 없으면 3장 TIP 상자를 숨김
  * - 사진 [크게 보기] → 모달 안 확대 화면, [닫기]·바깥 누르면 닫힘 (※신규 정책)
@@ -208,7 +213,7 @@ export default function HealthGuideModal({ onOpenDashboardEdit, onClose }) {
   const footer = (
     <>
       {isLast && chapter.note && (
-        <p className="text-sm break-keep text-subtle max-[761px]:basis-full">
+        <p className="text-sm break-keep text-subtle max-[760px]:basis-full">
           {chapter.note}
         </p>
       )}
@@ -245,10 +250,10 @@ export default function HealthGuideModal({ onOpenDashboardEdit, onClose }) {
       isDismissDisabled={zoom !== null}
       onClose={onClose}
     >
-      <div className="flex min-h-0 flex-1 gap-6 px-6 pb-5 max-[761px]:flex-col max-[761px]:gap-4">
+      <div className="flex min-h-0 flex-1 gap-6 px-6 pb-5 max-[760px]:flex-col max-[760px]:gap-4">
         <nav
           aria-label="둘러보기 목차"
-          className="flex w-64 shrink-0 flex-col gap-5 self-start rounded-card bg-surface-2 p-4 max-[761px]:hidden"
+          className="flex w-64 shrink-0 flex-col gap-5 self-start rounded-card bg-surface-2 p-4 max-[760px]:hidden"
         >
           <div>
             <p className="text-lg font-bold text-ink">건강기록 둘러보기</p>
@@ -285,7 +290,7 @@ export default function HealthGuideModal({ onOpenDashboardEdit, onClose }) {
           ))}
         </nav>
 
-        <div className="flex items-center justify-between gap-3 min-[761px]:hidden">
+        <div className="flex items-center justify-between gap-3 min-[760px]:hidden">
           <p className="text-sm font-semibold text-ink">
             <span className="text-brand-600">{index + 1}</span> /{' '}
             {CHAPTERS.length}
@@ -308,12 +313,12 @@ export default function HealthGuideModal({ onOpenDashboardEdit, onClose }) {
 
         <section
           aria-live="polite"
-          className="flex min-w-0 flex-1 flex-col gap-3 min-[761px]:self-center"
+          className="flex min-w-0 flex-1 flex-col gap-3 min-[760px]:self-center"
         >
           <p className="text-badge font-semibold text-subtle">
             {chapter.group}
           </p>
-          <h3 className="text-xl font-bold text-ink">{chapter.title}</h3>
+          <h3 className="text-lg font-bold text-ink">{chapter.title}</h3>
 
           <GuidePicture chapter={chapter} no={index + 1} onZoom={setZoom} />
 
@@ -326,10 +331,12 @@ export default function HealthGuideModal({ onOpenDashboardEdit, onClose }) {
               {chapter.linkText && (
                 <button
                   type="button"
-                  className="shrink-0 rounded-sm font-semibold text-brand-600 hover:underline hover:underline-offset-4"
+                  className={`${TEXT_ACTION} shrink-0`}
                   onClick={openDashboardEdit}
                 >
-                  {chapter.linkText} ›
+                  <span className="font-semibold text-brand-600">
+                    {chapter.linkText} ›
+                  </span>
                 </button>
               )}
             </div>
@@ -353,7 +360,7 @@ export default function HealthGuideModal({ onOpenDashboardEdit, onClose }) {
             <button
               ref={closeRef}
               type="button"
-              className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full bg-white px-3.5 text-sm font-semibold text-ink-2 hover:bg-surface-2"
+              className={`${BTN_SECONDARY} shrink-0 text-ink-2`}
               onClick={closeZoom}
             >
               <Icon name="close" className="text-lg" />
@@ -412,7 +419,7 @@ function TocButton({ no, title, state, onClick }) {
   );
 }
 
-/** 그림 칸: 사진 칸은 16:10 비율 고정(사진 1132×706). 1장이면 가운데 max-w-md, 2장이면 「여기를 누르면」 → 「이 화면이 열려요」(760px 이하 위아래) */
+/** 그림 칸: 사진 칸은 16:10 비율 고정(사진 1132×706). 1장이면 가운데 max-w-md, 2장이면 「여기를 누르면」 → 「이 화면이 열려요」(760px 미만 위아래) */
 function GuidePicture({ chapter, no, onZoom }) {
   const [from, to] = chapter.images;
   if (!to) {
@@ -430,7 +437,7 @@ function GuidePicture({ chapter, no, onZoom }) {
   const fromLabel = chapter.fromLabel ?? FROM_LABEL;
   const toLabel = chapter.toLabel ?? TO_LABEL;
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 rounded-card bg-surface-2 p-4 max-[761px]:grid-cols-1">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 rounded-card bg-surface-2 p-4 max-[760px]:grid-cols-1">
       <figure className="flex min-w-0 flex-col gap-2">
         <figcaption className="text-badge font-semibold text-subtle">
           {fromLabel}
@@ -447,7 +454,7 @@ function GuidePicture({ chapter, no, onZoom }) {
       </figure>
       <ArrowRight
         aria-hidden="true"
-        className="size-5 text-subtle max-[761px]:mx-auto max-[761px]:rotate-90"
+        className="size-5 text-subtle max-[760px]:mx-auto max-[760px]:rotate-90"
       />
       <figure className="flex min-w-0 flex-col gap-2">
         <figcaption className="text-badge font-semibold text-subtle">
@@ -480,7 +487,7 @@ function ZoomBox({ image, label, className = '', onZoom, children }) {
         ref={buttonRef}
         type="button"
         aria-label={`${label} 사진 크게 보기`}
-        className="absolute right-2 bottom-2 inline-flex cursor-zoom-in items-center gap-1 rounded-full border border-line bg-white px-2.5 py-0.5 text-badge font-semibold text-ink-2 hover:bg-surface-2"
+        className={`${CHIP} absolute right-2 bottom-2 cursor-zoom-in`}
       >
         <Icon name="zoom_in" className="text-base" />
         크게 보기

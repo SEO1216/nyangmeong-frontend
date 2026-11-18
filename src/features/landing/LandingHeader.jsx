@@ -1,5 +1,5 @@
 import { ChevronRight, Menu, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '@/assets/nm_logo.svg';
 import logoWhite from '@/assets/logo-white.svg';
@@ -10,18 +10,24 @@ import { LANDING_NAV } from './landingData';
 const scrollToSection = (id) =>
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
 
-export default function LandingHeader({ loginTo }) {
+export default function LandingHeader({ loginTo, onHome }) {
   const isDesktop = useMediaQuery('(min-width: 768px)');
   const [isHovered, setIsHovered] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // 메뉴로 섹션을 옮기는 동안에는 헤더를 숨기지 않는다. 숨기면 섹션 위 80px에 앞 섹션 끝이 보인다
+  const isNavScrolling = useRef(false);
 
   useEffect(() => {
     let last = window.scrollY;
     const onScroll = () => {
       const y = window.scrollY;
       setIsScrolled(y > 50);
+      if (isNavScrolling.current) {
+        last = y;
+        return;
+      }
       if (y < 10) {
         setIsHidden(false);
         last = y;
@@ -39,6 +45,18 @@ export default function LandingHeader({ loginTo }) {
   const closeMenu = () => setIsMenuOpen(false);
   const goTo = (id) => {
     closeMenu();
+    isNavScrolling.current = true;
+    setIsHidden(false);
+    // 스크롤이 끝나거나(scrollend) 사람이 직접 스크롤하면 다시 숨김을 켠다.
+    // 멀리 가는 부드러운 스크롤은 시간이 길어 타이머로 풀지 않는다
+    const events = ['scrollend', 'wheel', 'touchstart', 'keydown'];
+    const release = () => {
+      isNavScrolling.current = false;
+      events.forEach((e) => window.removeEventListener(e, release));
+    };
+    events.forEach((e) =>
+      window.addEventListener(e, release, { passive: true }),
+    );
     scrollToSection(id);
   };
 
@@ -60,10 +78,19 @@ export default function LandingHeader({ loginTo }) {
           }`}
         />
         <div className="relative z-10 mx-auto flex h-16 max-w-[1700px] items-center justify-between px-6 md:h-20 md:px-12">
-          <Link to={PATHS.HOME} aria-label="냥멍케어 홈">
+          <Link
+            to={PATHS.HOME}
+            aria-label="pawever 홈"
+            onClick={(e) => {
+              // 랜딩 안에서는 주소 이동 대신 맨 위 히어로로 올리고 슬라이드를 처음부터 다시 보인다
+              e.preventDefault();
+              goTo('home');
+              onHome?.();
+            }}
+          >
             <img
               src={isLight || isMenuOpen ? logo : logoWhite}
-              alt="냥멍케어"
+              alt="pawever"
               className="h-8 w-[88px] object-contain md:h-11 md:w-[122px]"
             />
           </Link>
@@ -73,7 +100,7 @@ export default function LandingHeader({ loginTo }) {
               <button
                 key={item.id}
                 type="button"
-                onClick={() => scrollToSection(item.id)}
+                onClick={() => goTo(item.id)}
                 className={`text-[15px] font-medium transition-colors duration-300 lg:text-[17px] ${
                   isLight
                     ? 'text-black hover:text-brand-600'
@@ -130,7 +157,7 @@ export default function LandingHeader({ loginTo }) {
       >
         <div>
           <div className="flex items-center justify-between border-b border-line-soft pb-6">
-            <span className="font-bold text-brand-600">냥멍케어 메뉴</span>
+            <span className="font-bold text-brand-600">pawever 메뉴</span>
             <button
               type="button"
               onClick={closeMenu}

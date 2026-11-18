@@ -56,7 +56,7 @@ export default function OcrStatusPanel({
       <ProcessingSkeleton
         filterClass="h-10 w-full max-w-[820px] max-[760px]:h-[184px]"
         cardCount={5}
-        cardGridClass="min-[761px]:grid-cols-5"
+        cardGridClass="min-[760px]:grid-cols-5"
         cardClass="h-[106px]"
         tableClass="h-[1105px]"
       />
@@ -87,7 +87,7 @@ export default function OcrStatusPanel({
       ) : (
         <>
           <ProcessingStatCards
-            className="min-[761px]:grid-cols-5"
+            className="min-[760px]:grid-cols-5"
             items={[
               { key: 'tot', label: '요청', value: summary.totCnt },
               { key: 'scs', label: '성공', value: summary.scsCnt },

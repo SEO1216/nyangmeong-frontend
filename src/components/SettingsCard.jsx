@@ -3,9 +3,9 @@ export default function SettingsCard({ icon, title, children }) {
   const Icon = icon;
 
   return (
-    <section className="overflow-hidden rounded-[14px] border border-[#e2e7e7] bg-white">
-      <h2 className="flex items-center gap-2 border-b border-[#edf1f1] px-5 py-4 text-base font-bold text-[#1a3234]">
-        <Icon size={18} className="text-[#285a5c]" aria-hidden="true" />
+    <section className="overflow-hidden rounded-[14px] border border-line bg-white">
+      <h2 className="flex items-center gap-2 border-b border-line-soft px-5 py-4 text-base font-bold text-ink">
+        <Icon size={18} className="text-brand-500" aria-hidden="true" />
         {title}
       </h2>
       {children}

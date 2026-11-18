@@ -17,10 +17,10 @@ export default function FallbackBubble({ text, hasActions, hasFaqGuide }) {
         alt=""
         width="36"
         height="36"
-        className="size-9 shrink-0 rounded-full border border-[#e2e7e7] bg-[#e9f2f2] object-contain p-1"
+        className="size-9 shrink-0 rounded-full border border-line bg-brand-50 object-contain p-1"
       />
       <div className="flex min-w-0 flex-col gap-2">
-        <p className="max-w-[592px] rounded-[4px_18px_18px_18px] border border-[#e2e7e7] bg-white px-4 py-3 text-[15px] leading-relaxed text-[#1a3234]">
+        <p className="max-w-[592px] rounded-[4px_18px_18px_18px] border border-line bg-white px-4 py-3 text-[15px] leading-relaxed text-ink">
           {text}
         </p>
         {hasActions && (
@@ -29,7 +29,7 @@ export default function FallbackBubble({ text, hasActions, hasFaqGuide }) {
               <button
                 key={chip.label}
                 type="button"
-                className="h-9 rounded-full border border-[#e2e7e7] bg-white px-4 text-base text-[#3d4a4b] hover:bg-[#f4f6f6]"
+                className="h-9 rounded-full border border-line bg-white px-4 text-base text-ink-2 hover:bg-surface-2"
                 onClick={() => openMain(chip.path)}
               >
                 {chip.label}
@@ -38,12 +38,12 @@ export default function FallbackBubble({ text, hasActions, hasFaqGuide }) {
           </div>
         )}
         {hasActions && hasFaqGuide && (
-          <div className="flex w-fit max-w-full flex-wrap items-center gap-x-3 gap-y-1 rounded-[10px] bg-[#f4f6f6] px-4 py-3 text-[15px] text-[#566465]">
+          <div className="flex w-fit max-w-full flex-wrap items-center gap-x-3 gap-y-1 rounded-[10px] bg-surface-2 px-4 py-3 text-[15px] text-muted">
             <Headset aria-hidden="true" className="size-4 shrink-0" />
             <span>찾으시는 내용이 없다면 고객센터를 이용해 주세요.</span>
             <button
               type="button"
-              className="flex items-center gap-1.5 font-bold text-[#285a5c] hover:underline"
+              className="flex items-center gap-1.5 font-bold text-brand-500 hover:underline"
               onClick={() => openMain(PATHS.FAQS)}
             >
               자주 묻는 질문 보기

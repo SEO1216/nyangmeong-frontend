@@ -8,13 +8,6 @@ export const TEXT_BTN =
 
 export const TEXT_BTN_DEL = 'font-semibold text-muted hover:underline';
 
-export const BTN_SM = 'h-8! px-3!';
-
-export const TAG =
-  'inline-flex h-6 items-center rounded-full border border-line bg-surface-2 px-2 text-[13px] text-ink-2';
-
-export const TAG_STRONG = 'border-ink! bg-ink! text-white!';
-
 /** 입력 영역(첨부 추가·처방약·반복 예방) 바탕 */
 export const SUB_BOX = 'mt-4 rounded-xl bg-surface-2 p-5';
 

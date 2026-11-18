@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import NoticeBox from '@/components/NoticeBox';
 import Icon from '@/components/Icon';
+import { CHIP, CHIP_ON } from '@/components/buttonStyles';
 import {
   RECOMMENDED_IDS,
   WIDGET_GROUPS,
@@ -71,11 +73,11 @@ const BAR_HEIGHTS = ['h-3', 'h-5', 'h-3', 'h-4', 'h-6'];
 
 /**
  * [기록 고르기] 튜토리얼 2단계·[대시보드 편집] 본문 (D4·D5·D7)
- * - 761px 이상 두 칸 (※신규 정책): 왼쪽 안내 문구 → 추천 줄 → 4묶음 칩, 오른쪽 대시보드 미리보기(모달 스크롤에도 sticky로 고정)
- * - 760px 이하는 한 칸, 미리보기 숨김
+ * - 760px 이상 두 칸 (※신규 정책): 왼쪽 안내 문구 → 추천 줄 → 4묶음 칩, 오른쪽 대시보드 미리보기(모달 스크롤에도 sticky로 고정)
+ * - 760px 미만은 한 칸, 미리보기 숨김
  * - 미리보기: 5:7 두 칸, 카드 3열(AI 리포트 한 줄 전체, 맨 위 고정, 끌 수 없음), 항목별 고정 예시 값(실제 기록 아님) (※신규 정책)
  * - 미리보기 카드 순서는 고른 순서(새로 켠 항목 맨 뒤). 카드를 끌어 놓아 순서를 바꾸고 그 순서로 저장 (※신규 정책, 2026-11-14)
- *   브라우저 기본 드래그만 씀. 미리보기는 760px 이하에서 숨겨 터치 끌기는 없음
+ *   브라우저 기본 드래그만 씀. 미리보기는 760px 미만에서 숨겨 터치 끌기는 없음
  */
 export default function WidgetPicker({
   petNm,
@@ -107,7 +109,7 @@ export default function WidgetPicker({
   };
 
   return (
-    <div className="grid min-w-0 items-start gap-6 min-[761px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+    <div className="grid min-w-0 items-start gap-6 min-[760px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
       <div className="flex min-w-0 flex-col gap-5">
         {isEdit ? (
           <p className="text-muted">
@@ -115,7 +117,7 @@ export default function WidgetPicker({
           </p>
         ) : (
           <div>
-            <h3 className="text-lg/[1.4] font-bold text-ink">
+            <h3 className="text-lg font-bold text-ink">
               {`${petNm}에게 어떤 기록을 남길까요?`}
             </h3>
             <p className="mt-1 text-muted">
@@ -124,8 +126,8 @@ export default function WidgetPicker({
           </div>
         )}
 
-        <p className="flex flex-wrap items-center gap-x-2 gap-y-2 rounded-[10px] bg-surface-2 px-3.5 py-3 text-muted max-sm:flex-col max-sm:items-stretch">
-          <span className="flex min-w-0 flex-1 items-start gap-2 sm:contents">
+        <NoticeBox className="flex flex-wrap items-center gap-2 max-[760px]:flex-col max-[760px]:items-stretch">
+          <span className="flex min-w-0 flex-1 items-start gap-2 min-[760px]:contents">
             <Icon name="tips_and_updates" className="shrink-0 text-subtle" />
             <span className="min-w-0 flex-1 break-keep">
               {`처음이라면 ${joinWidgetNames(RECOMMENDED_IDS)}부터 시작해 보세요`}
@@ -133,12 +135,12 @@ export default function WidgetPicker({
           </span>
           <button
             type="button"
-            className="inline-flex h-8 items-center rounded-md bg-brand-50 px-3 font-semibold whitespace-nowrap text-brand-600 hover:bg-brand-100 max-sm:self-end"
+            className="inline-flex h-8 items-center rounded-md bg-brand-50 px-3 font-semibold whitespace-nowrap text-brand-600 hover:bg-brand-100 max-[760px]:self-end"
             onClick={() => onRecommend(RECOMMENDED_IDS)}
           >
             추천대로 고르기
           </button>
-        </p>
+        </NoticeBox>
 
         {WIDGET_GROUPS.map((group) => (
           <div key={group.name}>
@@ -156,11 +158,7 @@ export default function WidgetPicker({
                     key={item.id}
                     type="button"
                     aria-pressed={isOn}
-                    className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 whitespace-nowrap ${
-                      isOn
-                        ? 'border-brand-500 bg-brand-500 text-white'
-                        : 'border-line bg-white text-ink-2 hover:border-line-strong hover:text-ink'
-                    }`}
+                    className={`${isOn ? CHIP_ON : CHIP} gap-1.5`}
                     onClick={() => onToggle(item.id)}
                   >
                     <Icon name={item.icon} className="text-lg" />
@@ -180,8 +178,8 @@ export default function WidgetPicker({
         )}
       </div>
 
-      <div className="sticky top-0 max-[761px]:hidden">
-        <div className="flex flex-col gap-3 rounded-[14px] bg-surface-2 p-4">
+      <div className="sticky top-0 max-[760px]:hidden">
+        <div className="flex flex-col gap-3 rounded-card bg-surface-2 p-4">
           <p className="text-sm">
             <b className="text-ink">대시보드 미리보기</b>
             <span className="text-subtle"> · </span>
@@ -230,7 +228,7 @@ export default function WidgetPicker({
                 </PreviewCard>
               );
             })}
-            <li className="grid min-h-[72px] place-items-center rounded-[10px] border border-dashed border-line-strong px-3 py-2.5 text-center text-sm text-subtle">
+            <li className="grid min-h-18 place-items-center rounded-box border border-dashed border-line-strong px-3 py-2.5 text-center text-sm text-subtle">
               {orderedIds.length > 0
                 ? '하나 더 고르면 여기에 카드가 생겨요'
                 : '아래에서 고르면 여기에 카드가 생겨요'}
@@ -268,7 +266,7 @@ function PreviewCard({
   return (
     <li
       {...dragProps}
-      className={`flex min-w-0 flex-col gap-2 rounded-[10px] border px-3 py-2.5 ${frameClass} ${
+      className={`flex min-w-0 flex-col gap-2 rounded-box border px-3 py-2.5 ${frameClass} ${
         dragProps ? 'cursor-grab' : ''
       } ${className}`}
     >
