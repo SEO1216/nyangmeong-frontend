@@ -2,12 +2,15 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 UI 통일 2-F · 고객센터·펫뉴스(KSJ `inquiry`·`notice`·`faq`·`news`) 값·부품 정리 (2026-11-18, 검증 2회차 통과(1회차: 문의 유형 칸 빨간 테두리·수정 화면 `LoadError` 빠짐), 사람 확인). 기준 `docs/ui-checklist.csv` 행 2·9·11·12·13·15·16·27·29·56·62·69·71·72·74·76·93·98. 색 토큰·그림자 삭제, 상세 제목 24/18px, 4px 간격, 밑줄 탭 `UnderlineTabs`, 뉴스 `FILTER_CHIP`, 배지 `Badge` tone, 버튼 `buttonStyles`·문구(등록하기·저장하기·삭제하기), 폼 `formStyles`·`FieldError`·`Required`, `LoadError`·`EmptyResult`, 최신 공지 박스 없앰
+끝남: SCR-COM-002 UI 통일 2-G 펫이야기·커뮤니티 공용 부품 값·부품 정리 (2026-11-18, 검증 2회차 통과, 사람 확인). 1회차 실패(목록-페이지 이동 간격 68/52px, ⋮ 메뉴 그림자 grep, 로컬 임시 파일 lint)를 고침
 
 ## 다음에 할 것
 
 ### SCR-COM-002 UI 통일 다음 단계(사람 결정 2026-11-18)
 
+- 2-G 팀 알림(PR 본문 + 팀 채널, KSJ): ① 커뮤니티 공용 `ListFilterParts` 칩이 `FILTER_CHIP`·`FILTER_CHIP_ON`(40 → 36, 고른 칩 연한 청록), [내 글만 보기] 등 체크가 공용 `Checkbox`, [상세 필터]가 `BTN_SECONDARY`라 펫돌봄·실종센터 목록도 같이 바뀜 ② `CommentSection`: 댓글·답글 제출 "등록하기", 삭제 확인 "삭제하기" + `isDanger`, ⋮ 메뉴 그림자 없음, 입력칸 `formStyles`, 모바일 답글 연결선 -25px·21px ③ 펫이야기 카드·레일·글쓰기 카드 그림자 삭제, 썸네일 높이 150px, "총 N건" → "전체 N 건", 목록-페이지 이동 48/32px, [인기] 공용 `Badge tone="rose"`, 조회 실패 `LoadError` ④ 글쓰기 "등록하기"·"저장하기", 폼 `formStyles`·`FieldError`·`Required`, 제목 글자 수 칸 아래 오른쪽 ⑤ 글 상세 제목 24/모바일 18px, 오른쪽 최신글 박스 없음
+- 2-G 참고(판정 밖): 행 78 펫이야기 내 글에도 [신고] 보이는 것은 그대로(KSJ 버그 후보). 캡처는 목록만(화면 ID가 SCR-COM-002 하나라 상세·글쓰기 캡처 이름이 겹침). `.playwright-mcp/`가 eslint 검사 대상이라 그 폴더에 `require` 쓰는 임시 스크립트를 두면 lint가 깨짐(`eslint.config.js` ignores 추가는 사람 결정)
+- 다음 2 조각 후보(2-G 뒤): KSJ 펫돌봄(`care/`) 2-H·실종센터(`missing/`) 2-I, YAY `member`·`place`
 - 2-F 팀 알림(PR 본문 + 팀 채널, KSJ): ① 문의·FAQ 탭이 공용 `UnderlineTabs`(PC 높이 72 → 48, 탭 패널 id는 고른 탭 id `inquiry-status-*`·`faq-category-*`), FAQ 검색창 줄 아래 여백 16 → 4, 검색창 좁힘 1280 → 1100 ② 펫뉴스 카테고리 칩 `FILTER_CHIP`·`FILTER_CHIP_ON`(40 → 36, 고른 칩 연한 청록) ③ 문의 상태·뉴스 카테고리·공지 고정 배지가 공용 `Badge` tone ④ 버튼 `BTN_PRIMARY`·`BTN_SECONDARY`(빈 안내 버튼 36 → 40, 원문 기사 보기 44 → 40), 문구 "문의 제출" → "등록하기", "저장" → "저장하기", 삭제 확인 "삭제하기" + `isDanger` ⑤ 문의 폼 `formStyles`·`FieldError`·`Required`, 제목 글자 수가 칸 아래 오른쪽, 문의 유형 칸 오류 빨간 테두리 ⑥ 조회 실패 `LoadError`([다시 시도]), 문의 수정 화면 조회 실패는 [목록으로] 링크 없어짐, 뉴스 빈 결과 `EmptyResult` ⑦ 공지 상세 "최신 공지" 박스 없앰, 상세 제목 모바일 20 → 18px, 카드 그림자 삭제, 4px 간격
 - 2-F 참고(검증 보고, 판정 밖): 문의 작성 제목 칸이 42px라 문의 유형 칸(40px)보다 2px 높음(`py-2`+`leading-6`+테두리). 커뮤니티 필터 칩(`ListFilterParts` `Chips`)과 "총 N건"은 csv 15·80행으로 커뮤니티 조각에서
 - 다음 2 조각 후보(2-F 뒤): KSJ `community`(펫이야기·펫돌봄·실종센터), YAY `member`·`place`
