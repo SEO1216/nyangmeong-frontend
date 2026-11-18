@@ -5,6 +5,7 @@ import { CHIP, CHIP_ON } from '@/components/buttonStyles';
 import {
   RECOMMENDED_IDS,
   WIDGET_GROUPS,
+  WIDGET_ITEMS,
   findWidgetItem,
   joinWidgetNames,
   keepWidgetOrder,
@@ -68,14 +69,18 @@ const BAR_HEIGHTS = ['h-3', 'h-5', 'h-3', 'h-4', 'h-6'];
 /**
  * [기록 고르기] 튜토리얼 2단계·[대시보드 편집] 본문 (D4·D5·D7)
  * - 760px 이상 두 칸 (※신규 정책): 왼쪽 안내 문구 → 추천 줄 → 4묶음 칩, 오른쪽 대시보드 미리보기(모달 스크롤에도 sticky로 고정)
- * - 760px 미만은 한 칸, 미리보기 숨김
+ * - 760px 미만은 한 칸, 미리보기 숨김. 튜토리얼은 고르기만 하고 설명 문구가 다름 (※신규 정책)
+ * - 760px 미만 편집(narrowStep): 1 기록 고르기는 칩 화면만, 2 순서 바꾸기는 1열 카드를 손잡이로 끌어 순서를 바꿈 (※신규 정책)
  * - 미리보기: 5:7 두 칸, 카드 3열(AI 리포트 한 줄 전체, 맨 위 고정, 끌 수 없음), 항목별 고정 예시 값(실제 기록 아님) (※신규 정책)
  * - 미리보기 카드 순서는 고른 순서(새로 켠 항목 맨 뒤). 카드를 끌어 놓아 순서를 바꾸고 그 순서로 저장 (※신규 정책, 2026-11-14)
- *   브라우저 기본 드래그만 씀. 미리보기는 760px 미만에서 숨겨 터치 끌기는 없음
+ *   760px 이상은 브라우저 기본 드래그
+ * - 고를 기록이 남아 있지 않으면 미리보기 마지막 안내 카드를 그리지 않음 (※신규 정책)
  */
 export default function WidgetPicker({
   petNm,
   isEdit,
+  isNarrow = false,
+  narrowStep = null,
   draftIds,
   lastPickedId,
   onToggle,
@@ -102,12 +107,22 @@ export default function WidgetPicker({
     endDrag();
   };
 
+  const hasMoreItems = WIDGET_ITEMS.some(
+    (item) => !orderedIds.includes(item.id),
+  );
+
+  if (narrowStep === 2) {
+    return <NarrowReorder orderedIds={orderedIds} onReorder={onReorder} />;
+  }
+
   return (
     <div className="grid min-w-0 items-start gap-6 min-[760px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
       <div className="flex min-w-0 flex-col gap-5">
         {isEdit ? (
           <p className="text-muted">
-            보여 줄 기록을 고르고, 오른쪽 미리보기에서 카드를 끌어 순서를 바꿔요
+            {narrowStep === 1
+              ? '보여 줄 기록을 고르고, 다음 단계에서 카드를 끌어 순서를 바꿔요'
+              : '보여 줄 기록을 고르고, 오른쪽 미리보기에서 카드를 끌어 순서를 바꿔요'}
           </p>
         ) : (
           <div>
@@ -115,7 +130,9 @@ export default function WidgetPicker({
               {`${petNm}에게 어떤 기록을 남길까요?`}
             </h3>
             <p className="mt-1 text-muted">
-              고르는 대로 대시보드 미리보기가 바로 바뀌어요
+              {isNarrow
+                ? '보여 줄 기록을 골라요. 카드 순서는 나중에 [대시보드 편집]에서 바꿀 수 있어요'
+                : '고르는 대로 대시보드 미리보기가 바로 바뀌어요'}
             </p>
           </div>
         )}
@@ -222,11 +239,13 @@ export default function WidgetPicker({
                 </PreviewCard>
               );
             })}
-            <li className="grid min-h-18 place-items-center rounded-box border border-dashed border-line-strong px-3 py-2.5 text-center text-sm text-subtle">
-              {orderedIds.length > 0
-                ? '하나 더 고르면 여기에 카드가 생겨요'
-                : '아래에서 고르면 여기에 카드가 생겨요'}
-            </li>
+            {hasMoreItems && (
+              <li className="grid min-h-18 place-items-center rounded-box border border-dashed border-line-strong px-3 py-2.5 text-center text-sm text-subtle">
+                {orderedIds.length > 0
+                  ? '하나 더 고르면 여기에 카드가 생겨요'
+                  : '아래에서 고르면 여기에 카드가 생겨요'}
+              </li>
+            )}
           </ul>
           <p className="text-badge/[1.5] text-subtle">
             값은 예시예요. 고른 기록은 건강 대시보드에 이 모양으로 놓이고,
@@ -234,6 +253,114 @@ export default function WidgetPicker({
           </p>
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * [760px 미만 편집 2단계 순서 바꾸기] (※신규 정책)
+ * - 카드 1열. AI 건강분석 리포트는 핀을 달고 맨 위 고정(끌 수 없음)
+ * - 나머지는 왼쪽 손잡이를 누르는 즉시 끌림(터치·마우스 같은 Pointer 이벤트, 길게 누르지 않음)
+ * - 끄는 동안 손가락이 옆 카드의 가운데를 넘으면 그 자리로 옮김
+ */
+function NarrowReorder({ orderedIds, onReorder }) {
+  const [draggingId, setDraggingId] = useState(null);
+
+  const handlePointerDown = (event, id) => {
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setDraggingId(id);
+  };
+
+  const handlePointerMove = (event) => {
+    if (draggingId === null) return;
+    const target = document
+      .elementFromPoint(event.clientX, event.clientY)
+      ?.closest('[data-widget-id]');
+    const overId = target?.dataset.widgetId;
+    if (!overId || overId === draggingId) return;
+    const fromIndex = orderedIds.indexOf(draggingId);
+    const toIndex = orderedIds.indexOf(overId);
+    const rect = target.getBoundingClientRect();
+    const middle = rect.top + rect.height / 2;
+    /** 가운데를 넘어야 옮김: 높이가 다른 카드끼리 자리가 오락가락하지 않게 */
+    if (toIndex > fromIndex ? event.clientY < middle : event.clientY > middle)
+      return;
+    const next = orderedIds.filter((id) => id !== draggingId);
+    next.splice(toIndex, 0, draggingId);
+    onReorder(next);
+  };
+
+  const endDrag = () => setDraggingId(null);
+
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="flex items-baseline justify-between gap-2 text-sm">
+        <b className="text-ink">대시보드 미리보기</b>
+        <span className="text-subtle">값은 예시예요</span>
+      </p>
+      <ul className="flex flex-col gap-2">
+        <li className="flex min-w-0 flex-col gap-2 rounded-box border border-line bg-white px-3 py-2.5">
+          <span className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-ink">
+            <Icon
+              name="auto_awesome"
+              className="shrink-0 text-lg text-brand-500"
+            />
+            <span className="min-w-0 grow truncate">AI 건강분석 리포트</span>
+            <span
+              role="img"
+              title="항상 맨 위"
+              aria-label="항상 맨 위"
+              className="inline-flex shrink-0"
+            >
+              <Icon name="push_pin" className="text-lg text-subtle" />
+            </span>
+          </span>
+          <AiSample />
+        </li>
+        {orderedIds.map((id) => {
+          const item = findWidgetItem(id);
+          const isDragging = id === draggingId;
+          return (
+            <li
+              key={id}
+              data-widget-id={id}
+              className={`flex min-w-0 items-stretch rounded-box border ${
+                isDragging
+                  ? 'border-brand-500 bg-surface-2'
+                  : 'border-line bg-white'
+              }`}
+            >
+              <span
+                aria-hidden="true"
+                className={`flex shrink-0 touch-none items-center px-1.5 text-subtle select-none ${
+                  isDragging ? 'cursor-grabbing' : 'cursor-grab'
+                }`}
+                onPointerDown={(event) => handlePointerDown(event, id)}
+                onPointerMove={handlePointerMove}
+                onPointerUp={endDrag}
+                onPointerCancel={endDrag}
+              >
+                <Icon name="drag_indicator" className="text-xl" />
+              </span>
+              <span className="flex min-w-0 grow flex-col gap-2 py-2.5 pr-3">
+                <span className="flex min-w-0 items-center gap-1.5 text-sm font-semibold text-ink">
+                  <Icon
+                    name={item.icon}
+                    className="shrink-0 text-lg text-brand-500"
+                  />
+                  <span className="truncate">{item.nm}</span>
+                </span>
+                <PreviewSample sample={PREVIEW_SAMPLES[id]} />
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="flex items-center gap-1.5 text-sm text-muted">
+        <Icon name="info" className="text-subtle" />
+        카드를 끌어 순서를 바꿀 수 있어요
+      </p>
     </div>
   );
 }

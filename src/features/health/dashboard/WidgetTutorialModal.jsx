@@ -1,10 +1,12 @@
 import { useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import LoadError from '@/components/LoadError';
 import Icon from '@/components/Icon';
 import Modal from '@/components/Modal';
 import Skeleton from '@/components/Skeleton';
 import { BTN_PRIMARY, BTN_SECONDARY, CHIP } from '@/components/buttonStyles';
 import { showToast } from '@/components/toastStore';
+import useMediaQuery from '@/hooks/useMediaQuery';
 import CareChipPicker from '../CareChipPicker';
 import { MIN_CARE_COUNT, isLinkedCareItem } from '../careDue';
 import { toCareIcon } from '../careIcons';
@@ -24,6 +26,8 @@ import {
 
 const STEPS = ['시작', '기록 고르기', '케어 고르기', '완료'];
 const LAST_STEP = STEPS.length;
+/** 760px 미만 대시보드 편집 단계 (※신규 정책) */
+const NARROW_EDIT_STEPS = ['기록 고르기', '순서 바꾸기'];
 
 /**
  * [튜토리얼 · 대시보드 편집 모달] (※신규 정책, 흐름도 D1~D7·D10)
@@ -32,6 +36,7 @@ const LAST_STEP = STEPS.length;
  * - 3단계 케어 고르기: 5개 이상, 처방·반복 예방 연동 항목은 항상 표시. 4단계에서 기록 항목과 함께 저장(케어 먼저: 기록 항목이 저장되면 튜토리얼이 닫힘)
  * - isReplay(이미 고른 항목이 있는 회원이 튜토리얼을 다시 엶): 2단계 처음 체크는 savedIds, 1~3단계의 [나중에 할래요]·×·Esc·배경은 저장 없이 닫음. 4단계 저장은 같음 (※신규 정책)
  * - mode 'edit': 2단계만. [저장]은 고른 항목 저장, [취소]·×·Esc·배경은 저장 없이 닫음(D7)
+ *   760px 미만은 1 기록 고르기 → 2 순서 바꾸기 (※신규 정책). 1단계는 [취소]·[다음 ›]만, 저장은 2단계 [저장하기]. [‹ 이전]은 고른 내용을 두고 1단계로
  * - 저장 실패: 서버 message 토스트. [나중에 할래요]·×·Esc는 그래도 닫고(다음에 들어오면 다시 열림), 4단계·편집 저장은 모달을 유지해 다시 시도(저장된 케어는 다시 보내지 않음)
  */
 export default function WidgetTutorialModal({
@@ -45,6 +50,10 @@ export default function WidgetTutorialModal({
 }) {
   const isEdit = mode === 'edit';
   const [step, setStep] = useState(isEdit ? 2 : 1);
+  const isNarrow = useMediaQuery('(width < 760px)');
+  const [narrowEditStep, setNarrowEditStep] = useState(1);
+  /** 760px 미만 편집의 단계(1·2). 그 밖은 null */
+  const narrowStep = isEdit && isNarrow ? narrowEditStep : null;
   /** 사람이 칩을 누르기 전에는 null: 튜토리얼은 추천 3개를 미리 고름 */
   const [pickedIds, setPickedIds] = useState(
     isEdit || (isReplay && savedIds.length > 0) ? savedIds : null,
@@ -182,6 +191,54 @@ export default function WidgetTutorialModal({
           시작할래요
         </button>
       </div>
+    ) : narrowStep === 2 ? (
+      <>
+        <button
+          type="button"
+          className={`${BTN_SECONDARY} mr-auto min-w-20 gap-0.5`}
+          onClick={() => setNarrowEditStep(1)}
+        >
+          <ChevronLeft className="size-4.5" aria-hidden="true" />
+          이전
+        </button>
+        <button
+          type="button"
+          disabled={isEmpty || saveWidgets.isPending}
+          className={`${BTN_PRIMARY} min-w-20`}
+          onClick={saveEdit}
+        >
+          저장하기
+        </button>
+      </>
+    ) : narrowStep === 1 ? (
+      <>
+        <p className="mr-auto flex flex-wrap items-center gap-x-3 self-center text-sm">
+          {isEmpty && (
+            <span role="alert" className="font-semibold text-danger">
+              1개 이상 골라 주세요
+            </span>
+          )}
+          <span className="text-muted">
+            <b className="text-ink">{draftIds.length}개</b> 골랐어요
+          </span>
+        </p>
+        <button
+          type="button"
+          className={`${BTN_SECONDARY} min-w-20`}
+          onClick={onClose}
+        >
+          취소
+        </button>
+        <button
+          type="button"
+          disabled={isEmpty}
+          className={`${BTN_PRIMARY} min-w-20 gap-0.5`}
+          onClick={() => setNarrowEditStep(2)}
+        >
+          다음
+          <ChevronRight className="size-4.5" aria-hidden="true" />
+        </button>
+      </>
     ) : step === 2 ? (
       <>
         <p className="mr-auto flex flex-wrap items-center gap-x-3 self-center text-sm">
@@ -271,7 +328,8 @@ export default function WidgetTutorialModal({
       isPending={isSaving}
       onClose={handleDismiss}
     >
-      {!isEdit && <StepBar current={step} />}
+      {!isEdit && <StepBar steps={STEPS} current={step} />}
+      {narrowStep && <StepBar steps={NARROW_EDIT_STEPS} current={narrowStep} />}
 
       {step === 1 && (
         <div className="flex flex-col items-center gap-4 py-4 text-center">
@@ -298,6 +356,8 @@ export default function WidgetTutorialModal({
         <WidgetPicker
           petNm={petNm}
           isEdit={isEdit}
+          isNarrow={isNarrow}
+          narrowStep={narrowStep}
           draftIds={draftIds}
           lastPickedId={lastPickedId}
           onToggle={handleToggle}
@@ -363,11 +423,11 @@ export default function WidgetTutorialModal({
   );
 }
 
-/** 단계 표시 */
-function StepBar({ current }) {
+/** 단계 표시: steps는 단계 이름 목록 */
+function StepBar({ steps, current }) {
   return (
     <ol className="mb-5 flex items-center gap-2 overflow-x-auto">
-      {STEPS.map((label, index) => {
+      {steps.map((label, index) => {
         const no = index + 1;
         const isCurrent = no === current;
         const isDone = no < current;
