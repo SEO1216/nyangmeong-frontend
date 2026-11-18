@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import useScrollLock from '@/hooks/useScrollLock';
 import DropdownSelect from '@/components/DropdownSelect';
 import DatePicker from '@/components/DatePicker';
 import TimeSelect from '@/components/TimeSelect';
@@ -56,6 +57,7 @@ export default function ScheduleModal({
   onCreateNew,
 }) {
   const dialogRef = useRef(null);
+  useScrollLock();
   const isEdit = schedule != null;
   const onlyPetSn = pets.length === 1 ? pets[0].petSn : null;
   const [form, setForm] = useState(() =>

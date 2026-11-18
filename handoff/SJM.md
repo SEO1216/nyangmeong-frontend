@@ -2,14 +2,17 @@
 
 ## 지금 하는 것
 
-SCR-MYP-005 공동양육자 추가 · 보낸 초대 취소·삭제 버튼 연결 — 끝 (2026-11-16, 검증 `통과`, lint·build 0, 사람 확인 완료: 취소·삭제 흐름, 취소 안내, 찾을 수 없음 안내, 393·360·1440px. 추가-1~5는 사람이 요청한 것으로 확인)
+SCR-MYP-005 수락 화면 안내 문구를 운영 설정값으로 — 끝 (2026-11-17, 검증 `통과` 1회차, lint·build 0, 사람 확인 완료)
 
-- 바꾼 것: FN-MYP-005-03 `features/pet/list/SentInvitations.jsx`를 초대 1건=1행으로(배지 "취소됨"·"일부 수락", ⋮ "초대 취소"·"삭제", 둘째 줄은 이름+"N일 후 만료"/"MM-DD 보냄"/"메일로 보냄 · …", 모바일은 이메일 말줄임+배지·이름·날짜 한 줄), 확인 모달 `SentInvitationDialog.jsx`, ⋮ 메뉴는 `PetSlide.jsx`에서 꺼낸 `list/MoreMenu.jsx`를 같이 쓴다. FN-MYP-005-10 `invite/InvitationClosed.jsx`에 취소 안내(✕ 원)와 찾을 수 없음 안내(편지+✕) 카드. `api.js`·`queries.js`에 cancel·delete, `INVTN_STTS.CNCL = 'PETC0035'`
+- 바꾼 것: `features/pet/invite/InvitationAccept.jsx`가 `usePetLimit()`의 `petMaxCnt`로 "N마리까지예요"를 쓴다. 한도를 불러오는 중·실패면 그 문장만 빠지고 남은 자리 문장만 보인다. 남은 자리·체크 제한·[수락] 활성은 `remainingPetCount` 그대로. `MAX_OWN_PETS` import만 뺐고 상수는 JAJ `PetSwitcher`가 써서 남겼다
+- 정리: 사람 확인용 시험 초대 `JNT_BRUP_INVTN_SN=250`(회원 1 → user0006)은 API로 취소·삭제까지 끝났고 보낸 목록에서 빠진 것도 확인했다. 따로 복구할 것 없음
+- 불러오기 전후로 안내 상자가 한 줄 늘 수 있다(완료 조건 밖)
 
 ## 다음에 할 것
 
 ### 내 코드 작업
 
+- JAJ 알림: `MAX_OWN_PETS`(`utils/petCodes.js`)를 쓰는 곳은 JAJ `features/health/shared/PetSwitcher.jsx`뿐이다. 운영 설정값 `GET /pets/limit`(`usePetLimit`)로 바꾸도록 알린다
 - (선택) 꾸미기 슬롯 아이템 이름이 390px에서 단어 중간에서 끊긴다("방울 목걸/이"). 슬롯은 이미지 자리라 이번엔 두었다
 - JAJ·LJS 알림: 공용 `components/AnalyzeProgress.jsx`를 새로 만들었다(영수증 분석 게이지, `label` prop). JAJ의 `features/ai/receipt/ReceiptUploadModal.jsx`는 함수·상수를 지우고 import만 바꿨고 화면 동작은 같다. 새 분석 화면에 게이지가 필요하면 이 컴포넌트를 쓴다
 - SCR-MYP-002 10마리 보유 때 삭제하면 등록 카드로 바뀌는지 화면 확인(데이터가 없어 못 함)

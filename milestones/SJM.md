@@ -237,6 +237,27 @@
 - 추가 요청(2026-11-16): 초대당 1행·⋮ 메뉴·"일부 수락" 배지, 날짜 문구("N일 후 만료"·"MM-DD 보냄"·"메일로 보냄"), 모바일 배치, 취소·404 안내 카드와 아이콘
 - 연결 남음: 없음
 
+## SCR-MYP-001·002·003·005·040 반려동물 10마리 한도 연결·등록 진입점·[사진 제거] — 끝
+
+- 기능: 명세 기능 ID 추가 없음. FN-MYP-002-01(등록 상한)·003-01(등록)·005-05(수락)·002-02(점 줄 ＋)·001-01(홈 내 반려동물 줄)·040-02·08(프로필 사진)에 걸친다
+- 기다리는 것: 백엔드 `POST /pets` 합계 한도, `GET /caregiver-invitations/{sn}`의 `remainingPetCount`, `POST …/accept` 400 `PET_LIMIT_EXCEEDED`(data `remainingPetCount`)(SJM, 백엔드 PR #250 병합됨)
+- 완료 조건: 등록 카드 "모두 등록했어요" 판정이 주양육 + 공동양육 합계 10. 등록 400 `PET_LIMIT_EXCEEDED`는 서버 문구 토스트. 수락 화면은 `remainingPetCount`까지만 고르고(0이면 수락 불가) 안내, 수락 400이면 data의 남은 자리로 다시 맞춘다. 반려동물 관리 점 줄 ＋를 초록 테두리 원·hover 안내로, 홈 "내 반려동물 N마리" 줄에 [＋ 등록]. 회원정보 수정 [기본 이미지로] → [사진 제거]. `yarn -s lint`, `yarn -s build` 종료 코드 0
+
+- 추가 요청(2026-11-16): `PetEmpty.jsx` 0마리 문구를 "공동양육을 포함해"로(추가-1), 수락 남은 0이면 아래 안내 숨김(추가-2)
+- 연결 남음: 없음
+
+## SCR-MYP-003 반려동물 등록/수정 · 운영 설정값 반려동물 최대 수 표시 — 끝
+
+- 기능: 명세 기능 ID 추가 없음. FN-MYP-003-01 등록 카드 "모두 등록했어요"와 FN-MYP-002-01·FN-MYP-002-06 등록 상한 안내의 "10마리"를 운영 설정값으로 바꾼다
+- 기다리는 것: 백엔드 `GET /pets/limit` → `{petMaxCnt, linkedPetCount, remainingPetCount}` (SJM, 백엔드 끝남)
+- 완료 조건: `PetListPage`·`PetSlide`·`PetEmpty`의 "10마리"와 등록 비활성 판정이 `petMaxCnt`·`remainingPetCount`를 따르고, 불러오는 중·실패 때 숫자를 임의로 보여 주지 않는다. `MAX_OWN_PETS`는 지우지 않는다(`InvitationAccept`·JAJ `PetSwitcher`가 아직 쓴다). `yarn -s lint`, `yarn -s build` 종료 코드 0
+
+## SCR-MYP-005 공동양육자 추가 · 수락 화면 안내 문구를 운영 설정값으로 — 끝
+
+- 기능: 명세 기능 ID 추가 없음. FN-MYP-005-05 수락 화면 안내 문구의 "10마리"를 운영 설정값으로 바꾼다
+- 기다리는 것: 백엔드 `GET /pets/limit`·`GET /caregiver-invitations/{sn}`의 `remainingPetCount`·수락 400 `PET_LIMIT_EXCEEDED`의 `message`와 `data.remainingPetCount` (SJM, 백엔드 끝남)
+- 완료 조건: `InvitationAccept`의 안내 문구가 `MAX_OWN_PETS`가 아니라 `petMaxCnt`(또는 서버 `message`)를 쓴다. 고르는 수는 `remainingPetCount`로 막는다. `yarn -s lint`, `yarn -s build` 종료 코드 0
+
 ## 제외
 
 - 없음. 마이페이지 명세의 화면은 모두 SJM 담당이다
