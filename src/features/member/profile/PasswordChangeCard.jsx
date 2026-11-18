@@ -1,11 +1,12 @@
 import { useId, useState } from 'react';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import FieldError from '@/components/FieldError';
 import { showToast } from '@/components/toastStore';
 import { useUpdatePassword } from '../queries';
-import { ACT_BTN, HELP, INPUT, LABEL } from '../shared/profileStyles';
+import { HELP, INPUT, LABEL } from '@/components/formStyles';
+import { ACT_BTN } from '../shared/profileStyles';
 import { isValidPassword } from '../shared/validate';
 import AccountRow from './AccountRow';
-import { ErrorText } from './FieldMessage';
 
 const PW_RULE = '영문과 숫자를 함께 써서 8~64자로 입력해 주세요(공백 제외)';
 
@@ -80,7 +81,7 @@ function PasswordEdit({ onClose }) {
 
   return (
     <>
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2">
         <label className={LABEL} htmlFor={curId}>
           현재 비밀번호
         </label>
@@ -99,10 +100,10 @@ function PasswordEdit({ onClose }) {
           className={INPUT}
         />
         {isCurError && (
-          <ErrorText id={curErrId}>현재 비밀번호가 일치하지 않아요</ErrorText>
+          <FieldError id={curErrId}>현재 비밀번호가 일치하지 않아요</FieldError>
         )}
       </div>
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2">
         <label className={LABEL} htmlFor={newId}>
           새 비밀번호
         </label>
@@ -120,14 +121,14 @@ function PasswordEdit({ onClose }) {
           className={INPUT}
         />
         {newError ? (
-          <ErrorText id={`${newId}-err`}>{newError}</ErrorText>
+          <FieldError id={`${newId}-err`}>{newError}</FieldError>
         ) : (
           <p id={`${newId}-help`} className={HELP}>
             {PW_RULE}
           </p>
         )}
       </div>
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2">
         <label className={LABEL} htmlFor={cfmId}>
           새 비밀번호 확인
         </label>
@@ -145,7 +146,7 @@ function PasswordEdit({ onClose }) {
           className={INPUT}
         />
         {isMismatch && (
-          <ErrorText id={cfmErrId}>비밀번호가 일치하지 않아요</ErrorText>
+          <FieldError id={cfmErrId}>비밀번호가 일치하지 않아요</FieldError>
         )}
       </div>
       <div className="flex justify-end gap-2">

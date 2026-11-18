@@ -1,5 +1,6 @@
 import { useId, useState } from 'react';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import FieldError from '@/components/FieldError';
 import { showToast } from '@/components/toastStore';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -7,14 +8,15 @@ import {
   useCheckNicknameAvailability,
   useSetupNickname,
 } from '../queries';
-import { ACT_BTN, HELP, INPUT, SIDE_BTN } from '../shared/profileStyles';
+import { HELP, INPUT } from '@/components/formStyles';
+import { ACT_BTN, SIDE_BTN } from '../shared/profileStyles';
 import {
   NICKNAME_MAX,
   isValidNickname,
   sanitizeNickname,
 } from '../shared/validate';
 import AccountRow from './AccountRow';
-import { ErrorText, OkText } from './FieldMessage';
+import { OkText } from './FieldMessage';
 
 const MSG = {
   duplicate: '이미 사용 중인 닉네임입니다.',
@@ -103,7 +105,7 @@ function NicknameEdit({ mbrNcnm, onClose }) {
           중복확인
         </button>
       </div>
-      {hasError && <ErrorText>{MSG[status]}</ErrorText>}
+      {hasError && <FieldError>{MSG[status]}</FieldError>}
       {status === 'available' && <OkText>{MSG.available}</OkText>}
       {status === 'idle' && (
         <p className={HELP}>최대 10글자 · 한글·영문·숫자</p>

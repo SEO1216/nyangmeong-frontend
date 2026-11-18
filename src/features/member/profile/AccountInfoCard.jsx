@@ -20,7 +20,7 @@ export default function AccountInfoCard({
       <AccountRow
         label="가입 방식"
         value={
-          <span className="inline-flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-2">
             {snsTyCd && <SnsLogoChip snsOffrCd={snsTyCd} />}
             {JOIN_PATH_NAME[joinPathCd]}
           </span>

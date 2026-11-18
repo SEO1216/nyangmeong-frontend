@@ -1,5 +1,5 @@
 import { canStartSnsLogin, startSnsLogin } from '../login/snsAuth';
-import { ROW_BTN } from '../shared/profileStyles';
+import { BTN_SECONDARY } from '@/components/buttonStyles';
 import SnsLogoChip from '../shared/SnsLogoChip';
 import { SNS_NAME } from '../shared/snsCodes';
 import AccountRow from './AccountRow';
@@ -42,7 +42,7 @@ export default function SnsLinkCard({ joinPathCd, snsAcntLinks = [] }) {
               !isLinked && (
                 <button
                   type="button"
-                  className={`${ROW_BTN} disabled:cursor-not-allowed disabled:opacity-50`}
+                  className={BTN_SECONDARY}
                   disabled={!canStartSnsLogin(snsOffrCd)}
                   onClick={() => startSnsLogin({ snsOffrCd, mode: 'link' })}
                 >
