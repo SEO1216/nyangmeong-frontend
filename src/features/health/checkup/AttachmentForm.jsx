@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import DropdownSelect from '@/components/DropdownSelect';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
-import FieldError from '../diary/FieldError';
-import { INPUT_CLASS, LABEL_CLASS } from '../diary/formStyles';
+import FieldError, { Required } from '@/components/FieldError';
+import { INPUT, LABEL } from '@/components/formStyles';
 import { useCreateAttachment } from '../queries';
 import { SUB_BOX } from './checkupStyles';
 import {
@@ -14,7 +14,7 @@ import {
 } from './checkupTypes';
 import { getFileError } from './attachmentUtils';
 
-const REQUIRED = <span className="ml-0.5 font-bold text-danger">*</span>;
+const REQUIRED = <Required />;
 
 /**
  * [첨부 추가 입력 영역]
@@ -68,7 +68,7 @@ export default function AttachmentForm({ petSn, ckupRcdSn, onClose }) {
     >
       <div className="grid gap-x-8 gap-y-5 min-[760px]:grid-cols-2">
         <label className="flex flex-col gap-1.5">
-          <span className={LABEL_CLASS}>파일 유형{REQUIRED}</span>
+          <span className={LABEL}>파일 유형{REQUIRED}</span>
           <DropdownSelect
             value={atchTypeCd}
             invalid={isInvalid('type')}
@@ -84,12 +84,12 @@ export default function AttachmentForm({ petSn, ckupRcdSn, onClose }) {
           )}
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className={LABEL_CLASS}>파일{REQUIRED}</span>
+          <span className={LABEL}>파일{REQUIRED}</span>
           <input
             type="file"
             accept={ATTACHMENT_ACCEPT}
             aria-invalid={isInvalid('file') ? true : undefined}
-            className={`${INPUT_CLASS} pt-2`}
+            className={`${INPUT} pt-2`}
             onChange={(event) => setFile(event.target.files[0] ?? null)}
           />
           <p className="text-sm text-muted">
@@ -102,7 +102,7 @@ export default function AttachmentForm({ petSn, ckupRcdSn, onClose }) {
       {isImage && (
         <div className="grid gap-x-8 gap-y-5 min-[760px]:grid-cols-2">
           <label className="flex flex-col gap-1.5">
-            <span className={LABEL_CLASS}>영상 종류{REQUIRED}</span>
+            <span className={LABEL}>영상 종류{REQUIRED}</span>
             <DropdownSelect
               value={imgKindCd}
               invalid={isInvalid('kind')}
@@ -118,7 +118,7 @@ export default function AttachmentForm({ petSn, ckupRcdSn, onClose }) {
             )}
           </label>
           <label className="flex flex-col gap-1.5">
-            <span className={LABEL_CLASS}>촬영 부위{REQUIRED}</span>
+            <span className={LABEL}>촬영 부위{REQUIRED}</span>
             <DropdownSelect
               value={imgPartCd}
               invalid={isInvalid('part')}

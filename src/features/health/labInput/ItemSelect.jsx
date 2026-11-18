@@ -1,6 +1,6 @@
 import { ChevronDown } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
-import { TAG } from '../checkup/checkupStyles';
+import Badge from '@/components/Badge';
 import { BLOOD_ITEM_GROUPS, findBloodItem } from './bloodItems';
 
 export const DIRECT = '__direct';
@@ -114,7 +114,7 @@ export default function ItemSelect({
         <span className="flex min-w-0 flex-1 items-center gap-2 truncate">
           {selectedBlood ? (
             <>
-              <span className={TAG}>{selectedBlood.tagNm}</span>
+              <Badge>{selectedBlood.tagNm}</Badge>
               {selectedBlood.ab}
               <span className="text-subtle">{selectedBlood.kn}</span>
             </>

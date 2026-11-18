@@ -6,6 +6,13 @@ const TONES = {
   white: 'bg-white text-brand-600',
   ok: 'bg-tone-green-bg text-tone-green-fg before:size-1.5 before:rounded-full before:bg-current before:content-[""]',
   outline: 'bg-white text-ink-2 shadow-[inset_0_0_0_1px_var(--color-line)]',
+  muted: 'bg-surface-3 text-muted',
+  solid: 'bg-brand-500 text-white',
+  ink: 'bg-ink text-white',
+  blue: 'bg-tone-blue-bg text-tone-blue-fg',
+  green: 'bg-tone-green-bg text-tone-green-fg',
+  rose: 'bg-tone-rose-bg text-tone-rose-fg',
+  violet: 'bg-tone-violet-bg text-tone-violet-fg',
 };
 
 // 알약 모양 뱃지. 높이·여백·글자는 퍼블리싱 시안의 .badge와 같다(24px, 위 1.5px·옆 10px)

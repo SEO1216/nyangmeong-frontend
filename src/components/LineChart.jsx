@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import useElementWidth from './useElementWidth';
+import useElementWidth from '@/hooks/useElementWidth';
 
 /** 색은 시안 nyangmung-chart.css 값을 색 토큰으로 */
 const COLORS = {
@@ -57,20 +57,21 @@ const getCurvePath = (points, slopes) => {
 };
 
 /**
- * [곡선 선그래프]
- * - 시안 nyangmung-chart.js의 nmCurveChart와 같은 모양: 곡선 + 연한 그라데이션, 범위는 점선 + 왼쪽 눈금(최대·최소), 최근 값은 말풍선
- * - points: [{ label, value }] 2개 이상, band: [최소, 최대], goal: 목표, formatValue: 말풍선 값, formatTag: 범위 라벨 값
+ * [곡선 선그래프] 공용 선 그래프(UI 체크리스트 68, 건강 일지 차트가 기준)
+ * - 시안 nyangmung-chart.js의 곡선 차트와 같은 모양: 곡선 + 연한 그라데이션, 범위는 점선 + 왼쪽 눈금(최대·최소), 최근 값은 말풍선
+ * - points: [{ label, value }] 1개 이상(1개면 가운데 점 하나), band: [최소, 최대], goal: 목표, formatValue: 말풍선 값, formatTag: 범위 라벨 값
  * - bandLabelSide: 'left'(기본, 오른쪽 라벨 없이 왼쪽 눈금을 최대·최소로) / 'right'(오른쪽 최대·최소 라벨)
  * - activeIndex: 말풍선을 띄울 점(points의 순번). 없으면 마지막 점, null이면 말풍선 없이 점만
  * - isLeftColumn: 최대·목표·최소을 모두 왼쪽 한 열의 라벨로 두고 오른쪽 라벨은 없앤다(모바일 건강기록 변화). bandLabelSide보다 우선
  * - labelFill: 아래 날짜 글자 색. 기본은 subtle(지속 관찰 PC는 placeholder 토큰, 추가 요청)
  * - isEdgeToEdge: 범위·목표 라벨이 없는 그래프에서 좌우 라벨 자리를 비우지 않고 폭 전체를 씀(지속 관찰, 추가 요청)
+ * - labelEvery: 아래 날짜 글자 간격(마지막 점부터 n칸마다). 기본 1은 모든 점(점이 많은 관리자 일별 그래프용)
  */
 export default function LineChart({
   points,
   band,
   goal,
-  formatValue,
+  formatValue = String,
   formatTag = String,
   bandLabelSide = 'left',
   isLeftColumn = false,
@@ -79,6 +80,7 @@ export default function LineChart({
   ariaLabel,
   labelFill = COLORS.subtle,
   isEdgeToEdge = false,
+  labelEvery = 1,
 }) {
   const [ref, width] = useElementWidth();
 
@@ -99,6 +101,7 @@ export default function LineChart({
           ariaLabel={ariaLabel}
           labelFill={labelFill}
           isEdgeToEdge={isEdgeToEdge}
+          labelEvery={labelEvery}
         />
       )}
     </div>
@@ -125,6 +128,7 @@ function Chart({
   ariaLabel,
   labelFill,
   isEdgeToEdge,
+  labelEvery,
 }) {
   const gradientId = useId();
   const isBandLeft = bandLabelSide === 'left' || isLeftColumn;
@@ -168,7 +172,9 @@ function Chart({
   const max = maxRef + margin;
 
   const getX = (i) =>
-    left + pad + (i * (width - left - right - 2 * pad)) / (count - 1);
+    count === 1
+      ? (left + width - right) / 2
+      : left + pad + (i * (width - left - right - 2 * pad)) / (count - 1);
   const getY = (value) =>
     top + ((max - value) * (height - top - bottom)) / (max - min);
   const isOut = (value) => band != null && (value < band[0] || value > band[1]);
@@ -408,18 +414,20 @@ function Chart({
         </>
       )}
 
-      {points.map((point, i) => (
-        <text
-          key={point.label + i}
-          x={coords[i][0]}
-          y={height - 8}
-          textAnchor="middle"
-          fontSize="14"
-          fill={labelFill}
-        >
-          {point.label}
-        </text>
-      ))}
+      {points.map((point, i) =>
+        (count - 1 - i) % labelEvery !== 0 ? null : (
+          <text
+            key={point.label + i}
+            x={coords[i][0]}
+            y={height - 8}
+            textAnchor="middle"
+            fontSize="14"
+            fill={labelFill}
+          >
+            {point.label}
+          </text>
+        ),
+      )}
     </svg>
   );
 }

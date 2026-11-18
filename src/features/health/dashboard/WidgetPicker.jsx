@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import NoticeBox from '@/components/NoticeBox';
+import Badge from '@/components/Badge';
 import Icon from '@/components/Icon';
 import { CHIP, CHIP_ON } from '@/components/buttonStyles';
 import {
@@ -126,7 +128,7 @@ export default function WidgetPicker({
         </p>
       </div>
 
-      <p className="flex flex-wrap items-center gap-x-2 gap-y-2 rounded-[10px] bg-surface-2 px-3.5 py-3 text-muted max-[760px]:flex-col max-[760px]:items-stretch">
+      <NoticeBox className="flex flex-wrap items-center gap-2 max-[760px]:flex-col max-[760px]:items-stretch">
         <span className="flex min-w-0 flex-1 items-start gap-2 min-[760px]:contents">
           <Icon name="tips_and_updates" className="shrink-0 text-subtle" />
           <span className="min-w-0 flex-1 break-keep">
@@ -140,7 +142,7 @@ export default function WidgetPicker({
         >
           추천대로 고르기
         </button>
-      </p>
+      </NoticeBox>
 
       {WIDGET_GROUPS.map((group) => (
         <div key={group.name}>
@@ -210,13 +212,7 @@ function PreviewCard({
         <Icon name={icon} className="text-lg text-brand-500" />
         <span className="truncate">{name}</span>
       </span>
-      <span
-        className={`inline-flex h-6 items-center rounded-full px-2.5 text-xs font-semibold whitespace-nowrap ${
-          isNew ? 'bg-brand-500 text-white' : 'bg-surface-3 text-muted'
-        }`}
-      >
-        {status}
-      </span>
+      <Badge tone={isNew ? 'solid' : 'muted'}>{status}</Badge>
     </li>
   );
 }

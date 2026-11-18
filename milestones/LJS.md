@@ -1341,8 +1341,15 @@
 - 결과(2026-11-18): H1~H8 검증 1회차 통과, 사람 확인. 기획과 달라진 것: `BTN_SM`(checkupStyles) 없앰, 오늘 기록 항목 편집·튜토리얼 완료 칩도 `CHIP`, 반려동물 고르기 [등록] 타일 → "등록하기"
 - 연결 남음: 없음
 
+## SCR-COM-002 UI 통일 2-B · 건강기록(JAJ) 부품 교체 — 끝
+- 기능: (2 마일스톤의 두 번째 조각, 2026-11-18, 기준 `docs/ui-checklist.csv`) `features/health`·`pages/health`에서 직접 만든 UI를 공용 부품으로. 체크리스트 26(스켈레톤)·27(LoadError)·56(Badge)·58(공용 Modal 틀)·68(차트 한 벌, 건강 일지 차트를 공용으로)·69(UnderlineTabs)·71(폼 상수, 회원정보 모양)·72(FieldError)·73(Checkbox)·83(NoticeBox)
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 P1~P10 + 추가-1~6 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): P1~P10 검증 통과(1회차), 추가-1~6 재검증 통과(3회차), 사람 확인. 기획과 달라진 것: 추가-1(28px)·추가-2(py-4)는 추가-3(입력 모달 제목 22px·제목 줄 py-3)·추가-5(확인 창 제목 18px)로 바뀜, 추가-4 isLarge가 아닌 모달 본문 안쪽 스크롤, 추가-6 `ConfirmModal` `isDanger`(일정 삭제만). P10은 `SelectedPetProvider`에 `refetch`, P1은 `summaryUtils` `toneKey`·`ItemSelect`도 고침
+- 연결 남음: 없음
+
 ## SCR-COM-002 UI 통일 2 · 다른 담당 폴더 적용 — 대기
-- 남은 것(2026-11-18): 건강기록 부품 교체 조각(Badge·공용 Modal 틀·차트 한 벌·UnderlineTabs·FieldError·Checkbox·NoticeBox·스켈레톤·LoadError·폼 상수) + 아래 다른 도메인
+- 남은 것(2026-11-18): 건강기록은 2-A·2-B로 끝. 아래 다른 도메인(기준 `docs/ui-checklist.csv`), 회원 `profileStyles` → `components/formStyles`, 삭제 확인 창 `isDanger`
 - 기능: 같은 기준을 `features/health`(JAJ), `pet`·`point`·`expense`(SJM), `community`·`inquiry`·`notice`·`faq`·`news`(KSJ), `member`·`place`(YAY)에 적용. 도메인 하나씩 나눠 진행하고 PR 본문·팀 채널로 담당자에게 알린다. 체크리스트 6·12·15·16·18·26·27·31·37·56·58·62·66·68·69·71~74·76·79·80·83·84·94·96·98
 - 버그 후보(담당자에게 먼저 알림): 78 펫이야기 상세 내 글에도 신고 버튼(`community/PostDetail.jsx`, KSJ), 82 `ZONES` 순서 반대(`health/CareChipPicker.jsx`·`CareItemFields.jsx`, JAJ)
 - 이번엔 안 함: 기준 미정 18행(55·57·61·63·64·65·67·70·77·81·85·88~91), 메모 "변경없음"·"잠시 패스"·"정하지 않음" 행(8·17·19·21·25·30·35·75·86·97)

@@ -1,5 +1,5 @@
 import BarChart from '@/components/BarChart';
-import CurveChart from '@/components/CurveChart';
+import LineChart from '@/components/LineChart';
 import { formatDate } from '@/utils/formatDate';
 import DashboardPanel from './DashboardPanel';
 import DashboardTable from './DashboardTable';
@@ -48,10 +48,10 @@ function DailyChart({ title, daily, field, labels }) {
         <span className="font-semibold text-ink-2">{title}</span>
         <span className="tabular-nums">합계 {total.toLocaleString()}</span>
       </figcaption>
-      <CurveChart
-        values={values}
-        labels={labels}
-        label={`일별 ${title}`}
+      <LineChart
+        points={values.map((value, i) => ({ label: labels[i], value }))}
+        formatValue={(v) => v.toLocaleString()}
+        ariaLabel={`일별 ${title}`}
         labelEvery={getLabelEvery(values.length)}
       />
     </figure>
@@ -67,9 +67,9 @@ function GroupBarChart({ rows, nameKey, label }) {
   }
   return (
     <BarChart
-      values={rows.map(({ cnt }) => cnt)}
-      labels={rows.map((row) => row[nameKey])}
-      label={label}
+      points={rows.map((row) => ({ label: row[nameKey], value: row.cnt }))}
+      formatValue={(v) => v.toLocaleString()}
+      ariaLabel={label}
     />
   );
 }

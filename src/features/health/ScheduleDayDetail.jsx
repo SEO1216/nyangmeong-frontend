@@ -1,5 +1,6 @@
 import Badge from '@/components/Badge';
 import Card from '@/components/Card';
+import EmptyResult from '@/components/EmptyResult';
 import Icon from '@/components/Icon';
 import { BTN_PRIMARY } from '@/components/buttonStyles';
 import {
@@ -53,14 +54,16 @@ export default function ScheduleDayDetail({
       }
     >
       {sorted.length === 0 ? (
-        <div className="h-full rounded-[10px] border border-dashed border-line-strong">
-          <div className="flex h-full flex-col items-center justify-center gap-2 px-4 py-6 text-center">
-            <span className="grid size-10 place-items-center rounded-full bg-surface-2 text-subtle">
-              <Icon name="calendar_month" />
-            </span>
-            <p className="text-sm text-muted">등록된 일정이 없어요</p>
-          </div>
-        </div>
+        <EmptyResult
+          isCompact
+          icon={
+            <Icon
+              name="calendar_month"
+              className="text-[28px] text-line-strong"
+            />
+          }
+          title="등록된 일정이 없어요"
+        />
       ) : (
         <>
           <ul>

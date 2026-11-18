@@ -2,7 +2,8 @@ import { ArrowDown, ArrowUp } from 'lucide-react';
 import { useState } from 'react';
 import DropdownSelect from '@/components/DropdownSelect';
 import BarChart from '@/components/BarChart';
-import CurveChart from '@/components/CurveChart';
+import LineChart from '@/components/LineChart';
+import Badge from '@/components/Badge';
 import Icon from '@/components/Icon';
 import {
   diffDays,
@@ -74,7 +75,7 @@ function Delta({ label, delta, unit }) {
   return (
     <p className="flex items-center gap-2 text-sm">
       <span className="text-subtle">{label}</span>
-      <b className="inline-flex h-[26px] items-center gap-0.5 rounded-full bg-surface-2 px-2.5 font-semibold text-ink-2">
+      <Badge>
         {amount === 0 ? (
           '변화 없음'
         ) : (
@@ -85,7 +86,7 @@ function Delta({ label, delta, unit }) {
             {unit}
           </>
         )}
-      </b>
+      </Badge>
     </p>
   );
 }
@@ -146,15 +147,9 @@ function KeyValue({ label, value }) {
   );
 }
 
-function Chip({ className, children }) {
-  return (
-    <span
-      className={`inline-flex h-6 shrink-0 items-center rounded-full px-2.5 text-[13px] font-semibold whitespace-nowrap ${className}`}
-    >
-      {children}
-    </span>
-  );
-}
+/** 공용 차트 입력: 값·날짜 배열 → [{ label, value }] */
+const toPoints = (values, labels) =>
+  values.map((value, i) => ({ label: labels[i], value }));
 
 const weightBody = ({ indicators }) => {
   const weight = indicators?.weight;
@@ -182,11 +177,10 @@ const weightBody = ({ indicators }) => {
         </ValueRow>
         {values.length > 0 && (
           <div className="mt-auto pt-3">
-            <CurveChart
-              values={values}
-              labels={labels}
+            <LineChart
+              points={toPoints(values, labels)}
               formatValue={(v) => `${v}kg`}
-              label={`체중 꺾은선 그래프 · ${joinSeries(values, labels, 'kg')}`}
+              ariaLabel={`체중 꺾은선 그래프 · ${joinSeries(values, labels, 'kg')}`}
             />
           </div>
         )}
@@ -232,9 +226,9 @@ const dailySumBody =
           {values.length > 0 && (
             <div className="mt-auto pt-3">
               <BarChart
-                values={values}
-                labels={labels}
-                label={`${chartName} 일 합계 막대그래프 · ${joinSeries(values, labels, unit)} · 점선은 평균`}
+                points={toPoints(values, labels)}
+                formatValue={(v) => `${v}${unit}`}
+                ariaLabel={`${chartName} 일 합계 막대그래프 · ${joinSeries(values, labels, unit)} · 점선은 평균`}
               />
               <Note>점선은 평균</Note>
             </div>
@@ -290,12 +284,12 @@ function InspectionTrend({ trends, initialInspection }) {
       </ValueRow>
       {values.length >= 2 && (
         <div className="mt-auto pt-3">
-          <CurveChart
+          <LineChart
             key={trend.inspNm}
-            values={values}
-            labels={labels}
+            points={toPoints(values, labels)}
             band={band}
-            label={`${trend.inspNm} 수치 꺾은선 그래프 · ${joinSeries(values, labels, '')} ${unitNm}`}
+            formatValue={(v) => `${v}${unitNm}`}
+            ariaLabel={`${trend.inspNm} 수치 꺾은선 그래프 · ${joinSeries(values, labels, '')} ${unitNm}`}
           />
           {band && (
             <Note>
@@ -367,9 +361,7 @@ function AttachmentRows({ petSn, attachments }) {
                 className="flex min-w-0 flex-1 items-center gap-2 text-left hover:text-brand-600"
                 onClick={() => handleOpen(attachment)}
               >
-                <Chip className="bg-surface-3 text-muted">
-                  {isImage ? 'IMG' : 'PDF'}
-                </Chip>
+                <Badge tone="muted">{isImage ? 'IMG' : 'PDF'}</Badge>
                 <b className="min-w-0 truncate font-semibold">
                   {attachment.orgnlFileNm}
                 </b>
@@ -468,7 +460,9 @@ const checkupBody = ({ checkups }) => {
               <b className="shrink-0 font-semibold text-ink tabular-nums">
                 {formatDate(checkup.ckupYmd)}
               </b>
-              <Chip className={type.tone.chip}>{type.nm}</Chip>
+              <Badge tone={type.toneKey} className="shrink-0">
+                {type.nm}
+              </Badge>
               <span className="min-w-0 truncate text-muted">{detail}</span>
             </Row>
           );
@@ -498,15 +492,9 @@ const prescriptionBody = ({ summary }) => {
           const isDosing = prescription.prscSttsCd === DOSING;
           return (
             <Row key={prescription.prscSn}>
-              <Chip
-                className={
-                  isDosing
-                    ? 'bg-brand-50 text-brand-600'
-                    : 'bg-surface-3 text-muted'
-                }
-              >
+              <Badge tone={isDosing ? 'brand' : 'muted'} className="shrink-0">
                 {isDosing ? '복용 중' : '복용 종료'}
-              </Chip>
+              </Badge>
               <b className="min-w-0 truncate font-semibold text-ink">
                 {prescription.mdcnNm}
               </b>

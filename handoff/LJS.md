@@ -2,13 +2,16 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 UI 통일 2-A · 건강기록(JAJ) 값·문구·칩 정리 (2026-11-18, 검증 1회차 통과, 사람 확인). `features/health`·`pages/health`의 직접 hex 173곳 → 토큰, 단계 밖 글자 크기, 분기점 640·761·901·1101 → 760·1100(JS 조건 3곳 포함, 640~759px는 모바일 배치로), 섹션 제목 행간, 4px 간격, 버튼 `h-8!` 덮어쓰기 제거·공용 버튼, 칩 `CHIP`·`FILTER_CHIP`, 버튼 문구 등록하기·저장하기·삭제하기
+끝남: SCR-COM-002 UI 통일 2-B · 건강기록(JAJ) 부품 교체 (2026-11-18, 검증 통과·추가-1~6 포함, 사람 확인). 기준 `docs/ui-checklist.csv` 행 26·27·56·58·68·69·71·72·73·83. 뱃지 `Badge`, 입력 모달 공용 `Modal`, 건강 일지 차트를 공용 `BarChart`·`LineChart`로(옛 `CurveChart` 삭제, 관리자 통계 포함), 밑줄 탭 `UnderlineTabs`, 폼 상수 `components/formStyles.js`(회원정보 모양), `FieldError`·`Required`, `Checkbox`, `NoticeBox`, 로딩 뼈대, `LoadError`·`EmptyResult`. 추가: 입력 모달 제목 22px·제목 줄 py-3, 확인 창 제목 18px, 모달 본문 안쪽 스크롤, `ConfirmModal` `isDanger`(일정 삭제)
 
 ## 다음에 할 것
 
 ### SCR-COM-002 UI 통일 다음 단계(사람 결정 2026-11-18)
 
-- 다음 /start: `UI 통일 2 · 다른 담당 폴더 적용`의 다음 조각. 건강기록 부품 교체(Badge 56·모달 틀 58·차트 68·탭 69·폼 상수 71·FieldError 72·Checkbox 73·NoticeBox 83·스켈레톤 26·LoadError 27)부터, 그다음 SJM·KSJ·YAY 도메인
+- 다음 /start: `UI 통일 2 · 다른 담당 폴더 적용`의 다음 조각(SJM·KSJ·YAY 도메인 하나씩). 기준은 `docs/ui-checklist.csv`의 "결정된 기준"만. 회원 `profileStyles.js`는 `components/formStyles.js`로, 다른 도메인 삭제 확인 창 9개 파일(AI 대화 삭제·커뮤니티 글·댓글·문의·관리자 라우팅 등)은 `ConfirmModal isDanger`로
+- 2-B 팀 알림(PR 본문 + 팀 채널): ① 전체: 공용 `Modal` 입력 모달 제목 22px·제목 줄 위아래 12px, 확인 창 제목 18px, isLarge가 아닌 모달은 본문만 안쪽 스크롤(제목 줄·푸터 고정) ② 전체: 공용 차트가 건강 일지 차트로 바뀜(`components/BarChart` props `points`·`formatValue`·`ariaLabel`, `CurveChart` → `LineChart`), 새 `components/formStyles.js`(INPUT·LABEL·TEXTAREA·HELP), `UnderlineTabs` `isLineHidden`·`isScrollable`, `Checkbox` `ariaLabel`, `NoticeBox` `role`, `EmptyResult` `isCompact`, `ConfirmModal` `isDanger`(삭제 등은 빨간 확인 버튼), `Badge` 톤 7개 추가 ③ JAJ: 지운 파일 `diary/BarChart`·`LineChart`·`useElementWidth`·`DiaryTabs`·`FieldError`·`formStyles`·`EmptyBox`, `checkupStyles` `TAG`, 입력 모달 머리 아이콘 없어짐, 760 이하 입력 모달은 화면 전체 ④ `docs/ui-checklist.csv`가 UI 통일 기준
+- 2-B 사람이 정할 것: 모달 제목 22px는 체크리스트 글자 단계(12·13·14·15·16·18·24·28px) 밖이라 단계에 넣을지 팀이 정한다
+- 2-B 참고(검증 보고, 판정 밖): `/health` 체중 위젯 차트 위 빈 공간이 큼. `/admin` 막대 그래프는 최소 상한 60이라 값 0~2면 막대가 거의 안 보임(옛 차트도 같음). 일정 모달 입력칸은 `aria-invalid`가 없어 서버 오류 때 빨간 테두리가 안 생김
 - 2-A 팀 알림(PR 본문 + 팀 채널, JAJ): ① 건강기록 640~759px 폭이 모바일 배치로 바뀜(`sm:`·`lg:` → 760·1100) ② 칩이 공용 `CHIP`·`FILTER_CHIP`, 작은 버튼이 높이 40px ③ 버튼 문구 등록하기·저장하기·삭제하기 ④ 버그 후보 82 `ZONES` 순서는 그대로 둠
 - 2-A 사람이 정할 것(검증 보고, 판정 밖): 줄 안 글자형 [삭제] 6곳(`diary/CheckupListCard`·`DayRecordEditModal`, `checkup/PrescriptionForm`·`AttachmentTab`·`EtcResultList`, ⋮ 메뉴 `CareItemMenu`)은 "삭제" 그대로. 확인 창 버튼은 "삭제하기". 규칙에 넣을지 정한다
 - 2-A 참고(판정 밖): `ui.md` "로딩 표시" 예시 코드에 옛 분기점 `min-[1101px]`이 남음. 콘솔의 `GET /api/pets/1/character-image?part=face` 404는 `PetFace` 데이터 문제(/main에서도 남)

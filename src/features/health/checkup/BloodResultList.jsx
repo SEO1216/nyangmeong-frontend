@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { Link, generatePath, useNavigate } from 'react-router-dom';
+import NoticeBox from '@/components/NoticeBox';
+import Badge from '@/components/Badge';
+import Checkbox from '@/components/Checkbox';
 import Icon from '@/components/Icon';
 import Modal from '@/components/Modal';
 import { BTN_DANGER, BTN_SECONDARY } from '@/components/buttonStyles';
@@ -8,7 +11,7 @@ import { formatDate } from '@/utils/formatDate';
 import { round2 } from '../numberFormat';
 import { useDeleteInspections } from '../queries';
 import BloodResultForm from './BloodResultForm';
-import { ADD_ROW, ROW_LINE, TAG, TAG_STRONG, TEXT_BTN } from './checkupStyles';
+import { ADD_ROW, ROW_LINE, TEXT_BTN } from './checkupStyles';
 import { findBloodItem } from '../labInput/bloodItems';
 import { FUNCTION_TAGS, findName, getInspectionName } from './checkupTypes';
 
@@ -95,28 +98,26 @@ export default function BloodResultList({ checkup, items }) {
             className="mb-3 flex flex-wrap gap-2"
           >
             {tagCounts.map((tag) => (
-              <span key={tag.cd} className={TAG}>
+              <Badge key={tag.cd}>
                 {tag.nm} {tag.count}
-              </span>
+              </Badge>
             ))}
           </div>
 
           <div className="flex items-center gap-3 border-b border-line py-2">
-            <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-md border border-input-line bg-white px-3">
-              <input
-                type="checkbox"
-                checked={isAllSelected}
-                className="size-4 accent-brand-500"
-                onChange={(event) =>
-                  setSelectedSns(
-                    event.target.checked
-                      ? items.map((item) => item.inspNvlSn)
-                      : [],
-                  )
-                }
-              />
+            <Checkbox
+              checked={isAllSelected}
+              className="h-10 rounded-md border border-input-line bg-white px-3"
+              onChange={(event) =>
+                setSelectedSns(
+                  event.target.checked
+                    ? items.map((item) => item.inspNvlSn)
+                    : [],
+                )
+              }
+            >
               전체 선택
-            </label>
+            </Checkbox>
             <button
               type="button"
               disabled={selectedSns.length === 0}
@@ -138,24 +139,21 @@ export default function BloodResultList({ checkup, items }) {
                   className={`flex cursor-pointer items-center gap-3 py-3 hover:bg-surface-2 ${ROW_LINE}`}
                   onClick={() => goEdit(item)}
                 >
-                  <label
-                    className="inline-flex h-10 cursor-pointer items-center rounded-md border border-input-line bg-white px-3"
-                    onClick={(event) => event.stopPropagation()}
-                  >
-                    <input
-                      type="checkbox"
-                      aria-label={`${getInspectionName(item)} 선택`}
+                  <span onClick={(event) => event.stopPropagation()}>
+                    <Checkbox
+                      ariaLabel={`${getInspectionName(item)} 선택`}
                       checked={selectedSns.includes(item.inspNvlSn)}
-                      className="size-4 accent-brand-500"
+                      className="h-10 rounded-md border border-input-line bg-white px-3"
                       onChange={() => toggleItem(item.inspNvlSn)}
                     />
-                  </label>
+                  </span>
                   {getFunctionTag(item) && (
-                    <span
-                      className={`${TAG} min-w-12 justify-center ${direction ? TAG_STRONG : ''}`}
+                    <Badge
+                      tone={direction ? 'ink' : 'gray'}
+                      className="min-w-12 justify-center"
                     >
                       {findName(FUNCTION_TAGS, getFunctionTag(item))}
-                    </span>
+                    </Badge>
                   )}
                   <span className="min-w-0 flex-1">
                     <Link
@@ -233,10 +231,10 @@ export default function BloodResultList({ checkup, items }) {
           onClose={() => setIsFormOpen(false)}
         />
       )}
-      <p className="mt-3 flex gap-2.5 rounded-[10px] bg-surface-2 px-3.5 py-3 text-muted">
-        <Icon name="info" className="mt-0.5 text-lg text-subtle" />
+      <NoticeBox className="mt-3 flex gap-2.5">
+        <Icon name="info" className="text-lg text-subtle" />
         <span>PDF로 받은 결과지는 첨부 자료 탭에서 [PDF 분석]</span>
-      </p>
+      </NoticeBox>
 
       {isConfirmOpen && (
         <Modal

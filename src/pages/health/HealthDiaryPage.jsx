@@ -5,6 +5,7 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom';
+import LoadError from '@/components/LoadError';
 import PageSkeleton from '@/components/PageSkeleton';
 import SkeletonCard from '@/components/SkeletonCard';
 import { useChatReceiptResult } from '@/features/ai/queries';
@@ -186,6 +187,7 @@ function HealthDiaryContent({ mbrSn }) {
     pet: selectedPet,
     isPending: isPetsPending,
     isError: isPetsError,
+    refetch: refetchPets,
   } = useSelectedPet();
   const selectedPetSn = selectedPet?.petSn ?? null;
   /** 반려동물을 바꾸면 다른 반려동물의 관찰 항목 번호가 주소에 남지 않게 삭제 */
@@ -230,9 +232,10 @@ function HealthDiaryContent({ mbrSn }) {
   if (isPetsError) {
     return (
       <HealthLayout petNm={selectedPet?.petNm}>
-        <p role="alert" className="text-muted">
-          반려동물 정보를 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요
-        </p>
+        <LoadError
+          message="반려동물 정보를 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요"
+          onRetry={() => refetchPets()}
+        />
       </HealthLayout>
     );
   }

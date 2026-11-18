@@ -6,7 +6,7 @@ import useMediaQuery from '@/hooks/useMediaQuery';
 import { formatDate, getYmdOf } from '@/utils/formatDate';
 import { RECORD_TYPES, STOOL, WEIGHT } from '../diaryTypes';
 import DayRecordEditModal from './DayRecordEditModal';
-import EmptyBox from './EmptyBox';
+import EmptyResult from '@/components/EmptyResult';
 import {
   formatAmount,
   formatRecordValue,
@@ -79,8 +79,11 @@ export default function RecentRecordTable({
       }
     >
       {ymds.length === 0 ? (
-        <EmptyBox
-          icon="edit_note"
+        <EmptyResult
+          isCompact
+          icon={
+            <Icon name="edit_note" className="text-[28px] text-line-strong" />
+          }
           title={`최근 ${periodDays}일 동안 기록이 없어요`}
           description="위의 [오늘 기록 추가]로 첫 기록을 남겨 보세요"
         />

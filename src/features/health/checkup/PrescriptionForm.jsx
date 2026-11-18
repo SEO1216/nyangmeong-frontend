@@ -9,8 +9,8 @@ import {
   BTN_SECONDARY,
 } from '@/components/buttonStyles';
 import CareShortageNotice from '../CareShortageNotice';
-import FieldError from '../diary/FieldError';
-import { INPUT_CLASS, LABEL_CLASS } from '../diary/formStyles';
+import FieldError, { Required } from '@/components/FieldError';
+import { INPUT, LABEL } from '@/components/formStyles';
 import CharCount from '../shared/CharCount';
 import {
   useCreatePrescription,
@@ -22,7 +22,7 @@ import { DOSE_STATUSES, DOSING } from './checkupTypes';
 
 const MAX_MEDICINE_NAME_LENGTH = 40;
 
-const REQUIRED = <span className="ml-0.5 font-bold text-danger">*</span>;
+const REQUIRED = <Required />;
 
 /**
  * [처방약 입력 영역]
@@ -109,12 +109,12 @@ export default function PrescriptionForm({
       onSubmit={handleSubmit}
     >
       <label className="flex flex-col gap-1.5">
-        <span className={LABEL_CLASS}>약품명{REQUIRED}</span>
+        <span className={LABEL}>약품명{REQUIRED}</span>
         <input
           value={medNm}
           maxLength={MAX_MEDICINE_NAME_LENGTH}
           aria-invalid={isInvalid('name')}
-          className={INPUT_CLASS}
+          className={INPUT}
           onChange={(event) => setMedNm(event.target.value)}
         />
         <CharCount value={medNm} max={MAX_MEDICINE_NAME_LENGTH} />
@@ -123,7 +123,7 @@ export default function PrescriptionForm({
 
       <div className="grid gap-x-8 gap-y-5 min-[760px]:grid-cols-2">
         <label className="flex flex-col gap-1.5">
-          <span className={LABEL_CLASS}>복용 시작일{REQUIRED}</span>
+          <span className={LABEL}>복용 시작일{REQUIRED}</span>
           <DatePicker
             value={dosBgnYmd}
             invalid={isInvalid('begin')}
@@ -134,7 +134,7 @@ export default function PrescriptionForm({
           )}
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className={LABEL_CLASS}>복용 종료일{REQUIRED}</span>
+          <span className={LABEL}>복용 종료일{REQUIRED}</span>
           <DatePicker
             value={dosEndYmd}
             min={dosBgnYmd || undefined}
@@ -152,14 +152,14 @@ export default function PrescriptionForm({
 
       <div className="grid gap-x-8 gap-y-5 min-[760px]:grid-cols-2">
         <label className="flex flex-col gap-1.5">
-          <span className={LABEL_CLASS}>1일 복용 횟수{REQUIRED}</span>
+          <span className={LABEL}>1일 복용 횟수{REQUIRED}</span>
           <span className="relative">
             <input
               type="number"
               min="1"
               value={dayDosCnt}
               aria-invalid={isInvalid('count')}
-              className={`${INPUT_CLASS} pr-11 tabular-nums`}
+              className={`${INPUT} pr-11 tabular-nums`}
               onChange={(event) => setDayDosCnt(event.target.value)}
             />
             <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-subtle">
@@ -171,7 +171,7 @@ export default function PrescriptionForm({
           )}
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className={LABEL_CLASS}>복용 상태{REQUIRED}</span>
+          <span className={LABEL}>복용 상태{REQUIRED}</span>
           <DropdownSelect
             value={dosSttsCd}
             options={DOSE_STATUSES.map((status) => ({
@@ -184,7 +184,7 @@ export default function PrescriptionForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <span className={LABEL_CLASS}>주기 체크</span>
+        <span className={LABEL}>주기 체크</span>
         <span className="flex items-center gap-2.5">
           <Toggle
             checked={cycleChckYn}

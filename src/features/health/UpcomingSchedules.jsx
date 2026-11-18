@@ -1,4 +1,5 @@
 import Card from '@/components/Card';
+import EmptyResult from '@/components/EmptyResult';
 import Icon from '@/components/Icon';
 import {
   WEEKDAYS,
@@ -41,14 +42,16 @@ export default function UpcomingSchedules({
       bodyClassName={bodyClassName}
     >
       {upcoming.length === 0 ? (
-        <div className="rounded-[10px] border border-dashed border-line-strong">
-          <div className="flex flex-col items-center gap-2 px-4 py-6 text-center">
-            <span className="grid size-10 place-items-center rounded-full bg-surface-2 text-subtle">
-              <Icon name="event_upcoming" />
-            </span>
-            <p className="text-sm text-muted">다가오는 일정이 없어요</p>
-          </div>
-        </div>
+        <EmptyResult
+          isCompact
+          icon={
+            <Icon
+              name="event_upcoming"
+              className="text-[28px] text-line-strong"
+            />
+          }
+          title="다가오는 일정이 없어요"
+        />
       ) : (
         <ul>
           {upcoming.map((schedule) => (

@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import LoadError from '@/components/LoadError';
+import Skeleton from '@/components/Skeleton';
 import Card from '@/components/Card';
 import {
   BTN_SECONDARY,
@@ -18,10 +20,11 @@ import {
 import { DAILY_ITEMS, keepWidgetOrder } from '../dashboard/widgetItems';
 import { useDailyTrend, usePetDetail } from '../queries';
 import { round2 } from '../numberFormat';
-import BarChart from './BarChart';
+import BarChart from '@/components/BarChart';
 import CountBars from './CountBars';
-import EmptyBox from './EmptyBox';
-import LineChart from './LineChart';
+import EmptyResult from '@/components/EmptyResult';
+import Icon from '@/components/Icon';
+import LineChart from '@/components/LineChart';
 import {
   RECENT_RECORD_COUNT,
   formatAmount,
@@ -140,11 +143,13 @@ export default function DailyTrendCard({
 
 function TrendBody({ pet, goalBdwg, trend, type, isPc, onAddRecord }) {
   const emptyBox = (
-    <EmptyBox
-      icon="monitoring"
+    <EmptyResult
+      isCompact
+      icon={<Icon name="monitoring" className="text-[28px] text-line-strong" />}
       title={`아직 ${type.nm} 기록이 없어요`}
       description="오늘 기록을 남기면 변화가 그래프로 보여요"
-      action={
+    >
+      {
         <button
           type="button"
           className={`${BTN_SECONDARY} mt-2`}
@@ -153,21 +158,22 @@ function TrendBody({ pet, goalBdwg, trend, type, isPc, onAddRecord }) {
           오늘 기록 추가
         </button>
       }
-    />
+    </EmptyResult>
   );
 
   if (trend.isPending) {
     return (
-      <p className="py-16 text-center text-sm text-muted" aria-busy="true">
-        기록을 불러오는 중이에요
-      </p>
+      <div aria-busy="true">
+        <Skeleton className="h-[260px] max-[600px]:h-[220px]" />
+      </div>
     );
   }
   if (trend.isError) {
     return (
-      <p role="alert" className="py-16 text-center text-sm text-muted">
-        기록을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요
-      </p>
+      <LoadError
+        message="기록을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요"
+        onRetry={() => trend.refetch()}
+      />
     );
   }
   const records = trend.data;

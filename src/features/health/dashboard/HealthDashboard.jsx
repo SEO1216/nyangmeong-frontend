@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import LoadError from '@/components/LoadError';
 import { showToast } from '@/components/toastStore';
 import Skeleton from '@/components/Skeleton';
 import SkeletonCard from '@/components/SkeletonCard';
@@ -137,9 +138,10 @@ export default function HealthDashboard({
       </div>
 
       {widgets.isError ? (
-        <p role="alert" className="text-muted">
-          기록 항목을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요
-        </p>
+        <LoadError
+          message="기록 항목을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요"
+          onRetry={() => widgets.refetch()}
+        />
       ) : (
         <div className={GRID_CLASS}>
           <AiReportCard key={pet.petSn} pet={pet} />

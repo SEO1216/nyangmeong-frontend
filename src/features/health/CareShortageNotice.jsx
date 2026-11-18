@@ -1,16 +1,18 @@
 import { TriangleAlert } from 'lucide-react';
+import NoticeBox from '@/components/NoticeBox';
 import { MIN_CARE_COUNT } from './careDue';
 import { useCareItems } from './queries';
 
-/** 주의 상자: 가계부 일괄 삭제 확인창과 같은 모양 */
+/** 주의 상자: 공용 NoticeBox(warn)에 경고 아이콘 */
 export function CareWarnBox({ className = '', children }) {
   return (
-    <p
-      className={`flex items-start gap-2 rounded-box border border-warn-line bg-warn-soft px-4 py-3 text-left text-sm text-warn ${className}`}
+    <NoticeBox
+      tone="warn"
+      className={`flex items-start gap-2 text-left ${className}`}
     >
-      <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+      <TriangleAlert className="mt-1 size-4 shrink-0" aria-hidden="true" />
       <span className="break-keep">{children}</span>
-    </p>
+    </NoticeBox>
   );
 }
 
