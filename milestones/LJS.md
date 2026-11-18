@@ -1355,8 +1355,15 @@
 - 결과(2026-11-18): C1~C10 검증 1회차 통과, 사람 확인. 기획과 달라진 것: `ExpenseDashboard` `lg:` → `min-[1100px]:`(C3 grep), 전체 선택(`ExpenseHistory`)도 `Checkbox`로 바꾸며 일부 선택 − 표시 없앰(사람 결정)
 - 연결 남음: 없음
 
+## SCR-COM-002 UI 통일 2-D · 반려동물(SJM) 값·부품 정리 — 끝
+- 기능: (2 마일스톤의 네 번째 조각, 2026-11-18, 기준 `docs/ui-checklist.csv`) `features/pet`·`pages/mypage/PetListPage`·`CharacterPage`·`InvitationPage`에 체크리스트 2·6·11·15·27·29·31·37·42·56·62·69·71·72·73·83·93·98 적용
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 D1~D10 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): D1~D10 검증 2회차 통과(1회차 실패: 390px에서 전환 점 11개 × 44px가 화면을 넘음 → 760 미만은 폭을 나눠 최대 44), 사람 확인. 기획과 달라진 것: `PetSlide`·`SentInvitations` 안 배지 복사본도 공용 `Badge`로, `PetFormModal` 라디오 직접 색 2개도 토큰으로, 확인 창 문구 "해제하기"·"거절하기"(사람 결정)
+- 연결 남음: 없음
+
 ## SCR-COM-002 UI 통일 2 · 다른 담당 폴더 적용 — 대기
-- 남은 것(2026-11-18): 건강기록은 2-A·2-B, 가계부는 2-C로 끝. 아래 다른 도메인(기준 `docs/ui-checklist.csv`), 회원 `profileStyles` → `components/formStyles`, 삭제 확인 창 `isDanger`
+- 남은 것(2026-11-18): 건강기록은 2-A·2-B, 가계부는 2-C, 반려동물(`pet`)은 2-D로 끝. 아래 다른 도메인(기준 `docs/ui-checklist.csv`), 회원 `profileStyles` → `components/formStyles`, 삭제 확인 창 `isDanger`
 - 기능: 같은 기준을 `features/health`(JAJ), `pet`·`point`·`expense`(SJM), `community`·`inquiry`·`notice`·`faq`·`news`(KSJ), `member`·`place`(YAY)에 적용. 도메인 하나씩 나눠 진행하고 PR 본문·팀 채널로 담당자에게 알린다. 체크리스트 6·12·15·16·18·26·27·31·37·56·58·62·66·68·69·71~74·76·79·80·83·84·94·96·98
 - 버그 후보(담당자에게 먼저 알림): 78 펫이야기 상세 내 글에도 신고 버튼(`community/PostDetail.jsx`, KSJ), 82 `ZONES` 순서 반대(`health/CareChipPicker.jsx`·`CareItemFields.jsx`, JAJ)
 - 이번엔 안 함: 기준 미정 18행(55·57·61·63·64·65·67·70·77·81·85·88~91), 메모 "변경없음"·"잠시 패스"·"정하지 않음" 행(8·17·19·21·25·30·35·75·86·97)

@@ -1,5 +1,6 @@
 import { PawPrint } from 'lucide-react';
 import Skeleton from '@/components/Skeleton';
+import { BTN_PRIMARY } from '@/components/buttonStyles';
 
 export default function PetEmpty({ onRegister, limit }) {
   return (
@@ -17,7 +18,7 @@ export default function PetEmpty({ onRegister, limit }) {
         <button
           type="button"
           onClick={onRegister}
-          className="mt-3 inline-flex h-10 items-center justify-center rounded-md bg-brand-500 px-4 font-semibold text-white hover:bg-brand-600"
+          className={`mt-3 ${BTN_PRIMARY}`}
         >
           반려동물 등록하기
         </button>

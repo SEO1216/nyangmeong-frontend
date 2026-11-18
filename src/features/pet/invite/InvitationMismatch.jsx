@@ -32,7 +32,7 @@ export default function InvitationMismatch({
           지금 계정으로 받으려면 초대한 분께 다시 초대를 요청해 주세요.
         </p>
       </div>
-      <div className="flex items-center justify-end gap-2 border-t border-line bg-[#fbfcfd] px-7 py-4 max-[760px]:flex-col-reverse max-[760px]:items-stretch max-[760px]:px-5">
+      <div className="flex items-center justify-end gap-2 border-t border-line bg-white px-7 py-4 max-[760px]:flex-col-reverse max-[760px]:items-stretch max-[760px]:px-5">
         <Link
           to={PATHS.MYPAGE}
           className={`${BTN_SECONDARY} max-[760px]:h-11 max-[760px]:w-full`}
