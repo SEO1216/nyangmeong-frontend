@@ -1,5 +1,6 @@
 import { FileX } from 'lucide-react';
 import { Link, useLocation, useParams } from 'react-router-dom';
+import { BTN_SECONDARY } from '@/components/buttonStyles';
 import EmptyResult from '@/components/EmptyResult';
 import NewsDetail from '@/features/news/NewsDetail';
 import { useNews } from '@/features/news/queries';
@@ -38,10 +39,7 @@ export default function NewsDetailPage() {
           title="뉴스를 찾지 못했어요"
           description="삭제되었거나 주소가 잘못되었을 수 있어요"
         >
-          <Link
-            to={PATHS.COMMUNITY_NEWS}
-            className="inline-flex h-9 items-center rounded-md border border-line bg-white px-3 text-sm font-medium text-ink hover:bg-surface-2"
-          >
+          <Link to={PATHS.COMMUNITY_NEWS} className={BTN_SECONDARY}>
             펫뉴스 목록으로
           </Link>
         </EmptyResult>

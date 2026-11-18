@@ -1,5 +1,6 @@
 import { FileX } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
+import { BTN_SECONDARY } from '@/components/buttonStyles';
 import EmptyResult from '@/components/EmptyResult';
 import PageSkeleton from '@/components/PageSkeleton';
 import SkeletonCard from '@/components/SkeletonCard';
@@ -26,10 +27,7 @@ export default function InquiryDetailPage() {
           icon={<FileX size={32} aria-hidden="true" />}
           title={error.message}
         >
-          <Link
-            to={PATHS.INQUIRIES}
-            className="inline-flex h-9 items-center rounded-md border border-line bg-white px-3 text-sm font-medium text-ink hover:bg-surface-2"
-          >
+          <Link to={PATHS.INQUIRIES} className={BTN_SECONDARY}>
             1:1 문의 목록으로
           </Link>
         </EmptyResult>

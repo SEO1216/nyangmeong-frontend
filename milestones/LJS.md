@@ -1369,8 +1369,15 @@
 - 결과(2026-11-18): E1~E8 검증 1회차 통과(E9는 확인만), 사람 확인. 기획과 달라진 것: 요약 3칸 경계 클래스 정리(모양 같음), 미완료 배지 바탕 `bg-tone-gray-bg` → 공용 회색 `bg-surface-2`
 - 연결 남음: 없음
 
+## SCR-COM-002 UI 통일 2-F · 고객센터·펫뉴스(KSJ) 값·부품 정리 — 끝
+- 기능: (2 마일스톤의 여섯 번째 조각, 2026-11-18, 기준 `docs/ui-checklist.csv`) `features`·`pages`의 `inquiry`·`notice`·`faq`·`news`에 체크리스트 2·9·11·12·13·15·16·27·29·56·62·69·71·72·74·76·93·98 적용
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 F1~F10 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): F1~F9 검증 2회차 통과(1회차: F7 문의 유형 칸 빨간 테두리, F8 수정 화면 `LoadError`), F10 확인만, 사람 확인. 기획과 달라진 것: 탭 패널 id가 고른 탭 id(공용 `UnderlineTabs` 방식), FAQ 검색창 아래 여백 16 → 4, 공지 고정 배지도 `Badge`, 문의 상세 [1:1 문의 목록으로]도 `BTN_SECONDARY`
+- 연결 남음: 없음
+
 ## SCR-COM-002 UI 통일 2 · 다른 담당 폴더 적용 — 대기
-- 남은 것(2026-11-18): 건강기록은 2-A·2-B, 가계부는 2-C, 반려동물(`pet`)은 2-D, 포인트(`point`)는 2-E로 끝. 아래 다른 도메인(기준 `docs/ui-checklist.csv`), 회원 `profileStyles` → `components/formStyles`, 삭제 확인 창 `isDanger`
+- 남은 것(2026-11-18): 건강기록은 2-A·2-B, 가계부는 2-C, 반려동물(`pet`)은 2-D, 포인트(`point`)는 2-E, 고객센터·펫뉴스(`inquiry`·`notice`·`faq`·`news`)는 2-F로 끝. 남은 도메인 KSJ `community`, YAY `member`·`place`. 아래 다른 도메인(기준 `docs/ui-checklist.csv`), 회원 `profileStyles` → `components/formStyles`, 삭제 확인 창 `isDanger`
 - 기능: 같은 기준을 `features/health`(JAJ), `pet`·`point`·`expense`(SJM), `community`·`inquiry`·`notice`·`faq`·`news`(KSJ), `member`·`place`(YAY)에 적용. 도메인 하나씩 나눠 진행하고 PR 본문·팀 채널로 담당자에게 알린다. 체크리스트 6·12·15·16·18·26·27·31·37·56·58·62·66·68·69·71~74·76·79·80·83·84·94·96·98
 - 버그 후보(담당자에게 먼저 알림): 78 펫이야기 상세 내 글에도 신고 버튼(`community/PostDetail.jsx`, KSJ), 82 `ZONES` 순서 반대(`health/CareChipPicker.jsx`·`CareItemFields.jsx`, JAJ)
 - 이번엔 안 함: 기준 미정 18행(55·57·61·63·64·65·67·70·77·81·85·88~91), 메모 "변경없음"·"잠시 패스"·"정하지 않음" 행(8·17·19·21·25·30·35·75·86·97)

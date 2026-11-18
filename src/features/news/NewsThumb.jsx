@@ -20,7 +20,7 @@ export default function NewsThumb({
       className={
         natural
           ? 'mx-auto block h-auto max-w-full rounded-[14px]'
-          : `overflow-hidden rounded-[10px] bg-[#f4f6f6] object-cover ${className}`
+          : `overflow-hidden rounded-[10px] bg-surface-2 object-cover ${className}`
       }
     />
   );
