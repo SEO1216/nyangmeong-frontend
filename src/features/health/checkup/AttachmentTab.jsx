@@ -18,7 +18,6 @@ import AttachmentForm from './AttachmentForm';
 import { getFileError } from './attachmentUtils';
 import {
   ADD_ROW,
-  BTN_SM,
   ROW_LINE,
   TAG,
   TEXT_BTN,
@@ -172,7 +171,7 @@ export default function AttachmentTab({
             action={
               <button
                 type="button"
-                className={`${BTN_SECONDARY} ${BTN_SM}`}
+                className={`${BTN_SECONDARY}`}
                 onClick={() => setIsAddOpen(true)}
               >
                 ＋ 첨부 추가
@@ -209,7 +208,7 @@ export default function AttachmentTab({
                     {findName(IMAGING_PARTS, attachment.shtRegnCd)}
                   </span>
                 )}
-                <span className="flex items-center gap-3 max-sm:w-full sm:ml-auto">
+                <span className="flex items-center gap-3 max-[760px]:w-full min-[760px]:ml-auto">
                   {isLabPdf(attachment) && (
                     <button
                       type="button"

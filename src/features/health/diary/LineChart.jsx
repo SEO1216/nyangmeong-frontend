@@ -1,19 +1,19 @@
 import { useId } from 'react';
 import useElementWidth from './useElementWidth';
 
-/** 색은 시안 nyangmung-chart.css 값 */
+/** 색은 시안 nyangmung-chart.css 값을 색 토큰으로 */
 const COLORS = {
-  brand: '#285a5c',
-  brandInk: '#1e4a4c',
-  brandLine: '#cde0e0',
-  ok: '#2f6f57',
-  danger: '#b4473a',
-  area: '#d9e8de',
-  range: '#9fc9b0',
-  lineSoft: '#edf1f1',
-  line: '#e2e7e7',
-  subtle: '#667374',
-  white: '#fff',
+  brand: 'var(--color-brand-500)',
+  brandInk: 'var(--color-brand-600)',
+  brandLine: 'var(--color-brand-100)',
+  ok: 'var(--color-ok)',
+  danger: 'var(--color-danger)',
+  area: 'color-mix(in srgb, var(--color-ok) 18%, white)',
+  range: 'color-mix(in srgb, var(--color-ok) 45%, white)',
+  lineSoft: 'var(--color-line-soft)',
+  line: 'var(--color-line)',
+  subtle: 'var(--color-subtle)',
+  white: 'white',
 };
 
 /** 단조 3차 보간의 점별 기울기 */

@@ -8,7 +8,7 @@ import CheckupModal from '../diary/CheckupModal';
 import { INPUT_CLASS, TEXTAREA_CLASS } from '../diary/formStyles';
 import { CHECKUP_TYPES } from '../scheduleTypes';
 import CharCount from '../shared/CharCount';
-import { BTN_SM, TEXT_BTN } from './checkupStyles';
+import { TEXT_BTN } from './checkupStyles';
 import { findName } from './checkupTypes';
 
 const MAX_CONTENT_LENGTH = 500;
@@ -54,7 +54,7 @@ export default function CheckupInfoCard({ checkup, pets }) {
         !isEditing && (
           <button
             type="button"
-            className={`${BTN_SECONDARY} ${BTN_SM}`}
+            className={`${BTN_SECONDARY}`}
             onClick={startEdit}
           >
             <Icon name="edit" className="text-lg" />
@@ -173,7 +173,7 @@ export default function CheckupInfoCard({ checkup, pets }) {
 /** 라벨·값 한 줄 */
 function Row({ label, htmlFor, children }) {
   return (
-    <div className="flex items-start gap-3 border-t border-dashed border-line py-2.5 first:border-t-0 max-sm:flex-col max-sm:gap-1">
+    <div className="flex items-start gap-3 border-t border-dashed border-line py-2.5 first:border-t-0 max-[760px]:flex-col max-[760px]:gap-1">
       <dt className="w-[104px] shrink-0 text-subtle">
         {htmlFor ? <label htmlFor={htmlFor}>{label}</label> : label}
       </dt>

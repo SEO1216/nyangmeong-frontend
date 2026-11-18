@@ -1,13 +1,9 @@
 import DropdownSelect from '@/components/DropdownSelect';
 import Icon from '@/components/Icon';
+import { FILTER_CHIP, FILTER_CHIP_ON } from '@/components/buttonStyles';
 import { SKIP } from './receiptUtils';
 
-const chipClass = (isActive) =>
-  `inline-flex h-9 items-center gap-1 rounded-full border px-3.5 ${
-    isActive
-      ? 'border-brand-100 bg-brand-50 font-semibold text-brand-600'
-      : 'border-line bg-white text-ink hover:bg-surface-2'
-  }`;
+const chipClass = (isActive) => (isActive ? FILTER_CHIP_ON : FILTER_CHIP);
 
 /**
  * [반려동물별 기록 탭] (FN-HLT-002-36)

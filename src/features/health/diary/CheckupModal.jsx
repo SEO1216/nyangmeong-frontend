@@ -24,9 +24,9 @@ const MAX_HOSPITAL_NAME_LENGTH = 80;
 const MAX_CONTENT_LENGTH = 500;
 const MAX_MEMO_LENGTH = 200;
 
-const REQUIRED = <span className="ml-0.5 font-bold text-[#b4473a]">*</span>;
+const REQUIRED = <span className="ml-0.5 font-bold text-danger">*</span>;
 const OPTIONAL = (
-  <span className="ml-1 text-[13px] font-medium text-[#667374]">선택</span>
+  <span className="ml-1 text-[13px] font-medium text-subtle">선택</span>
 );
 
 /**
@@ -165,6 +165,7 @@ export default function CheckupModal({
       <FormModal
         icon="local_hospital"
         title={checkup ? '검진기록 수정' : '검진기록 추가'}
+        submitLabel={checkup ? '저장하기' : '등록하기'}
         hasFooter={step === 'form'}
         widthClassName="w-[min(560px,calc(100%-32px))]"
         isPending={isPending}
@@ -178,7 +179,7 @@ export default function CheckupModal({
               className="flex flex-col items-center gap-1 rounded-[10px] border border-line px-4 py-6 hover:border-brand-500 hover:bg-brand-50"
               onClick={() => setStep('form')}
             >
-              <span className="text-lg/[1.6] font-semibold text-ink">
+              <span className="text-lg font-semibold text-ink">
                 직접 입력하기
               </span>
               <span className="text-subtle">
@@ -190,7 +191,7 @@ export default function CheckupModal({
               className="flex flex-col items-center gap-1 rounded-[10px] border border-line px-4 py-6 hover:border-brand-500 hover:bg-brand-50"
               onClick={onReceipt}
             >
-              <span className="text-lg/[1.6] font-semibold text-ink">
+              <span className="text-lg font-semibold text-ink">
                 영수증으로 추가하기
               </span>
               <span className="text-subtle">사진에서 자동 인식</span>
@@ -290,7 +291,7 @@ export default function CheckupModal({
             </label>
 
             <p className="flex gap-2 rounded-[10px] bg-surface-2 px-4 py-3 text-muted">
-              <Icon name="event" className="shrink-0 text-xl" />
+              <Icon name="event" className="shrink-0 text-lg" />
               저장하면 케어 캘린더에도 표시됩니다. 같은 날짜에 등록한 병원
               일정이 있으면 그 일정과 자동으로 연결됩니다
             </p>

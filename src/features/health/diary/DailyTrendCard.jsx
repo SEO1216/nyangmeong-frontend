@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import Card from '@/components/Card';
-import { BTN_SECONDARY } from '@/components/buttonStyles';
+import {
+  BTN_SECONDARY,
+  FILTER_CHIP,
+  FILTER_CHIP_ON,
+} from '@/components/buttonStyles';
 import useMediaQuery from '@/hooks/useMediaQuery';
 import { formatMonthDayDot, getYmdOf } from '@/utils/formatDate';
 import {
@@ -61,7 +65,7 @@ export default function DailyTrendCard({
   const trend = useDailyTrend(pet.petSn, typeCd);
   /** 목표체중은 목록(GET /pets)에 없어 상세로 받는다. 실패하거나 오기 전이면 목표선 없이 그린다 */
   const { data: petDetail } = usePetDetail(pet.petSn, typeCd === WEIGHT);
-  const isPc = useMediaQuery('(min-width: 761px)');
+  const isPc = useMediaQuery('(width >= 760px)');
   const rowRef = useRef(null);
   /** 줄 끝에 걸쳐 일부만 보이는 탭(모바일 가로 밀기) */
   const [clipped, setClipped] = useState([]);
@@ -101,7 +105,7 @@ export default function DailyTrendCard({
         ref={rowRef}
         role="radiogroup"
         aria-label="지표 선택"
-        className="mb-4 flex gap-2 overflow-x-auto [scrollbar-width:none] min-[761px]:flex-wrap min-[761px]:overflow-visible [&::-webkit-scrollbar]:hidden"
+        className="mb-4 flex gap-2 overflow-x-auto [scrollbar-width:none] min-[760px]:flex-wrap min-[760px]:overflow-visible [&::-webkit-scrollbar]:hidden"
       >
         {shownTypes.map((item, index) => {
           const isSelected = item.cd === typeCd;
@@ -111,12 +115,8 @@ export default function DailyTrendCard({
               type="button"
               role="radio"
               aria-checked={isSelected}
-              className={`inline-flex h-9 shrink-0 items-center rounded-full border px-3.5 transition-opacity ${
+              className={`${isSelected ? FILTER_CHIP_ON : FILTER_CHIP} transition-opacity ${
                 clipped[index] ? 'opacity-50' : ''
-              } ${
-                isSelected
-                  ? 'border-transparent bg-brand-50 text-brand-500'
-                  : 'border-line bg-white text-ink-2 hover:border-line-strong hover:text-ink'
               }`}
               onClick={() => setTypeCd(item.cd)}
             >
@@ -147,7 +147,7 @@ function TrendBody({ pet, goalBdwg, trend, type, isPc, onAddRecord }) {
       action={
         <button
           type="button"
-          className={`${BTN_SECONDARY} mt-2 h-8! px-3!`}
+          className={`${BTN_SECONDARY} mt-2`}
           onClick={() => onAddRecord(type.cd)}
         >
           오늘 기록 추가
@@ -240,9 +240,7 @@ function OneRecord({ ymd, value }) {
       <span className="text-sm/[1.6] text-subtle tabular-nums">
         {formatMonthDayDot(ymd)} 기록
       </span>
-      <span className="text-lg/[1.6] font-bold text-ink tabular-nums">
-        {value}
-      </span>
+      <span className="text-lg font-bold text-ink tabular-nums">{value}</span>
       <span className="text-sm/[1.6] text-subtle">
         기록이 2개 이상 쌓이면 그래프로 보여요
       </span>

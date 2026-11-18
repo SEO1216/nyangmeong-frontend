@@ -31,9 +31,9 @@ const MAX_ITEM_NAME_LENGTH = 40;
 const MAX_PART_DETAIL_LENGTH = 40;
 const MAX_MEMO_LENGTH = 200;
 
-const REQUIRED = <span className="ml-0.5 font-bold text-[#b4473a]">*</span>;
+const REQUIRED = <span className="ml-0.5 font-bold text-danger">*</span>;
 const OPTIONAL = (
-  <span className="ml-1 text-[13px] font-medium text-[#667374]">선택</span>
+  <span className="ml-1 text-[13px] font-medium text-subtle">선택</span>
 );
 
 const getModalTitle = (mode, item, cycles, cycle) => {
@@ -186,6 +186,7 @@ export default function ObservationModal({
     <FormModal
       icon="photo_camera"
       title={getModalTitle(mode, item, cycles, cycle)}
+      submitLabel={isEdit ? '저장하기' : '등록하기'}
       isPending={isPending}
       onSubmit={handleSubmit}
       onClose={onClose}
@@ -200,9 +201,7 @@ export default function ObservationModal({
           className={INPUT_CLASS}
           onChange={(event) => setName(event.target.value)}
         />
-        {isCreateItem && (
-          <CharCount value={name} max={MAX_ITEM_NAME_LENGTH} />
-        )}
+        {isCreateItem && <CharCount value={name} max={MAX_ITEM_NAME_LENGTH} />}
         {isInvalid('name') && (
           <FieldError>관찰 항목을 입력해 주세요</FieldError>
         )}
@@ -263,7 +262,7 @@ export default function ObservationModal({
         )}
       </label>
 
-      <div className="rounded-xl bg-[#f4f6f6] p-4">
+      <div className="rounded-xl bg-surface-2 p-4">
         <span className={LABEL_CLASS}>사진{REQUIRED}</span>
         <div className="mt-2 grid h-40 place-items-center overflow-hidden rounded-[10px] border border-dashed border-line-strong bg-white text-subtle">
           {previewUrl ? (
@@ -288,7 +287,7 @@ export default function ObservationModal({
         <div className="mt-3 flex flex-wrap gap-2">
           <button
             type="button"
-            className={`${BTN_SECONDARY} h-8! px-3!`}
+            className={`${BTN_SECONDARY}`}
             onClick={() => cameraRef.current.click()}
           >
             <Icon name="photo_camera" />
@@ -296,7 +295,7 @@ export default function ObservationModal({
           </button>
           <button
             type="button"
-            className={`${BTN_SECONDARY} h-8! px-3!`}
+            className={`${BTN_SECONDARY}`}
             onClick={() => albumRef.current.click()}
           >
             <Icon name="photo_library" />
@@ -304,7 +303,7 @@ export default function ObservationModal({
           </button>
         </div>
         {isEdit && (
-          <p className="mt-2 text-[13px] font-medium text-[#667374]">
+          <p className="mt-2 text-[13px] font-medium text-subtle">
             사진은 바꿀 수만 있어요
           </p>
         )}

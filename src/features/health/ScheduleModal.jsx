@@ -5,6 +5,7 @@ import DatePicker from '@/components/DatePicker';
 import TimeSelect from '@/components/TimeSelect';
 import ConfirmModal from '@/components/ConfirmModal';
 import Icon from '@/components/Icon';
+import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import { getHmOf, getYmdOf, makeDateTime } from '@/utils/formatDate';
 import {
   BADGE_COLORS,
@@ -41,7 +42,7 @@ const toForm = (schedule, defaultPetSn, defaultYmd) => ({
 function FieldError({ message }) {
   if (!message) return null;
   return (
-    <p role="alert" className="text-sm leading-[1.4] text-[#b4473a]">
+    <p role="alert" className="text-sm leading-[1.4] text-danger">
       {message}
     </p>
   );
@@ -160,14 +161,13 @@ export default function ScheduleModal({
   const targetPetNm = pets.find((pet) => pet.petSn === form.petSn)?.petNm;
 
   const labelClass =
-    'flex items-center gap-0.5 text-base leading-[1.4] font-semibold text-[#1a3234]';
+    'flex items-center gap-0.5 text-base leading-[1.4] font-semibold text-ink';
   const inputClass =
-    'block h-10 w-full rounded-[6px] border border-[#d3dae2] bg-white px-3 text-base leading-[1.4] text-[#1a3234] outline-none hover:border-[#b9c4c4] focus:border-[#285a5c] focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)]';
-  const secondaryButtonClass =
-    'inline-flex h-10 min-w-24 items-center justify-center rounded-[6px] border border-[#e2e7e7] bg-white px-4 text-base font-semibold whitespace-nowrap text-[#1a3234] hover:border-[#b9c4c4] hover:bg-[#f4f6f6] disabled:opacity-50';
-  const required = <span className="ml-0.5 font-bold text-[#b4473a]">*</span>;
+    'block h-10 w-full rounded-[6px] border border-input-line bg-white px-3 text-base leading-[1.4] text-ink outline-none hover:border-line-strong focus:border-brand-500 focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)]';
+  const secondaryButtonClass = `${BTN_SECONDARY} min-w-24 whitespace-nowrap`;
+  const required = <span className="ml-0.5 font-bold text-danger">*</span>;
   const optional = (
-    <span className="ml-1 text-[13px] font-medium text-[#667374]">선택</span>
+    <span className="ml-1 text-[13px] font-medium text-subtle">선택</span>
   );
 
   return (
@@ -178,17 +178,17 @@ export default function ScheduleModal({
       onCancel={handleCancel}
     >
       <form onSubmit={handleSubmit}>
-        <header className="flex items-start gap-3.5 border-b border-[#edf1f1] px-7 pt-6 pb-5">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#e9f2f2] text-[#285a5c]">
+        <header className="flex items-start gap-3.5 border-b border-line-soft px-7 pt-6 pb-5">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-500">
             <Icon name="calendar_month" />
           </span>
-          <h2 className="flex-1 text-xl leading-[1.35] font-bold text-[#1a3234]">
+          <h2 className="flex-1 text-lg font-bold text-ink">
             {isEdit ? '일정 수정' : '일정 추가'}
           </h2>
           <button
             type="button"
             aria-label="닫기"
-            className="-mt-1 -mr-2 grid size-9 shrink-0 place-items-center rounded-[10px] text-[#566465] hover:bg-[#ebf0f0] hover:text-[#1a3234]"
+            className="-mt-1 -mr-2 grid size-9 shrink-0 place-items-center rounded-[10px] text-muted hover:bg-surface-3 hover:text-ink"
             onClick={onClose}
           >
             <Icon name="close" />
@@ -224,8 +224,8 @@ export default function ScheduleModal({
             <FieldError message={fieldError('schdlKndCd')} />
           </fieldset>
 
-          {/* 시간 세 칸이 날짜 옆에 안 들어가는 640px 미만은 위아래로 쌓는다 */}
-          <div className="grid grid-cols-2 gap-x-8 max-sm:grid-cols-1 max-sm:gap-y-5">
+          {/* 시간 세 칸이 날짜 옆에 안 들어가는 760px 미만은 위아래로 쌓는다 */}
+          <div className="grid grid-cols-2 gap-x-8 max-[760px]:grid-cols-1 max-[760px]:gap-y-5">
             <label className="flex flex-col gap-1.5">
               <span className={labelClass}>날짜{required}</span>
               <DatePicker
@@ -247,7 +247,7 @@ export default function ScheduleModal({
           </div>
 
           {isHospitalForm && (
-            <div className="rounded-xl bg-[#f4f6f6] p-4">
+            <div className="rounded-xl bg-surface-2 p-4">
               <div className="grid grid-cols-2 gap-x-8">
                 <label className="flex flex-col gap-1.5">
                   <span className={labelClass}>검진유형{required}</span>
@@ -291,10 +291,7 @@ export default function ScheduleModal({
                 className={inputClass}
                 onChange={(event) => setField('schdlNm', event.target.value)}
               />
-              <CharCount
-                value={form.schdlNm}
-                max={MAX_SCHEDULE_NAME_LENGTH}
-              />
+              <CharCount value={form.schdlNm} max={MAX_SCHEDULE_NAME_LENGTH} />
               <FieldError message={fieldError('schdlNm')} />
             </label>
           )}
@@ -330,7 +327,7 @@ export default function ScheduleModal({
                     role="radio"
                     aria-checked={isChecked}
                     title={color.nm}
-                    className={`grid size-8 place-items-center rounded-full outline-offset-(--spacing) focus-visible:outline focus-visible:outline-[#285a5c] ${
+                    className={`grid size-8 place-items-center rounded-full outline-offset-(--spacing) focus-visible:outline focus-visible:outline-brand-500 ${
                       TONE_CLASSES[color.tone].chip
                     } ${isChecked ? 'outline-solid outline-[length:medium] outline-current' : ''}`}
                     onClick={() =>
@@ -352,18 +349,18 @@ export default function ScheduleModal({
           </div>
         </div>
 
-        <footer className="flex items-center justify-end gap-2 rounded-b-[20px] border-t border-[#e2e7e7] bg-[#fbfcfd] px-7 py-4">
+        <footer className="flex items-center justify-end gap-2 rounded-b-[20px] border-t border-line bg-surface-2 px-7 py-4">
           {isEdit ? (
             <button
               type="button"
-              className="mr-auto text-base font-semibold text-[#1e4a4c] hover:underline hover:underline-offset-[3px]"
+              className="mr-auto text-base font-semibold text-brand-600 hover:underline hover:underline-offset-[3px]"
               onClick={onCreateNew}
             >
               새 일정 추가
             </button>
           ) : (
-            <p className="mr-auto text-[#566465]">
-              <span className="font-bold text-[#b4473a]">*</span> 표시는 필수
+            <p className="mr-auto text-muted">
+              <span className="font-bold text-danger">*</span> 표시는 필수
               항목이에요
             </p>
           )}
@@ -382,15 +379,15 @@ export default function ScheduleModal({
               className={secondaryButtonClass}
               onClick={() => setConfirm('delete')}
             >
-              일정 삭제하기
+              삭제하기
             </button>
           )}
           <button
             type="submit"
             disabled={!canSubmit}
-            className="inline-flex h-10 min-w-24 items-center justify-center rounded-[6px] bg-[#285a5c] px-4 text-base font-semibold whitespace-nowrap text-white hover:bg-[#1e4a4c] disabled:opacity-40"
+            className={`${BTN_PRIMARY} min-w-24 whitespace-nowrap`}
           >
-            저장
+            {isEdit ? '저장하기' : '등록하기'}
           </button>
         </footer>
       </form>

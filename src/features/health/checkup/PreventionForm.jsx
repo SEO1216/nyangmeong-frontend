@@ -69,7 +69,7 @@ export default function PreventionForm({ petSn, ckupRcdSn, onClose }) {
       className={`${SUB_BOX} grid gap-5`}
       onSubmit={handleSubmit}
     >
-      <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+      <div className="grid gap-x-8 gap-y-5 min-[760px]:grid-cols-2">
         <label className="flex flex-col gap-1.5">
           <span className={LABEL_CLASS}>예방 항목{REQUIRED}</span>
           <DropdownSelect
@@ -112,9 +112,7 @@ export default function PreventionForm({ petSn, ckupRcdSn, onClose }) {
               일마다
             </span>
           </span>
-          {isInvalid('days') && (
-            <FieldError>{CYCLE_DAYS_ERROR}</FieldError>
-          )}
+          {isInvalid('days') && <FieldError>{CYCLE_DAYS_ERROR}</FieldError>}
         </label>
       )}
 

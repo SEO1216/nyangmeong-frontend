@@ -15,7 +15,7 @@ import SubPageLayout from '@/layouts/SubPageLayout';
 const LAYOUT_PROPS = {
   section: 'health',
   description: '우리 아이의 지금까지의 건강 이력을 한눈에 확인할 수 있어요',
-  contentClassName: 'gap-7 tabular-nums antialiased min-[1101px]:pt-6',
+  contentClassName: 'gap-7 tabular-nums antialiased min-[1100px]:pt-6',
 };
 
 /**
@@ -33,7 +33,7 @@ export default function HealthSummaryPage() {
   );
 }
 
-/** 공용 페이지 틀 + 공통 반려동물 카드(1101px 이상 사이드 메뉴 아래, 1100px 이하 본문 맨 위 알약) (※신규 정책) */
+/** 공용 페이지 틀 + 공통 반려동물 카드(1100px 이상 사이드 메뉴 아래, 1100px 이하 본문 맨 위 알약) (※신규 정책) */
 function HealthLayout({ children }) {
   return (
     <SubPageLayout
@@ -100,7 +100,7 @@ function HealthSummaryContent({ mbrSn }) {
 function SummarySkeleton() {
   return (
     <div aria-busy="true" className="flex flex-col gap-7">
-      <SkeletonCard className="h-52 max-sm:h-96" />
+      <SkeletonCard className="h-52 max-[760px]:h-96" />
       <DashboardSkeleton />
     </div>
   );

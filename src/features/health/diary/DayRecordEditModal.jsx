@@ -234,7 +234,7 @@ export default function DayRecordEditModal({
               disabled={isSaving}
               onClick={handleSave}
             >
-              저장
+              저장하기
             </button>
           </>
         }

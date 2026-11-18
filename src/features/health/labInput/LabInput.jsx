@@ -315,7 +315,7 @@ export default function LabInput({
 
       <section
         aria-label="검사 수치 입력"
-        className="rounded-[14px] border border-line bg-white px-[18px] pt-4 pb-[18px] shadow-[0_1px_2px_rgba(26,50,52,0.04)] sm:px-[22px] sm:pt-5 sm:pb-[22px]"
+        className="rounded-[14px] border border-line bg-white p-4 shadow-[0_1px_2px_rgba(26,50,52,0.04)] min-[760px]:p-5"
       >
         <LabItemForm
           form={form}
