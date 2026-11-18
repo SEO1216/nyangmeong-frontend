@@ -178,16 +178,17 @@ export default function CheckupListCard({ pet, pets, onReceipt }) {
             {pageCheckups.map((checkup) => (
               <li
                 key={checkup.ckupRcdSn}
-                className="flex items-start gap-3 border-b border-line-soft px-4 py-4 hover:bg-surface-2"
+                className="relative flex cursor-pointer items-start gap-3 border-b border-line-soft px-4 py-4 hover:bg-surface-2"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline gap-x-3">
+                    {/* 누르는 영역만 after로 줄 전체에 넓힌다. 낭독기·키보드 링크는 병원명 하나다 */}
                     <Link
                       to={generatePath(PATHS.HEALTH_CHECKUP_DETAIL, {
                         petSn,
                         ckupRcdSn: checkup.ckupRcdSn,
                       })}
-                      className="text-lg font-semibold text-ink underline-offset-4 hover:text-brand-600 hover:underline"
+                      className="text-lg font-semibold text-ink underline-offset-4 after:absolute after:inset-0 hover:text-brand-600 hover:underline"
                     >
                       {checkup.hsptlNm}
                     </Link>
@@ -201,7 +202,7 @@ export default function CheckupListCard({ pet, pets, onReceipt }) {
                 </div>
                 <button
                   type="button"
-                  className="min-h-9 shrink-0 px-1 font-semibold text-muted hover:underline"
+                  className="relative z-10 min-h-9 shrink-0 px-1 font-semibold text-muted hover:underline"
                   onClick={() => setDeleteSn(checkup.ckupRcdSn)}
                 >
                   삭제

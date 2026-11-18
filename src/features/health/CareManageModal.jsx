@@ -1,4 +1,6 @@
+import { ChevronRight } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Modal from '@/components/Modal';
 import {
   BTN_DANGER,
@@ -7,6 +9,7 @@ import {
   TEXT_ACTION_DANGER,
 } from '@/components/buttonStyles';
 import { showToast } from '@/components/toastStore';
+import { formatDate } from '@/utils/formatDate';
 import CareChipPicker from './CareChipPicker';
 import CareItemFields from './CareItemFields';
 import { CareWarnBox } from './CareShortageNotice';
@@ -14,6 +17,7 @@ import SegmentSwitch from './SegmentSwitch';
 import {
   EMPTY_CARE_FIELDS,
   MIN_CARE_COUNT,
+  getCareCycleName,
   getCareErrorMessage,
   isCareFieldsValid,
   isLinkedCareItem,
@@ -22,6 +26,7 @@ import {
   toCareUpdateBody,
 } from './careDue';
 import { useSaveCareChanges } from './queries';
+import { getCheckupDetailPath } from './summary/summaryUtils';
 
 /** 입력칸 값 -> 칩에 그릴 값 */
 const toChipValues = (fields) => {
@@ -46,7 +51,7 @@ const EDIT_HINT = '고칠 항목을 눌러 주세요';
  * [케어 항목 관리 모달] (※신규 정책)
  * - 왼쪽 맨 위 [고르기 | 수정] 전환(처음 고르기)
  *   - 고르기: 칩으로 켜고 끔(5개 이상), 오른쪽은 새 항목 만들기
- *   - 수정: 칩을 누르면 오른쪽에서 고침. 직접 만든 항목은 전체 칸 + [삭제하기], 기본 정기관리는 주기만
+ *   - 수정: 칩을 누르면 오른쪽에서 고침. 직접 만든 항목은 전체 칸 + [삭제하기], 기본 정기관리는 주기만, 연동 항목은 검진상세 이동 안내
  *   - 상태를 바꾸면 [수정 반영]한 내용은 남고 고치던 칸은 버림
  * - [삭제하기]: 확인창 뒤 칩만 빠지고 실제 삭제는 [저장하기] 때
  * - [저장하기]: 생성 -> 수정 -> 고른 항목 저장 -> 삭제. 실패하면 닫지 않고 남은 단계만 다시 시도
@@ -73,6 +78,8 @@ export default function CareManageModal({
   const [editingKey, setEditingKey] = useState(null);
   const [mode, setMode] = useState(MODE.PICK);
   const [deletingItem, setDeletingItem] = useState(null);
+  const [movingPath, setMovingPath] = useState(null);
+  const navigate = useNavigate();
   const nameRef = useRef(null);
   const newCountRef = useRef(0);
   /** 끝난 저장 단계: 다시 시도할 때 새 항목이 두 번 생기지 않게 보관 */
@@ -160,6 +167,22 @@ export default function CareManageModal({
     setItems((prev) => prev.filter((item) => item.chipKey !== target.chipKey));
     if (editingKey === target.chipKey) resetPanel();
     setDeletingItem(null);
+  };
+
+  /** 저장 안 한 변경: 칩 켜고 끄기·새 항목·[수정 반영]·삭제 */
+  const isDirty =
+    removedSns.length > 0 ||
+    items.some(
+      (item) =>
+        item.careArtclSn == null ||
+        item.fields != null ||
+        item.isOn !== item.indctYn,
+    );
+
+  /** 검진상세로 이동: 저장 안 한 변경이 있으면 확인창 뒤 이동 (※신규 정책) */
+  const handleMove = (path) => {
+    if (isDirty) setMovingPath(path);
+    else navigate(path);
   };
 
   const handleSave = () => {
@@ -277,7 +300,13 @@ export default function CareManageModal({
           />
         </div>
 
-        {isEditMode && !editingItem ? (
+        {isEditMode && editingItem && isLinkedCareItem(editingItem) ? (
+          <LinkedCarePanel
+            petSn={petSn}
+            item={editingItem}
+            onMove={handleMove}
+          />
+        ) : isEditMode && !editingItem ? (
           <section
             aria-label="항목 수정"
             className="self-start rounded-[14px] border border-transparent bg-surface-2 p-4"
@@ -392,6 +421,102 @@ export default function CareManageModal({
           }
         />
       )}
+      {movingPath && (
+        <Modal
+          title="저장하지 않고 이동할까요?"
+          description="이 창에서 바꾼 내용은 저장되지 않아요"
+          isConfirm
+          onClose={() => setMovingPath(null)}
+          footer={
+            <>
+              <button
+                type="button"
+                className={BTN_SECONDARY}
+                onClick={() => setMovingPath(null)}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className={BTN_PRIMARY}
+                onClick={() => navigate(movingPath)}
+              >
+                이동하기
+              </button>
+            </>
+          }
+        />
+      )}
     </Modal>
+  );
+}
+
+const INFO_ROW = 'flex justify-between gap-3';
+
+/**
+ * [연동 항목 안내 칸] (※신규 정책)
+ * - 「수정」 상태에서 처방약·반복 예방 칩을 누르면 오른쪽 칸 대신 보임
+ * - 케어리스트에서는 고칠 수 없고, [검진상세에서 관리 ›]로 검진상세 그 탭(CareTile 이동 링크와 같은 규칙)에 감. ckupRcdSn이 없으면 버튼 숨김
+ */
+function LinkedCarePanel({ petSn, item, onMove }) {
+  const isDose = item.prscSn != null;
+  const rows = isDose
+    ? [
+        ['복용 종료일', item.mdcnEndYmd && formatDate(item.mdcnEndYmd)],
+        ['1일 복용 횟수', item.dayMdcnNmtm != null && `${item.dayMdcnNmtm}회`],
+      ]
+    : [
+        ['주기', getCareCycleName(item)],
+        ['다음 예정일', item.nxtmPrnmntYmd && formatDate(item.nxtmPrnmntYmd)],
+      ];
+
+  return (
+    <section
+      aria-label="연동 항목"
+      className="flex flex-col gap-4 self-start rounded-[14px] border border-brand-500 bg-surface-2 p-4"
+    >
+      <div>
+        <h3 className="font-bold break-keep text-ink">
+          연동 항목 · {item.careArtclNm}
+        </h3>
+        <p className="mt-1 text-sm break-keep text-muted">
+          케어리스트에서는 수정·삭제할 수 없어요. 아래 버튼을 누르면 검진상세로
+          이동해 관리할 수 있어요
+        </p>
+      </div>
+      <dl className="flex flex-col gap-2 rounded-box bg-white p-4 text-sm tabular-nums">
+        <div className={INFO_ROW}>
+          <dt className="text-muted">연동</dt>
+          <dd className="font-semibold text-ink">
+            {isDose ? '처방약' : '반복 예방'}
+          </dd>
+        </div>
+        {rows
+          .filter(([, value]) => value)
+          .map(([label, value]) => (
+            <div key={label} className={INFO_ROW}>
+              <dt className="text-muted">{label}</dt>
+              <dd className="font-semibold text-ink">{value}</dd>
+            </div>
+          ))}
+      </dl>
+      {item.ckupRcdSn != null && (
+        <button
+          type="button"
+          className={`${BTN_PRIMARY} w-full gap-1`}
+          onClick={() =>
+            onMove(
+              getCheckupDetailPath(
+                { petSn, ckupRcdSn: item.ckupRcdSn },
+                isDose ? 'prescription' : 'prevention',
+              ),
+            )
+          }
+        >
+          검진상세에서 관리
+          <ChevronRight className="size-4" aria-hidden="true" />
+        </button>
+      )}
+    </section>
   );
 }

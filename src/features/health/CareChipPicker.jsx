@@ -13,9 +13,8 @@ const HINT_CLASS = 'text-sm text-subtle';
 /** 칩 식별값: 저장 전 새 항목은 chipKey, 나머지는 항목 번호 */
 const getChipKey = (item) => item.chipKey ?? item.careArtclSn;
 
-/** 수정 상태에서 고칠 수 없는 칩의 이유. 고칠 수 있으면 null (직접 만든 항목·기본 정기관리만 고침) */
+/** 수정 상태에서 누를 수 없는 칩의 이유. 누를 수 있으면 null (연동 항목은 눌러서 검진상세 이동 안내를 띄움) */
 const getLockReason = (item) => {
-  if (isLinkedCareItem(item)) return '처방·반복 예방에서 관리해요';
   if (item.bscArtclYn && item.careZoneCd !== CARE_ZONE.REGULAR)
     return '기본 일상관리는 고칠 내용이 없어요';
   return null;
@@ -25,7 +24,7 @@ const getLockReason = (item) => {
  * [케어 고르기 칩] (※신규 정책)
  * - 튜토리얼 3단계와 「케어 항목 관리」 모달 왼쪽이 같이 사용
  * - 처방·반복 예방 연동 항목은 켜진 상태로 고정 + 「항상 표시」 핀
- * - isEditMode(모달의 「수정」 상태): 칩을 눌러도 켜고 끄지 않고 onEdit. 고칠 수 없는 칩은 흐리게 + 이유
+ * - isEditMode(모달의 「수정」 상태): 칩을 눌러도 켜고 끄지 않고 onEdit. 고칠 수 없는 칩은 흐리게 + 이유. 연동 칩도 눌러 오른쪽에 검진상세 이동 안내를 띄움
  */
 export default function CareChipPicker({
   items,

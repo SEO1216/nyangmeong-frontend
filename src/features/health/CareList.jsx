@@ -1,4 +1,3 @@
-import { PawPrint } from 'lucide-react';
 import { useState } from 'react';
 import LoadError from '@/components/LoadError';
 import Card from '@/components/Card';
@@ -199,20 +198,11 @@ export default function CareList({ petSn, petNm, mission }) {
                   </p>
                 ) : (
                   <div className="grid gap-y-2 pt-3 min-[760px]:gap-y-0 min-[760px]:pt-0">
-                    {/** 묶음 제목: 미션 항목이 있는 구역에만. 760px 미만 처음 3칸에는 세지 않음 */}
-                    {missionItems.length > 0 && (
-                      <p className="flex items-center gap-1.5 py-2 text-sm font-semibold text-warn tabular-nums">
-                        <PawPrint className="size-3.5" aria-hidden="true" />
-                        오늘의 미션 · {missionItems.length}개
-                      </p>
-                    )}
                     {items.map((item, index) => (
                       <CareTile
                         key={item.careArtclSn}
                         item={item}
-                        petSn={petSn}
                         isDone={isDoneToday(item)}
-                        isMission={index < missionItems.length}
                         className={
                           !isExpanded && index >= MOBILE_VISIBLE_COUNT
                             ? 'max-[760px]:hidden'

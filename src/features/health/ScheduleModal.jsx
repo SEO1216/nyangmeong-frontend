@@ -50,6 +50,7 @@ export default function ScheduleModal({
   onCreateNew,
 }) {
   const formId = useId();
+  const petSelectId = useId();
   const isEdit = schedule != null;
   const onlyPetSn = pets.length === 1 ? pets[0].petSn : null;
   const [form, setForm] = useState(() =>
@@ -146,6 +147,19 @@ export default function ScheduleModal({
     <span className="ml-1 text-[13px] font-medium text-subtle">선택</span>
   );
 
+  // 수정일 때만 본문 첫 이름표 줄 오른쪽 끝(제목 줄 ✕ 아래)에 둔다
+  const deleteButton = isEdit && (
+    <button
+      type="button"
+      aria-label="일정 삭제"
+      disabled={isPending}
+      className="-my-2 grid size-9 shrink-0 place-items-center rounded-md bg-danger-soft text-danger disabled:opacity-50"
+      onClick={() => setConfirm('delete')}
+    >
+      <Icon name="delete" className="text-xl" />
+    </button>
+  );
+
   const footer = (
     <>
       {isEdit ? (
@@ -170,16 +184,6 @@ export default function ScheduleModal({
         >
           취소
         </button>
-        {isEdit && (
-          <button
-            type="button"
-            disabled={isPending}
-            className={secondaryButtonClass}
-            onClick={() => setConfirm('delete')}
-          >
-            삭제하기
-          </button>
-        )}
         <button
           type="submit"
           form={formId}
@@ -206,9 +210,15 @@ export default function ScheduleModal({
         <form id={formId} onSubmit={handleSubmit}>
           <div className="flex flex-col gap-5 px-6 py-5">
             {onlyPetSn === null && (
-              <label className="flex flex-col gap-1.5">
-                <span className={LABEL}>반려동물{required}</span>
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <label htmlFor={petSelectId} className={LABEL}>
+                    반려동물{required}
+                  </label>
+                  {deleteButton}
+                </div>
                 <DropdownSelect
+                  id={petSelectId}
                   value={form.petSn ?? ''}
                   placeholder="반려동물 선택"
                   options={pets.map((pet) => ({
@@ -218,11 +228,17 @@ export default function ScheduleModal({
                   onChange={(value) => setField('petSn', value)}
                 />
                 <FieldError>{fieldError('petSn')}</FieldError>
-              </label>
+              </div>
             )}
 
             <fieldset className="flex flex-col gap-1.5">
-              <legend className={`${LABEL} mb-1.5`}>일정 종류{required}</legend>
+              {/* 반려동물이 한 마리라 반려동물 칸이 없으면 이 줄이 첫 줄이므로 삭제 버튼을 여기에 둔다 */}
+              <legend
+                className={`${LABEL} mb-1.5 flex w-full items-center justify-between gap-3`}
+              >
+                <span>일정 종류{required}</span>
+                {onlyPetSn !== null && deleteButton}
+              </legend>
               <SegmentSwitch
                 options={SCHEDULE_TYPES}
                 selected={form.schdlKndCd}
