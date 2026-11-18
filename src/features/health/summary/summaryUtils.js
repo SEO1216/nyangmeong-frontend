@@ -12,7 +12,7 @@ import { CHECKUP_TYPES, TONE_CLASSES } from '../scheduleTypes';
 /** 검진유형 이름·아이콘·톤 클래스(chip: 연한 바탕 + 진한 글자) */
 export const getCheckupType = (ckupTypeCd) => {
   const type = CHECKUP_TYPES.find((item) => item.cd === ckupTypeCd);
-  return { ...type, tone: TONE_CLASSES[type.tone] };
+  return { ...type, toneKey: type.tone, tone: TONE_CLASSES[type.tone] };
 };
 
 /** 검사 항목 기능 태그 이름(검진상세와 같은 규칙) */

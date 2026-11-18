@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import LoadError from '@/components/LoadError';
 import PageSkeleton from '@/components/PageSkeleton';
 import Skeleton from '@/components/Skeleton';
 import SkeletonCard from '@/components/SkeletonCard';
 import Toggle from '@/components/Toggle';
 import { showToast } from '@/components/toastStore';
 import CareList from '@/features/health/CareList';
-import DiaryTabs from '@/features/health/diary/DiaryTabs';
+import UnderlineTabs from '@/components/UnderlineTabs';
 import MonthCalendar from '@/features/health/MonthCalendar';
 import PetSwitcher from '@/features/health/shared/PetSwitcher';
 import SelectedPetProvider from '@/features/health/shared/SelectedPetProvider';
@@ -96,6 +97,7 @@ function CareCalendarContent() {
     selectPet,
     isPending: isPetsPending,
     isError: isPetsError,
+    refetch: refetchPets,
   } = useSelectedPet();
   const year = getYear(viewMonthYmd);
   const month = getMonth(viewMonthYmd);
@@ -166,9 +168,10 @@ function CareCalendarContent() {
   if (isPetsError) {
     return (
       <CalendarLayout>
-        <p role="alert" className="text-muted">
-          반려동물 정보를 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요
-        </p>
+        <LoadError
+          message="반려동물 정보를 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요"
+          onRetry={() => refetchPets()}
+        />
       </CalendarLayout>
     );
   }
@@ -221,11 +224,12 @@ function CareCalendarContent() {
 
   return (
     <CalendarLayout>
-      <DiaryTabs
+      <UnderlineTabs
         items={SECTION_TABS}
         activeId={sectionId}
         onSelect={setSectionId}
         label="케어 캘린더 묶음"
+        className="mt-2"
       />
 
       {sectionId === 'hlt003-calendar' && (

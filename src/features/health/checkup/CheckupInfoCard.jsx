@@ -5,7 +5,7 @@ import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import { formatDate } from '@/utils/formatDate';
 import { useUpdateCheckup } from '../queries';
 import CheckupModal from '../diary/CheckupModal';
-import { INPUT_CLASS, TEXTAREA_CLASS } from '../diary/formStyles';
+import { INPUT, TEXTAREA } from '@/components/formStyles';
 import { CHECKUP_TYPES } from '../scheduleTypes';
 import CharCount from '../shared/CharCount';
 import { TEXT_BTN } from './checkupStyles';
@@ -71,7 +71,7 @@ export default function CheckupInfoCard({ checkup, pets }) {
                 id="info-ckup-ymd"
                 value={formatDate(checkup.ckupYmd)}
                 disabled
-                className={`${INPUT_CLASS} tabular-nums`}
+                className={`${INPUT} tabular-nums`}
               />
             </Row>
             <Row label="동물병원명" htmlFor="info-hosp-nm">
@@ -79,7 +79,7 @@ export default function CheckupInfoCard({ checkup, pets }) {
                 id="info-hosp-nm"
                 value={checkup.hsptlNm}
                 disabled
-                className={INPUT_CLASS}
+                className={INPUT}
               />
             </Row>
             <Row label="검진 종류" htmlFor="info-ckup-type">
@@ -88,7 +88,7 @@ export default function CheckupInfoCard({ checkup, pets }) {
                   id="info-ckup-type"
                   value={typeNm}
                   disabled
-                  className={`${INPUT_CLASS} max-w-60`}
+                  className={`${INPUT} max-w-60`}
                 />
                 <button
                   type="button"
@@ -106,7 +106,7 @@ export default function CheckupInfoCard({ checkup, pets }) {
                   id="info-ckup-cn"
                   value={ckupCn}
                   maxLength={MAX_CONTENT_LENGTH}
-                  className={TEXTAREA_CLASS}
+                  className={TEXTAREA}
                   onChange={(event) => setCkupCn(event.target.value)}
                 />
                 <CharCount value={ckupCn} max={MAX_CONTENT_LENGTH} />
@@ -118,7 +118,7 @@ export default function CheckupInfoCard({ checkup, pets }) {
                   id="info-ckup-memo"
                   value={ckupMemoCn}
                   maxLength={MAX_MEMO_LENGTH}
-                  className={INPUT_CLASS}
+                  className={INPUT}
                   onChange={(event) => setCkupMemoCn(event.target.value)}
                 />
                 <CharCount value={ckupMemoCn} max={MAX_MEMO_LENGTH} />

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import NoticeBox from '@/components/NoticeBox';
 import DropdownSelect from '@/components/DropdownSelect';
 import DatePicker from '@/components/DatePicker';
 import ConfirmModal from '@/components/ConfirmModal';
@@ -14,7 +15,7 @@ import {
   useSaveReceiptCheckups,
 } from '../queries';
 import { CHECKUP_TYPES } from '../scheduleTypes';
-import FieldError from './FieldError';
+import FieldError, { Required } from '@/components/FieldError';
 import FormModal from './FormModal';
 import LedgerDupModal from './LedgerDupModal';
 import NearScheduleModal from './NearScheduleModal';
@@ -22,7 +23,7 @@ import ReceiptAssignList from './ReceiptAssignList';
 import ReceiptInfoBlock from './ReceiptInfoBlock';
 import ReceiptPetLink from './ReceiptPetLink';
 import ReceiptPetTab from './ReceiptPetTab';
-import { INPUT_CLASS, LABEL_CLASS } from './formStyles';
+import { INPUT, LABEL } from '@/components/formStyles';
 import {
   SKIP,
   applyLineAssignment,
@@ -39,9 +40,7 @@ import {
   validateReceipt,
 } from './receiptUtils';
 
-const WIDTH = 'w-[min(760px,calc(100%-32px))]';
-
-const REQUIRED = <span className="ml-0.5 font-bold text-danger">*</span>;
+const REQUIRED = <Required />;
 const OPTIONAL = (
   <span className="ml-1 text-[13px] font-medium text-subtle">선택</span>
 );
@@ -246,12 +245,11 @@ export default function ReceiptResultStep({
   return (
     <>
       <FormModal
-        icon="receipt_long"
         title="인식 결과 확인"
         submitLabel="등록하기"
         cancelLabel="다시 촬영하기"
         hasRequiredNote={false}
-        widthClassName={WIDTH}
+        width={null}
         isPending={isPending}
         isSubmitDisabled={!validation.isValid && unlinkedTabs.length === 0}
         onSubmit={handleSave}
@@ -291,7 +289,7 @@ export default function ReceiptResultStep({
 
         <div className="grid grid-cols-2 gap-x-4 max-[760px]:grid-cols-1 max-[760px]:gap-y-5">
           <label className="flex flex-col gap-1.5">
-            <span className={LABEL_CLASS}>검진일{REQUIRED}</span>
+            <span className={LABEL}>검진일{REQUIRED}</span>
             <DatePicker
               value={ckupYmd}
               invalid={validation.common.ckupYmd != null}
@@ -310,11 +308,11 @@ export default function ReceiptResultStep({
             )}
           </label>
           <label className="flex flex-col gap-1.5">
-            <span className={LABEL_CLASS}>병원명{REQUIRED}</span>
+            <span className={LABEL}>병원명{REQUIRED}</span>
             <input
               value={hospNm}
               aria-invalid={validation.common.hospNm != null}
-              className={`${INPUT_CLASS} ${aiClass(!isCommonEdited.hospNm && hospNm !== '')}`}
+              className={`${INPUT} ${aiClass(!isCommonEdited.hospNm && hospNm !== '')}`}
               onChange={(event) => {
                 setHospNm(event.target.value);
                 setIsCommonEdited((prev) => ({ ...prev, hospNm: true }));
@@ -358,7 +356,7 @@ export default function ReceiptResultStep({
             ) : (
               <>
                 <label className="flex flex-col gap-1.5">
-                  <span className={LABEL_CLASS}>검진 종류{REQUIRED}</span>
+                  <span className={LABEL}>검진 종류{REQUIRED}</span>
                   <DropdownSelect
                     value={activeTab.ckupTypeCd}
                     invalid={activeErrors.type != null}
@@ -382,11 +380,11 @@ export default function ReceiptResultStep({
                 </label>
 
                 <label className="mt-5 flex flex-col gap-1.5">
-                  <span className={LABEL_CLASS}>검진 내용{OPTIONAL}</span>
+                  <span className={LABEL}>검진 내용{OPTIONAL}</span>
                   <input
                     value={activeTab.ckupCn}
                     aria-invalid={activeErrors.cn != null}
-                    className={`${INPUT_CLASS} ${aiClass(!activeTab.edited.cn && activeTab.ckupCn !== '')}`}
+                    className={`${INPUT} ${aiClass(!activeTab.edited.cn && activeTab.ckupCn !== '')}`}
                     onChange={(event) =>
                       editTab(activeTab.id, 'cn', {
                         ckupCn: event.target.value,
@@ -399,12 +397,12 @@ export default function ReceiptResultStep({
                 </label>
 
                 <label className="mt-5 flex flex-col gap-1.5">
-                  <span className={LABEL_CLASS}>검진 메모{OPTIONAL}</span>
+                  <span className={LABEL}>검진 메모{OPTIONAL}</span>
                   <input
                     value={activeTab.ckupMemoCn}
                     placeholder="다음에 확인할 것"
                     aria-invalid={activeErrors.memo != null}
-                    className={INPUT_CLASS}
+                    className={INPUT}
                     onChange={(event) =>
                       updateTab(activeTab.id, {
                         ckupMemoCn: event.target.value,
@@ -464,7 +462,7 @@ export default function ReceiptResultStep({
           />
         )}
 
-        <div className="rounded-xl bg-surface-2 px-4 py-3 tabular-nums">
+        <NoticeBox className="tabular-nums">
           <p>
             영수증 금액{' '}
             {ocr.recptAmt == null ? '-' : formatAmount(ocr.recptAmt)} · 나눈
@@ -485,12 +483,13 @@ export default function ReceiptResultStep({
           {hasTotalGap && (
             <p className="text-sm text-muted">영수증 금액과 합계가 달라요</p>
           )}
-        </div>
+        </NoticeBox>
 
         {hasSaveError && (
-          <div
+          <NoticeBox
+            tone="danger"
             role="alert"
-            className="flex flex-wrap items-center gap-3 rounded-xl border border-danger/30 bg-danger-soft px-4 py-3 text-danger"
+            className="flex flex-wrap items-center gap-3"
           >
             <p className="flex-1">
               {alreadySavedError
@@ -507,7 +506,7 @@ export default function ReceiptResultStep({
                 다시 시도하기
               </button>
             )}
-          </div>
+          </NoticeBox>
         )}
 
         <p className="text-sm text-muted">

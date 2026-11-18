@@ -1,9 +1,10 @@
 import Modal from './Modal';
-import { BTN_PRIMARY, BTN_SECONDARY } from './buttonStyles';
+import { BTN_DANGER, BTN_PRIMARY, BTN_SECONDARY } from './buttonStyles';
 
 /**
  * 확인 창. 공용 Modal의 isConfirm(440px, 가운데 정렬, 버튼 꽉 참)으로 그린다.
  * 버튼 순서는 [취소][확인], 처음 포커스는 안전한 [취소]. ESC·배경 클릭은 onCancel, 처리 중에는 닫지 않는다
+ * isDanger: 되돌릴 수 없는 일(삭제 등)이면 확인 버튼을 빨간 바탕(BTN_DANGER)으로
  */
 export default function ConfirmModal({
   title,
@@ -12,6 +13,7 @@ export default function ConfirmModal({
   cancelLabel = '취소',
   errorMessage,
   isPending = false,
+  isDanger = false,
   onConfirm,
   onCancel,
 }) {
@@ -36,7 +38,7 @@ export default function ConfirmModal({
           <button
             type="button"
             disabled={isPending}
-            className={BTN_PRIMARY}
+            className={isDanger ? BTN_DANGER : BTN_PRIMARY}
             onClick={onConfirm}
           >
             {confirmLabel}

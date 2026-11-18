@@ -21,8 +21,8 @@ import {
 } from '../diaryTypes';
 import { useCreateDailyRecord, useSaveHealthWidgets } from '../queries';
 import { DECIMAL_MESSAGE, hasOverTwoDecimals } from '../numberFormat';
-import FieldError from './FieldError';
-import { INPUT_CLASS, LABEL_CLASS } from './formStyles';
+import FieldError from '@/components/FieldError';
+import { INPUT, LABEL } from '@/components/formStyles';
 
 /**
  * [오늘 기록하기 모달] (※신규 정책, 2026-11-14 페이지 영역 → 모달)
@@ -176,7 +176,7 @@ export default function TodayRecordForm({
         <p className="text-subtle">기록 종류를 선택하고 내용을 입력해주세요</p>
 
         <div className="flex flex-col gap-1.5">
-          <span className={LABEL_CLASS}>종류</span>
+          <span className={LABEL}>종류</span>
           <div className="flex flex-wrap items-center gap-2">
             {recordTypes.length > 0 && (
               <div
@@ -268,7 +268,7 @@ export default function TodayRecordForm({
         {type && (
           <div className="flex flex-wrap items-end gap-x-4 gap-y-10">
             <div className="relative flex min-w-40 flex-1 flex-col gap-1.5">
-              <span className={LABEL_CLASS}>시간</span>
+              <span className={LABEL}>시간</span>
               <TimeSelect ref={timeRef} value={rcdTm} onChange={setRcdTm} />
               {/* 값 칸 안내와 같이 입력칸 아래에 겹쳐 띄운다 */}
               {timeError && (
@@ -279,7 +279,7 @@ export default function TodayRecordForm({
             </div>
             {isStool ? (
               <label className="flex min-w-40 flex-1 flex-col gap-1.5">
-                <span className={LABEL_CLASS}>{type.valueLabel}</span>
+                <span className={LABEL}>{type.valueLabel}</span>
                 <DropdownSelect
                   value={crsdSttsCd}
                   options={STOOL_STATES.map((state) => ({
@@ -291,7 +291,7 @@ export default function TodayRecordForm({
               </label>
             ) : (
               <label className="relative flex min-w-40 flex-1 flex-col gap-1.5">
-                <span className={LABEL_CLASS}>{type.valueLabel}</span>
+                <span className={LABEL}>{type.valueLabel}</span>
                 <span className="relative block">
                   <input
                     type="number"
@@ -299,7 +299,7 @@ export default function TodayRecordForm({
                     step="any"
                     inputMode="decimal"
                     value={value}
-                    className={`${INPUT_CLASS} pr-12 text-right tabular-nums`}
+                    className={`${INPUT} pr-12 text-right tabular-nums`}
                     onChange={(event) => setValue(event.target.value)}
                   />
                   <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-muted">

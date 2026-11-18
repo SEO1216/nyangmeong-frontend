@@ -20,9 +20,9 @@ import {
   hasOverTwoDecimals,
   toInputText,
 } from '../numberFormat';
-import FieldError from './FieldError';
+import FieldError, { Required } from '@/components/FieldError';
 import FormModal from './FormModal';
-import { INPUT_CLASS, LABEL_CLASS, TEXTAREA_CLASS } from './formStyles';
+import { INPUT, LABEL, TEXTAREA } from '@/components/formStyles';
 import ObservationPhoto from './ObservationPhoto';
 import { formatPart } from './observationUtils';
 import CharCount from '../shared/CharCount';
@@ -31,7 +31,7 @@ const MAX_ITEM_NAME_LENGTH = 40;
 const MAX_PART_DETAIL_LENGTH = 40;
 const MAX_MEMO_LENGTH = 200;
 
-const REQUIRED = <span className="ml-0.5 font-bold text-danger">*</span>;
+const REQUIRED = <Required />;
 const OPTIONAL = (
   <span className="ml-1 text-[13px] font-medium text-subtle">선택</span>
 );
@@ -184,7 +184,6 @@ export default function ObservationModal({
 
   return (
     <FormModal
-      icon="photo_camera"
       title={getModalTitle(mode, item, cycles, cycle)}
       submitLabel={isEdit ? '저장하기' : '등록하기'}
       isPending={isPending}
@@ -192,13 +191,13 @@ export default function ObservationModal({
       onClose={onClose}
     >
       <label className="flex flex-col gap-1.5">
-        <span className={LABEL_CLASS}>관찰 항목{REQUIRED}</span>
+        <span className={LABEL}>관찰 항목{REQUIRED}</span>
         <input
           value={name}
           readOnly={!isCreateItem}
           maxLength={MAX_ITEM_NAME_LENGTH}
           aria-invalid={isInvalid('name')}
-          className={INPUT_CLASS}
+          className={INPUT}
           onChange={(event) => setName(event.target.value)}
         />
         {isCreateItem && <CharCount value={name} max={MAX_ITEM_NAME_LENGTH} />}
@@ -208,7 +207,7 @@ export default function ObservationModal({
       </label>
 
       <div className="flex flex-col gap-1.5">
-        <span id="obsv-part-label" className={LABEL_CLASS}>
+        <span id="obsv-part-label" className={LABEL}>
           관찰 부위{REQUIRED}
         </span>
         {isCreateItem ? (
@@ -230,7 +229,7 @@ export default function ObservationModal({
                 maxLength={MAX_PART_DETAIL_LENGTH}
                 placeholder="세부 위치 (선택)"
                 aria-label="세부 위치 (선택)"
-                className={INPUT_CLASS}
+                className={INPUT}
                 onChange={(event) => setPartDetail(event.target.value)}
               />
               <CharCount value={partDetail} max={MAX_PART_DETAIL_LENGTH} />
@@ -241,7 +240,7 @@ export default function ObservationModal({
             readOnly
             aria-labelledby="obsv-part-label"
             value={formatPart(item)}
-            className={INPUT_CLASS}
+            className={INPUT}
           />
         )}
         {isInvalid('part') && (
@@ -250,7 +249,7 @@ export default function ObservationModal({
       </div>
 
       <label className="flex flex-col gap-1.5">
-        <span className={LABEL_CLASS}>관찰일{REQUIRED}</span>
+        <span className={LABEL}>관찰일{REQUIRED}</span>
         <DatePicker
           value={obsrvYmd}
           max={today}
@@ -263,7 +262,7 @@ export default function ObservationModal({
       </label>
 
       <div className="rounded-xl bg-surface-2 p-4">
-        <span className={LABEL_CLASS}>사진{REQUIRED}</span>
+        <span className={LABEL}>사진{REQUIRED}</span>
         <div className="mt-2 grid h-40 place-items-center overflow-hidden rounded-[10px] border border-dashed border-line-strong bg-white text-subtle">
           {previewUrl ? (
             <img
@@ -329,7 +328,7 @@ export default function ObservationModal({
 
       <div className="grid grid-cols-2 gap-x-4">
         <label className="flex flex-col gap-1.5">
-          <span className={LABEL_CLASS}>크기{OPTIONAL}</span>
+          <span className={LABEL}>크기{OPTIONAL}</span>
           <span className="relative block">
             <input
               type="number"
@@ -338,7 +337,7 @@ export default function ObservationModal({
               inputMode="decimal"
               value={size}
               placeholder="선택 입력"
-              className={`${INPUT_CLASS} pr-12 tabular-nums`}
+              className={`${INPUT} pr-12 tabular-nums`}
               onChange={(event) => setSize(event.target.value)}
             />
             <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-muted">
@@ -348,13 +347,13 @@ export default function ObservationModal({
           {isInvalid('size') && <FieldError>{DECIMAL_MESSAGE}</FieldError>}
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className={LABEL_CLASS}>변화{OPTIONAL}</span>
+          <span className={LABEL}>변화{OPTIONAL}</span>
           {isFirstCycle ? (
             <input
               disabled
               value="1회차는 비교 없음"
               aria-label="변화 (1회차는 비교 없음)"
-              className={INPUT_CLASS}
+              className={INPUT}
             />
           ) : (
             <DropdownSelect
@@ -373,12 +372,12 @@ export default function ObservationModal({
       </div>
 
       <label className="flex flex-col gap-1.5">
-        <span className={LABEL_CLASS}>메모{OPTIONAL}</span>
+        <span className={LABEL}>메모{OPTIONAL}</span>
         <textarea
           value={memo}
           maxLength={MAX_MEMO_LENGTH}
           placeholder="선택 입력"
-          className={TEXTAREA_CLASS}
+          className={TEXTAREA}
           onChange={(event) => setMemo(event.target.value)}
         />
         <CharCount value={memo} max={MAX_MEMO_LENGTH} />

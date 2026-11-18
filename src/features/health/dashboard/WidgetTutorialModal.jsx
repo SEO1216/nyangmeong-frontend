@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import LoadError from '@/components/LoadError';
 import Icon from '@/components/Icon';
 import Modal from '@/components/Modal';
 import Skeleton from '@/components/Skeleton';
@@ -307,16 +308,11 @@ export default function WidgetTutorialModal({
             보여요.
           </p>
           {care.isError ? (
-            <p role="alert" className="flex items-center gap-3 text-muted">
-              {care.error.message}
-              <button
-                type="button"
-                className="underline"
-                onClick={() => care.refetch()}
-              >
-                다시 시도
-              </button>
-            </p>
+            <LoadError
+              message={care.error.message}
+              onRetry={() => care.refetch()}
+              className="py-6"
+            />
           ) : care.data ? (
             <CareChipPicker
               items={careItems}

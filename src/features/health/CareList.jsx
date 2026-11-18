@@ -1,5 +1,6 @@
 import { PawPrint } from 'lucide-react';
 import { useState } from 'react';
+import LoadError from '@/components/LoadError';
 import Card from '@/components/Card';
 import Icon from '@/components/Icon';
 import SkeletonCard from '@/components/SkeletonCard';
@@ -10,7 +11,7 @@ import CareProgressBox from './CareProgressBox';
 import CareRecordList from './CareRecordList';
 import CareTile from './CareTile';
 import { CARE_ZONE, MIN_CARE_COUNT } from './careDue';
-import DiaryTabs from './diary/DiaryTabs';
+import UnderlineTabs from '@/components/UnderlineTabs';
 import {
   useCancelCareRecord,
   useCancelLastDose,
@@ -57,14 +58,7 @@ export default function CareList({ petSn, petNm, mission }) {
     );
   }
   if (isError) {
-    return (
-      <div role="alert" className="flex items-center gap-3 text-sm text-muted">
-        {error.message}
-        <button type="button" className="underline" onClick={() => refetch()}>
-          다시 시도
-        </button>
-      </div>
-    );
+    return <LoadError message={error.message} onRetry={() => refetch()} />;
   }
 
   const { careItems, careRecords } = data;
@@ -168,12 +162,12 @@ export default function CareList({ petSn, petNm, mission }) {
           mission={mission}
         />
 
-        <DiaryTabs
+        <UnderlineTabs
           items={ZONE_TABS}
           activeId={zoneId}
           onSelect={setZoneId}
           label="케어리스트 구역"
-          className="mt-4 shadow-[inset_0_-1px_0_var(--color-line)] min-[1100px]:hidden"
+          className="mt-4 min-[1100px]:hidden"
         />
 
         <div className="mt-5 grid gap-x-8 min-[1100px]:grid-cols-2">

@@ -1,6 +1,7 @@
 import { useId, useState } from 'react';
 import { ChevronRight, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import LoadError from '@/components/LoadError';
 import { BTN_SECONDARY } from '@/components/buttonStyles';
 import Card from '@/components/Card';
 import Icon from '@/components/Icon';
@@ -235,18 +236,11 @@ function AiReportBody({ pet, report, isRefreshing }) {
 
   if (report.isError) {
     return (
-      <div className="flex flex-wrap items-center gap-3">
-        <p role="alert" className="leading-[1.6] font-semibold text-ink-2">
-          {report.error.message}
-        </p>
-        <button
-          type="button"
-          onClick={() => report.refetch()}
-          className={BTN_SECONDARY}
-        >
-          다시 시도
-        </button>
-      </div>
+      <LoadError
+        message={report.error.message}
+        onRetry={() => report.refetch()}
+        className="py-2"
+      />
     );
   }
 

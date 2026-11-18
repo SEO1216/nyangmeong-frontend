@@ -1,15 +1,10 @@
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Badge from '@/components/Badge';
 import Icon from '@/components/Icon';
 import { getMoveState } from './widgetItems';
 
 /** 칩 색 */
-const CHIP_TONES = {
-  gray: 'bg-surface-2 text-ink-2',
-  green: 'bg-tone-green-bg text-tone-green-fg',
-  rose: 'bg-tone-rose-bg text-tone-rose-fg',
-  amber: 'bg-tone-amber-bg text-tone-amber-fg',
-};
 
 /**
  * [대시보드 요약 타일] 760px 미만 2열 (※신규 정책)
@@ -41,11 +36,9 @@ export default function WidgetTile({ item, content, petSn, petNm }) {
         {tile ? tile.value : '기록이 없어요'}
       </b>
       {tile?.chip && (
-        <span
-          className={`max-w-full self-start truncate rounded-full px-2 py-0.5 text-badge font-semibold ${CHIP_TONES[tile.chip.tone]}`}
-        >
-          {tile.chip.text}
-        </span>
+        <Badge tone={tile.chip.tone} className="max-w-full self-start">
+          <span className="truncate">{tile.chip.text}</span>
+        </Badge>
       )}
       {sub && <span className="truncate text-badge text-subtle">{sub}</span>}
     </Link>

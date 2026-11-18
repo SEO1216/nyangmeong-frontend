@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { generatePath, useNavigate } from 'react-router-dom';
+import NoticeBox from '@/components/NoticeBox';
 import DropdownSelect from '@/components/DropdownSelect';
 import DatePicker from '@/components/DatePicker';
 import Icon from '@/components/Icon';
@@ -14,17 +15,17 @@ import {
   useUpdateCheckup,
 } from '../queries';
 import { CHECKUP_TYPES } from '../scheduleTypes';
-import FieldError from './FieldError';
+import FieldError, { Required } from '@/components/FieldError';
 import FormModal from './FormModal';
 import NearScheduleModal from './NearScheduleModal';
 import CharCount from '../shared/CharCount';
-import { INPUT_CLASS, LABEL_CLASS, TEXTAREA_CLASS } from './formStyles';
+import { INPUT, LABEL, TEXTAREA } from '@/components/formStyles';
 
 const MAX_HOSPITAL_NAME_LENGTH = 80;
 const MAX_CONTENT_LENGTH = 500;
 const MAX_MEMO_LENGTH = 200;
 
-const REQUIRED = <span className="ml-0.5 font-bold text-danger">*</span>;
+const REQUIRED = <Required />;
 const OPTIONAL = (
   <span className="ml-1 text-[13px] font-medium text-subtle">선택</span>
 );
@@ -163,11 +164,10 @@ export default function CheckupModal({
   return (
     <>
       <FormModal
-        icon="local_hospital"
         title={checkup ? '검진기록 수정' : '검진기록 추가'}
         submitLabel={checkup ? '저장하기' : '등록하기'}
         hasFooter={step === 'form'}
-        widthClassName="w-[min(560px,calc(100%-32px))]"
+        width={560}
         isPending={isPending}
         onSubmit={handleSubmit}
         onClose={onClose}
@@ -201,7 +201,7 @@ export default function CheckupModal({
           <>
             {onlyPetSn === null && (
               <label className="flex flex-col gap-1.5">
-                <span className={LABEL_CLASS}>반려동물{REQUIRED}</span>
+                <span className={LABEL}>반려동물{REQUIRED}</span>
                 <DropdownSelect
                   value={petSn ?? ''}
                   invalid={isInvalid('pet')}
@@ -219,7 +219,7 @@ export default function CheckupModal({
             )}
 
             <label className="flex flex-col gap-1.5">
-              <span className={LABEL_CLASS}>검진일{REQUIRED}</span>
+              <span className={LABEL}>검진일{REQUIRED}</span>
               <DatePicker
                 value={ckupYmd}
                 invalid={isInvalid('date')}
@@ -235,12 +235,12 @@ export default function CheckupModal({
 
             <div className="grid grid-cols-2 gap-x-4">
               <label className="flex flex-col gap-1.5">
-                <span className={LABEL_CLASS}>동물병원명{REQUIRED}</span>
+                <span className={LABEL}>동물병원명{REQUIRED}</span>
                 <input
                   value={hsptlNm}
                   maxLength={MAX_HOSPITAL_NAME_LENGTH}
                   aria-invalid={isInvalid('hosp')}
-                  className={INPUT_CLASS}
+                  className={INPUT}
                   onChange={(event) => setHsptlNm(event.target.value)}
                 />
                 <CharCount value={hsptlNm} max={MAX_HOSPITAL_NAME_LENGTH} />
@@ -249,7 +249,7 @@ export default function CheckupModal({
                 )}
               </label>
               <label className="flex flex-col gap-1.5">
-                <span className={LABEL_CLASS}>검진 종류{REQUIRED}</span>
+                <span className={LABEL}>검진 종류{REQUIRED}</span>
                 <DropdownSelect
                   value={ckupTypeCd}
                   invalid={isInvalid('type')}
@@ -267,42 +267,39 @@ export default function CheckupModal({
             </div>
 
             <label className="flex flex-col gap-1.5">
-              <span className={LABEL_CLASS}>검진 내용{OPTIONAL}</span>
+              <span className={LABEL}>검진 내용{OPTIONAL}</span>
               <textarea
                 value={ckupCn}
                 maxLength={MAX_CONTENT_LENGTH}
                 placeholder="진료받은 내용을 적어주세요"
-                className={TEXTAREA_CLASS}
+                className={TEXTAREA}
                 onChange={(event) => setCkupCn(event.target.value)}
               />
               <CharCount value={ckupCn} max={MAX_CONTENT_LENGTH} />
             </label>
 
             <label className="flex flex-col gap-1.5">
-              <span className={LABEL_CLASS}>검진 메모{OPTIONAL}</span>
+              <span className={LABEL}>검진 메모{OPTIONAL}</span>
               <input
                 value={ckupMemoCn}
                 maxLength={MAX_MEMO_LENGTH}
                 placeholder="다음에 확인할 것"
-                className={INPUT_CLASS}
+                className={INPUT}
                 onChange={(event) => setCkupMemoCn(event.target.value)}
               />
               <CharCount value={ckupMemoCn} max={MAX_MEMO_LENGTH} />
             </label>
 
-            <p className="flex gap-2 rounded-[10px] bg-surface-2 px-4 py-3 text-muted">
+            <NoticeBox className="flex gap-2">
               <Icon name="event" className="shrink-0 text-lg" />
               저장하면 케어 캘린더에도 표시됩니다. 같은 날짜에 등록한 병원
               일정이 있으면 그 일정과 자동으로 연결됩니다
-            </p>
+            </NoticeBox>
 
             {createReceiptCheckup.isError && (
-              <p
-                role="alert"
-                className="rounded-xl border border-danger/30 bg-danger-soft px-4 py-3 text-danger"
-              >
+              <NoticeBox tone="danger" role="alert">
                 {createReceiptCheckup.error.message}
-              </p>
+              </NoticeBox>
             )}
           </>
         )}

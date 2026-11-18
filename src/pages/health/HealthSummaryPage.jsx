@@ -1,4 +1,5 @@
 import { useSearchParams } from 'react-router-dom';
+import LoadError from '@/components/LoadError';
 import SkeletonCard from '@/components/SkeletonCard';
 import HealthDashboard, {
   DashboardSkeleton,
@@ -52,10 +53,13 @@ function HealthSummaryContent({ mbrSn }) {
     pet: selectedPet,
     isPending: isPetsPending,
     isError: isPetsError,
+    refetch: refetchPets,
   } = useSelectedPet();
-  const { data: summary, isError: isSummaryError } = useHealthSummary(
-    selectedPet?.petSn ?? null,
-  );
+  const {
+    data: summary,
+    isError: isSummaryError,
+    refetch: refetchSummary,
+  } = useHealthSummary(selectedPet?.petSn ?? null);
 
   if (isPetsPending) {
     return (
@@ -67,9 +71,10 @@ function HealthSummaryContent({ mbrSn }) {
   if (isPetsError || isSummaryError) {
     return (
       <HealthLayout>
-        <p role="alert" className="text-muted">
-          건강기록을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요
-        </p>
+        <LoadError
+          message="건강기록을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요"
+          onRetry={() => (isPetsError ? refetchPets() : refetchSummary())}
+        />
       </HealthLayout>
     );
   }

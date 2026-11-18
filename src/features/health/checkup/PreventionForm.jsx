@@ -9,13 +9,13 @@ import {
   CYCLE_DAYS_ERROR,
   isValidCycleDays,
 } from '../careDue';
-import FieldError from '../diary/FieldError';
-import { INPUT_CLASS, LABEL_CLASS } from '../diary/formStyles';
+import FieldError, { Required } from '@/components/FieldError';
+import { INPUT, LABEL } from '@/components/formStyles';
 import { useCreatePrevention } from '../queries';
 import { SUB_BOX } from './checkupStyles';
 import { PREVENTION_ITEMS } from './checkupTypes';
 
-const REQUIRED = <span className="ml-0.5 font-bold text-danger">*</span>;
+const REQUIRED = <Required />;
 
 // 한달(HLTG15)
 const DEFAULT_CYCLE = 'HLTC0040';
@@ -71,7 +71,7 @@ export default function PreventionForm({ petSn, ckupRcdSn, onClose }) {
     >
       <div className="grid gap-x-8 gap-y-5 min-[760px]:grid-cols-2">
         <label className="flex flex-col gap-1.5">
-          <span className={LABEL_CLASS}>예방 항목{REQUIRED}</span>
+          <span className={LABEL}>예방 항목{REQUIRED}</span>
           <DropdownSelect
             value={prvntItmCd}
             options={PREVENTION_ITEMS.map((item) => ({
@@ -82,7 +82,7 @@ export default function PreventionForm({ petSn, ckupRcdSn, onClose }) {
           />
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className={LABEL_CLASS}>반복 주기{REQUIRED}</span>
+          <span className={LABEL}>반복 주기{REQUIRED}</span>
           <DropdownSelect
             value={rptCycleCd}
             options={CARE_CYCLES.map((cycle) => ({
@@ -96,7 +96,7 @@ export default function PreventionForm({ petSn, ckupRcdSn, onClose }) {
 
       {isCustom && (
         <label className="flex flex-col gap-1.5">
-          <span className={LABEL_CLASS}>일수{REQUIRED}</span>
+          <span className={LABEL}>일수{REQUIRED}</span>
           <span className="relative">
             <input
               type="number"
@@ -105,7 +105,7 @@ export default function PreventionForm({ petSn, ckupRcdSn, onClose }) {
               value={rptCycleDayCnt}
               placeholder="예: 10"
               aria-invalid={isInvalid('days')}
-              className={`${INPUT_CLASS} pr-16 tabular-nums`}
+              className={`${INPUT} pr-16 tabular-nums`}
               onChange={(event) => setRptCycleDayCnt(event.target.value)}
             />
             <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-subtle">
@@ -117,7 +117,7 @@ export default function PreventionForm({ petSn, ckupRcdSn, onClose }) {
       )}
 
       <label className="flex flex-col gap-1.5">
-        <span className={LABEL_CLASS}>시작일{REQUIRED}</span>
+        <span className={LABEL}>시작일{REQUIRED}</span>
         <DatePicker
           value={startYmd}
           invalid={isInvalid('start')}

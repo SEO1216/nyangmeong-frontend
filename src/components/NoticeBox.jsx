@@ -5,10 +5,19 @@ const TONES = {
   danger: 'bg-danger-soft text-danger',
 };
 
-/** 안내·주의 상자: 둥글기 10px(rounded-box), 안쪽 여백 16·12, 14px 글자 */
-export default function NoticeBox({ tone = 'info', className = '', children }) {
+/**
+ * 안내·주의 상자: 둥글기 10px(rounded-box), 안쪽 여백 16·12, 14px 글자(UI 체크리스트 83)
+ * role: 오류 안내처럼 바로 읽혀야 하면 "alert"
+ */
+export default function NoticeBox({
+  tone = 'info',
+  role,
+  className = '',
+  children,
+}) {
   return (
     <div
+      role={role}
       className={`rounded-box px-4 py-3 text-sm leading-[1.6] ${TONES[tone]} ${className}`}
     >
       {children}

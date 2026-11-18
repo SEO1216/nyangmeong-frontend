@@ -18,7 +18,8 @@ import { formatDate, getTodayYmd, getYear } from '@/utils/formatDate';
 import { useCheckupYears, useCheckups, useDeleteCheckup } from '../queries';
 import CareShortageNotice from '../CareShortageNotice';
 import CheckupModal from './CheckupModal';
-import EmptyBox from './EmptyBox';
+import EmptyResult from '@/components/EmptyResult';
+import Icon from '@/components/Icon';
 
 /** 한 페이지에 고정으로 보여 주는 검진기록 수 */
 const PAGE_SIZE = 10;
@@ -160,8 +161,14 @@ export default function CheckupListCard({ pet, pets, onReceipt }) {
       </div>
 
       {pageCheckups.length === 0 ? (
-        <EmptyBox
-          icon="local_hospital"
+        <EmptyResult
+          isCompact
+          icon={
+            <Icon
+              name="local_hospital"
+              className="text-[28px] text-line-strong"
+            />
+          }
           title="등록된 검진기록이 없어요"
           description="병원에 다녀왔다면 직접 입력하거나 영수증으로 등록해 보세요"
         />

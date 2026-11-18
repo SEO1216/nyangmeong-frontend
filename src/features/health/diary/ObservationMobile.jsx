@@ -4,7 +4,7 @@ import Icon from '@/components/Icon';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import { formatDate, formatMonthDayDot, getYmdOf } from '@/utils/formatDate';
 import { round2 } from '../numberFormat';
-import LineChart from './LineChart';
+import LineChart from '@/components/LineChart';
 import ObservationPhoto from './ObservationPhoto';
 import {
   CHART_COUNT,

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Card from '@/components/Card';
 import DropdownSelect from '@/components/DropdownSelect';
+import EmptyResult from '@/components/EmptyResult';
 import Icon from '@/components/Icon';
 import { addDays, formatMonthDayDot, getTodayYmd } from '@/utils/formatDate';
 import { toCareIcon } from './careIcons';
@@ -58,19 +59,14 @@ export default function CareRecordList({ records, regularSns, onCancel }) {
       }
     >
       {dates.length === 0 ? (
-        <div className="rounded-[10px] border border-dashed border-line-strong">
-          <div className="flex flex-col items-center gap-2 px-4 py-6 text-center">
-            <span className="grid size-10 place-items-center rounded-full bg-surface-2 text-subtle">
-              <Icon name="task_alt" />
-            </span>
-            <p className="text-sm font-semibold text-ink">
-              최근 {periodDays}일 동안 완료한 케어가 없어요
-            </p>
-            <p className="text-sm text-muted">
-              위 케어 항목을 누르면 완료로 표시되고 여기에 날짜별로 쌓여요
-            </p>
-          </div>
-        </div>
+        <EmptyResult
+          isCompact
+          icon={
+            <Icon name="task_alt" className="text-[28px] text-line-strong" />
+          }
+          title={`최근 ${periodDays}일 동안 완료한 케어가 없어요`}
+          description="위 케어 항목을 누르면 완료로 표시되고 여기에 날짜별로 쌓여요"
+        />
       ) : (
         <ul>
           {pageDates.map((ymd) => (

@@ -1,15 +1,17 @@
+import NoticeBox from '@/components/NoticeBox';
 import Card from '@/components/Card';
+import Badge from '@/components/Badge';
 import Icon from '@/components/Icon';
 import { BTN_SECONDARY } from '@/components/buttonStyles';
-import FieldError from '../diary/FieldError';
+import FieldError from '@/components/FieldError';
 import { LAB_NUMBER_MAX_LENGTH } from '../numberFormat';
-import { INPUT_CLASS } from '../diary/formStyles';
+import { INPUT } from '@/components/formStyles';
 import { getExcludeReason } from './labRows';
 
 const TH_CLASS =
   'h-12 whitespace-nowrap border-b border-line bg-surface-2 px-3 text-left font-semibold text-ink-2';
 const TD_CLASS = 'h-14 border-b border-line-soft px-3 group-last:border-b-0';
-const CELL_INPUT_CLASS = `${INPUT_CLASS} w-[120px] max-[760px]:w-full`;
+const CELL_INPUT_CLASS = `${INPUT} w-[120px] max-[760px]:w-full`;
 
 const EXCLUDE_LABEL = {
   registered: '이미 등록됨 · 저장 제외',
@@ -58,17 +60,14 @@ export default function AnalysisReview({
       className="[&>div:last-child]:flex [&>div:last-child]:flex-col [&>div:last-child]:gap-4"
     >
       {analysisError && (
-        <p
-          role="alert"
-          className="flex gap-2.5 rounded-[10px] bg-danger-soft px-3.5 py-3 text-danger"
-        >
-          <Icon name="error" className="mt-0.5 text-lg" />
+        <NoticeBox tone="danger" role="alert" className="flex gap-2.5">
+          <Icon name="error" className="text-lg" />
           <span>
             {analysisError.message ||
               ANALYZE_ERROR_MESSAGE[analysisError.code] ||
               DEFAULT_ANALYZE_ERROR}
           </span>
-        </p>
+        </NoticeBox>
       )}
 
       {!analysisError && (
@@ -143,9 +142,7 @@ export default function AnalysisReview({
                     </td>
                     <td className={`${TD_CLASS} whitespace-nowrap`}>
                       {isExcluded && (
-                        <span className="inline-flex h-6 items-center rounded-full bg-white px-2.5 text-[13px] text-ink-2 shadow-[inset_0_0_0_1px_var(--color-line)]">
-                          {EXCLUDE_LABEL[reason]}
-                        </span>
+                        <Badge tone="outline">{EXCLUDE_LABEL[reason]}</Badge>
                       )}
                     </td>
                   </tr>
@@ -169,13 +166,13 @@ export default function AnalysisReview({
       ))}
 
       {!analysisError && rows.length > 0 && (
-        <p className="flex gap-2.5 rounded-[10px] border border-warn-line bg-warn-soft px-3.5 py-3 text-warn">
-          <Icon name="warning" className="mt-0.5 text-lg" />
+        <NoticeBox tone="warn" className="flex gap-2.5">
+          <Icon name="warning" className="text-lg" />
           <span>
             AI가 자동으로 인식·판정한 결과이며 실수가 있을 수 있습니다. 저장
             전에 반드시 확인해 주세요.
           </span>
-        </p>
+        </NoticeBox>
       )}
 
       <div className="flex flex-wrap gap-2">

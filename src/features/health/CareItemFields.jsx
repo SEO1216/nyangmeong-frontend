@@ -1,5 +1,6 @@
 import DatePicker from '@/components/DatePicker';
 import Icon from '@/components/Icon';
+import NoticeBox from '@/components/NoticeBox';
 import { formatYmdWeekday, getTodayYmd } from '@/utils/formatDate';
 import {
   CARE_CYCLES,
@@ -12,7 +13,8 @@ import {
   isValidCycleDays,
 } from './careDue';
 import SegmentSwitch from './SegmentSwitch';
-import FieldError from './diary/FieldError';
+import FieldError, { Required } from '@/components/FieldError';
+import { HELP, INPUT, LABEL } from '@/components/formStyles';
 import CharCount from './shared/CharCount';
 
 /** 아이콘 목록과 이름: 퍼블리싱 html/hlt-calendar.html의 관리 항목 추가 모달과 같음. "기타"는 기본 아이콘 */
@@ -34,16 +36,6 @@ const ZONES = [
   { cd: CARE_ZONE.DAILY, nm: '일상관리' },
   { cd: CARE_ZONE.REGULAR, nm: '정기관리' },
 ];
-
-const LABEL_CLASS =
-  'flex items-center gap-0.5 text-base leading-[1.4] font-semibold text-ink';
-const INPUT_CLASS =
-  'block h-10 w-full rounded-[6px] border border-input-line bg-white px-3 text-base leading-[1.4] text-ink outline-none hover:border-line-strong focus:border-brand-500 focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)]';
-const HELP_CLASS = 'text-sm leading-normal text-muted';
-
-function Required() {
-  return <span className="ml-0.5 font-bold text-danger">*</span>;
-}
 
 function Optional() {
   return <span className="ml-1 text-[13px] font-medium text-subtle">선택</span>;
@@ -83,9 +75,9 @@ export default function CareItemFields({
         )
       : null;
   const nextDue = nextDueYmd && (
-    <p className="rounded-xl bg-surface-2 px-4 py-3 tabular-nums">
+    <NoticeBox className="tabular-nums">
       다음 예정일 {formatYmdWeekday(nextDueYmd)}
-    </p>
+    </NoticeBox>
   );
 
   return (
@@ -93,7 +85,7 @@ export default function CareItemFields({
       {!isCycleOnly && (
         <>
           <label className="flex flex-col gap-1.5">
-            <span className={LABEL_CLASS}>
+            <span className={LABEL}>
               항목명
               <Required />
             </span>
@@ -103,7 +95,7 @@ export default function CareItemFields({
               maxLength={MAX_NAME_LENGTH}
               placeholder="예: 영양제"
               disabled={isBasic}
-              className={`${INPUT_CLASS} disabled:bg-surface-2 disabled:text-subtle`}
+              className={INPUT}
               onChange={(event) =>
                 onChange({ careArtclNm: event.target.value })
               }
@@ -114,7 +106,7 @@ export default function CareItemFields({
           </label>
 
           <fieldset className="flex flex-col gap-1.5">
-            <legend className={`${LABEL_CLASS} mb-1.5`}>
+            <legend className={`${LABEL} mb-1.5`}>
               카테고리 대표 아이콘
               <Optional />
             </legend>
@@ -148,11 +140,11 @@ export default function CareItemFields({
                 );
               })}
             </div>
-            <p className={HELP_CLASS}>고르지 않으면 기본 아이콘으로 추가돼요</p>
+            <p className={HELP}>고르지 않으면 기본 아이콘으로 추가돼요</p>
           </fieldset>
 
           <fieldset className="flex flex-col gap-1.5">
-            <legend className={`${LABEL_CLASS} mb-1.5`}>
+            <legend className={`${LABEL} mb-1.5`}>
               반복 유형
               <Required />
             </legend>
@@ -169,7 +161,7 @@ export default function CareItemFields({
       {isRegular && (
         <>
           <fieldset className="flex flex-col gap-1.5">
-            <legend className={`${LABEL_CLASS} mb-1.5`}>
+            <legend className={`${LABEL} mb-1.5`}>
               주기
               <Required />
             </legend>
@@ -189,7 +181,7 @@ export default function CareItemFields({
                     placeholder="예: 10"
                     aria-label="반복 일수"
                     aria-invalid={showDaysError}
-                    className={`${INPUT_CLASS} pr-16 tabular-nums aria-invalid:border-danger`}
+                    className={`${INPUT} pr-16 tabular-nums`}
                     onChange={(event) =>
                       onChange({ cycleDrctInptDayCnt: event.target.value })
                     }
@@ -198,7 +190,7 @@ export default function CareItemFields({
                     일마다
                   </span>
                 </div>
-                <p className={HELP_CLASS}>마지막으로 한 날부터 n일마다</p>
+                <p className={HELP}>마지막으로 한 날부터 n일마다</p>
                 {showDaysError && <FieldError>{CYCLE_DAYS_ERROR}</FieldError>}
               </>
             )}
@@ -209,7 +201,7 @@ export default function CareItemFields({
           ) : (
             <div className="flex flex-col gap-1.5">
               <label className="flex flex-col gap-1.5">
-                <span className={LABEL_CLASS}>
+                <span className={LABEL}>
                   마지막으로 한 날
                   <Optional />
                 </span>
@@ -219,7 +211,7 @@ export default function CareItemFields({
                   onChange={(lastYmd) => onChange({ lastCmptnYmd: lastYmd })}
                 />
               </label>
-              <p className={HELP_CLASS}>
+              <p className={HELP}>
                 마지막으로 한 날을 알려주시면 다음 예정일을 더 정확하게
                 계산해요. 비우면 오늘부터 셉니다
               </p>
