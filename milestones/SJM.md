@@ -258,6 +258,13 @@
 - 기다리는 것: 백엔드 `GET /pets/limit`·`GET /caregiver-invitations/{sn}`의 `remainingPetCount`·수락 400 `PET_LIMIT_EXCEEDED`의 `message`와 `data.remainingPetCount` (SJM, 백엔드 끝남)
 - 완료 조건: `InvitationAccept`의 안내 문구가 `MAX_OWN_PETS`가 아니라 `petMaxCnt`(또는 서버 `message`)를 쓴다. 고르는 수는 `remainingPetCount`로 막는다. `yarn -s lint`, `yarn -s build` 종료 코드 0
 
+## SCR-MYP-020 포인트 관리/케어미션 · 포인트 안내 문구를 등급 배점으로 — 끝
+
+- 기능: 명세 기능 ID 추가 없음. 걸치는 기능 FN-MYP-020-05 (미션 포인트 지급 규칙)
+- 기다리는 것: 백엔드 케어미션 개편(쉬움 5·보통 10·어려움 15P, 하루 60P) (SJM, 백엔드 끝남)
+- 완료 조건: `features/point/guide/PointGuide.jsx` 6행 "미션마다 1~20P가 쌓여요"를 등급 배점(쉬움 5·보통 10·어려움 15P, 하루 60P) 기준 문구로 바꾼다. `yarn -s lint`, `yarn -s build` 종료 코드 0
+- 추가 요청: 추가-1 `utils/petCodes.js`의 `MAX_OWN_PETS` 삭제, 추가-2·3 안내 4칸 문구를 1440·1280·390px에서 한 줄로(실제 문구는 핸드오프 기록)
+
 ## 제외
 
 - 없음. 마이페이지 명세의 화면은 모두 SJM 담당이다
