@@ -16,7 +16,6 @@ import Avatar from '@/components/Avatar';
 import Badge from '@/components/Badge';
 import { TEXT_ACTION, TEXT_ACTION_DANGER } from '@/components/buttonStyles';
 import ConfirmModal from '@/components/ConfirmModal';
-import ImageViewer from '@/components/ImageViewer';
 import LikeButton from '@/components/LikeButton';
 import PostBody from '@/components/PostBody';
 import ReportModal from '@/components/ReportModal';
@@ -31,6 +30,7 @@ import {
   getYmdOf,
 } from '@/utils/formatDate';
 import { publicFileUrl } from '@/utils/fileUrl';
+import AttachedImages from '../AttachedImages';
 import CommentSection from '../CommentSection';
 import {
   EXTEND_DAYS,
@@ -71,9 +71,7 @@ function InfoRow({ icon, label, children }) {
         {icon}
         {label}
       </dt>
-      <dd className="min-w-0 leading-6 break-words text-ink">
-        {children}
-      </dd>
+      <dd className="min-w-0 leading-6 break-words text-ink">{children}</dd>
     </div>
   );
 }
@@ -212,7 +210,6 @@ export default function MissingDetail({ post }) {
   const markFound = useMarkMissingFound();
   const extend = useExtendMissing();
   const [modal, setModal] = useState('');
-  const [viewerIndex, setViewerIndex] = useState(null);
   const listTo = `${PATHS.COMMUNITY_MISSING}${state?.listSearch ?? ''}`;
   const isMine = post.owner;
   const found = isFound(post);
@@ -307,25 +304,7 @@ export default function MissingDetail({ post }) {
           )}
 
           <PostBody content={post.pstCn}>
-            {post.imgs.length > 0 && (
-              <div className="mb-6 flex flex-col items-center gap-3">
-                {post.imgs.map((img, index) => (
-                  <button
-                    key={img.atchFileSn}
-                    type="button"
-                    aria-label={`첨부 이미지 ${index + 1} 크게 보기`}
-                    onClick={() => setViewerIndex(index)}
-                    className="max-w-full cursor-zoom-in"
-                  >
-                    <img
-                      src={publicFileUrl(img.atchFileSn)}
-                      alt={`첨부 이미지 ${index + 1}`}
-                      className="h-auto max-h-[min(640px,75vh)] w-auto max-w-full rounded-[10px] object-contain"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
+            <AttachedImages imgs={post.imgs} className="mb-6" />
             <section aria-labelledby="missing-info-title">
               <h3
                 id="missing-info-title"
@@ -483,18 +462,6 @@ export default function MissingDetail({ post }) {
         )}
       </div>
 
-      {viewerIndex !== null && (
-        <ImageViewer
-          images={post.imgs.map((img, index) => ({
-            key: img.atchFileSn,
-            src: publicFileUrl(img.atchFileSn),
-            name: `첨부 이미지 ${index + 1}`,
-          }))}
-          index={viewerIndex}
-          onChange={setViewerIndex}
-          onClose={() => setViewerIndex(null)}
-        />
-      )}
       {modal === 'delete' && (
         <ConfirmModal
           title="실종 게시글을 삭제할까요? 삭제한 글과 제보 댓글은 되돌릴 수 없어요. 찾으셨다면 삭제 대신 '찾았어요'를 눌러 주세요"

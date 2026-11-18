@@ -1,7 +1,9 @@
 import { ChevronRight, Heart, MessageCircleHeart } from 'lucide-react';
 import { generatePath, Link } from 'react-router-dom';
+import FileImage from '@/components/FileImage';
 import { PATHS } from '@/routes/paths';
 import { publicFileUrl } from '@/utils/fileUrl';
+import ImagePlaceholder from './ImagePlaceholder';
 import { useHealthTips, usePopularPhoto, useTodayStory } from './queries';
 
 const CARD_CLASS =
@@ -93,10 +95,10 @@ export default function StoryRail({ action }) {
           className="relative overflow-hidden rounded-[14px] bg-[#f4f6f6] shadow-[0_1px_2px_rgba(26,50,52,0.06)] max-[1100px]:mt-10 max-[760px]:[&+section]:mt-4"
         >
           <Link to={detailPath(photo.pstSn)} className="group block">
-            <img
+            <FileImage
               src={publicFileUrl(photo.imgs[0].atchFileSn)}
-              alt=""
               className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+              fallback={<ImagePlaceholder className="aspect-square w-full" />}
             />
             <span
               aria-hidden="true"
