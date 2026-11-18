@@ -9,9 +9,9 @@ import { useHealthTips, usePopularPhoto, useTodayStory } from './queries';
 const CARD_CLASS =
   'rounded-[14px] border border-[#e2e7e7] bg-white px-5 py-5 shadow-[0_1px_2px_rgba(26,50,52,0.06)] max-[1100px]:mt-10 max-[760px]:[&+section]:mt-4';
 
-/** 접힌 모서리: 2px 칸 12×12개를 계단으로 자르고(clipPath), 접힌 면과 선을 같은 칸으로 그린다 */
-const CELL = 2;
-const STEPS = 12;
+/** 접힌 모서리: 1px 칸 24×24개를 계단으로 자르고(clipPath), 접힌 면과 선을 같은 칸으로 그린다 */
+const CELL = 1;
+const STEPS = 24;
 const NOTCH = CELL * STEPS;
 const FOLD_CLIP = `polygon(0 0, ${Array.from(
   { length: STEPS },
@@ -23,7 +23,7 @@ const FOLD_CLIP = `polygon(0 0, ${Array.from(
   })
   .join(', ')}, 100% 100%, 0 100%)`;
 
-/** 칸 (row, col): 대각선·왼쪽·아래는 선(fab-line), 그 안쪽은 접힌 면(fab). 대각선 위쪽은 잘려 나간 칸 */
+/** 칸 (row, col): 대각선·왼쪽·아래는 선(brand-100), 그 안쪽은 접힌 면(white). 대각선 위쪽은 잘려 나간 칸 */
 function FoldCorner() {
   const cells = [];
   for (let row = 0; row < STEPS; row += 1) {
@@ -36,7 +36,7 @@ function FoldCorner() {
           y={row}
           width="1"
           height="1"
-          className={isLine ? 'fill-fab-line' : 'fill-fab'}
+          className={isLine ? 'fill-brand-100' : 'fill-white'}
         />,
       );
     }
@@ -47,7 +47,7 @@ function FoldCorner() {
       viewBox={`0 0 ${STEPS} ${STEPS}`}
       shapeRendering="crispEdges"
       style={{ width: NOTCH, height: NOTCH }}
-      className="absolute -top-0.5 -right-0.5"
+      className="absolute -top-px -right-px"
     >
       {cells}
     </svg>
@@ -76,7 +76,7 @@ export default function StoryRail({ action }) {
       {story && (
         <div
           style={{ clipPath: FOLD_CLIP }}
-          className="relative rounded-md border-2 border-fab-line bg-fab-soft px-5 py-4 max-[1100px]:order-first max-[1100px]:col-span-full max-[1100px]:mb-6"
+          className="relative rounded-md border border-brand-100 bg-brand-50 px-5 py-4 max-[1100px]:order-first max-[1100px]:col-span-full max-[1100px]:mb-6"
         >
           <FoldCorner />
           <p className="flex items-center gap-1.5 text-sm font-medium text-brand-500">

@@ -44,12 +44,12 @@ function MissingListSkeleton() {
   return (
     <div
       aria-busy="true"
-      className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 border-t border-line pt-6 max-[1100px]:grid-cols-1"
+      className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 max-[1100px]:grid-cols-1"
     >
       <div className="flex min-w-0 flex-col gap-5">
         <div
           aria-hidden="true"
-          className="grid grid-cols-2 gap-x-9 gap-y-5 max-[760px]:grid-cols-1 max-[760px]:gap-y-4"
+          className="rounded-card border border-line bg-white p-5 shadow-[0_1px_2px_rgba(26,50,52,0.06)] grid grid-cols-2 gap-x-9 gap-y-5 max-[760px]:grid-cols-1 max-[760px]:gap-y-4"
         >
           <Skeleton className="h-16" />
           <Skeleton className="h-16 max-[760px]:hidden" />
@@ -57,7 +57,7 @@ function MissingListSkeleton() {
           <Skeleton className="h-16 max-[760px]:hidden" />
           <Skeleton className="hidden h-10 max-[760px]:block" />
         </div>
-        <div className="border-t border-line pt-4">
+        <div>
           <Skeleton className="h-9 w-full" />
         </div>
         <ul className="grid grid-cols-3 gap-4 max-[1100px]:grid-cols-2 max-[560px]:grid-cols-1">
@@ -170,7 +170,6 @@ export default function MissingListPage() {
       section="community"
       menu={PATHS.COMMUNITY_MISSING}
       description={DESCRIPTION}
-      contentClassName="min-[1101px]:pt-[7px]"
     >
       {body}
     </SubPageLayout>
