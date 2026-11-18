@@ -1402,8 +1402,15 @@
 - 결과(2026-11-18): J1~J8 검증 1회차 통과, 사람 확인. 기획과 달라진 것: 탈퇴 버튼 반반 폭은 PC만(`min-[760px]:flex-1`, 모바일은 세로로 쌓여 꽉 참), `SnsLinkCard` [연동하기]의 `disabled:opacity-50` 빼고 `BTN_SECONDARY` 비활성 모양
 - 연결 남음: 없음
 
+## SCR-COM-002 UI 통일 2-K · 로그인·가입 계열(YAY) 값·부품 정리 — 끝
+- 기능: (2 마일스톤의 열한 번째 조각, 2026-11-18, 기준 `docs/ui-checklist.csv`) `features/member`의 `login/`·`signup/`·`password/`·`recovery/`·`shared/Auth*`·`authStyles.js`·`TermsModal.jsx`·`withdraw/WithdrawComplete.jsx`와 `pages/auth/*`에 체크리스트 2·12·37·71·72·73·83·94와 분기점 규칙 적용. `place`는 2-L
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 K1~K9 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): K1~K9 검증 1회차 통과, 사람 확인. 기획과 달라진 것: 94 나머지 세 쌍은 사람 결정(인증번호 보내기·중복확인·회원가입), SNS 로그인 버튼 그대로, K2 grep은 2-J `profileStyles` `SIDE_BTN` 5줄이 걸려 auth 쪽 0건으로 판단
+- 연결 남음: 없음
+
 ## SCR-COM-002 UI 통일 2 · 다른 담당 폴더 적용 — 대기
-- 남은 것(2026-11-18): 건강기록은 2-A·2-B, 가계부는 2-C, 반려동물(`pet`)은 2-D, 포인트(`point`)는 2-E, 고객센터·펫뉴스(`inquiry`·`notice`·`faq`·`news`)는 2-F, 펫이야기·커뮤니티 공용 부품은 2-G, 펫돌봄(`care/`)은 2-H, 실종센터(`missing/`)는 2-I, 회원정보·탈퇴(`member/profile`·`withdraw`)는 2-J로 끝. 남은 것 YAY 로그인·가입 계열(2-K)·`place`(2-L). 아래 다른 도메인(기준 `docs/ui-checklist.csv`), 회원 `profileStyles` → `components/formStyles`, 삭제 확인 창 `isDanger`
+- 남은 것(2026-11-18): 건강기록은 2-A·2-B, 가계부는 2-C, 반려동물(`pet`)은 2-D, 포인트(`point`)는 2-E, 고객센터·펫뉴스(`inquiry`·`notice`·`faq`·`news`)는 2-F, 펫이야기·커뮤니티 공용 부품은 2-G, 펫돌봄(`care/`)은 2-H, 실종센터(`missing/`)는 2-I, 회원정보·탈퇴(`member/profile`·`withdraw`)는 2-J, 로그인·가입 계열은 2-K로 끝. 남은 것 YAY `place`(2-L). 아래 다른 도메인(기준 `docs/ui-checklist.csv`), 회원 `profileStyles` → `components/formStyles`, 삭제 확인 창 `isDanger`
 - 기능: 같은 기준을 `features/health`(JAJ), `pet`·`point`·`expense`(SJM), `community`·`inquiry`·`notice`·`faq`·`news`(KSJ), `member`·`place`(YAY)에 적용. 도메인 하나씩 나눠 진행하고 PR 본문·팀 채널로 담당자에게 알린다. 체크리스트 6·12·15·16·18·26·27·31·37·56·58·62·66·68·69·71~74·76·79·80·83·84·94·96·98
 - 버그 후보(담당자에게 먼저 알림): 78 펫이야기 상세 내 글에도 신고 버튼(`community/PostDetail.jsx`, KSJ), 82 `ZONES` 순서 반대(`health/CareChipPicker.jsx`·`CareItemFields.jsx`, JAJ)
 - 이번엔 안 함: 기준 미정 18행(55·57·61·63·64·65·67·70·77·81·85·88~91), 메모 "변경없음"·"잠시 패스"·"정하지 않음" 행(8·17·19·21·25·30·35·75·86·97)
