@@ -39,11 +39,11 @@ function NewsListSkeleton() {
     <PageSkeleton>
       <div
         aria-hidden="true"
-        className="flex flex-wrap items-end justify-between gap-3 border-b border-[#d3dae2] px-4 pt-6 pb-3 max-[760px]:flex-col max-[760px]:items-stretch"
+        className="flex flex-wrap items-center justify-between gap-3 max-[760px]:flex-col max-[760px]:items-stretch"
       >
-        <div className="flex max-w-full gap-8 overflow-hidden pb-1 max-[760px]:gap-3">
+        <div className="flex max-w-full gap-1.5 overflow-hidden">
           {Array.from({ length: 5 }, (_, index) => (
-            <Skeleton key={index} className="h-5 w-14 max-[760px]:w-11" />
+            <Skeleton key={index} className="h-10 w-16 rounded-full" />
           ))}
         </div>
         <Skeleton className="h-10 w-[300px] max-[760px]:w-full" />
@@ -116,7 +116,6 @@ export default function NewsListPage() {
       section="community"
       menu={PATHS.COMMUNITY_NEWS}
       description={DESCRIPTION}
-      contentClassName="min-[1101px]:pt-0"
     >
       {body}
     </SubPageLayout>

@@ -184,7 +184,6 @@ export default function PostListPage() {
       section="community"
       menu={PATHS.COMMUNITY}
       description={DESCRIPTION}
-      contentClassName="min-[1101px]:pt-[7px]"
     >
       {body}
     </SubPageLayout>

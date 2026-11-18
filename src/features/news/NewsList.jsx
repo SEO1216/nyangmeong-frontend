@@ -78,15 +78,15 @@ export default function NewsList({
   const { content, page, totalPages } = news;
 
   const tabClass = (selected) =>
-    `h-14 shrink-0 cursor-pointer px-4 text-base leading-none whitespace-nowrap max-[760px]:h-12 ${selected ? 'border-b-2 border-[#285a5c] font-bold text-[#1a3234]' : 'font-medium text-[#566465] hover:text-[#1a3234]'}`;
+    `inline-flex h-10 shrink-0 cursor-pointer items-center rounded-full border px-3.5 text-sm whitespace-nowrap ${selected ? 'border-brand-500 bg-brand-500 font-semibold text-white' : 'border-input-line bg-white font-medium text-ink-2 hover:border-line-strong'}`;
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="mb-1 flex flex-wrap items-end justify-between gap-3 border-b border-[#d3dae2] max-[760px]:flex-col max-[760px]:items-stretch">
+      <div className="flex flex-wrap items-center justify-between gap-3 max-[760px]:flex-col max-[760px]:items-stretch">
         <div
           role="tablist"
           aria-label="뉴스 카테고리"
-          className="flex overflow-x-auto"
+          className="flex gap-1.5 overflow-x-auto"
         >
           <button
             type="button"
@@ -117,7 +117,7 @@ export default function NewsList({
           onChange={setInput}
           onSubmit={() => onSearch(input.trim())}
           placeholder="제목 또는 내용 검색"
-          className="mb-4 w-[300px] max-[760px]:mb-3 max-[760px]:w-full"
+          className="w-[300px] max-[760px]:w-full"
         />
       </div>
 
