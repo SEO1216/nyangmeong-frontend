@@ -16,7 +16,6 @@ import Avatar from '@/components/Avatar';
 import Badge from '@/components/Badge';
 import { TEXT_ACTION, TEXT_ACTION_DANGER } from '@/components/buttonStyles';
 import ConfirmModal from '@/components/ConfirmModal';
-import ImageViewer from '@/components/ImageViewer';
 import LikeButton from '@/components/LikeButton';
 import PostBody from '@/components/PostBody';
 import ReportModal from '@/components/ReportModal';
@@ -31,6 +30,7 @@ import {
   getYmdOf,
 } from '@/utils/formatDate';
 import { publicFileUrl } from '@/utils/fileUrl';
+import AttachedImages from '../AttachedImages';
 import CommentSection from '../CommentSection';
 import {
   EXTEND_DAYS,
@@ -66,12 +66,12 @@ const NOTE_CLASS =
 
 function InfoRow({ icon, label, children }) {
   return (
-    <div className="grid grid-cols-[120px_minmax(0,1fr)] gap-4 border-b border-line px-1 py-3.5 max-[760px]:grid-cols-[96px_minmax(0,1fr)] max-[760px]:gap-3">
-      <dt className="flex items-center gap-1.5 font-semibold text-ink-2">
+    <div className="col-span-2 grid grid-cols-subgrid">
+      <dt className="flex h-6 min-w-[120px] items-center gap-1.5 font-semibold whitespace-nowrap text-ink-2 max-[760px]:min-w-0">
         {icon}
         {label}
       </dt>
-      <dd className="min-w-0 break-words text-ink">{children}</dd>
+      <dd className="min-w-0 leading-6 break-words text-ink">{children}</dd>
     </div>
   );
 }
@@ -98,7 +98,7 @@ function PostHead({ post, children, actions }) {
       >
         {post.pstTtl}
       </h2>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 pb-1">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-b border-line pb-6 max-[760px]:pb-5">
         <p className="flex flex-wrap items-center gap-2 text-sm text-subtle">
           <Avatar src={publicFileUrl(post.mbrAtchFileSn)} className="size-8" />
           {post.mbrNcnm && (
@@ -210,7 +210,6 @@ export default function MissingDetail({ post }) {
   const markFound = useMarkMissingFound();
   const extend = useExtendMissing();
   const [modal, setModal] = useState('');
-  const [viewerIndex, setViewerIndex] = useState(null);
   const listTo = `${PATHS.COMMUNITY_MISSING}${state?.listSearch ?? ''}`;
   const isMine = post.owner;
   const found = isFound(post);
@@ -305,25 +304,7 @@ export default function MissingDetail({ post }) {
           )}
 
           <PostBody content={post.pstCn}>
-            {post.imgs.length > 0 && (
-              <div className="mb-6 flex flex-col items-center gap-3">
-                {post.imgs.map((img, index) => (
-                  <button
-                    key={img.atchFileSn}
-                    type="button"
-                    aria-label={`첨부 이미지 ${index + 1} 크게 보기`}
-                    onClick={() => setViewerIndex(index)}
-                    className="max-w-full cursor-zoom-in"
-                  >
-                    <img
-                      src={publicFileUrl(img.atchFileSn)}
-                      alt={`첨부 이미지 ${index + 1}`}
-                      className="h-auto max-h-[min(640px,75vh)] w-auto max-w-full rounded-[10px] object-contain"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
+            <AttachedImages imgs={post.imgs} className="mb-6" />
             <section aria-labelledby="missing-info-title">
               <h3
                 id="missing-info-title"
@@ -331,7 +312,7 @@ export default function MissingDetail({ post }) {
               >
                 실종 정보
               </h3>
-              <dl className="mt-3 border-t border-line-strong">
+              <dl className="mt-4 grid grid-cols-[max-content_minmax(0,1fr)] gap-x-4 gap-y-4 max-[760px]:gap-x-3">
                 <InfoRow
                   icon={
                     <PawPrint
@@ -481,18 +462,6 @@ export default function MissingDetail({ post }) {
         )}
       </div>
 
-      {viewerIndex !== null && (
-        <ImageViewer
-          images={post.imgs.map((img, index) => ({
-            key: img.atchFileSn,
-            src: publicFileUrl(img.atchFileSn),
-            name: `첨부 이미지 ${index + 1}`,
-          }))}
-          index={viewerIndex}
-          onChange={setViewerIndex}
-          onClose={() => setViewerIndex(null)}
-        />
-      )}
       {modal === 'delete' && (
         <ConfirmModal
           title="실종 게시글을 삭제할까요? 삭제한 글과 제보 댓글은 되돌릴 수 없어요. 찾으셨다면 삭제 대신 '찾았어요'를 눌러 주세요"

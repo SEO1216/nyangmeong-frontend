@@ -1,9 +1,11 @@
-import { Clock, MapPin, PartyPopper, PawPrint } from 'lucide-react';
+import { Clock, MapPin, PartyPopper } from 'lucide-react';
 import { generatePath, Link, useLocation } from 'react-router-dom';
 import Badge from '@/components/Badge';
+import FileImage from '@/components/FileImage';
 import { PATHS } from '@/routes/paths';
 import { formatRelativeTime } from '@/utils/formatDate';
 import { publicFileUrl } from '@/utils/fileUrl';
+import ImagePlaceholder from '../ImagePlaceholder';
 import { getBreedName, isFound } from '../missingCodes';
 import MissingStatusBadge from './MissingStatusBadge';
 import { FOUND_PRIVATE_TEXT, formatArea } from './missingUtils';
@@ -35,14 +37,13 @@ export default function MissingCard({ post }) {
             가족 품으로 돌아갔어요
           </span>
         ) : post.thumbAtchFileSn ? (
-          <img
+          <FileImage
             src={publicFileUrl(post.thumbAtchFileSn)}
-            alt=""
-            loading="lazy"
             className="size-full object-cover"
+            fallback={<ImagePlaceholder className="size-full" />}
           />
         ) : (
-          <PawPrint size={48} aria-hidden="true" />
+          <ImagePlaceholder className="size-full" />
         )}
         <span className="absolute top-3 left-3 flex gap-1.5 [&>*]:shadow-[0_1px_2px_rgba(15,23,35,0.12)]">
           {post.owner && (
