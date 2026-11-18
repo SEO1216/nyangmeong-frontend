@@ -41,7 +41,7 @@ export default function CountSection() {
   return (
     <section
       id="stats"
-      className="relative flex w-full scroll-mt-20 flex-col items-center justify-center overflow-hidden bg-[#f8f8f8] py-24 lg:h-[742px]"
+      className="relative flex w-full scroll-mt-20 flex-col items-center justify-center overflow-hidden bg-[#f8f8f8] min-h-[calc(100dvh-5rem)] py-24 lg:min-h-[max(742px,calc(100dvh-5rem))]"
     >
       <div className="mx-auto w-full max-w-7xl px-4">
         <FadeIn
@@ -49,13 +49,13 @@ export default function CountSection() {
           className="mb-16 flex flex-col items-center space-y-4 text-center lg:mb-24"
         >
           <span className="text-[14px] font-medium tracking-wider text-[#2c6669] uppercase md:text-[18px] lg:text-[20px]">
-            The NYANGMUNGCARE DATA
+            The PAWEVER DATA
           </span>
           <h2 className="text-[24px] leading-tight font-medium break-keep text-black md:text-[40px] lg:text-[48px] lg:font-normal">
             기록이 쌓이면 케어가 달라집니다
           </h2>
           <p className="text-[14px] leading-relaxed break-keep text-black md:text-[18px] lg:text-[20px]">
-            냥멍케어에 모인 기록입니다.
+            pawever에 모인 기록입니다.
             <br />
             보호자와 반려동물의 하루가 숫자로 남아요.
           </p>

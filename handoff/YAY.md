@@ -2,6 +2,8 @@
 
 ## 지금 하는 것
 
+파비콘 · 브라우저 탭 아이콘을 냥멍케어 발자국 로고로 — 진행 중 (직접 요청 2026-11-18, 사람 확인 남음). `public/favicon.svg`(Vite 기본 번개 아이콘)를 받은 발자국 로고 SVG(밝은 초록 #20915C 원 + 흰 발가락 4개 발자국, 메인 로고와 같은 초록)로 바꿈(앞서 넣은 첫 로고·발가락 3개 판·v2를 이 판으로 대체). `index.html`은 이미 `/favicon.svg`를 가리켜 그대로. 같은 날 요청으로 `src/assets/nm_logo.svg`(사용자 헤더·랜딩 헤더·인증·관리자 로고)를 받은 "pawever." 글자 로고(ever. 초록 #20915C 판)로 바꿈(viewBox만 글자 둘레로 잘라 냄). 흰 로고 `logo-white.svg`(랜딩 헤더 어두운 배경·인증 화면 사진 칸)도 받은 흰색 "pawever." 로고로 바꿈(viewBox 잘라 냄). 랜딩 푸터 왼쪽 로고는 대체 없이 뺐고(`LandingFooter.jsx`, 반려동물 그림·안내 문구만 가운데), `MainLogo.svg`는 이제 아무 데서도 안 쓴다. 플레이스 모바일 [이 지도 영역에서 다시 검색]이 두 줄로 꺾일 때 "다/시"가 갈라지지 않게 단어 단위로 꺾음(`PlaceMap.jsx` `break-keep`). 랜딩 섹션(서비스·과정·파트너·데이터·FAQ)을 화면 높이에서 헤더 80px를 뺀 높이 이상으로 늘림(`min-h-[calc(100dvh-5rem)]`, PC는 원래 높이와 큰 쪽). 데이터 섹션 영어 제목 "The NYANGMUNGCARE DATA" → "The PAWEVER DATA". 랜딩 헤더 메뉴로 섹션을 옮길 때는 헤더를 숨기지 않음(`LandingHeader.jsx` `goTo`, scrollend·휠·터치·키 입력에서 다시 숨김 켬. PC 메뉴도 `goTo`를 거치게 함). 랜딩 헤더 로고를 누르면 맨 위 히어로로 부드럽게 올라가고 슬라이드가 첫 장부터 다시 시작(`LandingHeader.jsx` `onHome`, `pages/landing/LandingPage.jsx` `HeroSlider key`). 랜딩(`features/landing/`)의 글자 "냥멍케어"·"냥멍 데이터"를 "pawever"·"pawever 데이터"로 바꿈(문구·alt·aria-label 18곳)
+
 SCR-HOS-001 플레이스 · 지도 범위 한 번에 받고 목록 안에서 거르기 — 끝남 (승인 2026-11-16 11:50, 검증 통과, 사람 확인 2026-11-16, PR #386). `whole=true`로 범위 전체를 한 번 받고 상호명·주소 거르기와 거리순·이름순은 받은 목록 안에서([검색]도 서버를 부르지 않음). 추가-1 목록 항목을 누르면 지도 이동·팝업, 추가-2 업체 사진 칸 제거, 추가-3 즐겨찾기 별을 노란 별만, 추가-4·5 핀 흰 테두리 제거·가로 85%, 추가-8 카테고리 탭 선택 배경 미끄러지기(추가-6 목록·핀·팝업 모션은 뺌), 추가-7 지도 부드러운 이동은 되돌림, 추가-9 [일반 지도 | 스카이뷰] 선택 배경 미끄러지기
 
 문서 정리 · 인증 이동 규칙을 지금 코드에 맞춤 — 진행 중 (승인 2026-10-27 16:29, 검증 통과, 사람 확인 남음, 커밋 3b31971). `docs/convention/api.md`·`docs/convention/pages.md`·`AGENTS.md` 2번. 결정: `skipAuthRedirect`는 원칙으로, AGENTS.md 2번 단서 삭제
