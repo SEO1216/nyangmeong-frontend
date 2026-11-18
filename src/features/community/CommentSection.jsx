@@ -24,15 +24,29 @@ function CommentInput({
   isPending,
   onSubmit,
   onCancel,
+  mention = '',
 }) {
-  const [text, setText] = useState('');
+  /** mention: 답글 대상 「@닉네임 」. 입력창에 미리 넣고, 보낼 때는 뗀다(서버가 rplyTrgtMbrNcnm으로 따로 준다) */
+  const [text, setText] = useState(mention);
   const generatedId = useId();
   const id = inputId ?? generatedId;
+  const textareaRef = useRef(null);
+
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (mention && el) {
+      el.focus();
+      el.setSelectionRange(mention.length, mention.length);
+    }
+  }, [mention]);
+
+  const body =
+    mention && text.startsWith(mention) ? text.slice(mention.length) : text;
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!text.trim() || isPending) return;
-    onSubmit(text.trim(), () => setText(''));
+    if (!body.trim() || isPending) return;
+    onSubmit(body.trim(), () => setText(mention));
   };
 
   return (
@@ -41,16 +55,17 @@ function CommentInput({
         {placeholder}
       </label>
       <textarea
+        ref={textareaRef}
         id={id}
         value={text}
-        maxLength={CMNT_MAX}
+        maxLength={CMNT_MAX + mention.length}
         placeholder={placeholder}
         onChange={(event) => setText(event.target.value)}
         className="block min-h-20 w-full resize-y rounded-md border border-[#d3dae2] bg-white px-3 py-2.5 text-base leading-[1.6] placeholder:text-[#8c9899] hover:border-[#b9c4c4] focus:border-[#285a5c] focus:ring-focus focus:outline-none"
       />
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs text-[#667374]">
-          {text.length} / {CMNT_MAX}
+          {body.length} / {CMNT_MAX}
         </span>
         <span className="flex gap-2">
           {onCancel && (
@@ -64,7 +79,7 @@ function CommentInput({
           )}
           <button
             type="submit"
-            disabled={!text.trim() || isPending}
+            disabled={!body.trim() || isPending}
             className="inline-flex h-9 min-w-24 cursor-pointer items-center justify-center rounded-md bg-[#e9f2f2] px-4 text-sm font-semibold text-[#1e4a4c] hover:enabled:bg-[#dcebeb] disabled:cursor-not-allowed disabled:opacity-50 max-[760px]:h-11"
           >
             {submitLabel}
@@ -191,6 +206,11 @@ function CommentRow({
         ) : (
           <>
             <p className="mt-0.5 text-base leading-[1.6] break-words whitespace-pre-line text-[#1a3234]">
+              {comment.rplyTrgtMbrNcnm && (
+                <span className="font-medium text-brand-500">
+                  @{comment.rplyTrgtMbrNcnm}{' '}
+                </span>
+              )}
               {isFoundNotice
                 ? stripLeadingEmoji(comment.cmntCn)
                 : comment.cmntCn}
@@ -239,7 +259,7 @@ const stripLeadingEmoji = (text) =>
  * - targetSn: 글 번호, authorSn: 글쓴이 회원번호(그 댓글에 「작성자」 배지), hooks: 게시판별 댓글 훅 묶음(useComments·useCreateComment·useDeleteComment·useReportComment)
  * - title·placeholder: 제목과 입력창 문구(실종센터는 「제보 · 댓글」), inputId: 맨 위 입력창 id(밖에서 포커스를 줄 때)
  * - sysAutoCrtYn이 true인 댓글(찾았어요 안내)은 강조 표시, 답글·신고 불가
- * - 답글에 단 답글은 원 댓글 스레드에 이어서 붙는다(prntCmntSn은 항상 원 댓글)
+ * - 답글에 단 답글은 원 댓글 스레드에 이어서 붙는다(보낼 때는 누른 댓글 번호, 서버가 원 댓글로 바꿔 저장하고 rplyTrgtMbrNcnm으로 「@닉네임」 응답)
  * - 삭제: 답글이 없는 댓글과 삭제된 답글은 줄이 사라지고 토스트, 답글이 남은 원 댓글은 「삭제된 댓글입니다」로 남는다(마지막 답글이 지워지면 그 줄도 사라짐). 댓글 수는 삭제된 댓글 제외
  */
 export default function CommentSection({
@@ -297,6 +317,7 @@ export default function CommentSection({
         isPending={create.isPending}
         onSubmit={handleCreate(comment.cmntSn)}
         onCancel={() => setReplyTo(null)}
+        mention={comment.prntCmntSn ? `@${comment.mbrNcnm} ` : ''}
       />
     );
 
