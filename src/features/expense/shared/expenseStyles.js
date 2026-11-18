@@ -1,9 +1,9 @@
 export const CARD =
   'min-w-0 rounded-card border border-line bg-white shadow-depth-sm';
 export const CARD_HEAD =
-  'flex items-center justify-between gap-3 border-b border-line-soft px-[22px] py-[18px]';
-export const CARD_BODY = 'px-[22px] pt-5 pb-[22px]';
-export const CARD_TITLE = 'text-lg font-bold tracking-[-0.01em]';
+  'flex items-center justify-between gap-3 border-b border-line-soft px-6 py-5';
+export const CARD_BODY = 'px-6 pt-5 pb-6';
+export const CARD_TITLE = 'text-lg font-semibold tracking-[-0.01em]';
 
 /** 날짜별 상세·내역 리스트 공통 줄·날짜 머리 */
 export const DAY_HEAD =
@@ -16,7 +16,7 @@ export const EXPENSE_ROW =
  * 색 막대는 줄에 넘긴 --cat 값(카테고리 색)으로 색칠
  */
 export const DAY_ROW_APP =
-  'relative max-[760px]:grid max-[760px]:grid-cols-[minmax(0,1fr)_auto] max-[760px]:gap-x-3 max-[760px]:gap-y-0.5 max-[760px]:py-3 max-[760px]:pr-4 max-[760px]:pl-[14px] max-[760px]:before:absolute max-[760px]:before:top-3 max-[760px]:before:bottom-3 max-[760px]:before:left-0 max-[760px]:before:w-1 max-[760px]:before:rounded-xs max-[760px]:before:bg-[var(--cat)] max-[760px]:before:content-[""]';
+  'relative max-[760px]:grid max-[760px]:grid-cols-[minmax(0,1fr)_auto] max-[760px]:gap-x-3 max-[760px]:gap-y-0.5 max-[760px]:py-3 max-[760px]:pr-4 max-[760px]:pl-4 max-[760px]:before:absolute max-[760px]:before:top-3 max-[760px]:before:bottom-3 max-[760px]:before:left-0 max-[760px]:before:w-1 max-[760px]:before:rounded-xs max-[760px]:before:bg-[var(--cat)] max-[760px]:before:content-[""]';
 
 /** 앱에서 누르면 상세 시트가 열리는 날짜 상세 줄: 위 줄에 오른쪽 ›를 더한 3열 */
 export const DAY_ROW_APP_TAP = DAY_ROW_APP.replace(
@@ -29,4 +29,4 @@ export const DAY_ROW_APP_TAP = DAY_ROW_APP.replace(
  * 색 막대는 줄에 넘긴 --cat 값(카테고리 색)으로 색칠
  */
 export const ROW_BODY_APP =
-  'relative flex min-w-0 flex-1 items-center gap-3 max-[760px]:grid max-[760px]:grid-cols-[minmax(0,1fr)_auto] max-[760px]:gap-x-3 max-[760px]:gap-y-0.5 max-[760px]:pl-[14px] max-[760px]:before:absolute max-[760px]:before:inset-y-0 max-[760px]:before:left-0 max-[760px]:before:w-1 max-[760px]:before:rounded-xs max-[760px]:before:bg-[var(--cat)] max-[760px]:before:content-[""]';
+  'relative flex min-w-0 flex-1 items-center gap-3 max-[760px]:grid max-[760px]:grid-cols-[minmax(0,1fr)_auto] max-[760px]:gap-x-3 max-[760px]:gap-y-0.5 max-[760px]:pl-4 max-[760px]:before:absolute max-[760px]:before:inset-y-0 max-[760px]:before:left-0 max-[760px]:before:w-1 max-[760px]:before:rounded-xs max-[760px]:before:bg-[var(--cat)] max-[760px]:before:content-[""]';

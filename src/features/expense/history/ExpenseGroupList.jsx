@@ -1,4 +1,5 @@
 import { ChevronRight } from 'lucide-react';
+import Checkbox from '@/components/Checkbox';
 import ExpenseInfo from '../shared/ExpenseInfo';
 import { EXPND_CLSF } from '../shared/expenseCodes';
 import {
@@ -31,21 +32,21 @@ export default function ExpenseGroupList({
     const prefix = hasDayHead ? '' : `${formatMonthDay(expense.expndYmd)} · `;
     if (isEditing) {
       return (
-        <label
+        <div
           key={expense.expndSn}
           style={style}
-          className={`${EXPENSE_ROW} cursor-pointer hover:bg-surface-2 max-[760px]:py-3`}
+          className="border-t border-line-soft first:border-t-0"
         >
-          <input
-            type="checkbox"
+          <Checkbox
             checked={selected.has(expense.expndSn)}
             onChange={() => onToggle(expense.expndSn)}
-            className="size-5 shrink-0 cursor-pointer accent-brand-500"
-          />
-          <span className={ROW_BODY_APP}>
-            <ExpenseInfo expense={expense} prefix={prefix} isDay />
-          </span>
-        </label>
+            className={`${EXPENSE_ROW} hover:bg-surface-2 max-[760px]:py-3`}
+          >
+            <span className={ROW_BODY_APP}>
+              <ExpenseInfo expense={expense} prefix={prefix} isDay />
+            </span>
+          </Checkbox>
+        </div>
       );
     }
     return (

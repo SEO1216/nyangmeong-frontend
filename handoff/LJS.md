@@ -2,12 +2,15 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 UI 통일 2-B · 건강기록(JAJ) 부품 교체 (2026-11-18, 검증 통과·추가-1~6 포함, 사람 확인). 기준 `docs/ui-checklist.csv` 행 26·27·56·58·68·69·71·72·73·83. 뱃지 `Badge`, 입력 모달 공용 `Modal`, 건강 일지 차트를 공용 `BarChart`·`LineChart`로(옛 `CurveChart` 삭제, 관리자 통계 포함), 밑줄 탭 `UnderlineTabs`, 폼 상수 `components/formStyles.js`(회원정보 모양), `FieldError`·`Required`, `Checkbox`, `NoticeBox`, 로딩 뼈대, `LoadError`·`EmptyResult`. 추가: 입력 모달 제목 22px·제목 줄 py-3, 확인 창 제목 18px, 모달 본문 안쪽 스크롤, `ConfirmModal` `isDanger`(일정 삭제)
+끝남: SCR-COM-002 UI 통일 2-C · 가계부(SJM `expense`) 값·부품 정리 (2026-11-18, 검증 1회차 통과, 사람 확인). 기준 `docs/ui-checklist.csv` 행 2·6·11·15·16·18·29·37·42·71·72·73·83·93·98. 글자 단계·카드 제목 600, 색 토큰, 분기점 390·760·1100, 4px 간격, 버튼 문구(등록하기·저장하기·삭제하기), 칩 `CHIP`, 폼 `formStyles`·`Required`·`FieldError`, `Checkbox`, `NoticeBox`, ↻ 44px
 
 ## 다음에 할 것
 
 ### SCR-COM-002 UI 통일 다음 단계(사람 결정 2026-11-18)
 
+- 2-C 팀 알림(PR 본문 + 팀 채널, SJM): ① 가계부 버튼 문구: 지출 등록 "등록하기"·수정 "저장하기", 영수증 "등록하기", 중복 "그래도 등록하기", 한도 "저장하기", 삭제 확인 "삭제하기"(⋮ 메뉴·편집 막대 [삭제]는 그대로) ② 폼이 `components/formStyles`(`LABEL`·`INPUT`)·`components/FieldError`(`Required`·`FieldError`)를 씀, `shared/ExpenseRequired`에는 `MissingNotice`만 남음 ③ 카테고리 칩 `CHIP`·`CHIP_ON`, 줄·전체 선택 체크박스 공용 `Checkbox`(전체 선택의 일부 선택 − 표시 없앰, 사람 결정), 영수증 안내 `NoticeBox` ④ 분기점 `lg:`(1024) → 1100이라 1024~1099px에서 대시보드 1열 ⑤ 카드 여백 22·18px → 24·20px, 색 막대 들여쓰기 14 → 16px
+- 2-C 참고(검증 보고, 판정 밖): 카테고리 칩 hover 표시가 없어짐(공용 `CHIP`의 `hover:enabled:`가 `<span>`에는 안 걸림). 같은 병원비 안내가 지출 입력 모달은 `FieldError`, 영수증 확인은 `NoticeBox`(기획대로). 채팅 목록 편집 [전체 선택](`chat/room/ChatRoomList.jsx`)은 아직 기본 체크박스
+- 다음 2 조각 후보: SJM `pet`·`point`, KSJ `community`·`inquiry`·`notice`·`faq`·`news`, YAY `member`·`place`
 - 다음 /start: `UI 통일 2 · 다른 담당 폴더 적용`의 다음 조각(SJM·KSJ·YAY 도메인 하나씩). 기준은 `docs/ui-checklist.csv`의 "결정된 기준"만. 회원 `profileStyles.js`는 `components/formStyles.js`로, 다른 도메인 삭제 확인 창 9개 파일(AI 대화 삭제·커뮤니티 글·댓글·문의·관리자 라우팅 등)은 `ConfirmModal isDanger`로
 - 2-B 팀 알림(PR 본문 + 팀 채널): ① 전체: 공용 `Modal` 입력 모달 제목 22px·제목 줄 위아래 12px, 확인 창 제목 18px, isLarge가 아닌 모달은 본문만 안쪽 스크롤(제목 줄·푸터 고정) ② 전체: 공용 차트가 건강 일지 차트로 바뀜(`components/BarChart` props `points`·`formatValue`·`ariaLabel`, `CurveChart` → `LineChart`), 새 `components/formStyles.js`(INPUT·LABEL·TEXTAREA·HELP), `UnderlineTabs` `isLineHidden`·`isScrollable`, `Checkbox` `ariaLabel`, `NoticeBox` `role`, `EmptyResult` `isCompact`, `ConfirmModal` `isDanger`(삭제 등은 빨간 확인 버튼), `Badge` 톤 7개 추가 ③ JAJ: 지운 파일 `diary/BarChart`·`LineChart`·`useElementWidth`·`DiaryTabs`·`FieldError`·`formStyles`·`EmptyBox`, `checkupStyles` `TAG`, 입력 모달 머리 아이콘 없어짐, 760 이하 입력 모달은 화면 전체 ④ `docs/ui-checklist.csv`가 UI 통일 기준
 - 2-B 사람이 정할 것: 모달 제목 22px는 체크리스트 글자 단계(12·13·14·15·16·18·24·28px) 밖이라 단계에 넣을지 팀이 정한다

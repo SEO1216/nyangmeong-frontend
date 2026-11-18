@@ -24,13 +24,13 @@ export default function ExpenseSummary({
 
   return (
     <section aria-label="이번달 총 지출" className={CARD}>
-      <div className={`${CARD_HEAD} max-[400px]:gap-2 max-[400px]:px-3.5`}>
+      <div className={`${CARD_HEAD} max-[390px]:gap-2 max-[390px]:px-3.5`}>
         <MonthNav
           onPrev={() => onChangeMonth(-1)}
           onNext={() => onChangeMonth(1)}
           isNextDisabled={isNextDisabled}
         >
-          <b className="min-w-28 text-center text-lg max-[400px]:min-w-0 max-[400px]:px-1">
+          <b className="min-w-28 text-center text-lg max-[390px]:min-w-0 max-[390px]:px-1">
             {formatYm(ym)}
           </b>
         </MonthNav>
@@ -38,7 +38,7 @@ export default function ExpenseSummary({
           <button
             type="button"
             onClick={onOpenLimit}
-            className={`${BTN_SECONDARY} shrink-0 whitespace-nowrap max-[400px]:px-3`}
+            className={`${BTN_SECONDARY} shrink-0 whitespace-nowrap max-[390px]:px-3`}
           >
             한도 설정
           </button>

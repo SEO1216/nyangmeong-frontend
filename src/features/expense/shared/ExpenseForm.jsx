@@ -2,10 +2,12 @@ import { useState } from 'react';
 import DatePicker from '@/components/DatePicker';
 import AmountInput from '@/components/AmountInput';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import FieldError, { Required } from '@/components/FieldError';
+import { INPUT, LABEL } from '@/components/formStyles';
 import Modal from '@/components/Modal';
 import Select from '@/components/Select';
 import ExpenseCategoryChips from './ExpenseCategoryChips';
-import { MissingNotice, Required } from './ExpenseRequired';
+import { MissingNotice } from './ExpenseRequired';
 import { FILTER_SHARED, HOSPITAL_CLSF_CD } from './expenseCodes';
 import { PLACE_MAX_LENGTH, getPlace } from './expenseFormat';
 import {
@@ -19,9 +21,6 @@ import {
 } from './expenseInput';
 
 const FORM_ID = 'expense-form';
-const LABEL = 'font-semibold';
-const INPUT =
-  'block h-10 w-full rounded-md border border-input-line bg-white px-3 placeholder:text-placeholder hover:border-line-strong focus:border-brand-500 focus:ring-focus focus:outline-none';
 
 /** 지출 입력 모달: 등록·수정 공용 */
 export default function ExpenseForm({
@@ -117,7 +116,7 @@ export default function ExpenseForm({
             disabled={!canSave || isPending}
             className={BTN_PRIMARY}
           >
-            저장
+            {isEdit ? '저장하기' : '등록하기'}
           </button>
         </>
       }
@@ -156,9 +155,9 @@ export default function ExpenseForm({
           </div>
         </div>
         {hasHospitalNotice && petValue === '' && (
-          <p role="alert" className="-mt-2 text-sm text-danger">
-            {HOSPITAL_NOTICE}
-          </p>
+          <div className="-mt-3.5">
+            <FieldError>{HOSPITAL_NOTICE}</FieldError>
+          </div>
         )}
         <div>
           <span className={LABEL}>
@@ -188,7 +187,7 @@ export default function ExpenseForm({
         </div>
         <div>
           <label htmlFor="expense-place" className={LABEL}>
-            사용처 <span className="font-normal text-subtle">선택</span>
+            사용처 <span className="ml-1 font-normal text-subtle">선택</span>
           </label>
           <input
             id="expense-place"
@@ -201,7 +200,7 @@ export default function ExpenseForm({
         </div>
         <div>
           <label htmlFor="expense-memo" className={LABEL}>
-            내용 <span className="font-normal text-subtle">선택</span>
+            내용 <span className="ml-1 font-normal text-subtle">선택</span>
           </label>
           <input
             id="expense-memo"
