@@ -16,17 +16,14 @@ export default function CareWriteGuide() {
       className="min-w-0 max-[1101px]:mt-6 min-[1101px]:sticky min-[1101px]:top-24"
     >
       <section aria-labelledby="care-guide-title">
-        <h2
-          id="care-guide-title"
-          className="pb-2 text-lg leading-[1.4] font-bold text-ink"
-        >
+        <h2 id="care-guide-title" className="pb-2 text-lg font-bold text-ink">
           이렇게 쓰면 매칭이 빨라요
         </h2>
         <ul>
           {ITEMS.map(([title, description]) => (
             <li
               key={title}
-              className="flex flex-col gap-1 border-t border-line py-3.5 first:border-t-0 first:pt-1.5"
+              className="flex flex-col gap-1 border-t border-line py-4 first:border-t-0 first:pt-2"
             >
               <b className="font-semibold text-ink">{title}</b>
               <p className="text-sm leading-[1.6] text-muted">{description}</p>

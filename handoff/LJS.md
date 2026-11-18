@@ -2,12 +2,16 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 UI 통일 2-G 펫이야기·커뮤니티 공용 부품 값·부품 정리 (2026-11-18, 검증 2회차 통과, 사람 확인). 1회차 실패(목록-페이지 이동 간격 68/52px, ⋮ 메뉴 그림자 grep, 로컬 임시 파일 lint)를 고침
+끝남: SCR-COM-002 UI 통일 2-H 펫돌봄 값·부품 정리 (2026-11-18, 검증 1회차 통과, 사람 확인)
 
 ## 다음에 할 것
 
 ### SCR-COM-002 UI 통일 다음 단계(사람 결정 2026-11-18)
 
+- 2-H 팀 알림(PR 본문 + 팀 채널, KSJ): ① 펫돌봄 상태 배지가 공용 `Badge`(모집중 `ok` 점+테두리, 매칭완료 `blue`+테두리, 거래완료 `gray` 바탕 `bg-surface-2`), 내 채팅 배지도 `Badge` ② 카드·필터 상자·글쓰기 카드·오른쪽 요약 상자 그림자 삭제, 4px 간격 ③ 상세 제목 24/모바일 18px ④ 글쓰기 "등록하기"·"저장하기", 글 삭제 확인 `isDanger` ⑤ 글쓰기 폼 `formStyles`·`FieldError`·`Required`·공용 `Checkbox`, `careFormStyles.js` 삭제, `CareFormParts`에는 `Counter`·`Section`만, 제목 글자 수 칸 아래 오른쪽 ⑥ "총 N건" → "전체 N 건", 목록 조회 실패 `LoadError`([다시 시도])
+- 2-H 버그 후보(KSJ, 판정 밖): `CareForm` 빠진 항목으로 이동이 `setErrors` 반영 전에 `[aria-invalid]`를 찾아 첫 [등록하기] 뒤 포커스가 제출 버튼에 남음(2-H 전에도 같음). 품종 오류 문구(`missing/BreedCombobox`)는 아이콘 없음 → 2-I에서 볼 것
+- 2-H 참고: 빈 결과 [필터 초기화] 버튼은 자체 36px 클래스 그대로(기획 밖). 동의 체크박스는 공용 `Checkbox`가 `aria-invalid`를 받지 않아 바깥 칸 `data-invalid`로 둠
+- 다음 2 조각 후보(2-H 뒤): KSJ 실종센터(`missing/`) 2-I, YAY `member`·`place`
 - 2-G 팀 알림(PR 본문 + 팀 채널, KSJ): ① 커뮤니티 공용 `ListFilterParts` 칩이 `FILTER_CHIP`·`FILTER_CHIP_ON`(40 → 36, 고른 칩 연한 청록), [내 글만 보기] 등 체크가 공용 `Checkbox`, [상세 필터]가 `BTN_SECONDARY`라 펫돌봄·실종센터 목록도 같이 바뀜 ② `CommentSection`: 댓글·답글 제출 "등록하기", 삭제 확인 "삭제하기" + `isDanger`, ⋮ 메뉴 그림자 없음, 입력칸 `formStyles`, 모바일 답글 연결선 -25px·21px ③ 펫이야기 카드·레일·글쓰기 카드 그림자 삭제, 썸네일 높이 150px, "총 N건" → "전체 N 건", 목록-페이지 이동 48/32px, [인기] 공용 `Badge tone="rose"`, 조회 실패 `LoadError` ④ 글쓰기 "등록하기"·"저장하기", 폼 `formStyles`·`FieldError`·`Required`, 제목 글자 수 칸 아래 오른쪽 ⑤ 글 상세 제목 24/모바일 18px, 오른쪽 최신글 박스 없음
 - 2-G 참고(판정 밖): 행 78 펫이야기 내 글에도 [신고] 보이는 것은 그대로(KSJ 버그 후보). 캡처는 목록만(화면 ID가 SCR-COM-002 하나라 상세·글쓰기 캡처 이름이 겹침). `.playwright-mcp/`가 eslint 검사 대상이라 그 폴더에 `require` 쓰는 임시 스크립트를 두면 lint가 깨짐(`eslint.config.js` ignores 추가는 사람 결정)
 - 다음 2 조각 후보(2-G 뒤): KSJ 펫돌봄(`care/`) 2-H·실종센터(`missing/`) 2-I, YAY `member`·`place`
