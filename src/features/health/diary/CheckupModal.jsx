@@ -26,9 +26,6 @@ const MAX_CONTENT_LENGTH = 500;
 const MAX_MEMO_LENGTH = 200;
 
 const REQUIRED = <Required />;
-const OPTIONAL = (
-  <span className="ml-1 text-[13px] font-medium text-subtle">선택</span>
-);
 
 /**
  * [검진기록 추가 모달]
@@ -267,7 +264,7 @@ export default function CheckupModal({
             </div>
 
             <label className="flex flex-col gap-1.5">
-              <span className={LABEL}>검진 내용{OPTIONAL}</span>
+              <span className={LABEL}>검진 내용</span>
               <textarea
                 value={ckupCn}
                 maxLength={MAX_CONTENT_LENGTH}
@@ -279,7 +276,7 @@ export default function CheckupModal({
             </label>
 
             <label className="flex flex-col gap-1.5">
-              <span className={LABEL}>검진 메모{OPTIONAL}</span>
+              <span className={LABEL}>검진 메모</span>
               <input
                 value={ckupMemoCn}
                 maxLength={MAX_MEMO_LENGTH}

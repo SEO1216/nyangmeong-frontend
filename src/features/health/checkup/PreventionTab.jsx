@@ -9,7 +9,7 @@ import CareShortageNotice from '../CareShortageNotice';
 import { getCycleName } from '../careDue';
 import EmptyResult from '@/components/EmptyResult';
 import { useCancelPrevention } from '../queries';
-import PreventionForm from './PreventionForm';
+import PreventionModal from './PreventionModal';
 import { ADD_ROW, ROW_LINE, TEXT_BTN_DEL } from './checkupStyles';
 import { PREVENTION_ITEMS, findName } from './checkupTypes';
 
@@ -79,18 +79,16 @@ export default function PreventionTab({ petSn, ckupRcdSn, preventions }) {
         </ul>
       )}
 
-      {!isFormOpen && (
-        <button
-          type="button"
-          className={`${BTN_SECONDARY} ${ADD_ROW} w-full`}
-          onClick={() => setIsFormOpen(true)}
-        >
-          <Icon name="add" className="text-lg" />
-          반복 예방 추가
-        </button>
-      )}
+      <button
+        type="button"
+        className={`${BTN_SECONDARY} ${ADD_ROW} w-full`}
+        onClick={() => setIsFormOpen(true)}
+      >
+        <Icon name="add" className="text-lg" />
+        반복 예방 추가
+      </button>
       {isFormOpen && (
-        <PreventionForm
+        <PreventionModal
           petSn={petSn}
           ckupRcdSn={ckupRcdSn}
           onClose={() => setIsFormOpen(false)}

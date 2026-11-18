@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, generatePath, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import NoticeBox from '@/components/NoticeBox';
 import Badge from '@/components/Badge';
 import Checkbox from '@/components/Checkbox';
@@ -10,7 +10,7 @@ import { PATHS } from '@/routes/paths';
 import { formatDate } from '@/utils/formatDate';
 import { round2 } from '../numberFormat';
 import { useDeleteInspections } from '../queries';
-import BloodResultForm from './BloodResultForm';
+import BloodResultModal from './BloodResultModal';
 import { ADD_ROW, ROW_LINE, TEXT_BTN } from './checkupStyles';
 import { findBloodItem } from '../labInput/bloodItems';
 import { FUNCTION_TAGS, findName, getInspectionName } from './checkupTypes';
@@ -33,21 +33,17 @@ const getOutDirection = ({ rsltNvl, refLlmtNvl, refUplmtNvl }) => {
 /**
  * [혈액검사 결과 목록]
  * - 기능 태그·태그별 건수, 항목·측정값·참고범위 한 줄, 참고범위 밖은 색 + ▲▼ (FN-HLT-005-02)
- * - 행의 어디를 눌러도(체크박스 제외) 검사 수치 입력(수정), [＋ 검사 수치 추가] → 목록 아래에 입력 영역이 열림
+ * - 행의 어디를 눌러도(체크박스·추이 보기 제외) 검사 수치 수정 모달, [＋ 검사 수치 추가] → 검사 수치 추가 모달
  * - 체크박스로 고른 항목을 확인 뒤 삭제
  */
 export default function BloodResultList({ checkup, items }) {
-  const navigate = useNavigate();
   const { petSn, ckupRcdSn } = checkup;
   const [selectedSns, setSelectedSns] = useState([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  /** 입력 모달: null이면 닫힘, item이 null이면 새로 추가 */
+  const [modal, setModal] = useState(null);
   const deleteInspections = useDeleteInspections();
 
-  const inputPath = generatePath(PATHS.HEALTH_CHECKUP_INSPECTIONS, {
-    petSn,
-    ckupRcdSn,
-  });
   const tagCounts = FUNCTION_TAGS.map((tag) => ({
     ...tag,
     count: items.filter((item) => getFunctionTag(item) === tag.cd).length,
@@ -74,11 +70,7 @@ export default function BloodResultList({ checkup, items }) {
       },
     );
 
-  const goEdit = (item) =>
-    navigate({
-      pathname: inputPath,
-      search: `?mode=edit&item=${item.inspNvlSn}`,
-    });
+  const openEdit = (item) => setModal({ item });
 
   return (
     <div>
@@ -137,7 +129,7 @@ export default function BloodResultList({ checkup, items }) {
                 <li
                   key={item.inspNvlSn}
                   className={`flex cursor-pointer items-center gap-3 py-3 hover:bg-surface-2 ${ROW_LINE}`}
-                  onClick={() => goEdit(item)}
+                  onClick={() => openEdit(item)}
                 >
                   <span onClick={(event) => event.stopPropagation()}>
                     <Checkbox
@@ -156,16 +148,16 @@ export default function BloodResultList({ checkup, items }) {
                     </Badge>
                   )}
                   <span className="min-w-0 flex-1">
-                    <Link
-                      to={{
-                        pathname: inputPath,
-                        search: `?mode=edit&item=${item.inspNvlSn}`,
+                    <button
+                      type="button"
+                      className="text-left text-lg font-semibold text-ink underline underline-offset-4 hover:text-brand-600"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        openEdit(item);
                       }}
-                      className="text-lg font-semibold text-ink underline underline-offset-4 hover:text-brand-600"
-                      onClick={(event) => event.stopPropagation()}
                     >
                       {getInspectionName(item)}
-                    </Link>
+                    </button>
                     {hasRange && (
                       <span className="block text-sm text-subtle tabular-nums">
                         참고범위 {round2(item.refLlmtNvl)}~
@@ -213,22 +205,21 @@ export default function BloodResultList({ checkup, items }) {
         </>
       )}
 
-      {!isFormOpen && (
-        <button
-          type="button"
-          className={`${BTN_SECONDARY} ${ADD_ROW} w-full`}
-          onClick={() => setIsFormOpen(true)}
-        >
-          <Icon name="add" className="text-lg" />
-          검사 수치 추가
-        </button>
-      )}
-      {isFormOpen && (
-        <BloodResultForm
+      <button
+        type="button"
+        className={`${BTN_SECONDARY} ${ADD_ROW} w-full`}
+        onClick={() => setModal({ item: null })}
+      >
+        <Icon name="add" className="text-lg" />
+        검사 수치 추가
+      </button>
+      {modal && (
+        <BloodResultModal
           petSn={petSn}
           ckupRcdSn={ckupRcdSn}
+          item={modal.item}
           registeredNames={new Set(items.map(getInspectionName))}
-          onClose={() => setIsFormOpen(false)}
+          onClose={() => setModal(null)}
         />
       )}
       <NoticeBox className="mt-3 flex gap-2.5">
