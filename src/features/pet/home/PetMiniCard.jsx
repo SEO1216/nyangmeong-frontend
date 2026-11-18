@@ -42,9 +42,12 @@ export default function PetMiniCard({ pet, index }) {
           iconClassName="size-7 max-[760px]:size-5"
         />
         {pet.rprsPetYn && (
-          <span className="absolute -right-1.5 -bottom-1 max-[760px]:-right-2.5 max-[760px]:-bottom-1.5 max-[760px]:scale-[.85] inline-flex h-6 items-center rounded-full bg-brand-500 px-2.5 pt-[1.5px] text-[13px] leading-none font-semibold whitespace-nowrap text-white ring-2 ring-white">
+          <Badge
+            tone="solid"
+            className="absolute -right-1.5 -bottom-1 ring-2 ring-white max-[760px]:-right-2.5 max-[760px]:-bottom-1.5 max-[760px]:scale-[.85]"
+          >
             대표
-          </span>
+          </Badge>
         )}
       </span>
       <span className="flex min-w-0 flex-col gap-0.5">

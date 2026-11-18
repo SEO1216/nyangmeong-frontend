@@ -31,11 +31,11 @@ function CharacterPageSkeleton() {
     <div aria-busy="true" className="flex flex-col gap-4">
       <Skeleton className="h-12 w-full" />
       <Skeleton className="h-[26px] w-64" />
-      <div className="grid grid-cols-2 gap-4 min-[600px]:grid-cols-3 min-[1101px]:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 min-[760px]:grid-cols-3 min-[1100px]:grid-cols-5">
         {Array.from({ length: 6 }, (_, index) => (
           <SkeletonCard
             key={index}
-            className="h-[263px] max-[599px]:h-[223px]"
+            className="h-[263px] max-[760px]:h-[223px]"
           />
         ))}
       </div>
@@ -119,7 +119,7 @@ export default function CharacterPage() {
             <Skeleton className="inline-block h-[1em] w-28 align-middle" />
           }
           description={DESCRIPTION}
-          contentClassName="min-[1101px]:pt-6 max-[760px]:grid max-[760px]:grid-cols-[auto_minmax(0,1fr)] max-[760px]:items-center"
+          contentClassName="min-[1100px]:pt-6 max-[760px]:grid max-[760px]:grid-cols-[auto_minmax(0,1fr)] max-[760px]:items-center"
         >
           <DecorateSkeleton />
         </SubPageLayout>
@@ -164,7 +164,7 @@ export default function CharacterPage() {
         section="mypage"
         title={`${decoratingPet.petNm} 꾸미기`}
         description={DESCRIPTION}
-        contentClassName="min-[1101px]:pt-6 max-[760px]:grid max-[760px]:grid-cols-[auto_minmax(0,1fr)] max-[760px]:items-center"
+        contentClassName="min-[1100px]:pt-6 max-[760px]:grid max-[760px]:grid-cols-[auto_minmax(0,1fr)] max-[760px]:items-center"
       >
         <CharacterDecorate pet={decoratingPet} />
       </SubPageLayout>
@@ -191,28 +191,35 @@ export default function CharacterPage() {
               }
             />
           )}
-          {tab === 'own' && ownPets.length > 0 && (
-            <>
-              <p className="text-subtle">
-                캐릭터를 누르면 꾸미기 화면으로 이동해요
-              </p>
-              <CharacterGrid
-                pets={ownPets}
-                mode="own"
-                onDecorate={(pet) =>
-                  setSearchParams({ pixelCharSn: pet.pixelCharSn })
-                }
-                onCreate={(pet) => setCreatingPetSn(pet.petSn)}
-                onSetRepresentative={(pet) => setRepresentative(pet.petSn)}
-              />
-              <p className="text-sm text-subtle">
-                캐릭터는 반려동물 1마리당 1개예요
-              </p>
-            </>
-          )}
-          {tab === 'shared' && (
-            <CharacterGrid pets={sharedPets} mode="shared" />
-          )}
+          <div
+            id={hasShared ? `char-${tab}` : undefined}
+            role={hasShared ? 'tabpanel' : undefined}
+            aria-labelledby={hasShared ? `char-${tab}-tab` : undefined}
+            className="flex flex-col gap-4"
+          >
+            {tab === 'own' && ownPets.length > 0 && (
+              <>
+                <p className="text-subtle">
+                  캐릭터를 누르면 꾸미기 화면으로 이동해요
+                </p>
+                <CharacterGrid
+                  pets={ownPets}
+                  mode="own"
+                  onDecorate={(pet) =>
+                    setSearchParams({ pixelCharSn: pet.pixelCharSn })
+                  }
+                  onCreate={(pet) => setCreatingPetSn(pet.petSn)}
+                  onSetRepresentative={(pet) => setRepresentative(pet.petSn)}
+                />
+                <p className="text-sm text-subtle">
+                  캐릭터는 반려동물 1마리당 1개예요
+                </p>
+              </>
+            )}
+            {tab === 'shared' && (
+              <CharacterGrid pets={sharedPets} mode="shared" />
+            )}
+          </div>
         </div>
       )}
       {creatingPet && (

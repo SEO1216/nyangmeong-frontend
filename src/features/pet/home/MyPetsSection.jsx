@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import LoadError from '@/components/LoadError';
 import SkeletonCard from '@/components/SkeletonCard';
 import { PATHS } from '@/routes/paths';
 import PetEmpty from '../list/PetEmpty';
@@ -8,7 +9,7 @@ import PetFormModal from '../list/PetFormModal';
 import { usePetLimit, usePets } from '../queries';
 import PetMiniCard from './PetMiniCard';
 
-/** 모바일(760px 이하)에서 처음 보이는 카드 수. PC(761px 이상)는 전부 보인다 */
+/** 모바일(760px 미만)에서 처음 보이는 카드 수. PC(760px 이상)는 전부 보인다 */
 const VISIBLE_COUNT = 6;
 
 export default function MyPetsSection() {
@@ -24,7 +25,7 @@ export default function MyPetsSection() {
       <div className="flex items-baseline justify-between gap-3">
         <h2
           id="home-pets"
-          className="flex items-baseline gap-2 text-xl font-bold tracking-[-0.02em]"
+          className="flex items-baseline gap-2 text-lg font-bold tracking-[-0.02em]"
         >
           내 반려동물
           {pets && (
@@ -47,7 +48,7 @@ export default function MyPetsSection() {
       {isPending ? (
         <div
           aria-busy="true"
-          className="grid grid-cols-1 gap-3 min-[761px]:grid-cols-2 min-[1281px]:grid-cols-3 max-[760px]:gap-0 max-[760px]:overflow-hidden max-[760px]:rounded-card max-[760px]:border max-[760px]:border-line max-[760px]:bg-white max-[760px]:[&>div+div]:border-t max-[760px]:[&>div+div]:border-line-soft"
+          className="grid grid-cols-1 gap-3 min-[760px]:grid-cols-2 min-[1100px]:grid-cols-3 max-[760px]:gap-0 max-[760px]:overflow-hidden max-[760px]:rounded-card max-[760px]:border max-[760px]:border-line max-[760px]:bg-white max-[760px]:[&>div+div]:border-t max-[760px]:[&>div+div]:border-line-soft"
         >
           {Array.from({ length: VISIBLE_COUNT }, (_, index) => (
             <div key={index} className="flex min-w-0">
@@ -56,21 +57,16 @@ export default function MyPetsSection() {
           ))}
         </div>
       ) : isError ? (
-        <p className="py-10 text-center text-muted">
-          반려동물을 불러오지 못했어요{' '}
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="font-semibold text-brand-600 underline"
-          >
-            다시 시도
-          </button>
-        </p>
+        <LoadError
+          message="반려동물을 불러오지 못했어요"
+          onRetry={() => refetch()}
+          className="py-10"
+        />
       ) : pets.length === 0 ? (
         <PetEmpty onRegister={() => setIsRegistering(true)} limit={limit} />
       ) : (
         <>
-          <ul className="grid grid-cols-1 gap-3 min-[761px]:grid-cols-2 min-[1281px]:grid-cols-3 max-[760px]:gap-0 max-[760px]:overflow-hidden max-[760px]:rounded-card max-[760px]:border max-[760px]:border-line max-[760px]:bg-white max-[760px]:[&>li+li]:border-t max-[760px]:[&>li+li]:border-line-soft">
+          <ul className="grid grid-cols-1 gap-3 min-[760px]:grid-cols-2 min-[1100px]:grid-cols-3 max-[760px]:gap-0 max-[760px]:overflow-hidden max-[760px]:rounded-card max-[760px]:border max-[760px]:border-line max-[760px]:bg-white max-[760px]:[&>li+li]:border-t max-[760px]:[&>li+li]:border-line-soft">
             {pets.map((pet, index) => (
               <li
                 key={pet.petSn}
@@ -85,7 +81,7 @@ export default function MyPetsSection() {
               type="button"
               onClick={() => setIsExpanded((prev) => !prev)}
               aria-expanded={isExpanded}
-              className="inline-flex items-center gap-1 self-center font-medium text-muted hover:text-brand-600 min-[761px]:hidden"
+              className="inline-flex items-center gap-1 self-center font-medium text-muted hover:text-brand-600 min-[760px]:hidden"
             >
               {isExpanded ? '접기' : `더보기 +${hiddenCount}`}
               <ChevronDown
