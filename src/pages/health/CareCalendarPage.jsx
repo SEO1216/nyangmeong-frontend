@@ -222,6 +222,22 @@ function CareCalendarContent() {
     });
   };
 
+  /**
+   * 다가오는 케어 일정 줄: 수정 모달 대신 캘린더를 그 일정의 달로 옮기고 그 날짜를 골라 날짜 상세에 보임. 수정은 날짜 상세에서만 (※신규 정책)
+   * - 다른 아이 일정이면 openEdit처럼 공통 카드를 그 아이로 바꾸고 알림
+   */
+  const showScheduleDay = (schedule) => {
+    if (schedule.isOtherPet) {
+      selectPet(schedule.petSn);
+      showToast(
+        `${schedule.petNm}의 일정이라 보고 있는 아이를 ${schedule.petNm}${pickJosa(schedule.petNm, '으로/로')} 바꿨어요`,
+      );
+    }
+    const ymd = getYmdOf(schedule.schdlDt);
+    setViewMonthYmd(makeYmd(getYear(ymd), getMonth(ymd), 1));
+    setSelectedYmd(ymd);
+  };
+
   return (
     <CalendarLayout>
       <UnderlineTabs
@@ -281,7 +297,7 @@ function CareCalendarContent() {
             />
             <UpcomingSchedules
               schedules={upcomingSchedules}
-              onSelectSchedule={openEdit}
+              onSelectSchedule={showScheduleDay}
               className="min-[1100px]:min-h-fit min-[1100px]:flex-3"
             />
           </div>

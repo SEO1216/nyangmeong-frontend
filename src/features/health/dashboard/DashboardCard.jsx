@@ -17,9 +17,10 @@ const LONG_EMPTY_TEXT = 12;
 
 /**
  * [대시보드 카드 한 장] (※신규 정책)
- * - content가 null이면 빈 상태: 프로토타입 원문 문구 + 링크([더보기]와 다른 곳으로 갈 때만)
- * - 오른쪽 위 [더보기]만 이동 링크. 카드 빈 곳을 눌러도 이동하지 않음(사람 결정 2026-11-08)
+ * - content가 null이면 빈 상태: 프로토타입 원문 문구 + 링크(이동 링크와 다른 곳으로 갈 때만)
+ * - 오른쪽 위 이동 링크(item.moveText, 「기록하기 ›」·「검진 기록 보기 ›」 등). 카드 빈 곳을 눌러도 이동하지 않음(사람 결정 2026-11-08)
  * - content.moveTo가 있으면 item.moveTo 대신 그 주소로(처방·투약)
+ * - 매일 기록 5개(item.typeCd)의 「기록하기 ›」는 건강 일지 「오늘 기록하기」 모달을 그 항목으로 엶 (※신규 정책)
  * - item.titleNote가 있으면 제목 바로 오른쪽에 작은 회색 글자(케어리스트 「보기 전용」)
  */
 export default function DashboardCard({
@@ -46,10 +47,10 @@ export default function DashboardCard({
         <Link
           to={content?.moveTo ?? item.moveTo}
           state={getMoveState(item, petSn)}
-          aria-label={`${petNm}의 ${item.nm} 기록 화면으로 이동`}
+          aria-label={`${petNm}의 ${item.nm} ${item.moveText}`}
           className="inline-flex shrink-0 items-center rounded-sm text-sm font-semibold whitespace-nowrap text-brand-600 hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
         >
-          더보기
+          {item.moveText}
           <ChevronRight className="size-4.5" aria-hidden="true" />
         </Link>
       }

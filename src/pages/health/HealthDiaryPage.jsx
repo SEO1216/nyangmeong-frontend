@@ -121,10 +121,23 @@ function HealthDiaryContent({ mbrSn }) {
   };
   const todayYmd = getTodayYmd();
   const [sectionId, setSectionId] = useState(() => getTabFromHash(hash));
-  /** 대시보드 매일 기록 카드 [더보기]로 오면 그 지표를 고른 채로 그래프를 연다 (※신규 정책) */
+  /** 대시보드 매일 기록 카드 「기록하기 ›」·휴대폰 타일로 오면 그 지표를 고른 채로 그래프를 연다 (※신규 정책) */
   const initialTrendTypeCd = location.state?.typeCd;
-  /** 오늘 기록하기 모달: null이면 닫힘, token으로 열 때마다 새로 시작 */
-  const [recordForm, setRecordForm] = useState(null);
+  /** 오늘 기록하기 모달: null이면 닫힘, token으로 열 때마다 새로 시작. 대시보드 「기록하기 ›」로 오면 그 항목으로 열린 채 시작 (※신규 정책) */
+  const [recordForm, setRecordForm] = useState(() =>
+    location.state?.isRecordOpen && location.state.typeCd
+      ? { typeCd: location.state.typeCd, token: Date.now() }
+      : null,
+  );
+  /** 새로고침·뒤로 가기에서 모달이 다시 열리지 않게 isRecordOpen만 지움(그래프 항목 typeCd는 유지) */
+  useEffect(() => {
+    if (!location.state?.isRecordOpen) return;
+    navigate(`${location.pathname}${location.search}${location.hash}`, {
+      replace: true,
+      state: { typeCd: location.state.typeCd },
+    });
+    /* eslint-disable-next-line react-hooks/exhaustive-deps -- 첫 진입 때 한 번만 */
+  }, []);
   /**
    * 영수증으로 검진기록 추가 흐름: null이면 닫힘
    * { step: 'upload' } 업로드(LJS) → { step: 'result', result } 인식 결과 확인
