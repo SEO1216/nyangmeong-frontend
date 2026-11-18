@@ -15,7 +15,7 @@ import {
   useDeleteAttachment,
   useReplaceAttachment,
 } from '../queries';
-import AttachmentForm from './AttachmentForm';
+import AttachmentModal from './AttachmentModal';
 import { getFileError } from './attachmentUtils';
 import { ADD_ROW, ROW_LINE, TEXT_BTN, TEXT_BTN_DEL } from './checkupStyles';
 import {
@@ -39,15 +39,10 @@ const PDF_URL_LIFETIME = 60 * 1000;
  * - PDF 분석은 검사결과지 유형의 PDF 행마다. 성공하면 인식 항목을 들고 검사 수치 입력으로 이동
  * - 영수증 원본은 첨부 자료에 넣지 않음
  */
-export default function AttachmentTab({
-  petSn,
-  ckupRcdSn,
-  attachments,
-  isAddOpenInitially,
-}) {
+export default function AttachmentTab({ petSn, ckupRcdSn, attachments }) {
   const navigate = useNavigate();
   const replaceInputRef = useRef(null);
-  const [isAddOpen, setIsAddOpen] = useState(isAddOpenInitially);
+  const [isAddOpen, setIsAddOpen] = useState(false);
   const [replaceSn, setReplaceSn] = useState(null);
   const [deleteSn, setDeleteSn] = useState(null);
   const [analyzingSn, setAnalyzingSn] = useState(null);
@@ -147,19 +142,11 @@ export default function AttachmentTab({
       { onSuccess: () => setDeleteSn(null) },
     );
 
-  const addForm = isAddOpen && (
-    <AttachmentForm
-      petSn={petSn}
-      ckupRcdSn={ckupRcdSn}
-      onClose={() => setIsAddOpen(false)}
-    />
-  );
 
   return (
     <Card title="첨부 자료" sub="여러 건 등록 가능">
       {attachments.length === 0 ? (
-        <>
-          <EmptyResult
+        <EmptyResult
             isCompact
             icon={
               <Icon
@@ -180,8 +167,6 @@ export default function AttachmentTab({
               </button>
             }
           </EmptyResult>
-          {addForm}
-        </>
       ) : (
         <>
           <ul>
@@ -270,18 +255,23 @@ export default function AttachmentTab({
               먼저 검사결과지를 등록하세요
             </p>
           )}
-          {!isAddOpen && (
-            <button
-              type="button"
-              className={`${TEXT_BTN} ${ADD_ROW}`}
-              onClick={() => setIsAddOpen(true)}
-            >
-              <Icon name="add" className="text-lg" />
-              첨부 추가
-            </button>
-          )}
-          {addForm}
+          <button
+            type="button"
+            className={`${TEXT_BTN} ${ADD_ROW}`}
+            onClick={() => setIsAddOpen(true)}
+          >
+            <Icon name="add" className="text-lg" />
+            첨부 추가
+          </button>
         </>
+      )}
+
+      {isAddOpen && (
+        <AttachmentModal
+          petSn={petSn}
+          ckupRcdSn={ckupRcdSn}
+          onClose={() => setIsAddOpen(false)}
+        />
       )}
 
       <input

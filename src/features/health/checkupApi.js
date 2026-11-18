@@ -139,6 +139,13 @@ export const createPrescription = ({ petSn, ...body }) =>
 export const updatePrescription = ({ petSn, prscSn, ...body }) =>
   api.patch(`/pets/${petSn}/prescriptions/${prscSn}`, body);
 
+/**
+ * 처방약 일괄 저장: values의 prscSn이 있으면 전체 값으로 수정, 없으면 추가. 하나라도 틀리면 아무것도 저장하지 않음
+ * - 응답은 저장된 약 목록(요청 순서)
+ */
+export const bulkSavePrescriptions = ({ petSn, ckupRcdSn, values }) =>
+  api.post(`/pets/${petSn}/prescriptions/bulk-save`, { ckupRcdSn, values });
+
 export const deletePrescription = ({ petSn, prscSn }) =>
   api.delete(`/pets/${petSn}/prescriptions/${prscSn}`);
 

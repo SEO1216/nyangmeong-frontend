@@ -33,6 +33,7 @@ import {
 } from './api';
 import {
   analyzeLabPdf,
+  bulkSavePrescriptions,
   cancelPrevention,
   createAttachment,
   createEtcInspection,
@@ -514,7 +515,7 @@ export const useCheckupDetail = ({ petSn, ckupRcdSn }) =>
 /** 검진상세 변경: 변수의 ckupRcdSn 상세를 다시 읽고, 케어 항목이 바뀌는 변경은 케어리스트도 재조회 */
 const useCheckupDetailMutation = (
   mutationFn,
-  { hasCareItems = false } = {},
+  { hasCareItems = false, onError = showErrorToast } = {},
 ) => {
   const queryClient = useQueryClient();
 
@@ -528,7 +529,7 @@ const useCheckupDetailMutation = (
         queryClient.invalidateQueries({ queryKey: healthKeys.careItems });
       }
     },
-    onError: showErrorToast,
+    onError,
   });
 };
 
@@ -568,6 +569,15 @@ export const useCreatePrescription = () =>
 
 export const useUpdatePrescription = () =>
   useCheckupDetailMutation(updatePrescription, { hasCareItems: true });
+
+/** 처방약 일괄 저장: 칸별 400 오류는 모달이 약마다 보여 주므로 토스트를 띄우지 않음 */
+export const useBulkSavePrescriptions = () =>
+  useCheckupDetailMutation(bulkSavePrescriptions, {
+    hasCareItems: true,
+    onError: (error) => {
+      if (!error.fields) showErrorToast(error);
+    },
+  });
 
 export const useDeletePrescription = () =>
   useCheckupDetailMutation(deletePrescription, { hasCareItems: true });

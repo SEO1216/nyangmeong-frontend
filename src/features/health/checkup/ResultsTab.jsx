@@ -10,7 +10,7 @@ import ImagingResultList from './ImagingResultList';
  * - 혈액검사 · 영상검사 · 기타검사 칩과 종류별 건수, 처음 열면 혈액검사 선택 (FN-HLT-005-02)
  * - 영상검사 건수는 첨부 자료의 "영상 사진" 건수와 같음
  */
-export default function ResultsTab({ detail, onGoAttachments }) {
+export default function ResultsTab({ detail }) {
   const [kind, setKind] = useState('blood');
   const { checkup, bloodInspections, etcInspections } = detail;
   const imagingAttachments = detail.attachments.filter(
@@ -51,8 +51,8 @@ export default function ResultsTab({ detail, onGoAttachments }) {
       {kind === 'img' && (
         <ImagingResultList
           petSn={checkup.petSn}
+          ckupRcdSn={checkup.ckupRcdSn}
           attachments={imagingAttachments}
-          onGoAttachments={onGoAttachments}
         />
       )}
       {kind === 'etc' && (

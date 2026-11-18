@@ -10,9 +10,6 @@ const MAX_RESULT_LENGTH = 500;
 const MAX_MEMO_LENGTH = 200;
 
 const REQUIRED = <Required />;
-const OPTIONAL = (
-  <span className="ml-1 text-[13px] font-medium text-subtle">선택</span>
-);
 
 /**
  * [기타검사 추가 모달]
@@ -60,7 +57,6 @@ export default function EtcInspectionModal({
   return (
     <FormModal
       title="기타검사 추가"
-      submitLabel="등록하기"
       width={560}
       isPending={isPending}
       onSubmit={handleSubmit}
@@ -96,7 +92,7 @@ export default function EtcInspectionModal({
       </label>
 
       <label className="flex flex-col gap-1.5">
-        <span className={LABEL}>메모{OPTIONAL}</span>
+        <span className={LABEL}>메모</span>
         <textarea
           value={memoCn}
           maxLength={MAX_MEMO_LENGTH}

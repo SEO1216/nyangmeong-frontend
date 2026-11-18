@@ -33,6 +33,9 @@ import {
   pickType,
 } from './recordUtils';
 
+/** 산책 막대 그래프 높이: 꺾은선 그래프(LineChart 기본값)와 같게 그래프 폭 600 미만 230, 이상 260 */
+const getLineChartHeight = (width) => (width < 600 ? 230 : 260);
+
 /**
  * [건강기록 변화 카드]
  * - 지표 탭 5종 단일 선택, 최근 5건 기준 그래프 (FN-HLT-002-09·10)
@@ -164,12 +167,8 @@ function TrendBody({ pet, goalBdwg, trend, type, isPc, onAddRecord }) {
   if (trend.isPending) {
     return (
       <div aria-busy="true">
-        {/* 산책은 막대 그래프 높이(122)에 맞춤 */}
-        <Skeleton
-          className={
-            type.cd === WALK ? 'h-[122px]' : 'h-[260px] max-[600px]:h-[220px]'
-          }
-        />
+        {/* 산책 막대·꺾은선 그래프 높이(폭 600 이상 260, 미만 230)에 맞춤 */}
+        <Skeleton className="h-[260px] max-[600px]:h-[230px]" />
       </div>
     );
   }
@@ -223,6 +222,7 @@ function TrendBody({ pet, goalBdwg, trend, type, isPc, onAddRecord }) {
         points={chartPoints}
         formatValue={(value) => formatAmount(WALK, value)}
         ariaLabel={`산책 시간 막대그래프 · ${summary} · 점선은 하루 평균`}
+        height={getLineChartHeight}
       />
     );
   }

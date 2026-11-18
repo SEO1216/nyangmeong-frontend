@@ -568,6 +568,24 @@
 - 결과: 2026-11-18 검증 통과(판정 「확인 못 함 있음」, 내 것 없음. 루프는 사람 결정으로 세 번 clear 후 다시 시작). 남은 관리자 화면(이용 통계 막대·일별 그래프)은 사람이 확인함. 사람 확인 끝. 데이터 없는 경우는 검증 에이전트가 브라우저 응답만 바꿔 확인
 - 연결 남음: 없음
 
+## SCR-HLT-005 검진상세 · 처방·투약 일괄 저장 연결 — 진행
+
+- 기능: 명세 기능 ID 추가 없음, FN-HLT-005-03 처방·투약에 걸침(※추가 요청: 모달에서 약 여러 개 추가·수정을 한 번에 저장)
+- 기다리는 것: 없음(백엔드 PR #267로 develop 병합)
+- 요청 2026-11-19(사람이 고칠 파일·내용 승인): [A] 검진상세 「‹ 목록으로」(`back: true`, `backTo` 건강 일지 `#hlt002-exam`). [B] 검진상세 입력을 모두 `diary/FormModal` 모달로(검사 수치 추가·수정, 기타검사 [저장하기], 영상검사 → 영상 사진이 골라진 첨부 추가, 반복 예방, 첨부, 처방·투약 여러 약 모달). `LabInputPage`는 PDF 분석용으로 그대로
+- 결정: 처방 행 배지 오른쪽 [수정] 추가(약품명도 같은 모달), 수정 모달은 누른 약만 펼침, 저장된 약 삭제 확인에만 CareShortageNotice, 약 0개면 [저장하기] 비활성, useCreatePrescription·useUpdatePrescription·API 함수는 남김. 400 칸 오류는 `values[i].필드`를 그 약 칸 아래에, 칸에 못 붙이는 문구는 모달 아래 오류 줄
+- 결과: 2026-11-19 lint·build 통과, 화면 ①~⑥ Playwright 확인(백엔드 develop d3f25ff). 사람 확인 2026-11-19(추가 요청 포함). 대화를 보지 않는 별도 검증 보고가 없어 `진행`으로 둠
+- 추가 요청 2026-11-19(사람 승인): ① 검진상세 「‹ 목록으로」 모양을 커뮤니티 상세와 같게(contentClassName 기본값, gap-7·tabular-nums·antialiased는 본문 div에만) ② 검진상세에서 여는 모달의 칸 옆 「선택」 삭제(LabItemForm·EtcInspectionModal, 사람 결정으로 diary/CheckupModal도. 검사 수치 입력 페이지·건강 일지 검진기록 모달에서도 같이 빠짐) ③ 영상검사 링크 「첨부 자료 추가하기」 ④ 반복 예방 반복 주기를 SegmentSwitch로, 칸 한 줄에 하나씩, 직접입력이면 이름 없는 일수 칸(aria-label 「반복 일수」) ⑤ 공용 BarChart에 height(숫자 또는 폭→높이 함수, 기본 122), 건강 일지 산책 막대는 꺾은선과 같게 그래프 폭 600 미만 230·이상 260, 산책·꺾은선 로딩 칸 260 / 600px 미만 230
+  - 결과: 2026-11-19 lint·build 통과, ①~⑤ Playwright 확인. 관리자 통계는 관리자 계정이 아니라 화면에서는 못 보고 코드로 확인(height를 넘기지 않아 122)
+- 추가 요청 2026-11-19(사람 승인): ① 처방·투약 모달 [＋ 약 추가]는 펼친 약을 모두 접고 새 약만 펼친 채 그 위치로 폼 본문을 스크롤(scrollIntoView는 바깥 모달 감싸개까지 밀어 제목 줄이 움직여서 폼을 직접 scrollTo), 모달은 고정 높이(FormModal `isFixedHeight` → 공용 Modal isAutoHeight 없이 660px·화면 − 2rem·760px 미만 화면 전체, 폼만 안에서 스크롤) ② 첨부 추가의 파일 유형·영상 종류·촬영 부위를 SegmentSwitch로, 칸 한 줄에 하나씩
+  - 결과: 2026-11-19 lint·build 통과, ①~④ Playwright 확인(1440px·390px). 390px 첨부 추가 버튼 글자 넘침 없음
+- 추가 요청 2026-11-19(사람 승인): 처방·투약 모달 [＋ 약 추가] 버튼의 mt-4를 빼 마지막 약과 간격 20px, shrink-0으로 고정 높이 모달 안에서도 높이 40px
+  - 결과: 2026-11-19 lint·build 통과, 1440px·390px 약 1개·6개 모두 간격 20px·높이 40px 확인
+- 완료 조건:
+  - 처방·투약 모달 [저장하기] 한 번이 `POST /pets/{petSn}/prescriptions/bulk-save` 한 번이다. 요청 `{ckupRcdSn, values:[…]}`, 이미 등록된 약은 `prscSn`을 넣고 모든 값을 보낸다(전체 덮어쓰기), 새 약은 `prscSn` 없이 보낸다. 필드 이름은 `PrescriptionCreateRequest`와 같다(mdcnNm·mdcnBgngYmd·mdcnEndYmd·dayMdcnNmtm·prscSttsCd·careRfltYn)
+  - 200이면 응답 목록(요청 순서)으로 모달·처방 목록·케어리스트를 갱신한다. 400·404면 아무것도 저장되지 않았으니 입력을 그대로 두고 오류를 보여 준다
+  - 삭제는 지금처럼 `DELETE /pets/{petSn}/prescriptions/{prscSn}`를 쓴다(일괄 저장에 넣지 않음)
+
 ## 제외
 
 - AI매니저 FN-AIM-008 참조 대상 반려동물 선택: 화면 SCR-AIM-008 영수증 업로드는 LJS(분배 표 "AIM-008 영수증 업로드")
