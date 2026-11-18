@@ -240,7 +240,7 @@ const stripLeadingEmoji = (text) =>
  * - title·placeholder: 제목과 입력창 문구(실종센터는 「제보 · 댓글」), inputId: 맨 위 입력창 id(밖에서 포커스를 줄 때)
  * - sysAutoCrtYn이 true인 댓글(찾았어요 안내)은 강조 표시, 답글·신고 불가
  * - 답글에 단 답글은 원 댓글 스레드에 이어서 붙는다(prntCmntSn은 항상 원 댓글)
- * - 삭제된 댓글은 문구로 바뀌고 답글은 유지. 댓글 수는 삭제된 댓글 제외
+ * - 삭제: 답글이 없는 댓글과 삭제된 답글은 줄이 사라지고 토스트, 답글이 남은 원 댓글은 「삭제된 댓글입니다」로 남는다(마지막 답글이 지워지면 그 줄도 사라짐). 댓글 수는 삭제된 댓글 제외
  */
 export default function CommentSection({
   targetSn,
@@ -260,10 +260,18 @@ export default function CommentSection({
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [reportTarget, setReportTarget] = useState(null);
 
-  const roots = comments.filter((row) => !row.prntCmntSn);
+  /** 삭제된 답글은 그리지 않고, 삭제된 원 댓글은 보이는 답글이 남아 있을 때만 그린다 */
   const repliesOf = (rootSn) =>
-    comments.filter((row) => row.prntCmntSn === rootSn);
+    comments.filter((row) => row.prntCmntSn === rootSn && !row.delYn);
+  const roots = comments.filter(
+    (row) =>
+      !row.prntCmntSn && (!row.delYn || repliesOf(row.cmntSn).length > 0),
+  );
   const count = comments.filter((row) => !row.delYn).length;
+
+  /** 삭제하면 줄이 사라지는 댓글인지: 답글이거나, 보이는 답글이 없는 원 댓글 */
+  const vanishesOnDelete = (comment) =>
+    Boolean(comment.prntCmntSn) || repliesOf(comment.cmntSn).length === 0;
 
   const handleCreate = (prntCmntSn) => (cmntCn, reset) =>
     create.mutate(
@@ -277,14 +285,17 @@ export default function CommentSection({
       },
     );
 
-  /** 눌린 댓글 아래에 입력창을 열고, 등록할 때는 원 댓글의 답글로 추가 */
+  /**
+   * 눌린 댓글 아래에 입력창을 열고, 눌린 댓글 번호를 부모로 보낸다
+   * - 답글에 단 답글을 원 댓글 스레드로 올리는 것은 서버가 한다. 원 댓글 번호를 보내면 원 댓글이 삭제된 스레드에서 거절된다
+   */
   const renderReplyForm = (comment) =>
     replyTo === comment.cmntSn && (
       <CommentInput
         placeholder="답글을 입력하세요"
         submitLabel="답글 등록"
         isPending={create.isPending}
-        onSubmit={handleCreate(comment.prntCmntSn ?? comment.cmntSn)}
+        onSubmit={handleCreate(comment.cmntSn)}
         onCancel={() => setReplyTo(null)}
       />
     );
@@ -357,12 +368,18 @@ export default function CommentSection({
           confirmLabel="삭제"
           isPending={remove.isPending}
           errorMessage={remove.isError && '댓글을 삭제하지 못했어요'}
-          onConfirm={() =>
+          onConfirm={() => {
+            const vanishes = vanishesOnDelete(deleteTarget);
             remove.mutate(
               { targetSn, cmntSn: deleteTarget.cmntSn },
-              { onSuccess: () => setDeleteTarget(null) },
-            )
-          }
+              {
+                onSuccess: () => {
+                  setDeleteTarget(null);
+                  if (vanishes) showToast('댓글이 삭제되었습니다');
+                },
+              },
+            );
+          }}
           onCancel={() => {
             remove.reset();
             setDeleteTarget(null);
