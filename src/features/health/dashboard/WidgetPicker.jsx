@@ -54,12 +54,6 @@ const PREVIEW_SAMPLES = {
       { parts: ['다음 검진 · 12.15 정기검진'] },
     ],
   },
-  care: {
-    rows: [
-      { parts: ['양치 · 오늘 완료'], tone: 'brand' },
-      { parts: ['빗질 · 오늘 미완료'] },
-    ],
-  },
 };
 
 /** AI 건강분석 리포트 예시 값 */

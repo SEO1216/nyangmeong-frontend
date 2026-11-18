@@ -7,7 +7,6 @@ import { formatDate, getTodayYmd } from '@/utils/formatDate';
 import Icon from '@/components/Icon';
 import { BTN_SECONDARY } from '@/components/buttonStyles';
 import {
-  useCareItems,
   useCheckups,
   useHealthIndicators,
   useHealthWidgets,
@@ -94,14 +93,12 @@ export default function HealthDashboard({
     petSn: isShown('ckup') ? pet.petSn : null,
     size: CHECKUP_COUNT,
   });
-  const care = useCareItems(isShown('care') ? pet.petSn : null);
 
   /** 항목별 조회 상태: 불러오는 중이면 true */
   const isItemPending = (id) => {
     if (INDICATOR_IDS.includes(id)) return indicators.isPending;
     if (id === 'poop') return stools.isPending;
     if (id === 'ckup') return checkups.isPending;
-    if (id === 'care') return care.isPending;
     return false;
   };
   const sources = {
@@ -111,7 +108,6 @@ export default function HealthDashboard({
     indicators: indicators.data,
     stools: stools.data,
     checkups: checkups.data?.content,
-    care: care.data,
     initialInspection,
   };
 

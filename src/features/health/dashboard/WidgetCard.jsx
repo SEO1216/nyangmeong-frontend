@@ -14,7 +14,6 @@ import {
   getYmdOf,
 } from '@/utils/formatDate';
 import { showToast } from '@/components/toastStore';
-import { CARE_ZONE } from '../careDue';
 import { DOSING, FILE_EXT_PDF } from '../checkup/checkupTypes';
 import { getAttachmentFile } from '../checkupApi';
 import ObservationPhoto from '../diary/ObservationPhoto';
@@ -62,8 +61,6 @@ const deltaChip = (delta, unit) => {
   };
 };
 
-/** 케어리스트 카드 최대 줄 수 */
-const CARE_ROW_COUNT = 4;
 /** 처방·투약 카드 최대 줄 수 */
 const PRESCRIPTION_ROW_COUNT = 3;
 
@@ -189,39 +186,48 @@ const weightBody = ({ indicators }) => {
   };
 };
 
+/**
+ * 식사량·음수량·산책 카드: points는 기록이 있는 최근 5일의 하루 합계(날짜 오름차순)
+ * - 오늘 기록이 있으면 오늘 합계와 직전 기록일 대비(prevDiff, 서버 값)
+ * - 오늘 기록이 없으면 마지막 기록일 합계와 그 앞 기록일과의 차이(서버 prevDiff가 null이라 화면에서 계산, 점 1개면 없음)
+ */
 const dailySumBody =
   (id) =>
   ({ indicators }) => {
     const { key, unit, chartName } = DAILY_SUM[id];
     const indicator = indicators?.[key];
-    if (!indicator) return null;
+    if (!indicator || indicator.points.length === 0) return null;
     const todaySum = toNumber(indicator.todaySum);
     const values = indicator.points.map((point) => toNumber(point.sumNvl));
     const labels = indicator.points.map((point) =>
       formatMonthDayDot(point.rcdYmd),
     );
     const sums = values.filter((value) => value != null);
+    const isToday = todaySum != null;
+    const shownSum = isToday ? todaySum : values.at(-1);
+    const prevSum = values.length > 1 ? values.at(-2) : null;
+    const delta = isToday
+      ? toNumber(indicator.prevDiff)
+      : shownSum != null && prevSum != null
+        ? round2(shownSum - prevSum)
+        : null;
     return {
       tile: {
-        value: todaySum == null ? '기록이 없어요' : `${todaySum}${unit}`,
-        chip: deltaChip(toNumber(indicator.prevDiff), unit),
+        value: `${shownSum}${unit}`,
+        chip: deltaChip(delta, unit),
         sub:
           sums.length > 0
-            ? `최근 5일 평균 ${round2(sums.reduce((a, b) => a + b, 0) / sums.length)}${unit}`
+            ? `최근 5개 기록 평균 ${round2(sums.reduce((a, b) => a + b, 0) / sums.length)}${unit}`
             : '',
       },
-      period: '최근 5일',
+      period: '최근 5개 기록',
       body: (
         <>
           <ValueRow
-            value={todaySum ?? '오늘 기록이 없어요'}
-            unit={todaySum == null ? null : `${unit} / 오늘 합계`}
+            value={shownSum}
+            unit={`${unit} / ${isToday ? '오늘' : labels.at(-1)} 합계`}
           >
-            <Delta
-              label="직전 기록일 대비"
-              delta={toNumber(indicator.prevDiff)}
-              unit={unit}
-            />
+            <Delta label="직전 기록일 대비" delta={delta} unit={unit} />
           </ValueRow>
           {values.length > 0 && (
             <div className="mt-auto pt-3">
@@ -681,53 +687,6 @@ const preventionBody = ({ summary }) => {
   };
 };
 
-const careBody = ({ care }) => {
-  if (!care) return null;
-  const { careItems, careRecords } = care;
-  const todayYmd = getTodayYmd();
-  /** 케어리스트에 보이는 항목(indctYn)만 (※신규 정책) */
-  const dailyItems = careItems.filter(
-    (item) => item.indctYn && item.careZoneCd === CARE_ZONE.DAILY,
-  );
-  if (dailyItems.length === 0) return null;
-  /** 케어 캘린더 케어리스트와 같은 오늘 완료 기준 */
-  const isDoneToday = (item) =>
-    item.prscSn != null
-      ? item.todayCmptnCnt >= item.dayMdcnNmtm
-      : careRecords.some(
-          (record) =>
-            record.careArtclSn === item.careArtclSn &&
-            record.cmptnYmd === todayYmd,
-        );
-  const leftItems = dailyItems.filter((item) => !isDoneToday(item));
-  return {
-    tile: {
-      value: leftItems.length > 0 ? `${leftItems.length}개 남음` : '모두 완료',
-      chip:
-        leftItems.length > 0 ? { tone: 'amber', text: '오늘 미완료' } : null,
-      sub: leftItems[0]?.careArtclNm ?? '',
-    },
-    body: (
-      <Rows>
-        {dailyItems.slice(0, CARE_ROW_COUNT).map((item) => {
-          const isDone = isDoneToday(item);
-          /** 보기 전용이라 체크 칸처럼 보이는 동그라미를 두지 않음(추가-1). 글자는 카드 머리와 같은 왼쪽 선 */
-          return (
-            <Row key={item.careArtclSn}>
-              <b className="min-w-0 truncate font-semibold text-ink">
-                {item.careArtclNm}
-              </b>
-              <span className="ml-auto shrink-0 text-muted">
-                {isDone ? '오늘 완료' : '오늘 미완료'}
-              </span>
-            </Row>
-          );
-        })}
-      </Rows>
-    ),
-  };
-};
-
 /** 항목 키 → 본문 만들기 */
 const WIDGET_BODIES = {
   weight: weightBody,
@@ -742,7 +701,6 @@ const WIDGET_BODIES = {
   obsv: observationBody,
   allergy: allergyBody,
   vacc: preventionBody,
-  care: careBody,
 };
 
 /** 고른 항목 카드 한 장(760px 이상)과 요약 타일(760px 미만) */
