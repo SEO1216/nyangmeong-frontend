@@ -2,7 +2,9 @@ import { Flag, MoreVertical } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
 import Avatar from '@/components/Avatar';
 import Badge from '@/components/Badge';
+import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import ConfirmModal from '@/components/ConfirmModal';
+import { INPUT } from '@/components/formStyles';
 import ReportModal from '@/components/ReportModal';
 import { showToast } from '@/components/toastStore';
 import { publicFileUrl } from '@/utils/fileUrl';
@@ -11,10 +13,10 @@ const CMNT_MAX = 500;
 const PREVIEW_MAX = 30;
 
 const ACT_CLASS =
-  'min-h-8 cursor-pointer rounded px-1.5 text-sm font-medium text-[#667374] hover:bg-[#ebf0f0] hover:text-[#1a3234] max-[760px]:min-h-10';
+  'min-h-8 cursor-pointer rounded px-2 text-sm font-medium text-subtle hover:bg-surface-3 hover:text-ink max-[760px]:min-h-11';
 
 const menuItemClass =
-  'flex min-h-10 w-full cursor-pointer items-center gap-2 rounded px-3 text-left text-sm whitespace-nowrap text-[#1a3234] hover:bg-[#f4f6f6]';
+  'flex min-h-10 w-full cursor-pointer items-center gap-2 rounded px-3 text-left text-sm whitespace-nowrap text-ink hover:bg-surface-2';
 
 /** 회원 기본 프로필(사진이 없을 때): 디자인의 .ava-user */
 function CommentInput({
@@ -61,10 +63,10 @@ function CommentInput({
         maxLength={CMNT_MAX + mention.length}
         placeholder={placeholder}
         onChange={(event) => setText(event.target.value)}
-        className="block min-h-20 w-full resize-y rounded-md border border-[#d3dae2] bg-white px-3 py-2.5 text-base leading-[1.6] placeholder:text-[#8c9899] hover:border-[#b9c4c4] focus:border-[#285a5c] focus:ring-focus focus:outline-none"
+        className={`${INPUT} min-h-20 resize-y py-3 leading-[1.6]`}
       />
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs text-[#667374]">
+        <span className="text-xs text-subtle">
           {body.length} / {CMNT_MAX}
         </span>
         <span className="flex gap-2">
@@ -72,7 +74,7 @@ function CommentInput({
             <button
               type="button"
               onClick={onCancel}
-              className="inline-flex h-9 min-w-20 cursor-pointer items-center justify-center rounded-md border border-[#e2e7e7] bg-white px-4 text-sm font-semibold text-[#1a3234] hover:bg-[#f4f6f6]"
+              className={`${BTN_SECONDARY} min-w-20 cursor-pointer`}
             >
               취소
             </button>
@@ -80,7 +82,7 @@ function CommentInput({
           <button
             type="submit"
             disabled={!body.trim() || isPending}
-            className="inline-flex h-9 min-w-24 cursor-pointer items-center justify-center rounded-md bg-[#e9f2f2] px-4 text-sm font-semibold text-[#1e4a4c] hover:enabled:bg-[#dcebeb] disabled:cursor-not-allowed disabled:opacity-50 max-[760px]:h-11"
+            className={`${BTN_PRIMARY} min-w-24 cursor-pointer max-[760px]:h-11`}
           >
             {submitLabel}
           </button>
@@ -112,21 +114,21 @@ function CommentMenu({ comment, onReport }) {
   }, [open]);
 
   return (
-    <div ref={rootRef} className="relative -mt-0.5 shrink-0">
+    <div ref={rootRef} className="relative -mt-1 shrink-0">
       <button
         type="button"
         aria-label="댓글 더보기"
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((prev) => !prev)}
-        className={`grid size-8 cursor-pointer place-items-center rounded-full text-[#8c9899] hover:bg-[#ebf0f0] hover:text-[#3d4a4b] ${open ? 'bg-[#ebf0f0] text-[#3d4a4b]' : ''}`}
+        className={`grid size-8 cursor-pointer place-items-center rounded-full text-placeholder hover:bg-surface-3 hover:text-ink-2 ${open ? 'bg-surface-3 text-ink-2' : ''}`}
       >
         <MoreVertical size={20} aria-hidden="true" />
       </button>
       {open && (
         <div
           role="menu"
-          className="absolute top-[calc(100%+4px)] right-0 z-20 min-w-32 rounded-md border border-[#e2e7e7] bg-white p-1 shadow-md"
+          className="absolute top-[calc(100%+4px)] right-0 z-20 min-w-32 rounded-md border border-line bg-white p-1 shadow-depth-sm"
         >
           <button
             type="button"
@@ -137,7 +139,7 @@ function CommentMenu({ comment, onReport }) {
             }}
             className={menuItemClass}
           >
-            <Flag size={16} aria-hidden="true" className="text-[#667374]" />
+            <Flag size={16} aria-hidden="true" className="text-subtle" />
             신고하기
           </button>
         </div>
@@ -167,7 +169,7 @@ function CommentRow({
 
   return (
     <div
-      className={`grid items-start ${isFoundNotice ? 'my-2 rounded-lg border border-warn-line bg-warn-soft px-4 py-3.5' : 'py-2'} ${isReply ? 'grid-cols-[24px_minmax(0,1fr)_auto] gap-2' : 'grid-cols-[32px_minmax(0,1fr)_auto] gap-3 max-[760px]:gap-2.5'}`}
+      className={`grid items-start ${isFoundNotice ? 'my-2 rounded-lg border border-warn-line bg-warn-soft px-4 py-4' : 'py-2'} ${isReply ? 'grid-cols-[24px_minmax(0,1fr)_auto] gap-2' : 'grid-cols-[32px_minmax(0,1fr)_auto] gap-3 max-[760px]:gap-2'}`}
     >
       <span className="flex flex-col self-stretch">
         <Avatar
@@ -178,13 +180,13 @@ function CommentRow({
         {hasReplies && (
           <span
             aria-hidden="true"
-            className="mx-auto mt-1 -mb-2 w-0.5 flex-1 bg-[#e2e7e7]"
+            className="mx-auto mt-1 -mb-2 w-0.5 flex-1 bg-line"
           />
         )}
       </span>
       <div className="min-w-0">
-        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[#667374]">
-          <b className="text-base font-semibold text-[#1a3234]">
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-subtle">
+          <b className="text-base font-semibold text-ink">
             {comment.mbrNcnm}
           </b>
           {isFoundNotice && (
@@ -193,19 +195,19 @@ function CommentRow({
             </Badge>
           )}
           {comment.mbrSn === authorSn && !isFoundNotice && (
-            <Badge tone="brand" bordered className="h-[22px] px-2">
+            <Badge tone="brand" bordered>
               작성자
             </Badge>
           )}
           <time>{formatRelativeTime(comment.regDt)}</time>
         </p>
         {isDeleted ? (
-          <p className="mt-0.5 text-base leading-[1.6] text-[#667374]">
+          <p className="mt-1 text-base leading-[1.6] text-subtle">
             삭제된 댓글입니다
           </p>
         ) : (
           <>
-            <p className="mt-0.5 text-base leading-[1.6] break-words whitespace-pre-line text-[#1a3234]">
+            <p className="mt-1 text-base leading-[1.6] break-words whitespace-pre-line text-ink">
               {comment.rplyTrgtMbrNcnm && (
                 <span className="font-medium text-brand-500">
                   @{comment.rplyTrgtMbrNcnm}{' '}
@@ -216,7 +218,7 @@ function CommentRow({
                 : comment.cmntCn}
             </p>
             <p
-              className={`mt-0.5 -ml-1.5 flex items-center ${isFoundNotice ? 'hidden' : ''}`}
+              className={`mt-1 -ml-2 flex items-center ${isFoundNotice ? 'hidden' : ''}`}
             >
               <button
                 type="button"
@@ -248,7 +250,7 @@ function CommentRow({
 
 /** 답글: 왼쪽에 ㄴ 모양 연결선, 마지막이 아니면 세로선이 아래로 연결 */
 const REPLY_ITEM_CLASS =
-  "relative before:absolute before:top-0 before:-left-[29px] before:h-[21px] before:w-[23px] before:rounded-bl-[14px] before:border-b-2 before:border-l-2 before:border-[#e2e7e7] before:content-[''] [&:not(:last-child)]:after:absolute [&:not(:last-child)]:after:top-0 [&:not(:last-child)]:after:bottom-0 [&:not(:last-child)]:after:-left-[29px] [&:not(:last-child)]:after:border-l-2 [&:not(:last-child)]:after:border-[#e2e7e7] [&:not(:last-child)]:after:content-[''] max-[760px]:before:-left-[27px] max-[760px]:before:w-[23px] max-[760px]:[&:not(:last-child)]:after:-left-[27px]";
+  "relative before:absolute before:top-0 before:-left-[29px] before:h-[21px] before:w-[23px] before:rounded-bl-[14px] before:border-b-2 before:border-l-2 before:border-line before:content-[''] [&:not(:last-child)]:after:absolute [&:not(:last-child)]:after:top-0 [&:not(:last-child)]:after:bottom-0 [&:not(:last-child)]:after:-left-[29px] [&:not(:last-child)]:after:border-l-2 [&:not(:last-child)]:after:border-line [&:not(:last-child)]:after:content-[''] max-[760px]:before:-left-[25px] max-[760px]:before:w-[21px] max-[760px]:[&:not(:last-child)]:after:-left-[25px]";
 
 /** 서버가 만든 자동 댓글(찾았어요 안내)은 글자 맨 앞에 🎉가 붙어 오므로 보일 때만 떼고 보인다(저장 글자는 그대로) */
 const stripLeadingEmoji = (text) =>
@@ -313,7 +315,7 @@ export default function CommentSection({
     replyTo === comment.cmntSn && (
       <CommentInput
         placeholder="답글을 입력하세요"
-        submitLabel="답글 등록"
+        submitLabel="등록하기"
         isPending={create.isPending}
         onSubmit={handleCreate(comment.cmntSn)}
         onCancel={() => setReplyTo(null)}
@@ -336,13 +338,13 @@ export default function CommentSection({
     <section
       id={inputId ? `${inputId}-section` : undefined}
       aria-labelledby="post-cmnt-title"
-      className="scroll-mt-24 rounded-[14px] border border-[#e2e7e7] bg-white px-9 py-8 max-[760px]:px-5 max-[760px]:py-6"
+      className="scroll-mt-24 rounded-[14px] border border-line bg-white px-9 py-8 max-[760px]:px-5 max-[760px]:py-6"
     >
       <h2
         id="post-cmnt-title"
-        className="text-lg font-bold tracking-[-0.18px] text-[#1a3234]"
+        className="text-lg font-bold tracking-[-0.01em] text-ink"
       >
-        {title} <b className="text-[#2f6f57]">{count}</b>
+        {title} <b className="text-ok">{count}</b>
       </h2>
       <ul className="mt-3">
         {roots.map((root) => (
@@ -355,7 +357,7 @@ export default function CommentSection({
               {...rowProps}
             />
             {repliesOf(root.cmntSn).length > 0 && (
-              <ul className="pl-[44px] max-[760px]:pl-[42px]">
+              <ul className="pl-11 max-[760px]:pl-10">
                 {repliesOf(root.cmntSn).map((reply) => (
                   <li key={reply.cmntSn} className={REPLY_ITEM_CLASS}>
                     <CommentRow
@@ -377,7 +379,7 @@ export default function CommentSection({
         <CommentInput
           inputId={inputId}
           placeholder={placeholder}
-          submitLabel="댓글 등록"
+          submitLabel="등록하기"
           isPending={create.isPending}
           onSubmit={handleCreate(null)}
         />
@@ -386,7 +388,8 @@ export default function CommentSection({
       {deleteTarget && (
         <ConfirmModal
           title="댓글을 삭제할까요?"
-          confirmLabel="삭제"
+          confirmLabel="삭제하기"
+          isDanger
           isPending={remove.isPending}
           errorMessage={remove.isError && '댓글을 삭제하지 못했어요'}
           onConfirm={() => {

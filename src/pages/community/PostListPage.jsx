@@ -1,6 +1,7 @@
 import { Pencil } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { BTN_PRIMARY } from '@/components/buttonStyles';
+import LoadError from '@/components/LoadError';
 import PostList, { POST_LIST_GRID } from '@/features/community/PostList';
 import { getBoardCode } from '@/features/community/postCodes';
 import { usePostList } from '@/features/community/queries';
@@ -17,19 +18,19 @@ function PostCardSkeleton({ hasThumbOnMobile }) {
   return (
     <div
       aria-hidden="true"
-      className="grid h-[208px] grid-cols-[minmax(0,1fr)_200px] gap-x-8 gap-y-3.5 rounded-[14px] border border-[#e2e7e7] bg-white px-7 py-6 max-[760px]:h-auto max-[760px]:grid-cols-1 max-[760px]:gap-3 max-[760px]:px-4 max-[760px]:pt-4 max-[760px]:pb-[18px]"
+      className="grid h-[208px] grid-cols-[minmax(0,1fr)_200px] gap-x-8 gap-y-4 rounded-[14px] border border-line bg-white px-7 py-6 max-[760px]:h-auto max-[760px]:grid-cols-1 max-[760px]:gap-3 max-[760px]:px-4 max-[760px]:pt-4 max-[760px]:pb-5"
     >
       <div className="min-w-0 max-[760px]:order-2">
         <div className="flex gap-2">
-          <Skeleton className="h-[22px] w-14 rounded-full" />
-          <Skeleton className="h-[22px] w-11 rounded-full" />
+          <Skeleton className="h-6 w-14 rounded-full" />
+          <Skeleton className="h-6 w-11 rounded-full" />
         </div>
         <Skeleton className="mt-3 h-[22px] w-3/4" />
-        <Skeleton className="mt-3.5 h-3.5 w-full" />
+        <Skeleton className="mt-4 h-3.5 w-full" />
         <Skeleton className="mt-2 h-3.5 w-3/5" />
       </div>
       <Skeleton
-        className={`col-start-2 row-span-2 row-start-1 min-h-[124px] self-stretch rounded-[10px] ${hasThumbOnMobile ? '' : 'max-[760px]:hidden'} max-[760px]:order-1 max-[760px]:col-start-1 max-[760px]:row-span-1 max-[760px]:row-start-auto max-[760px]:aspect-[16/9] max-[760px]:min-h-0`}
+        className={`col-start-2 row-span-2 row-start-1 h-[150px] self-start rounded-[10px] ${hasThumbOnMobile ? '' : 'max-[760px]:hidden'} max-[760px]:order-1 max-[760px]:col-start-1 max-[760px]:row-span-1 max-[760px]:row-start-auto max-[760px]:aspect-[16/9] max-[760px]:h-auto`}
       />
       <div className="flex items-center gap-2 max-[760px]:order-3">
         <Skeleton className="size-6 rounded-full" />
@@ -47,14 +48,14 @@ function PostListSkeleton() {
       <div className="flex min-w-0 flex-col gap-5 max-[1100px]:col-span-full">
         <div aria-hidden="true" className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
-            <div className="flex gap-1.5">
+            <div className="flex gap-2">
               {Array.from({ length: 3 }, (_, index) => (
-                <Skeleton key={index} className="h-[34px] w-16 rounded-full" />
+                <Skeleton key={index} className="h-9 w-16 rounded-full" />
               ))}
             </div>
             <div className="ml-auto flex items-center gap-2 max-[760px]:ml-0 max-[760px]:w-full">
-              <Skeleton className="h-[34px] w-[104px] shrink-0" />
-              <Skeleton className="h-[34px] w-[280px] max-[760px]:w-auto max-[760px]:flex-1" />
+              <Skeleton className="h-10 w-[104px] shrink-0" />
+              <Skeleton className="h-10 w-[280px] max-[760px]:w-auto max-[760px]:flex-1" />
             </div>
           </div>
           <div className="flex items-center justify-between">
@@ -62,12 +63,12 @@ function PostListSkeleton() {
             <Skeleton className="h-5 w-14" />
           </div>
         </div>
-        <div className="flex flex-col gap-3 max-[760px]:gap-2.5">
+        <div className="flex flex-col gap-3 max-[760px]:gap-2">
           {Array.from({ length: PAGE_SIZE }, (_, index) => (
             <PostCardSkeleton key={index} hasThumbOnMobile={index % 2 === 0} />
           ))}
         </div>
-        <div aria-hidden="true" className="mt-5">
+        <div aria-hidden="true" className="mt-12 max-[760px]:mt-8">
           <Skeleton className="mx-auto h-9 w-64" />
         </div>
       </div>
@@ -101,6 +102,7 @@ export default function PostListPage() {
     data: posts,
     isPending,
     isError,
+    refetch,
   } = usePostList({
     page,
     size: PAGE_SIZE,
@@ -150,12 +152,11 @@ export default function PostListPage() {
   } else if (isError) {
     body = (
       <div className={POST_LIST_GRID}>
-        <p
-          role="alert"
-          className="min-w-0 text-[#566465] max-[1100px]:col-span-full"
-        >
-          게시글을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요
-        </p>
+        <LoadError
+          message="게시글을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요"
+          onRetry={() => refetch()}
+          className="min-w-0 py-16 max-[1100px]:col-span-full"
+        />
         <StoryRail action={writeAction} />
       </div>
     );

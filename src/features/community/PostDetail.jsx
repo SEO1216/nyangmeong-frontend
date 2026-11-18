@@ -44,23 +44,23 @@ export default function PostDetail({ post }) {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-8 max-[1100px]:grid-cols-1 max-[1100px]:gap-10">
       <div className="flex min-w-0 flex-col gap-4">
-        <article className="rounded-[14px] border border-[#e2e7e7] bg-white px-9 pt-8 pb-7 max-[760px]:px-5 max-[760px]:pt-[22px] max-[760px]:pb-5">
+        <article className="rounded-[14px] border border-line bg-white px-9 pt-8 pb-7 max-[760px]:px-5 max-[760px]:pt-6 max-[760px]:pb-5">
           <PostBadges post={post} />
-          <h2 className="mt-3 text-2xl leading-[1.35] font-bold tracking-[-0.24px] break-words text-[#1a3234] max-[760px]:text-xl">
+          <h2 className="mt-3 text-2xl leading-[1.35] font-bold tracking-[-0.01em] break-words text-ink max-[760px]:text-lg">
             {post.pstTtl}
           </h2>
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-b border-[#e2e7e7] pb-6 max-[760px]:pb-5">
-            <p className="flex flex-wrap items-center gap-2 text-sm text-[#667374]">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-b border-line pb-6 max-[760px]:pb-5">
+            <p className="flex flex-wrap items-center gap-2 text-sm text-subtle">
               <Avatar
                 src={publicFileUrl(post.mbrAtchFileSn)}
                 className="size-8"
               />
-              <b className="text-base leading-normal font-semibold text-[#1a3234]">
+              <b className="text-base leading-normal font-semibold text-ink">
                 {post.mbrNcnm}
               </b>
-              <i className="text-[#b9c4c4] not-italic">·</i>
+              <i className="text-line-strong not-italic">·</i>
               <time>{formatDateTime(post.regDt)}</time>
-              <i className="text-[#b9c4c4] not-italic">·</i>
+              <i className="text-line-strong not-italic">·</i>
               <span>조회 {post.inqCnt}</span>
             </p>
             {post.owner && (
@@ -89,7 +89,7 @@ export default function PostDetail({ post }) {
             <AttachedImages imgs={post.imgs} />
           </PostBody>
 
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-[#e2e7e7] pt-4">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-line pt-4">
             <div className="flex items-center gap-2 max-[760px]:gap-1">
               <LikeButton
                 isLiked={isLiked}
@@ -99,14 +99,14 @@ export default function PostDetail({ post }) {
                   toggleLike.mutate({ pstSn: post.pstSn, liked: isLiked })
                 }
               />
-              <i className="mx-1 h-3.5 w-px bg-[#b9c4c4]" aria-hidden="true" />
+              <i className="mx-1 h-4 w-px bg-line-strong" aria-hidden="true" />
               <SharePanel title={post.pstTtl} />
             </div>
             <button
               type="button"
               aria-label="신고"
               onClick={() => setIsReporting(true)}
-              className="ml-auto inline-flex min-h-9 cursor-pointer items-center gap-1.5 px-1 text-sm font-medium text-[#667374] hover:text-[#1a3234] max-[760px]:min-w-9 max-[760px]:justify-center"
+              className="ml-auto inline-flex min-h-9 cursor-pointer items-center gap-2 px-1 text-sm font-medium text-subtle hover:text-ink max-[760px]:min-h-11 max-[760px]:min-w-11 max-[760px]:justify-center"
             >
               <Flag
                 size={20}
@@ -130,7 +130,7 @@ export default function PostDetail({ post }) {
           <div className="pb-2">
             <h2
               id="post-latest-title"
-              className="text-lg leading-[1.4] font-bold text-[#1a3234]"
+              className="text-lg font-bold tracking-[-0.01em] text-ink"
             >
               펫이야기 최신글
             </h2>
@@ -139,19 +139,19 @@ export default function PostDetail({ post }) {
             {latest?.content.map((item) => (
               <li
                 key={item.pstSn}
-                className="border-t border-[#e2e7e7] first:border-t-0"
+                className="border-t border-line first:border-t-0"
               >
                 <Link
                   to={generatePath(PATHS.COMMUNITY_POST_DETAIL, {
                     pstSn: item.pstSn,
                   })}
                   state={state}
-                  className="group flex flex-col gap-0.5 py-3"
+                  className="group flex flex-col gap-1 py-3"
                 >
-                  <span className="truncate text-base leading-[1.6] text-[#3d4a4b] group-hover:text-[#285a5c]">
+                  <span className="truncate text-base leading-[1.6] text-ink-2 group-hover:text-brand-500">
                     {item.pstTtl}
                   </span>
-                  <time className="text-sm text-[#667374]">
+                  <time className="text-sm text-subtle">
                     {formatMonthDayDot(item.regDt)}
                   </time>
                 </Link>
@@ -164,7 +164,8 @@ export default function PostDetail({ post }) {
       {isDeleting && (
         <ConfirmModal
           title="게시글을 삭제할까요? 삭제한 글은 되돌릴 수 없어요"
-          confirmLabel="삭제"
+          confirmLabel="삭제하기"
+          isDanger
           isPending={remove.isPending}
           errorMessage={remove.isError && '게시글을 삭제하지 못했어요'}
           onConfirm={() =>
