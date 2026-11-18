@@ -1,9 +1,13 @@
-import { Check, ChevronDown, CircleAlert, Lock } from 'lucide-react';
+import { Check, ChevronDown, Lock } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DropdownSelect from '@/components/DropdownSelect';
 import DatePicker from '@/components/DatePicker';
-import { BTN_PRIMARY } from '@/components/buttonStyles';
+import Checkbox from '@/components/Checkbox';
+import FieldError, { Required } from '@/components/FieldError';
+import LoadError from '@/components/LoadError';
+import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import { HELP, INPUT, LABEL } from '@/components/formStyles';
 import Modal from '@/components/Modal';
 import Skeleton from '@/components/Skeleton';
 import { showToast } from '@/components/toastStore';
@@ -227,7 +231,7 @@ export default function PetFormModal({ petSn = null, onClose, onCreated }) {
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="inline-flex h-10 min-w-24 items-center justify-center rounded-md border border-line bg-white px-4 font-semibold hover:border-line-strong hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className={`${BTN_SECONDARY} min-w-24`}
           >
             취소
           </button>
@@ -235,24 +239,18 @@ export default function PetFormModal({ petSn = null, onClose, onCreated }) {
             type="submit"
             form="pet-form"
             disabled={isSaveDisabled}
-            className="inline-flex h-10 min-w-24 items-center justify-center rounded-md bg-brand-500 px-4 font-semibold text-white hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-surface-3 disabled:text-line-strong"
+            className={`${BTN_PRIMARY} min-w-24`}
           >
-            {isEdit ? '저장' : '등록하기'}
+            {isEdit ? '저장하기' : '등록하기'}
           </button>
         </div>
       }
     >
       {isLoadFailed ? (
-        <div className="flex flex-col items-center gap-4 py-16 text-center">
-          <p className="text-muted">반려동물 정보를 불러오지 못했어요</p>
-          <button
-            type="button"
-            onClick={() => refetchPet()}
-            className={BTN_PRIMARY}
-          >
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message="반려동물 정보를 불러오지 못했어요"
+          onRetry={() => refetchPet()}
+        />
       ) : isFormLoading ? (
         <PetFormSkeleton />
       ) : (
@@ -613,21 +611,14 @@ function PetForm({
                 value={form.petGndrCd}
                 onChange={(code) => setField('petGndrCd', code)}
               />
-              <label className="inline-flex cursor-pointer items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={form.nutrYn === 'Y'}
-                  onChange={(e) =>
-                    setField('nutrYn', e.target.checked ? 'Y' : 'N')
-                  }
-                  className="peer sr-only"
-                />
-                <span
-                  aria-hidden="true"
-                  className="grid size-5 shrink-0 place-items-center rounded-sm border-[1.5px] border-line-strong bg-white transition-colors after:h-[5px] after:w-2.5 after:-translate-y-px after:-rotate-45 after:border-b-2 after:border-l-2 after:border-white after:opacity-0 peer-checked:border-brand-500 peer-checked:bg-brand-500 peer-checked:after:opacity-100 peer-focus-visible:ring-focus"
-                />
+              <Checkbox
+                checked={form.nutrYn === 'Y'}
+                onChange={(e) =>
+                  setField('nutrYn', e.target.checked ? 'Y' : 'N')
+                }
+              >
                 중성화 완료
-              </label>
+              </Checkbox>
             </Group>
             <Field
               m="colr"
@@ -722,7 +713,7 @@ function PetForm({
                   onClick={() =>
                     navigate(`${PATHS.HEALTH_DIARY}?petSn=${pet.petSn}`)
                   }
-                  className="inline-flex h-10 items-center justify-center self-start rounded-md border border-line bg-white px-4 font-semibold hover:border-line-strong hover:bg-surface-2"
+                  className={`${BTN_SECONDARY} self-start`}
                 >
                   건강 일지에서 기록하기
                 </button>
@@ -936,31 +927,8 @@ function PetForm({
   );
 }
 
-const INPUT =
-  'block h-10 w-full rounded-md border border-input-line bg-white px-3 placeholder:text-placeholder hover:border-line-strong focus:border-brand-500 focus:ring-focus focus:outline-none aria-invalid:border-danger aria-invalid:focus:ring-error';
-const HELP = 'text-sm leading-normal text-muted';
-const LABEL = 'flex items-center gap-0.5 leading-[1.4] font-semibold';
-
-function Required() {
-  return (
-    <span aria-hidden="true" className="ml-0.5 font-bold text-danger">
-      *
-    </span>
-  );
-}
-
 function Optional() {
   return <span className="ml-1 text-badge font-medium text-subtle">선택</span>;
-}
-
-function ErrorText({ id, children }) {
-  if (!children) return null;
-  return (
-    <p id={id} className="flex items-center gap-1 text-sm text-danger">
-      <CircleAlert className="size-4 shrink-0" />
-      <span>{children}</span>
-    </p>
-  );
 }
 
 /** 앱: 항목 순서(order)와 한 줄/반 줄(col-span)을 항목마다 정한다. 정하지 않은 항목은 뒤에 한 줄씩 */
@@ -988,7 +956,7 @@ function ResponsiveHelp({ pc, m }) {
 
 function Row({ children }) {
   return (
-    <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2 max-[760px]:contents">
+    <div className="grid grid-cols-1 gap-x-8 gap-y-6 min-[760px]:grid-cols-2 max-[760px]:contents">
       {children}
     </div>
   );
@@ -1027,7 +995,7 @@ function Field({
           {help}
         </p>
       )}
-      <ErrorText id={`${id}-e`}>{error}</ErrorText>
+      <FieldError id={`${id}-e`}>{error}</FieldError>
     </div>
   );
 }
@@ -1057,14 +1025,14 @@ function Group({
           {help}
         </p>
       )}
-      <ErrorText id={errorId}>{error}</ErrorText>
+      <FieldError id={errorId}>{error}</FieldError>
     </fieldset>
   );
 }
 
 function RadioGroup({ name, options, value, onChange }) {
   return (
-    <div className="flex flex-wrap gap-x-7 max-[760px]:h-10 max-[760px]:flex-nowrap max-[760px]:gap-0 max-[760px]:rounded-md max-[760px]:border max-[760px]:border-[#e6eaeb] max-[760px]:bg-[#f1f3f4] max-[760px]:p-[3px]">
+    <div className="flex flex-wrap gap-x-7 max-[760px]:h-10 max-[760px]:flex-nowrap max-[760px]:gap-0 max-[760px]:rounded-md max-[760px]:border max-[760px]:border-line max-[760px]:bg-surface-2 max-[760px]:p-1">
       {options.map((option) => (
         <label
           key={option.code}

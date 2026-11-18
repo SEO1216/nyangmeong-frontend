@@ -1,4 +1,5 @@
 import Modal from '@/components/Modal';
+import { BTN_DANGER, BTN_SECONDARY } from '@/components/buttonStyles';
 import { showToast } from '@/components/toastStore';
 import { useCancelInvitation, useDeleteInvitation } from '../queries';
 
@@ -18,7 +19,7 @@ const MODES = {
   delete: {
     title: (target) => `${target}에게 보낸 초대를 삭제할까요?`,
     description: '삭제하면 보낸 초대 목록에서 사라지고 되돌릴 수 없어요.',
-    confirm: '삭제',
+    confirm: '삭제하기',
     keep: '닫기',
     done: '초대를 삭제했어요',
   },
@@ -66,7 +67,7 @@ export default function SentInvitationDialog({
             type="button"
             onClick={close}
             disabled={mutation.isPending}
-            className="h-11 min-w-0 flex-1 rounded-md border border-line bg-white font-semibold hover:border-line-strong hover:bg-surface-2"
+            className={BTN_SECONDARY}
           >
             {text.keep}
           </button>
@@ -74,7 +75,7 @@ export default function SentInvitationDialog({
             type="button"
             onClick={handleConfirm}
             disabled={mutation.isPending}
-            className="h-11 min-w-0 flex-1 rounded-md bg-danger font-semibold text-white hover:bg-[#983a2f] disabled:bg-surface-3 disabled:text-line-strong"
+            className={BTN_DANGER}
           >
             {text.confirm}
           </button>

@@ -1,3 +1,4 @@
+import { CHIP, CHIP_ON } from '@/components/buttonStyles';
 import { ITEM_PART_OPTIONS } from '../shared/petCodes';
 
 export const ALL = 'ALL';
@@ -6,7 +7,7 @@ export const ALL = 'ALL';
 const TABS = [{ code: ALL, name: '전체' }, ...ITEM_PART_OPTIONS];
 
 /**
- * [부위 탭] 보관함(FN-MYP-010-14)·상점(FN-MYP-011-02) 공용
+ * [부위 탭] 공용 칩(CHIP·CHIP_ON). 보관함(FN-MYP-010-14)·상점(FN-MYP-011-02) 공용
  * - 모바일에서 탭 줄이 칸을 넓히지 않도록 폭을 0에서 부모 폭까지로 둔다(줄 안에서만 가로 스크롤)
  */
 export default function PartTabs({ value, onChange }) {
@@ -22,11 +23,7 @@ export default function PartTabs({ value, onChange }) {
           type="button"
           aria-pressed={tab.code === value}
           onClick={() => onChange(tab.code)}
-          className={`inline-flex h-9 shrink-0 items-center rounded-full border px-3.5 font-semibold min-[761px]:h-8 ${
-            tab.code === value
-              ? 'border-brand-500 bg-brand-500 text-white'
-              : 'border-line bg-white text-ink-2 hover:border-line-strong'
-          }`}
+          className={tab.code === value ? CHIP_ON : CHIP}
         >
           {tab.name}
         </button>

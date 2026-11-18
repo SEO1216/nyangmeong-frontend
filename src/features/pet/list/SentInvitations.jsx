@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Badge from '@/components/Badge';
 import Skeleton from '@/components/Skeleton';
 import SkeletonCard from '@/components/SkeletonCard';
 import { diffDays, getTodayYmd, getYmdOf } from '@/utils/formatDate';
@@ -19,29 +20,29 @@ import SentInvitationDialog from './SentInvitationDialog';
 const STATUS_BADGES = {
   [INVTN_STTS.WAIT]: {
     label: '대기중',
-    tone: 'bg-tone-amber-bg text-tone-amber-fg',
+    tone: 'amber',
   },
   [INVTN_STTS.ACPT]: {
     label: '수락',
-    tone: 'bg-tone-green-bg text-tone-green-fg',
+    tone: 'green',
   },
   [INVTN_STTS.RJCT]: {
     label: '거절',
-    tone: 'bg-tone-rose-bg text-tone-rose-fg',
+    tone: 'rose',
   },
   [INVTN_STTS.EXPR]: {
     label: '만료됨',
-    tone: 'bg-tone-gray-bg text-tone-gray-fg',
+    tone: 'gray',
   },
   [INVTN_STTS.CNCL]: {
     label: '취소됨',
-    tone: 'bg-tone-gray-bg text-tone-gray-fg',
+    tone: 'gray',
   },
 };
 
 const PARTIAL_BADGE = {
   label: '일부 수락',
-  tone: 'bg-tone-green-bg text-tone-green-fg',
+  tone: 'green',
 };
 
 /** 둘째 줄의 동물별 결과 글자색 */
@@ -68,16 +69,6 @@ function EmailText({ email }) {
       </span>
       {email.slice(at + 1)}
     </>
-  );
-}
-
-function Badge({ tone, children }) {
-  return (
-    <span
-      className={`inline-flex h-6 shrink-0 items-center rounded-full px-2.5 pt-[1.5px] text-badge leading-none font-semibold whitespace-nowrap ${tone}`}
-    >
-      {children}
-    </span>
   );
 }
 
@@ -116,7 +107,7 @@ export default function SentInvitations() {
     <section aria-labelledby="sent-title" className="mt-12 flex flex-col gap-5">
       <h2
         id="sent-title"
-        className="flex items-baseline gap-2 text-[22px] leading-[1.35] font-bold tracking-[-0.02em]"
+        className="flex items-baseline gap-2 text-lg font-bold tracking-[-0.02em]"
       >
         보낸 초대
         <small className="text-base font-medium tracking-normal text-subtle">
@@ -124,7 +115,7 @@ export default function SentInvitations() {
         </small>
       </h2>
       {invitations.length === 0 ? (
-        <p className="rounded-card border border-line bg-white px-[22px] py-6 text-center text-muted shadow-depth-sm">
+        <p className="rounded-card border border-line bg-white px-6 py-6 text-center text-muted shadow-depth-sm">
           아직 보낸 초대가 없어요
         </p>
       ) : (
@@ -158,7 +149,7 @@ export default function SentInvitations() {
             return (
               <li
                 key={invitation.jntBrupInvtnSn}
-                className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-start gap-x-3 border-b border-line-soft px-[22px] py-6 last:border-b-0 max-[760px]:grid-cols-[auto_minmax(0,1fr)_auto] max-[760px]:gap-y-1.5 max-[760px]:px-4 max-[760px]:py-4"
+                className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-start gap-x-3 border-b border-line-soft px-6 py-6 last:border-b-0 max-[760px]:grid-cols-[auto_minmax(0,1fr)_auto] max-[760px]:gap-y-1.5 max-[760px]:px-4 max-[760px]:py-4"
               >
                 <p
                   className={`col-start-1 row-start-1 min-w-0 font-semibold [overflow-wrap:anywhere] max-[760px]:overflow-hidden max-[760px]:text-ellipsis max-[760px]:whitespace-nowrap ${menuItems.length > 0 ? 'max-[760px]:col-span-2' : 'max-[760px]:col-span-3'}`}
@@ -191,7 +182,9 @@ export default function SentInvitations() {
                   </span>
                 </p>
                 <div className="col-start-2 row-span-2 row-start-1 self-start max-[760px]:col-start-1 max-[760px]:row-span-1 max-[760px]:row-start-2 max-[760px]:self-center">
-                  <Badge tone={status.tone}>{status.label}</Badge>
+                  <Badge tone={status.tone} className="shrink-0">
+                    {status.label}
+                  </Badge>
                 </div>
                 {menuItems.length > 0 ? (
                   <MoreMenu

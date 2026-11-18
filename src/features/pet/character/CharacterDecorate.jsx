@@ -158,12 +158,12 @@ export default function CharacterDecorate({ pet }) {
           </Link>
         )}
       </div>
-      <div className="mt-4 grid items-start gap-4 max-[760px]:col-span-full min-[1101px]:grid-cols-[minmax(0,1fr)_minmax(360px,420px)]">
+      <div className="mt-4 grid items-start gap-4 max-[760px]:col-span-full min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(360px,420px)]">
         <section
           aria-label="착용 미리보기"
           className="rounded-card border border-line bg-white shadow-sm max-[760px]:col-span-full max-[760px]:grid max-[760px]:grid-cols-5 max-[760px]:gap-x-2 max-[760px]:gap-y-3 max-[760px]:p-4"
         >
-          <div className="max-[760px]:contents grid grid-cols-[72px_minmax(0,300px)_72px] items-center justify-center gap-3 px-4 pt-8 pb-4 min-[600px]:grid-cols-[96px_minmax(0,300px)_96px] min-[600px]:gap-5 min-[600px]:px-6">
+          <div className="max-[760px]:contents grid grid-cols-[72px_minmax(0,300px)_72px] items-center justify-center gap-3 px-4 pt-8 pb-4 min-[760px]:grid-cols-[96px_minmax(0,300px)_96px] min-[760px]:gap-5 min-[760px]:px-6">
             <div className="flex flex-col gap-5 max-[760px]:contents">
               {slot(ITEM_PART.HEAD)}
               {slot(ITEM_PART.FACE)}
@@ -182,7 +182,7 @@ export default function CharacterDecorate({ pet }) {
             </div>
           </div>
           <div className="flex justify-center px-6 pb-6 max-[760px]:contents">
-            <div className="w-[72px] min-[600px]:w-24 max-[760px]:contents">
+            <div className="w-[72px] min-[760px]:w-24 max-[760px]:contents">
               {slot(ITEM_PART.NECK)}
             </div>
           </div>
@@ -244,7 +244,7 @@ export function DecorateSkeleton() {
       <div className="flex justify-end max-[760px]:mb-4 max-[760px]:-translate-y-3">
         <Skeleton className="h-10 w-24" />
       </div>
-      <div className="mt-4 grid items-start gap-4 max-[760px]:col-span-full min-[1101px]:grid-cols-[minmax(0,1fr)_minmax(360px,420px)]">
+      <div className="mt-4 grid items-start gap-4 max-[760px]:col-span-full min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(360px,420px)]">
         <SkeletonCard className="h-[478px] max-[760px]:h-[346px]" />
         <SkeletonCard className="h-[187px]" />
       </div>

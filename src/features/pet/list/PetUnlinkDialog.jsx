@@ -1,4 +1,5 @@
 import Modal from '@/components/Modal';
+import { BTN_DANGER, BTN_SECONDARY } from '@/components/buttonStyles';
 import { showToast } from '@/components/toastStore';
 import { BRUP_ROLE } from '@/utils/petCodes';
 import { useCaregivers, useLeavePet } from '../queries';
@@ -53,7 +54,7 @@ export default function PetUnlinkDialog({ pet, onClose }) {
             type="button"
             onClick={close}
             disabled={leavePet.isPending}
-            className="h-11 min-w-0 flex-1 rounded-md border border-line bg-white font-semibold hover:border-line-strong hover:bg-surface-2"
+            className={BTN_SECONDARY}
           >
             취소
           </button>
@@ -61,9 +62,9 @@ export default function PetUnlinkDialog({ pet, onClose }) {
             type="button"
             onClick={handleLeave}
             disabled={leavePet.isPending || !myRelation}
-            className="h-11 min-w-0 flex-1 rounded-md bg-danger font-semibold text-white hover:bg-[#983a2f] disabled:bg-surface-3 disabled:text-line-strong"
+            className={BTN_DANGER}
           >
-            해제
+            해제하기
           </button>
         </>
       }
