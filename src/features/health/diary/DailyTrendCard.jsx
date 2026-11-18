@@ -164,7 +164,12 @@ function TrendBody({ pet, goalBdwg, trend, type, isPc, onAddRecord }) {
   if (trend.isPending) {
     return (
       <div aria-busy="true">
-        <Skeleton className="h-[260px] max-[600px]:h-[220px]" />
+        {/* 산책은 막대 그래프 높이(122)에 맞춤 */}
+        <Skeleton
+          className={
+            type.cd === WALK ? 'h-[122px]' : 'h-[260px] max-[600px]:h-[220px]'
+          }
+        />
       </div>
     );
   }
