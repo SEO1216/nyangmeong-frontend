@@ -35,7 +35,7 @@ export default function ExpenseDuplicateDialog({
             disabled={isPending}
             className={BTN_PRIMARY}
           >
-            그래도 저장
+            그래도 등록하기
           </button>
         </>
       }

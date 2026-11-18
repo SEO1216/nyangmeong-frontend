@@ -108,7 +108,7 @@ export default function ExpenseCalendar({
                   </span>
                   <span
                     aria-hidden="true"
-                    className={`hidden h-[5px] rounded-[3px] max-[760px]:block ${cell.count > 1 ? 'w-3.5' : 'w-[5px]'} ${isSelected ? 'bg-brand-600' : 'bg-[#4f8f86]'}`}
+                    className={`hidden h-[5px] rounded-[3px] max-[760px]:block ${cell.count > 1 ? 'w-3.5' : 'w-[5px]'} ${isSelected ? 'bg-brand-600' : 'bg-brand-500'}`}
                   />
                 </>
               )}

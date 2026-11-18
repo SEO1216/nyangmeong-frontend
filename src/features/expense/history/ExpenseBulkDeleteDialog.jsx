@@ -92,7 +92,7 @@ export default function ExpenseBulkDeleteDialog({
             disabled={deletion.isPending}
             className={BTN_DANGER}
           >
-            삭제
+            삭제하기
           </button>
         </>
       }
