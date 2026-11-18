@@ -28,7 +28,7 @@ export default function ProfileImageField({ prflImgUrl, mbrNcnm, children }) {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-5 px-5 py-5 sm:px-8 sm:py-7 max-[760px]:gap-4">
+    <div className="flex flex-wrap items-center gap-5 px-5 py-5 min-[760px]:px-8 min-[760px]:py-7 max-[760px]:gap-4">
       <div className="relative shrink-0">
         <span className="grid size-[76px] place-items-center overflow-hidden rounded-full bg-surface-3 text-subtle">
           {prflImgUrl ? (
@@ -51,11 +51,11 @@ export default function ProfileImageField({ prflImgUrl, mbrNcnm, children }) {
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-lg font-bold">{mbrNcnm}</p>
-        <p className="mt-1 flex flex-wrap items-center gap-x-1.5 text-muted">
+        <p className="mt-1 flex flex-wrap items-center gap-x-2 text-muted">
           {children}
         </p>
       </div>
-      <div className="flex items-center gap-2 max-sm:w-full">
+      <div className="flex items-center gap-2 max-[760px]:w-full">
         <label
           htmlFor={fileId}
           className={`${BTN_SECONDARY} cursor-pointer has-focus-visible:ring-focus ${

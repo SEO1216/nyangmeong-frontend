@@ -5,7 +5,7 @@ export default function CheckList({ items }) {
       {items.map(([title, description], index) => (
         <li
           key={title}
-          className="grid grid-cols-[28px_minmax(0,1fr)] gap-x-2.5 gap-y-0.5 border-t border-line py-3.5 first:border-t-0 first:pt-1"
+          className="grid grid-cols-[28px_minmax(0,1fr)] gap-x-3 gap-y-1 border-t border-line py-4 first:border-t-0 first:pt-1"
         >
           <span
             aria-hidden="true"

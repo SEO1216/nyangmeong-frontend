@@ -43,7 +43,7 @@ export default function MissingList({
 
         <div className="flex items-center justify-between gap-3">
           <p aria-live="polite" className="text-sm text-muted">
-            총 <b className="font-bold text-ink">{totalElements}</b>건
+            전체 <b className="font-bold text-ink">{totalElements}</b> 건
           </p>
         </div>
 

@@ -1,7 +1,8 @@
 import AiErrorGuide from '@/components/AiErrorGuide';
+import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import Checkbox from '@/components/Checkbox';
+import FieldError from '@/components/FieldError';
 import { BRUP_ROLE } from '@/utils/petCodes';
-import AuthCheckBox from '../shared/AuthCheckBox';
-import { OUTLINE_BTN, PRIMARY_BTN } from '../shared/authStyles';
 import { WITHDRAW_MESSAGES as MSG } from './withdrawMessages';
 
 const SECTION = 'rounded-box border border-line bg-white px-5 py-4';
@@ -57,27 +58,29 @@ export default function WithdrawNotice({
           noticeError ? 'border-danger' : 'border-line'
         }`}
       >
-        <AuthCheckBox checked={isChecked} onChange={onToggle}>
+        <Checkbox checked={isChecked} onChange={onToggle}>
           <span className="font-semibold text-ink">{MSG.noticeCheck}</span>
-        </AuthCheckBox>
+        </Checkbox>
         {noticeError && (
           <>
-            <p role="alert" className="mt-2 text-sm leading-5 text-danger">
-              {noticeError}
-            </p>
+            <FieldError>{noticeError}</FieldError>
             <AiErrorGuide message={noticeError} />
           </>
         )}
       </div>
-      <div className="mt-2 flex gap-2 max-md:flex-col-reverse">
-        <button type="button" onClick={onCancel} className={OUTLINE_BTN}>
+      <div className="mt-2 flex gap-2 max-[760px]:flex-col-reverse">
+        <button
+          type="button"
+          onClick={onCancel}
+          className={`${BTN_SECONDARY} min-[760px]:flex-1`}
+        >
           취소
         </button>
         <button
           type="button"
           onClick={onContinue}
           disabled={!isChecked}
-          className={PRIMARY_BTN}
+          className={`${BTN_PRIMARY} min-[760px]:flex-1`}
         >
           탈퇴 확인으로 계속
         </button>

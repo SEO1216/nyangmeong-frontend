@@ -1,14 +1,7 @@
+import Badge from '@/components/Badge';
 import { isExpired, isFound } from '../missingCodes';
 
-const BADGE_CLASS =
-  'inline-flex h-6 items-center rounded-full px-2.5 pt-[1.5px] text-[13px] leading-none font-semibold whitespace-nowrap';
-
-const TONES = {
-  found:
-    'bg-tone-green-bg text-tone-green-fg ring-1 ring-current/10 ring-inset',
-  expired: 'bg-surface-2 text-muted',
-  lost: 'bg-tone-rose-bg text-tone-rose-fg ring-1 ring-current/10 ring-inset',
-};
+const TONES = { found: 'green', expired: 'gray', lost: 'rose' };
 
 const LABELS = { found: '찾았어요', expired: '기간 만료', lost: '실종' };
 
@@ -18,8 +11,12 @@ export default function MissingStatusBadge({ post, className = '' }) {
   if (isFound(post)) state = 'found';
   else if (isExpired(post)) state = 'expired';
   return (
-    <span className={`${BADGE_CLASS} ${TONES[state]} ${className}`}>
+    <Badge
+      tone={TONES[state]}
+      bordered={state !== 'expired'}
+      className={className}
+    >
       {LABELS[state]}
-    </span>
+    </Badge>
   );
 }

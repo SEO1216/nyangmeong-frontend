@@ -44,7 +44,7 @@ export default function WithdrawConfirmModal({
     >
       <dl className="mb-4 rounded-box bg-surface-2 px-4 py-3">
         <dt className="text-sm text-subtle">탈퇴할 계정</dt>
-        <dd className="mt-0.5 font-semibold break-all text-ink">
+        <dd className="mt-1 font-semibold break-all text-ink">
           {me ? `${me.maskedAcntEml} · ${me.mbrNcnm}` : ''}
         </dd>
       </dl>

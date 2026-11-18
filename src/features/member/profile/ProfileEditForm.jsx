@@ -47,7 +47,7 @@ export default function ProfileEditForm({ profile, hidePassword, onWithdraw }) {
           <ProfileImageField prflImgUrl={prflImgUrl} mbrNcnm={mbrNcnm}>
             {snsTyCd ? (
               <>
-                <span className="inline-flex items-center gap-1.5">
+                <span className="inline-flex items-center gap-2">
                   <SnsLogoChip snsOffrCd={snsTyCd} />
                   {SNS_NAME[snsTyCd]} 계정으로 로그인 중
                 </span>

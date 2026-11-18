@@ -1,10 +1,11 @@
 import { Lock } from 'lucide-react';
 import { useId, useState } from 'react';
 import { BTN_PRIMARY } from '@/components/buttonStyles';
+import FieldError from '@/components/FieldError';
 import { showToast } from '@/components/toastStore';
 import { useVerifyPassword } from '../queries';
-import { CARD, INPUT } from '../shared/profileStyles';
-import { ErrorText } from './FieldMessage';
+import { INPUT } from '@/components/formStyles';
+import { CARD } from '../shared/profileStyles';
 
 export default function PasswordConfirm({ onVerified, onSnsOnly }) {
   const inputId = useId();
@@ -71,7 +72,7 @@ export default function PasswordConfirm({ onVerified, onSnsOnly }) {
           className={INPUT}
         />
         {isError && (
-          <ErrorText id={errorId}>비밀번호가 일치하지 않아요</ErrorText>
+          <FieldError id={errorId}>비밀번호가 일치하지 않아요</FieldError>
         )}
         <button
           type="submit"
