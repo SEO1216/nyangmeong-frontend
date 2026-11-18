@@ -8,7 +8,7 @@ export default function Toggle({ checked, onChange, label, disabled = false }) {
       aria-label={label}
       disabled={disabled}
       className={`relative h-[26px] w-[44px] shrink-0 rounded-full transition-colors disabled:opacity-50 ${
-        checked ? 'bg-[#285a5c]' : 'bg-[#cdd5d5]'
+        checked ? 'bg-brand-500' : 'bg-line-strong'
       }`}
       onClick={() => onChange(!checked)}
     >

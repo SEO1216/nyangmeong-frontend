@@ -36,7 +36,7 @@ export default function MainPage() {
         <>
           <h1
             id="main-title"
-            className="flex items-center gap-2 text-[28px] leading-[36px] font-bold tracking-[-0.03em] text-ink max-[760px]:text-xl max-[760px]:leading-[28px]"
+            className="flex items-center gap-2 text-[28px] leading-[36px] font-bold tracking-[-0.03em] text-ink max-[760px]:text-2xl max-[760px]:leading-[32px]"
           >
             {pickGreeting(enteredAt, representativePet?.petNm)}
           </h1>

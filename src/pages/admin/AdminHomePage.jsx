@@ -181,19 +181,19 @@ function DashboardSkeleton() {
       <div className="flex flex-col gap-8">
         <div className="space-y-3">
           <Skeleton className="h-7 w-24" />
-          <div className="grid grid-cols-2 gap-3 min-[1101px]:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 min-[1100px]:grid-cols-4">
             {Array.from({ length: 4 }, (_, index) => (
               <SkeletonCard key={index} className="h-[106px]" />
             ))}
           </div>
-          <div className="grid gap-3 min-[1101px]:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+          <div className="grid gap-3 min-[1100px]:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
             <SkeletonCard className="h-[300px]" />
             <SkeletonCard className="h-[300px]" />
           </div>
         </div>
         <div className="space-y-3">
           <Skeleton className="h-7 w-24" />
-          <div className="grid grid-cols-2 gap-3 min-[761px]:grid-cols-3 min-[1101px]:grid-cols-6">
+          <div className="grid grid-cols-2 gap-3 min-[760px]:grid-cols-3 min-[1100px]:grid-cols-6">
             {Array.from({ length: 6 }, (_, index) => (
               <SkeletonCard key={index} className="h-[106px]" />
             ))}
@@ -204,7 +204,7 @@ function DashboardSkeleton() {
             <Skeleton className="h-7 w-56" />
             <Skeleton className="h-10 w-[260px]" />
           </div>
-          <div className="grid gap-3 min-[1101px]:grid-cols-2">
+          <div className="grid gap-3 min-[1100px]:grid-cols-2">
             <SkeletonCard className="h-[560px]" />
             <SkeletonCard className="h-[560px]" />
             <SkeletonCard className="h-[300px]" />

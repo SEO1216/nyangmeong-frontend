@@ -17,7 +17,7 @@ import ScrollToTop from './ScrollToTop';
  */
 
 /** 사이드바가 고정으로 보이는 폭 */
-const WIDE_QUERY = '(min-width: 1101px)';
+const WIDE_QUERY = '(width >= 1100px)';
 
 /** PATHS에 경로가 있는 메뉴만 남긴 목록 */
 const VISIBLE_MENUS = ADMIN_MENUS.map((menu) =>
@@ -97,7 +97,7 @@ function AdminDrawer({ onClose }) {
   return (
     <div id="admin-drawer" className="fixed inset-0 z-50">
       <div
-        className="absolute inset-0 bg-[#0f1723]/45"
+        className="absolute inset-0 bg-dim/45"
         aria-hidden="true"
         onClick={onClose}
       />
@@ -181,7 +181,7 @@ export default function AdminLayout() {
             aria-label="메뉴 열기"
             aria-expanded={isDrawerOpen}
             aria-controls="admin-drawer"
-            className="flex size-10 items-center justify-center rounded-md text-ink-2 hover:bg-surface-2 min-[1101px]:hidden"
+            className="flex size-10 items-center justify-center rounded-md text-ink-2 hover:bg-surface-2 min-[1100px]:hidden"
             onClick={handleDrawerOpen}
           >
             <Menu className="size-5" aria-hidden="true" />
@@ -210,7 +210,7 @@ export default function AdminLayout() {
       </header>
       <div className="flex">
         {/** 사이드바 */}
-        <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-60 shrink-0 overflow-y-auto border-r border-line bg-white min-[1101px]:block">
+        <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-60 shrink-0 overflow-y-auto border-r border-line bg-white min-[1100px]:block">
           <SidebarNav />
         </aside>
         {/** 본문 */}

@@ -10,7 +10,7 @@ export default function Skeleton({ className = '', lines }) {
     return (
       <div
         aria-hidden="true"
-        className={`animate-pulse bg-[#e9eded] ${rounded} ${className}`}
+        className={`animate-pulse bg-surface-2 ${rounded} ${className}`}
       />
     );
   }
@@ -20,7 +20,7 @@ export default function Skeleton({ className = '', lines }) {
       {Array.from({ length: lines }, (_, index) => (
         <div
           key={index}
-          className={`h-4 animate-pulse rounded-md bg-[#e9eded] ${index === lines - 1 && lines > 1 ? 'w-3/5' : 'w-full'}`}
+          className={`h-4 animate-pulse rounded-md bg-surface-2 ${index === lines - 1 && lines > 1 ? 'w-3/5' : 'w-full'}`}
         />
       ))}
     </div>

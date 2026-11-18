@@ -283,7 +283,7 @@ export default function ChatMessageInput({
             className="mb-0.5 grid size-9 shrink-0 place-items-center rounded-full bg-brand-500 text-white disabled:bg-surface-3 disabled:text-placeholder"
             disabled={!canSend}
           >
-            <Icon name="arrow_upward" className="text-xl" />
+            <Icon name="arrow_upward" className="text-lg" />
           </button>
         </div>
       </form>

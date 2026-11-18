@@ -26,7 +26,7 @@ const BUTTON_VARIANT = {
   secondary:
     'border-line bg-white hover:enabled:border-line-strong hover:enabled:bg-surface-2 disabled:border-transparent disabled:bg-surface-3 disabled:text-line-strong',
   danger:
-    'border-transparent bg-danger text-white hover:enabled:bg-[#983a2f] disabled:bg-surface-3 disabled:text-line-strong',
+    'border-transparent bg-danger text-white hover:enabled:bg-danger-600 disabled:bg-surface-3 disabled:text-line-strong',
 };
 
 function DealButton({ action, isSmall = false, isPending, onClick }) {
@@ -50,7 +50,7 @@ function StepList({ stage }) {
   return (
     <ol
       aria-label="거래 진행 단계"
-      className="mt-3.5 grid grid-cols-5 text-sm max-[400px]:text-[13px]"
+      className="mt-3.5 grid grid-cols-5 text-sm max-[390px]:text-[13px]"
     >
       {DEAL_STEPS.map((name, index) => {
         const step = index + 1;
@@ -59,15 +59,16 @@ function StepList({ stage }) {
         const lineColor =
           isEnded || !(isDone || isNow)
             ? 'before:bg-line'
-            : 'before:bg-[#e9d27a]';
-        let circle = 'bg-white shadow-[inset_0_0_0_2px_#b9c4c4]';
+            : 'before:bg-fab-line';
+        let circle =
+          'bg-white shadow-[inset_0_0_0_2px_var(--color-line-strong)]';
         if (isDone) {
           circle = isEnded
-            ? 'bg-surface-3 shadow-[inset_0_0_0_1px_#b9c4c4]'
-            : 'bg-[#f9eaa6] shadow-[inset_0_0_0_1px_#e9d27a]';
+            ? 'bg-surface-3 shadow-[inset_0_0_0_1px_var(--color-line-strong)]'
+            : 'bg-accent-300 shadow-[inset_0_0_0_1px_var(--color-fab-line)]';
         } else if (isNow) {
           circle =
-            'bg-white shadow-[inset_0_0_0_2px_#e9d27a,0_0_0_4px_#f9eaa6]';
+            'bg-white shadow-[inset_0_0_0_2px_var(--color-fab-line),0_0_0_4px_var(--color-accent-300)]';
         }
         let textColor = 'text-placeholder';
         if (isDone && !isEnded) textColor = 'text-ink-2';
@@ -224,8 +225,8 @@ const formatCondition = (cnd) => {
 };
 
 const ACT_TONE = {
-  todo: 'bg-[#f9eaa6] [&_.icon]:text-ink text-ink',
-  done: 'bg-[#ebf3ee] [&_.icon]:text-[#2f6f57]',
+  todo: 'bg-accent-300 [&_.icon]:text-ink text-ink',
+  done: 'bg-tone-green-bg [&_.icon]:text-ok',
   end: '[&_.icon]:text-placeholder',
   '': '',
 };
@@ -292,8 +293,8 @@ export default function CareDealCard({ room }) {
       className="@container relative z-[15] shrink-0 border-b border-line bg-white"
     >
       <div
-        className={`flex flex-wrap items-center gap-x-2 gap-y-1.5 py-1.5 pr-1.5 pl-4 transition-colors max-[520px]:pl-3.5 ${
-          mainAction ? 'bg-[#f9eaa6]' : ''
+        className={`flex flex-wrap items-center gap-x-2 gap-y-1.5 py-1.5 pr-1.5 pl-4 transition-colors max-[390px]:pl-3.5 ${
+          mainAction ? 'bg-accent-300' : ''
         }`}
       >
         <p className="order-1 flex min-w-0 flex-1 items-center gap-2">

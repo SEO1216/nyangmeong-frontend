@@ -67,7 +67,7 @@ const groupLabelOf = (type) =>
  * - 막대 자리(10px)를 늘 비워 두고 오른쪽 여백을 24px→14px로 줄인다: 막대가 생겨도 목록 너비가 그대로이고
  *   막대는 오른쪽 여백 위에 보인다(사람 요청 2026-11-13). 웹 폭에서만(모바일 왼쪽 목록은 스크롤하지 않음)
  */
-const SCROLL_SOFT = 'min-[761px]:pr-3.5 min-[761px]:scrollbar-stable';
+const SCROLL_SOFT = 'min-[760px]:pr-3.5 min-[760px]:scrollbar-stable';
 
 const isSamePick = (a, b) => a.petSn === b.petSn && a.cd === b.cd;
 
@@ -137,7 +137,7 @@ export default function ShortcutEditModal({
       onClose={onClose}
       footer={
         <>
-          <span className="text-sm text-muted min-[761px]:hidden">
+          <span className="text-sm text-muted min-[760px]:hidden">
             {isFull ? (
               '가득 참'
             ) : (
@@ -161,7 +161,7 @@ export default function ShortcutEditModal({
               disabled={isPending || !isChanged}
               onClick={() => onSubmit(list)}
             >
-              저장
+              저장하기
             </button>
           </div>
         </>
@@ -176,10 +176,7 @@ export default function ShortcutEditModal({
           {pets.map((pet) => {
             const isSelected = pet.petSn === petSn;
             return (
-              <li
-                key={pet.petSn}
-                className="shrink-0"
-              >
+              <li key={pet.petSn} className="shrink-0">
                 <button
                   type="button"
                   aria-pressed={isSelected}
@@ -209,9 +206,9 @@ export default function ShortcutEditModal({
             );
           })}
         </ul>
-        <div className="grid min-h-0 flex-1 min-[761px]:grid-cols-2">
+        <div className="grid min-h-0 flex-1 min-[760px]:grid-cols-2">
           <div
-            className={`flex min-h-0 min-w-0 flex-col gap-3 px-6 pt-4 pb-5 min-[761px]:overflow-y-auto min-[761px]:border-r min-[761px]:border-line-soft ${SCROLL_SOFT}`}
+            className={`flex min-h-0 min-w-0 flex-col gap-3 px-6 pt-4 pb-5 min-[760px]:overflow-y-auto min-[760px]:border-r min-[760px]:border-line-soft ${SCROLL_SOFT}`}
           >
             <SearchInput
               value={query}
@@ -219,7 +216,7 @@ export default function ShortcutEditModal({
               onSubmit={() => {}}
               placeholder="메뉴 검색"
             />
-            <p className="flex items-center gap-1 text-xs text-muted min-[761px]:hidden">
+            <p className="flex items-center gap-1 text-xs text-muted min-[760px]:hidden">
               <Info className="size-3.5 shrink-0" aria-hidden="true" />
               {guideText}
             </p>
@@ -267,7 +264,7 @@ export default function ShortcutEditModal({
                             )}
                             <Star
                               aria-hidden="true"
-                              className={`size-4 min-[761px]:hidden ${
+                              className={`size-4 min-[760px]:hidden ${
                                 isPicked
                                   ? 'fill-brand-500 text-brand-500'
                                   : 'text-ink-2'
@@ -283,7 +280,7 @@ export default function ShortcutEditModal({
             )}
           </div>
           <div
-            className={`hidden min-h-0 flex-col gap-3 overflow-y-auto px-6 pt-4 pb-5 min-[761px]:flex ${SCROLL_SOFT}`}
+            className={`hidden min-h-0 flex-col gap-3 overflow-y-auto px-6 pt-4 pb-5 min-[760px]:flex ${SCROLL_SOFT}`}
           >
             <div>
               <div className="flex items-center justify-between">

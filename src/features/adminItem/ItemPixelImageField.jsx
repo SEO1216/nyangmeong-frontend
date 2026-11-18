@@ -105,7 +105,7 @@ export default function ItemPixelImageField({
               src={pixel.url}
               alt="만든 픽셀 그림 미리보기"
               className={`${PREVIEW_CLASS} [image-rendering:pixelated] ${
-                isPixelChosen ? 'ring-2 ring-[#285a5c]' : ''
+                isPixelChosen ? 'ring-2 ring-brand-500' : ''
               }`}
             />
           </Preview>

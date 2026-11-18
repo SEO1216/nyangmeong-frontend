@@ -20,7 +20,7 @@ export default function PageSkeleton({ top, chips = 0, tabs = 0, children }) {
       {tabs > 0 && (
         <div
           aria-hidden="true"
-          className="flex gap-8 border-b border-[#e2e7e7] px-4 pt-6 pb-4"
+          className="flex gap-8 border-b border-line px-4 pt-6 pb-4"
         >
           {Array.from({ length: tabs }, (_, index) => (
             <Skeleton key={index} className="h-5 w-20" />

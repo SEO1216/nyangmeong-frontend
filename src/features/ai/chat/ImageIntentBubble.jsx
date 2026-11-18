@@ -3,9 +3,9 @@ import CharacterRequestBubble from './CharacterRequestBubble';
 import ImageKindChips from './ImageKindChips';
 
 const bubbleClass =
-  'max-w-[592px] rounded-[4px_18px_18px_18px] border border-[#e2e7e7] bg-white px-4 py-3 text-[15px] leading-relaxed text-[#1a3234]';
+  'max-w-[592px] rounded-[4px_18px_18px_18px] border border-line bg-white px-4 py-3 text-[15px] leading-relaxed text-ink';
 const primaryClass =
-  'h-8 rounded-md bg-[#285a5c] px-3 text-base font-semibold text-white hover:bg-[#1e4a4c]';
+  'h-8 rounded-md bg-brand-500 px-3 text-base font-semibold text-white hover:bg-brand-600';
 
 /** AI 아바타 + 내용 */
 function AiRow({ children }) {
@@ -16,7 +16,7 @@ function AiRow({ children }) {
         alt=""
         width="36"
         height="36"
-        className="size-9 shrink-0 rounded-full border border-[#e2e7e7] bg-[#e9f2f2] object-contain p-1"
+        className="size-9 shrink-0 rounded-full border border-line bg-brand-50 object-contain p-1"
       />
       <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
         {children}
@@ -52,10 +52,10 @@ export default function ImageIntentBubble({
             alt={image.file.name}
             width="160"
             height="120"
-            className="h-[120px] w-40 rounded-[10px] border border-[#e2e7e7] object-cover"
+            className="h-[120px] w-40 rounded-[10px] border border-line object-cover"
           />
           {image.text && (
-            <p className="max-w-[592px] whitespace-pre-wrap rounded-[18px_4px_18px_18px] border border-[#e8d27e] bg-[#f9eaa6] px-4 py-3 text-[15px] leading-relaxed text-[#1a3234]">
+            <p className="max-w-[592px] whitespace-pre-wrap rounded-[18px_4px_18px_18px] border border-fab-line bg-accent-300 px-4 py-3 text-[15px] leading-relaxed text-ink">
               {image.text}
             </p>
           )}
@@ -71,10 +71,7 @@ export default function ImageIntentBubble({
       )}
 
       {image.status === 'failed' && (
-        <p
-          role="alert"
-          className="self-end text-sm leading-[22px] text-[#b42318]"
-        >
+        <p role="alert" className="self-end text-sm leading-[22px] text-danger">
           {image.errorMessage}
         </p>
       )}

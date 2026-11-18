@@ -7,7 +7,7 @@ import { PATHS } from '@/routes/paths';
  * [경로 + 페이지 머리]
  * - 경로: 홈 아이콘 / 섹션 / 메뉴 / (상세면 제목). 위에 작게, 앞 단계는 보통·현재 위치는 굵게(디자인 COM-5)
  * - 머리: 제목(h1) · 설명 · 픽셀 그림
- * - 761~1100px 목록 화면은 제목 옆 ▾로 같은 섹션 메뉴 전환(COM-6), 760px 이하는 바텀 네비가 맡음
+ * - 760~1099px 목록 화면은 제목 옆 ▾로 같은 섹션 메뉴 전환(COM-6), 760px 미만은 바텀 네비가 맡음
  * - 레이아웃 칸 배치는 SubPageLayout이 맡는다. 경로는 전체 폭, 머리는 본문 칸
  */
 export default function SubPageHead({
@@ -27,7 +27,7 @@ export default function SubPageHead({
     <>
       <nav
         aria-label="현재 위치"
-        className="mb-[51px] flex flex-wrap items-center gap-x-3 gap-y-1 text-sm leading-5 text-muted max-[1101px]:mb-5 min-[1101px]:col-span-full"
+        className="mb-[51px] flex flex-wrap items-center gap-x-3 gap-y-1 text-sm leading-5 text-muted max-[1100px]:mb-5 min-[1100px]:col-span-full"
       >
         <CrumbLink to={PATHS.MAIN} onLeave={onLeave} label="홈">
           <img src={homeIcon} alt="" width="16" height="16" />
@@ -49,10 +49,10 @@ export default function SubPageHead({
           {heading}
         </span>
       </nav>
-      <header className="relative mb-6 max-[1101px]:mb-5 min-[1101px]:col-start-2 min-[1101px]:row-start-2">
+      <header className="relative mb-6 max-[1100px]:mb-5 min-[1100px]:col-start-2 min-[1100px]:row-start-2">
         <div className="flex items-end justify-between gap-3">
           <div className="min-w-0">
-            <div className="relative flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[28px] leading-[1.3] tracking-[-0.02em] max-[761px]:text-2xl">
+            <div className="relative flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[28px] leading-[1.3] tracking-[-0.02em] max-[760px]:text-2xl">
               <h1 className="font-bold text-ink">{heading}</h1>
               {hasSwitch && (
                 <MenuSwitch section={section} activeItem={activeItem} />
@@ -61,7 +61,7 @@ export default function SubPageHead({
             {/** 설명이 없어도 한 줄 높이를 비워 콘텐츠 시작 위치를 맞춤 */}
             <p
               aria-hidden={description ? undefined : 'true'}
-              className={`mt-2 text-muted max-[761px]:mt-1.5 max-[761px]:text-sm ${description ? '' : 'invisible'}`}
+              className={`mt-2 text-muted max-[760px]:mt-1.5 max-[760px]:text-sm ${description ? '' : 'invisible'}`}
             >
               {description || ' '}
             </p>
@@ -76,7 +76,7 @@ export default function SubPageHead({
             width="160"
             height="100"
             aria-hidden="true"
-            className="pointer-events-none absolute -bottom-1 right-0 origin-bottom-right [image-rendering:pixelated] select-none max-[1101px]:scale-80 max-[761px]:hidden"
+            className="pointer-events-none absolute -bottom-1 right-0 origin-bottom-right [image-rendering:pixelated] select-none max-[1100px]:scale-80 max-[760px]:hidden"
           />
         )}
       </header>
@@ -113,7 +113,7 @@ function Slash() {
   );
 }
 
-/** 761~1100px 섹션 메뉴 전환 드롭다운 */
+/** 760~1099px 섹션 메뉴 전환 드롭다운 */
 function MenuSwitch({ section, activeItem }) {
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef(null);
@@ -144,7 +144,7 @@ function MenuSwitch({ section, activeItem }) {
         aria-controls={menuId}
         aria-label={`${section.label} 메뉴 열기`}
         onClick={() => setIsOpen((open) => !open)}
-        className="-ml-1 hidden size-8 flex-none cursor-pointer place-items-center rounded-full bg-brand-50 text-brand-600 transition-colors hover:bg-brand-100 aria-expanded:bg-brand-100 min-[761px]:max-[1101px]:inline-grid"
+        className="-ml-1 hidden size-8 flex-none cursor-pointer place-items-center rounded-full bg-brand-50 text-brand-600 transition-colors hover:bg-brand-100 aria-expanded:bg-brand-100 min-[760px]:max-[1100px]:inline-grid"
       >
         <span
           aria-hidden="true"
@@ -156,7 +156,7 @@ function MenuSwitch({ section, activeItem }) {
           id={menuId}
           role="dialog"
           aria-label={`${section.label} 메뉴`}
-          className="absolute top-[calc(100%+8px)] left-0 z-60 w-[280px] rounded-[10px] border border-line bg-white p-2 tracking-normal shadow-depth-sm min-[1101px]:hidden max-[761px]:hidden"
+          className="absolute top-[calc(100%+8px)] left-0 z-60 w-[280px] rounded-[10px] border border-line bg-white p-2 tracking-normal shadow-depth-sm min-[1100px]:hidden max-[760px]:hidden"
         >
           <nav className="flex flex-col gap-0.5">
             {section.items.map((item) => {

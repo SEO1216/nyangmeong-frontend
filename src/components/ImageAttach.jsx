@@ -71,10 +71,10 @@ export default function ImageAttach({
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center gap-2">
-        <span className="text-base leading-[1.4] font-semibold text-[#1a3234]">
+        <span className="text-base leading-[1.4] font-semibold text-ink">
           이미지 첨부
         </span>
-        <span className="text-sm text-[#667374]">
+        <span className="text-sm text-subtle">
           {images.length} / {max}
         </span>
       </div>
@@ -95,12 +95,12 @@ export default function ImageAttach({
             }
             onDragLeave={isFull ? undefined : () => setIsDragging(false)}
             onDrop={isFull ? undefined : handleDrop}
-            className={`relative flex aspect-square flex-col items-center justify-center gap-1 overflow-hidden rounded-[10px] border border-dashed text-sm font-medium has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[#285a5c] ${
+            className={`relative flex aspect-square flex-col items-center justify-center gap-1 overflow-hidden rounded-[10px] border border-dashed text-sm font-medium has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-500 ${
               isFull
-                ? 'cursor-not-allowed border-[#d3dae2] bg-[#f4f6f6] text-[#b9c4c4]'
+                ? 'cursor-not-allowed border-input-line bg-surface-2 text-line-strong'
                 : isDragging
-                  ? 'cursor-pointer border-[#285a5c] bg-[#e9f2f2] text-[#1e4a4c]'
-                  : 'cursor-pointer border-[#b9c4c4] bg-[#f4f6f6] text-[#566465] hover:border-[#285a5c] hover:bg-[#e9f2f2] hover:text-[#1e4a4c]'
+                  ? 'cursor-pointer border-brand-500 bg-brand-50 text-brand-600'
+                  : 'cursor-pointer border-line-strong bg-surface-2 text-muted hover:border-brand-500 hover:bg-brand-50 hover:text-brand-600'
             }`}
           >
             <input
@@ -118,7 +118,7 @@ export default function ImageAttach({
         </li>
         {fixedImage && (
           <li className="flex min-w-0 flex-col gap-1.5">
-            <div className="relative aspect-square overflow-hidden rounded-[10px] border border-[#e2e7e7] bg-white">
+            <div className="relative aspect-square overflow-hidden rounded-[10px] border border-line bg-white">
               {fixedImage.url ? (
                 <img
                   src={fixedImage.url}
@@ -128,20 +128,20 @@ export default function ImageAttach({
               ) : (
                 <span
                   aria-hidden="true"
-                  className="grid size-full place-items-center bg-[#eef1f1] text-[#b9c4c4]"
+                  className="grid size-full place-items-center bg-surface-2 text-line-strong"
                 >
                   <ImageIcon size={32} />
                 </span>
               )}
             </div>
-            <span className="truncate text-sm leading-[1.4] text-[#566465]">
+            <span className="truncate text-sm leading-[1.4] text-muted">
               {fixedImage.name}
             </span>
           </li>
         )}
         {images.map((image) => (
           <li key={image.id} className="flex min-w-0 flex-col gap-1.5">
-            <div className="group relative aspect-square overflow-hidden rounded-[10px] border border-[#e2e7e7] bg-[#eef1f1]">
+            <div className="group relative aspect-square overflow-hidden rounded-[10px] border border-line bg-surface-2">
               {image.url ? (
                 <img
                   src={image.url}
@@ -151,7 +151,7 @@ export default function ImageAttach({
               ) : (
                 <span
                   aria-hidden="true"
-                  className="grid size-full place-items-center text-[#b9c4c4]"
+                  className="grid size-full place-items-center text-line-strong"
                 >
                   <ImageIcon size={32} />
                 </span>
@@ -162,31 +162,26 @@ export default function ImageAttach({
                 onClick={() => handleRemove(image.id)}
                 className="absolute top-1 right-1 flex size-8 cursor-pointer items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 max-[760px]:top-0 max-[760px]:right-0 max-[760px]:size-10 max-[760px]:opacity-100 [@media(hover:none)]:opacity-100"
               >
-                <span className="flex size-6 items-center justify-center rounded-full bg-[rgba(15,23,35,0.62)] text-white hover:bg-[#1a3234]">
+                <span className="flex size-6 items-center justify-center rounded-full bg-[rgba(15,23,35,0.62)] text-white hover:bg-brand-900">
                   <X size={16} aria-hidden="true" />
                 </span>
               </button>
             </div>
-            <span className="truncate text-sm leading-[1.4] text-[#566465]">
+            <span className="truncate text-sm leading-[1.4] text-muted">
               {image.name}
             </span>
           </li>
         ))}
       </ul>
 
-      <p className="text-sm leading-normal text-[#566465]">
+      <p className="text-sm leading-normal text-muted">
         {hint && (
-          <span className="mb-0.5 block font-medium text-[#2f6f57]">
-            {hint}
-          </span>
+          <span className="mb-0.5 block font-medium text-ok">{hint}</span>
         )}
         최대 {max}장(JPG · PNG · WEBP), 한 장에 10MB까지 올릴 수 있어요.
       </p>
       {errorMessage && (
-        <p
-          role="alert"
-          className="flex items-center gap-1 text-sm text-[#b4473a]"
-        >
+        <p role="alert" className="flex items-center gap-1 text-sm text-danger">
           <CircleAlert size={14} aria-hidden="true" />
           {errorMessage}
         </p>
