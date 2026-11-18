@@ -233,7 +233,7 @@ export default function PetSwitcher({ variant, onOpenDashboardEdit }) {
               <span className="font-semibold text-ink">반려동물</span>
               <span className="text-subtle">{pets.length}마리</span>
             </div>
-            <div className="grid grid-cols-4 gap-1">
+            <div className="grid grid-cols-5 gap-1">
               <div role="listbox" aria-label="반려동물" className="contents">
                 {pets.map((item) => {
                   const isSelected = item.petSn === pet.petSn;

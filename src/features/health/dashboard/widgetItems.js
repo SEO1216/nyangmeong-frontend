@@ -4,17 +4,17 @@ import { DIARY_EXAM_PATH, DIARY_OBS_PATH } from '../summary/summaryUtils';
 
 /**
  * [건강 대시보드 기록 항목] (※신규 정책, 흐름도 D1~D11)
- * - 4묶음 13개(첨부 자료 추가-2 포함). AI 건강분석 리포트는 항상 표시라 고르는 대상이 아님(D9)
- * - 화면 안에서는 id(weight…care)를 쓰고, 서버와 주고받을 때만 공통코드 dshbdWdgtCd(HLTC0084~0096)로 바꿈
+ * - 4묶음 12개(첨부 자료 추가-2 포함). AI 건강분석 리포트는 항상 표시라 고르는 대상이 아님(D9)
+ * - 케어리스트(HLTC0096)는 대시보드에서 뺌: 체크는 케어 캘린더에서만 하고 메인 ★ 표시와 겹침 (※신규 정책)
+ * - 화면 안에서는 id(weight…vacc)를 쓰고, 서버와 주고받을 때만 공통코드 dshbdWdgtCd(HLTC0084~0095)로 바꿈
  * - 이름·설명·빈 상태 문구·링크는 프로토타입 원문
- * - moveTo: 카드 오른쪽 위 이동 링크가 가는 곳 (※신규 정책, 대시보드 카드 이동). 빈 상태 링크가 같은 곳이면 빼고 이동 링크만 둠
+ * - moveTo: 카드 오른쪽 위 이동 링크·760px 미만 타일이 가는 곳 (※신규 정책, 대시보드 카드 이동). 함수면 petSn을 받아 주소를 만듦(getMovePath)
  * - moveText: 이동 링크 글자(「기록하기 ›」·「검진 기록 보기 ›」 등)
  * - typeCd가 있는 매일 기록 5개의 「기록하기 ›」·760px 미만 타일은 건강 일지 「오늘 기록하기」 모달을 그 항목으로 엶 (※신규 정책)
  */
 
 const DIARY_GRAPH_PATH = `${PATHS.HEALTH_DIARY}#hlt002-graph`;
 const CALENDAR_PATH = `${PATHS.HEALTH_CALENDAR}#hlt003-calendar`;
-const CARE_LIST_PATH = `${PATHS.HEALTH_CALENDAR}#hlt003-care`;
 
 export const WIDGET_GROUPS = [
   {
@@ -148,8 +148,9 @@ export const WIDGET_GROUPS = [
         icon: 'warning',
         desc: '주의할 점을 적어 둬요',
         emptyText: '등록된 내용 없음',
-        moveTo: PATHS.MYPAGE_PETS,
-        moveText: '반려동물 정보',
+        /** 마이페이지 반려동물 관리에서 그 아이의 수정 모달을 엶(PetListPage가 ?edit=petSn을 읽음) */
+        moveTo: (petSn) => `${PATHS.MYPAGE_PETS}?edit=${petSn}`,
+        moveText: '수정하기',
       },
     ],
   },
@@ -167,21 +168,6 @@ export const WIDGET_GROUPS = [
         moveTo: CALENDAR_PATH,
         moveText: '캘린더 보기',
       },
-      {
-        id: 'care',
-        dshbdWdgtCd: 'HLTC0096',
-        nm: '케어리스트',
-        /** 카드 머리 제목 바로 오른쪽 글자 */
-        titleNote: '보기 전용',
-        icon: 'checklist',
-        desc: '매일 챙길 케어를 만들어요',
-        emptyText: '보일 케어 항목이 없어요',
-        /** 빈 상태 링크는 캘린더 탭(케어 항목 설정), 이동 링크는 케어리스트 탭이라 둘 다 둠 */
-        linkText: '케어 캘린더에서 설정하기',
-        to: PATHS.HEALTH_CALENDAR,
-        moveTo: CARE_LIST_PATH,
-        moveText: '케어리스트',
-      },
     ],
   },
 ];
@@ -192,14 +178,18 @@ export const findWidgetItem = (id) =>
   WIDGET_ITEMS.find((item) => item.id === id);
 
 /**
- * 이동 링크 state: 매일 기록은 건강 일지에서 그 항목을 고른 「오늘 기록하기」 모달을 바로 엶(HealthDiaryPage가 typeCd·isRecordOpen을 읽음, ※신규 정책),
- * 알레르기·기저질환은 마이페이지 반려동물 관리에서 그 아이로(PetListPage가 읽음). 건강기록 화면끼리는 공통 카드가 아이를 유지
+ * 이동 링크·타일이 가는 곳: 카드 내용의 주소(처방·투약) → 항목 주소(함수면 petSn으로 만듦). 카드가 비어도 같은 곳
  */
-export const getMoveState = (item, petSn) => {
-  if (item.typeCd) return { typeCd: item.typeCd, isRecordOpen: true };
-  if (item.id === 'allergy') return { petSn };
-  return undefined;
-};
+export const getMovePath = (item, content, petSn) =>
+  content?.moveTo ??
+  (typeof item.moveTo === 'function' ? item.moveTo(petSn) : item.moveTo);
+
+/**
+ * 이동 링크 state: 매일 기록은 건강 일지에서 그 항목을 고른 「오늘 기록하기」 모달을 바로 엶(HealthDiaryPage가 typeCd·isRecordOpen을 읽음, ※신규 정책).
+ * 건강기록 화면끼리는 공통 카드가 아이를 유지
+ */
+export const getMoveState = (item) =>
+  item.typeCd ? { typeCd: item.typeCd, isRecordOpen: true } : undefined;
 
 /** 처음 추천 항목: 체중·식사량·음수량 (D4 수정) (※신규 정책) */
 export const RECOMMENDED_IDS = ['weight', 'meal', 'water'];
@@ -240,8 +230,14 @@ export const toShownWidgetIds = (widgets) =>
     .filter((id) => id != null);
 
 /**
- * 보이는 항목 id 배열 → PUT 본문 widgets(13개 전부, 보낸 순서가 저장 순서)
- * - 고른 항목은 받은 순서대로 indctYn=true, 나머지는 4묶음 순서로 뒤에 indctYn=false
+ * 대시보드에서 뺀 항목 코드: 백엔드가 PUT에 공통코드 13개를 모두 담아야 받으므로 맨 뒤에 indctYn=false로 계속 보냄
+ * - 케어리스트 HLTC0096 (※신규 정책, 대시보드에서 뺌)
+ */
+const RETIRED_WIDGET_CODES = ['HLTC0096'];
+
+/**
+ * 보이는 항목 id 배열 → PUT 본문 widgets(공통코드 13개 전부, 보낸 순서가 저장 순서)
+ * - 고른 항목은 받은 순서대로 indctYn=true, 나머지는 4묶음 순서로 뒤에 indctYn=false, 뺀 항목은 맨 뒤에 indctYn=false
  */
 export const toWidgetBody = (shownIds) => {
   const ids = keepWidgetOrder(shownIds);
@@ -255,6 +251,10 @@ export const toWidgetBody = (shownIds) => {
     })),
     ...hiddenIds.map((id) => ({
       dshbdWdgtCd: findWidgetItem(id).dshbdWdgtCd,
+      indctYn: false,
+    })),
+    ...RETIRED_WIDGET_CODES.map((dshbdWdgtCd) => ({
+      dshbdWdgtCd,
       indctYn: false,
     })),
   ];
