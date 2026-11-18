@@ -54,7 +54,7 @@ export default function ExpenseLimitModal({ mmExpndLimAmt, onClose }) {
             disabled={!canSave || saveLimit.isPending}
             className={BTN_PRIMARY}
           >
-            저장
+            저장하기
           </button>
         </>
       }

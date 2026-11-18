@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import { CHIP, CHIP_ON } from '@/components/buttonStyles';
 import { EXPND_CLSF_LIST } from './expenseCodes';
 
 /** 카테고리 칩 원탭 선택. isRequired: 필수 입력(스크린리더 안내) */
@@ -25,7 +26,9 @@ export default function ExpenseCategoryChips({
             onChange={() => onChange(clsf.code)}
             className="peer sr-only"
           />
-          <span className="inline-flex h-9 items-center rounded-full border border-line bg-white px-3.5 text-sm font-medium peer-checked:border-brand-500 peer-checked:bg-brand-500 peer-checked:text-white peer-focus-visible:ring-focus hover:border-line-strong">
+          <span
+            className={`${value === clsf.code ? CHIP_ON : CHIP} peer-focus-visible:ring-focus`}
+          >
             {clsf.name}
           </span>
         </label>

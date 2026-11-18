@@ -3,9 +3,12 @@ import { useState } from 'react';
 import DatePicker from '@/components/DatePicker';
 import AmountInput from '@/components/AmountInput';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import { Required } from '@/components/FieldError';
+import { INPUT, LABEL } from '@/components/formStyles';
 import Modal from '@/components/Modal';
+import NoticeBox from '@/components/NoticeBox';
 import Select from '@/components/Select';
-import { MissingNotice, Required } from '../shared/ExpenseRequired';
+import { MissingNotice } from '../shared/ExpenseRequired';
 import ExpenseCategoryChips from '../shared/ExpenseCategoryChips';
 import { FILTER_SHARED, HOSPITAL_CLSF_CD } from '../shared/expenseCodes';
 import {
@@ -19,9 +22,6 @@ import {
 import { PLACE_MAX_LENGTH, formatWon } from '../shared/expenseFormat';
 
 const FORM_ID = 'expense-receipt-form';
-const LABEL = 'font-semibold';
-const INPUT =
-  'block h-10 w-full rounded-md border border-input-line bg-white px-3 placeholder:text-placeholder hover:border-line-strong focus:border-brand-500 focus:ring-focus focus:outline-none';
 
 let nextRowKey = 1;
 const newRow = (petValue, digits) => ({
@@ -140,7 +140,7 @@ export default function ExpenseReceiptReview({
               disabled={!canSave || isPending}
               className={BTN_PRIMARY}
             >
-              저장
+              등록하기
             </button>
           </>
         }
@@ -203,7 +203,8 @@ export default function ExpenseReceiptReview({
             </div>
             <div>
               <label htmlFor="receipt-place" className={LABEL}>
-                사용처 <span className="font-normal text-subtle">선택</span>
+                사용처{' '}
+                <span className="ml-1 font-normal text-subtle">선택</span>
               </label>
               <input
                 id="receipt-place"
@@ -215,7 +216,7 @@ export default function ExpenseReceiptReview({
             </div>
             <div>
               <label htmlFor="receipt-memo" className={LABEL}>
-                내용 <span className="font-normal text-subtle">선택</span>
+                내용 <span className="ml-1 font-normal text-subtle">선택</span>
               </label>
               <input
                 id="receipt-memo"
@@ -271,9 +272,9 @@ export default function ExpenseReceiptReview({
                 ))}
               </div>
               {hasHospitalNotice && rows.some((row) => row.petValue === '') && (
-                <p role="alert" className="mt-2 text-sm text-danger">
+                <NoticeBox tone="danger" role="alert" className="mt-2">
                   {HOSPITAL_NOTICE}
-                </p>
+                </NoticeBox>
               )}
               {canAddRow && (
                 <button
@@ -304,11 +305,11 @@ export default function ExpenseReceiptReview({
                 </p>
               )}
             </div>
-            <p className="flex items-start gap-2 rounded-box bg-warn-soft px-4 py-3 text-sm text-warn">
-              <Sparkles className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            <NoticeBox tone="warn" className="flex items-start gap-2">
+              <Sparkles className="mt-1 size-4 shrink-0" aria-hidden="true" />
               AI가 자동으로 인식한 결과라 실수가 있을 수 있어요. 저장 전에 꼭
               확인해 주세요
-            </p>
+            </NoticeBox>
             {!canSave && (
               <MissingNotice
                 missing={missing}

@@ -34,7 +34,7 @@ function ExpenseDashboardSkeleton() {
   return (
     <div
       aria-busy="true"
-      className="grid gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)] lg:items-start"
+      className="grid gap-5 min-[1100px]:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)] min-[1100px]:items-start"
     >
       <div className="flex min-w-0 flex-col gap-5">
         <SkeletonCard className="h-[234px]" />
@@ -131,7 +131,7 @@ export default function ExpenseDashboard({ onViewAll }) {
 
   return (
     <div
-      className={`grid gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)] lg:items-start ${isPlaceholderData ? 'opacity-60' : ''}`}
+      className={`grid gap-5 min-[1100px]:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)] min-[1100px]:items-start ${isPlaceholderData ? 'opacity-60' : ''}`}
     >
       <div className="flex min-w-0 flex-col gap-5">
         <ExpenseSummary

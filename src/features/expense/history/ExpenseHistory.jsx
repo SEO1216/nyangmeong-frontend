@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Checkbox from '@/components/Checkbox';
 import DropdownSelect from '@/components/DropdownSelect';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import EmptyResult from '@/components/EmptyResult';
@@ -75,7 +76,7 @@ function ExpenseHistorySkeleton() {
     <div aria-busy="true" className="flex flex-col gap-5">
       <Skeleton className="h-[74px] rounded-card max-[760px]:h-[124px]" />
       <Skeleton className="h-10 rounded-card" />
-      <Skeleton className="-mb-2 h-7 min-[761px]:hidden" />
+      <Skeleton className="-mb-2 h-7 min-[760px]:hidden" />
       <SkeletonCard className="h-[1786px] max-[760px]:h-[1854px]" />
       <Skeleton className="mx-auto h-9 w-64" />
     </div>
@@ -190,13 +191,6 @@ export default function ExpenseHistory({ initialYm }) {
   const isPageAllSelected =
     pageItems.length > 0 &&
     pageItems.every((expense) => isChecked(expense.expndSn));
-  const isPagePartiallySelected =
-    !isPageAllSelected &&
-    pageItems.some((expense) => isChecked(expense.expndSn));
-  /** 일부만 선택되면 [전체 선택] 체크박스를 중간 상태(−)로 보인다. 렌더마다 다시 지정된다 */
-  const setPageCheckbox = (element) => {
-    if (element) element.indeterminate = isPagePartiallySelected;
-  };
 
   /** 기간 지정 선택 가능 달 */
   const rangeMonths = [...new Set([...months, ym])].sort();
@@ -392,7 +386,7 @@ export default function ExpenseHistory({ initialYm }) {
         )}
       </ExpenseFilterBar>
       {!isEditing && (
-        <div className="-mb-2 flex items-center justify-between px-0.5 min-[761px]:hidden">
+        <div className="-mb-2 flex items-center justify-between px-0.5 min-[760px]:hidden">
           <DropdownSelect
             label="정렬"
             variant="text"
@@ -418,15 +412,12 @@ export default function ExpenseHistory({ initialYm }) {
         <section aria-label="지출 내역" className={`${CARD} overflow-hidden`}>
           {isEditing && (
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-surface-2 px-4 py-3">
-              <label className="flex cursor-pointer items-center gap-2">
-                <input
-                  ref={setPageCheckbox}
-                  type="checkbox"
-                  checked={isPageAllSelected}
-                  onChange={handleTogglePage}
-                  disabled={pageItems.length === 0}
-                  className="size-5 cursor-pointer accent-brand-500"
-                />
+              {/** 일부만 선택돼도 빈칸으로 보이고, 누르면 이 페이지 전체를 고른다 */}
+              <Checkbox
+                checked={isPageAllSelected}
+                onChange={handleTogglePage}
+                disabled={pageItems.length === 0}
+              >
                 <span>
                   전체 선택{' '}
                   <span className="text-subtle">
@@ -437,7 +428,7 @@ export default function ExpenseHistory({ initialYm }) {
                     {pageItems.length}건)
                   </span>
                 </span>
-              </label>
+              </Checkbox>
               <button
                 type="button"
                 onClick={handleToggleResult}
