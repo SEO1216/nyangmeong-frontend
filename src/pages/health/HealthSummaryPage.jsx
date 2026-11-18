@@ -6,7 +6,10 @@ import HealthDashboard, {
   DashboardSkeleton,
 } from '@/features/health/dashboard/HealthDashboard';
 import NoPetDashboard from '@/features/health/dashboard/NoPetDashboard';
-import { useHealthSummary } from '@/features/health/queries';
+import {
+  useHealthSummary,
+  usePrefetchHealthDashboard,
+} from '@/features/health/queries';
 import PetSwitcher from '@/features/health/shared/PetSwitcher';
 import SelectedPetProvider from '@/features/health/shared/SelectedPetProvider';
 import { useSelectedPet } from '@/features/health/shared/selectedPet';
@@ -99,6 +102,10 @@ function HealthSummaryContent({ mbrSn }) {
     isError: isSummaryError,
     refetch: refetchSummary,
   } = useHealthSummary(selectedPet?.petSn ?? null);
+  usePrefetchHealthDashboard({ petSn: selectedPet?.petSn ?? null, mbrSn });
+  /** 요약은 프로필을 받지 않음: 목록 값(selectedPet)을 붙여 마이페이지에서 고친 값이 바로 보이게 */
+  const summaryWithPet =
+    summary && selectedPet ? { ...summary, pet: selectedPet } : summary;
 
   if (isPetsPending) {
     return (
@@ -134,11 +141,11 @@ function HealthSummaryContent({ mbrSn }) {
 
   return (
     <HealthLayout onOpenDashboardEdit={() => setIsEditRequested(true)}>
-      <SummaryBanner pet={selectedPet} summary={summary} />
+      <SummaryBanner pet={selectedPet} summary={summaryWithPet} />
       <HealthDashboard
         mbrSn={mbrSn}
         pet={selectedPet}
-        summary={summary}
+        summary={summaryWithPet}
         initialInspection={searchParams.get('inspection')}
         isTutorialRequested={isTutorialRequested}
         onTutorialClose={() => setIsTutorialRequested(false)}

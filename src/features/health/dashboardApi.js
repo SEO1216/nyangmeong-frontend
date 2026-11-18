@@ -5,7 +5,7 @@ import { STOOL } from './diaryTypes';
 /**
  * [건강 대시보드 API]
  * - 지표: GET /pets/{petSn}/health-indicators (JAJ 백엔드, 메인 위젯과 같은 API를 features/health에 따로 둠)
- * - 고른 항목: GET·PUT /members/me/dashboard-widgets (JAJ 백엔드, 건강기록 전용 13개)
+ * - 고른 항목: GET·PUT /members/me/dashboard-widgets (JAJ 백엔드, 건강기록 전용 공통코드 13개. 화면은 케어리스트를 뺀 12개)
  */
 
 /** 배변 상태 카드의 최근 기록 수 */
@@ -39,7 +39,7 @@ export const getHealthWidgets = async () => {
   return savedYn ? toShownWidgetIds(widgets) : null;
 };
 
-/** 고른 항목 저장. 13개 전부 보내고(고르지 않은 항목은 indctYn=false), 고른 id 배열을 돌려줌 */
+/** 고른 항목 저장. 공통코드 13개 전부 보내고(고르지 않은 항목·뺀 케어리스트는 indctYn=false), 고른 id 배열을 돌려줌 */
 export const saveHealthWidgets = async ({ widgetIds }) => {
   await api.put('/members/me/dashboard-widgets', {
     widgets: toWidgetBody(widgetIds),

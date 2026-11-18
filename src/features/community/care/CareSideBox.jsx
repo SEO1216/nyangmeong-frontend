@@ -5,7 +5,7 @@ import {
   MessagesSquare,
   User,
 } from 'lucide-react';
-import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import { BTN_PRIMARY } from '@/components/buttonStyles';
 import {
   RCRT_STTS,
   getRcrtSttsLabel,
@@ -90,16 +90,12 @@ function OwnerPanel({ post, onOpenList }) {
             ? `채팅 목록 보기, 지금 ${post.aplcntCnt}명이 채팅 중`
             : undefined
         }
-        className={`${isOpen(post) ? BTN_PRIMARY : BTN_SECONDARY} mt-4 w-full`}
+        className={`${BTN_PRIMARY} mt-4 w-full`}
       >
         <MessageCircle size={16} aria-hidden="true" />
-        {isOpen(post) ? (
-          <>
-            채팅 목록 보기
-            <span className="text-sm font-normal">· {post.aplcntCnt}명</span>
-          </>
-        ) : (
-          '이 글의 채팅 목록'
+        채팅 목록 보기
+        {isOpen(post) && (
+          <span className="text-sm font-normal">· {post.aplcntCnt}명</span>
         )}
       </button>
     </>

@@ -65,6 +65,7 @@ const putPostFirst = (rooms, pstSn) =>
       ];
 
 /**
+ * isFocused: 글 상세 [채팅 목록 보기]로 열었을 때 그 글의 방(왼쪽 띠와 옅은 배경으로 구분)
  * isEdit: 편집 중이면 줄을 눌러도 방이 열리지 않고 체크만 바뀐다(진행 중인 방은 잠금)
  */
 function ChatRoomRow({
@@ -72,6 +73,7 @@ function ChatRoomRow({
   isSelected,
   isEdit,
   isChecked,
+  isFocused,
   onSelect,
   onToggle,
 }) {
@@ -93,7 +95,7 @@ function ChatRoomRow({
           isEdit
             ? 'grid-cols-[20px_44px_minmax(0,1fr)]'
             : 'grid-cols-[44px_minmax(0,1fr)]'
-        } ${isHighlighted ? 'bg-brand-50' : 'hover:bg-surface-2'}`}
+        } ${isHighlighted ? 'bg-brand-50' : isFocused ? 'bg-brand-50/50 hover:bg-brand-50' : 'hover:bg-surface-2'} ${isFocused ? 'shadow-[inset_3px_0_0_var(--color-brand-500)]' : ''}`}
         onClick={() => (isEdit ? onToggle(room) : onSelect(room.otoChatRoomSn))}
       >
         {isEdit &&
@@ -282,7 +284,7 @@ export default function ChatRoomList({
   return (
     <div className={isHidden ? 'hidden' : 'flex min-h-0 flex-1 flex-col'}>
       {isEdit ? (
-        <div className="flex h-12 shrink-0 items-center gap-3 bg-brand-50 pr-3 pl-5 shadow-[inset_0_-1px_0_var(--color-line)]">
+        <div className="flex h-15 shrink-0 items-center gap-3 bg-brand-50 pr-3 pl-5 shadow-[inset_0_-1px_0_var(--color-line)]">
           <label className="flex min-h-11 cursor-pointer items-center gap-2 font-semibold text-ink">
             <input
               type="checkbox"
@@ -305,7 +307,7 @@ export default function ChatRoomList({
           </button>
         </div>
       ) : (
-        <div className="flex h-12 shrink-0 items-center justify-between pr-3 pl-2 shadow-[inset_0_-1px_0_var(--color-line)]">
+        <div className="flex h-15 shrink-0 items-center justify-between pr-3 pl-2 shadow-[inset_0_-1px_0_var(--color-line)]">
           <div role="tablist" aria-label="채팅 나누기" className="flex">
             {TABS.map(({ key, label }) => (
               <button
@@ -313,7 +315,7 @@ export default function ChatRoomList({
                 type="button"
                 role="tab"
                 aria-selected={activeTab === key}
-                className={`relative h-12 px-3 font-semibold whitespace-nowrap ${
+                className={`relative h-15 px-3 font-semibold whitespace-nowrap ${
                   activeTab === key
                     ? 'text-brand-500 after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full after:bg-brand-500'
                     : 'text-subtle hover:text-ink'
@@ -409,6 +411,7 @@ export default function ChatRoomList({
                   isSelected={room.otoChatRoomSn === selectedRoomSn}
                   isEdit={isEdit}
                   isChecked={checkedSns.includes(room.otoChatRoomSn)}
+                  isFocused={listPstSn !== null && room.pstSn === listPstSn}
                   onSelect={handleSelect}
                   onToggle={handleToggle}
                 />
@@ -430,8 +433,8 @@ export default function ChatRoomList({
         )}
       </div>
 
-      <p className="flex shrink-0 gap-2 border-t border-line px-5 py-3 text-xs text-subtle">
-        <Icon name="info" className="mt-0.5 text-lg" />
+      <p className="flex h-16.25 shrink-0 items-center gap-2 border-t border-line px-5 text-[12px] leading-4 text-subtle">
+        <Icon name="info" className="shrink-0 text-lg" />
         거래는 채팅방 위 카드에서 단계별로 진행해요. 냥멍케어는 결제를 대신하지
         않아요.
       </p>

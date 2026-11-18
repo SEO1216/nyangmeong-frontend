@@ -1,7 +1,7 @@
 /**
  * [사진 보기]
  * - 채팅 사진을 누르면 어두운 배경 전체 화면으로 크게 본다. 방에서 불러온 모든 사진을 시간 순으로 넘겨 본다(카카오톡 사진 보기)
- * - 모바일: 좌우 스와이프(스크롤 스냅). PC: 양옆 ‹ › 버튼, 키보드 ← →. ✕·Esc로 닫는다. 위에 「현재 / 전체」
+ * - 터치: 좌우 스와이프(스크롤 스냅). 마우스(너비와 상관없이, 줄인 PC 창 포함): 양옆 ‹ › 버튼, 키보드 ← →. ✕·Esc로 닫는다. 위에 「현재 / 전체」
  * - 사진은 비공개라 참여자 쿠키로 받는 useChatImage를 슬라이드마다 쓴다(보이는 슬라이드 근처만 받는다)
  */
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
@@ -117,7 +117,7 @@ export default function PhotoViewer({
         <button
           type="button"
           aria-label="이전 사진"
-          className="absolute top-1/2 left-4 z-10 grid size-12 -translate-y-1/2 place-items-center rounded-full bg-black/50 hover:bg-black/70 max-[760px]:hidden [@media(hover:none)]:hidden"
+          className="absolute top-1/2 left-4 z-10 grid size-12 -translate-y-1/2 place-items-center rounded-full bg-black/50 hover:bg-black/70 [@media(hover:none)]:hidden"
           onClick={() => goTo(index - 1)}
         >
           <ChevronLeft size={28} aria-hidden="true" />
@@ -127,7 +127,7 @@ export default function PhotoViewer({
         <button
           type="button"
           aria-label="다음 사진"
-          className="absolute top-1/2 right-4 z-10 grid size-12 -translate-y-1/2 place-items-center rounded-full bg-black/50 hover:bg-black/70 max-[760px]:hidden [@media(hover:none)]:hidden"
+          className="absolute top-1/2 right-4 z-10 grid size-12 -translate-y-1/2 place-items-center rounded-full bg-black/50 hover:bg-black/70 [@media(hover:none)]:hidden"
           onClick={() => goTo(index + 1)}
         >
           <ChevronRight size={28} aria-hidden="true" />

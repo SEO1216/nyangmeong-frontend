@@ -487,10 +487,10 @@ function ZoomBox({ image, label, className = '', onZoom, children }) {
         ref={buttonRef}
         type="button"
         aria-label={`${label} 사진 크게 보기`}
+        title="크게 보기"
         className={`${CHIP} absolute right-2 bottom-2 cursor-zoom-in`}
       >
         <Icon name="zoom_in" className="text-base" />
-        크게 보기
       </button>
     </div>
   );
