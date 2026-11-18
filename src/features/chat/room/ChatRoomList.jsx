@@ -111,7 +111,7 @@ function ChatRoomRow({
               title={LOCKED_NOTICE}
               className="grid size-5 self-center text-subtle"
             >
-              <Icon name="lock" className="text-xl" />
+              <Icon name="lock" className="text-lg" />
             </span>
           ))}
         <Avatar
@@ -325,7 +325,7 @@ export default function ChatRoomList({
                   <>
                     <span
                       aria-hidden="true"
-                      className="absolute top-3 right-1 size-1.5 rounded-full bg-[#f44b21]"
+                      className="absolute top-3 right-1 size-1.5 rounded-full bg-alert"
                     />
                     <span className="sr-only">(안 읽은 메시지 있음)</span>
                   </>
@@ -348,7 +348,7 @@ export default function ChatRoomList({
               {unreadCount > 0 && (
                 <b
                   className={`ml-1 font-bold ${
-                    isUnreadOnly ? 'text-white' : 'text-[#f44b21]'
+                    isUnreadOnly ? 'text-white' : 'text-alert'
                   }`}
                 >
                   {unreadCount > 99 ? '99+' : unreadCount}
@@ -459,7 +459,7 @@ export default function ChatRoomList({
                 disabled={isDeleting}
                 onClick={handleDelete}
               >
-                삭제
+                삭제하기
               </button>
             </>
           }

@@ -72,7 +72,7 @@ export default function ChatPage() {
   return (
     <div className="flex h-dvh flex-col bg-white">
       <header className="flex h-16 shrink-0 items-center gap-1 border-b border-line pr-4 pl-6 max-[760px]:pl-5">
-        <h1 className="flex-1 text-xl font-bold text-ink">채팅</h1>
+        <h1 className="flex-1 text-lg font-bold text-ink">채팅</h1>
         <button
           type="button"
           aria-label="창 닫기"

@@ -121,7 +121,7 @@ export default function AdminItemsPage() {
             disabled={saveOrder.isPending}
             onClick={handleOrderSave}
           >
-            저장
+            저장하기
           </button>
         </div>
       );

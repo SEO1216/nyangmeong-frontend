@@ -2,15 +2,17 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 UI 통일 1-A · 공용 기반 (2026-11-18, 검증 2회차 통과, 사람 확인). 기준은 "UI 체크리스트_결정반영" CSV(86행). 토큰 정리·대비 4.5:1(`--color-alert` #d4411c·`--color-subtle` #5f6b6c·`--color-cat-hosp-fg` #496f97)·`ConfirmModal` → `Modal isConfirm`·헤더 드롭다운·서랍·닫기 32px·404 화면·공용 부품 5개(FieldError·Checkbox·UnderlineTabs·NoticeBox·ProgressBar)·칩 규격(`CHIP`·`FILTER_CHIP`)
+끝남: SCR-COM-002 UI 통일 1-B · LJS 담당 화면 적용 (2026-11-18, 검증 통과·추가-1 포함 재검증 통과, 사람 확인). LJS 폴더 직접 hex 343곳 → 토큰, 단계 밖 글자 크기 8곳, 분기점 짝 760/760·1100/1100(components·layouts·JS 조건 포함, `ui.md` "화면 폭 분기점" 절), 버튼 문구 등록하기·저장하기·삭제하기, 설정 H1 28px·채팅/AI 창 H1 18px(별도 창 예외), 추가-1 옛 분기점 주석
 
 ## 다음에 할 것
 
 ### SCR-COM-002 UI 통일 다음 단계(사람 결정 2026-11-18)
 
-- 다음 /start: `UI 통일 1-B · LJS 담당 화면 적용`(마일스톤 대기). 그다음 `UI 통일 2 · 다른 담당 폴더 적용`(도메인 하나씩, 담당자 알림). 결정: 글자 단계는 체크리스트 V1(12·13·14·15·16·18·24·28px, 짝수 규칙보다 우선), 분기점 390·760·1100, 칩은 항목 선택 `CHIP`(1번 채움)·필터 `FILTER_CHIP`(2번 연한 바탕+연한 테두리, 건강기록·케어미션), 랜딩 항목(17px·굵기 800·색·H1·PAWEVER·푸터 대비)은 랜딩 교체(SCR-MAN-002) 때
+- 다음 /start: `UI 통일 2 · 다른 담당 폴더 적용`(마일스톤 대기, 도메인 하나씩, 담당자 알림). 분기점은 `ui.md` "화면 폭 분기점"대로 `min-[761px]`→`min-[760px]`, `min-[1101px]`→`min-[1100px]`, JS `(width < 760px)`. 결정: 글자 단계는 체크리스트 V1(12·13·14·15·16·18·24·28px, 짝수 규칙보다 우선), 분기점 390·760·1100, 칩은 항목 선택 `CHIP`(1번 채움)·필터 `FILTER_CHIP`(2번 연한 바탕+연한 테두리, 건강기록·케어미션), 랜딩 항목(17px·굵기 800·색·H1·PAWEVER·푸터 대비)은 랜딩 교체(SCR-MAN-002) 때
 - 팀 알림(PR 본문 + 팀 채널): ① `ConfirmModal`이 공용 `Modal isConfirm` 모양(440px·[취소][확인] 꽉 참)으로 바뀌어 커뮤니티·건강기록·가계부·고객센터·회원 확인 창이 파일 수정 없이 같이 바뀜 ② 토큰 값 변경: `--color-subtle` #5f6b6c, `--color-cat-hosp-fg` #496f97, `--color-tone-gray-bg` #f4f6f6, 알림 배지 #d4411c ③ 새 공용 부품·칩 규격을 2단계에서 쓴다 ④ SJM: `routes/paths.js` `MYPAGE_CAREGIVERS`(화면 없음, `docs/routes.md` MYP-004)는 그대로 두고 AI 바로가기만 `/mypage/pets`로 보냄. 상수·문서·AI 서버 매핑 정리 여부는 SJM이 정함
 - 버그 후보 알림: KSJ `community/PostDetail.jsx` 내 글에도 신고 버튼(체크리스트 78), JAJ `health/CareChipPicker.jsx`·`CareItemFields.jsx` `ZONES` 순서 반대(82)
+- 1-B 팀 알림(PR 본문 + 팀 채널): ① components·layouts의 `min-[761px]`·`min-[1101px]`이 `760`·`1100`으로, JS 조건이 `(width < 760px)`·`(width >= 1100px)`로 바뀌어 폭이 정확히 760·1100px일 때 PC 모양이 나옴 ② 분기점 규칙이 `docs/convention/ui.md`에 들어감 ③ 메인 검색창 [AI 매니저] 버튼은 760 미만에서 아이콘만(전에는 480 이하)
+- 1-B 참고(판정 밖): 알림 설정 H1 행간은 `text-page` 토큰 1.35배라 37.8px(기획 문장의 36px와 다름). `rgba(...)` 직접 값(LJS 폴더 34곳)·관리자 H1 24px는 그대로
 - 참고(검증 보고, 판정 밖): `components/`의 `rgba(...)` 직접 값(그림자·포커스 링·딤) 몇 곳은 이번 hex 대상 밖이라 남음
 
 ### SCR-COM-004 모두 읽음 남은 문서 일

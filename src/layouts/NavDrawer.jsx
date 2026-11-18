@@ -14,7 +14,7 @@ import { GNB_MENUS } from './gnbMenus';
  */
 
 /** 헤더 햄버거가 사라지는 폭 */
-const WIDE_QUERY = '(min-width: 1100px)';
+const WIDE_QUERY = '(width >= 1100px)';
 
 /** 2차 메뉴와 별개인 보조 메뉴 */
 const ETC_LINKS = [

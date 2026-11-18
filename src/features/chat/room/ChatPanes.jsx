@@ -9,7 +9,7 @@ import ChatConversation from './ChatConversation';
 import ChatRoomList from './ChatRoomList';
 
 /** Tailwind max-[760px]와 같은 기준 */
-const NARROW_QUERY = '(max-width: 760px)';
+const NARROW_QUERY = '(width < 760px)';
 
 const subscribeNarrow = (onChange) => {
   const media = window.matchMedia(NARROW_QUERY);
@@ -64,7 +64,7 @@ export default function ChatPanes({
         ) : (
           <p
             role="status"
-            className="flex flex-1 items-center justify-center bg-[#fdfcfb] text-subtle"
+            className="flex flex-1 items-center justify-center bg-page-bg text-subtle"
           >
             {pstSn !== null
               ? '채팅방을 여는 중이에요'

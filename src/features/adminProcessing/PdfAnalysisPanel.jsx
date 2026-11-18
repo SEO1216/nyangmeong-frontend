@@ -46,7 +46,7 @@ export default function PdfAnalysisPanel({
       <ProcessingSkeleton
         filterClass="h-10 w-full max-w-[420px] max-[760px]:h-[88px]"
         cardCount={4}
-        cardGridClass="min-[761px]:grid-cols-4"
+        cardGridClass="min-[760px]:grid-cols-4"
         cardClass="h-[84px]"
         tableClass="h-[486px]"
       />
@@ -73,7 +73,7 @@ export default function PdfAnalysisPanel({
       ) : (
         <>
           <ProcessingStatCards
-            className="min-[761px]:grid-cols-4"
+            className="min-[760px]:grid-cols-4"
             items={[
               { key: 'tot', label: '요청', value: summary.totCnt },
               { key: 'scs', label: '성공', value: summary.scsCnt },

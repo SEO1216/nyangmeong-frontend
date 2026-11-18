@@ -349,7 +349,7 @@ export default function AiChatModal() {
     <>
       <div
         ref={backdropRef}
-        className="fixed inset-x-0 top-16 bottom-0 z-35 bg-[#0f1723]/45"
+        className="fixed inset-x-0 top-16 bottom-0 z-35 bg-dim/45"
         aria-hidden="true"
       />
       <AiChatModalPanel backdropRef={backdropRef} />

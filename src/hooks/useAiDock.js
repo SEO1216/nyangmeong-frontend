@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 const DOCK_KEY = 'nyangmeong-ai-dock';
 const BUBBLE_SEEN_KEY = 'nyangmeong-ai-bubble-seen';
-const MOBILE_QUERY = '(max-width: 760px)';
+const MOBILE_QUERY = '(width < 760px)';
 /** 이 거리(px)보다 오른쪽으로 끌고 놓으면 접힘 */
 const FOLD_DISTANCE = 40;
 /** 이 거리(px) 안의 움직임은 클릭으로 간주 */

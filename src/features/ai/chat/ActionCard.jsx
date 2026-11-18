@@ -21,9 +21,9 @@ function ResultLine({ status, text, hasCalendarLink, petSn, isCareItem }) {
   const openMain = useOpenMain();
   const isDone = status === 'done';
   const Icon = isDone ? CircleCheck : CircleX;
-  let color = 'text-[#667374]';
-  if (isDone) color = 'text-[#2f6f57]';
-  if (status === 'failed') color = 'text-[#b42318]';
+  let color = 'text-subtle';
+  if (isDone) color = 'text-ok';
+  if (status === 'failed') color = 'text-danger';
   return (
     <div>
       <p
@@ -36,7 +36,7 @@ function ResultLine({ status, text, hasCalendarLink, petSn, isCareItem }) {
         <div className="mt-2 flex justify-end">
           <button
             type="button"
-            className="flex items-center gap-1 text-base font-semibold leading-6 text-[#1e4a4c] hover:underline"
+            className="flex items-center gap-1 text-base font-semibold leading-6 text-brand-600 hover:underline"
             onClick={() => openMain(calendarPath(petSn, isCareItem))}
           >
             {isCareItem ? '케어리스트에서 보기' : '케어 캘린더에서 보기'}
@@ -77,9 +77,9 @@ export default function ActionCard({
           alt=""
           width="36"
           height="36"
-          className="size-9 shrink-0 rounded-full border border-[#e2e7e7] bg-[#e9f2f2] object-contain p-1"
+          className="size-9 shrink-0 rounded-full border border-line bg-brand-50 object-contain p-1"
         />
-        <div className="max-w-[592px] rounded-[4px_18px_18px_18px] border border-[#e2e7e7] bg-white px-4 py-3 tracking-[-0.03em]">
+        <div className="max-w-[592px] rounded-[4px_18px_18px_18px] border border-line bg-white px-4 py-3 tracking-[-0.03em]">
           <ResultLine
             status={status}
             text={item.resultText}
@@ -105,23 +105,20 @@ export default function ActionCard({
   return (
     <div className="flex flex-col gap-2 tracking-[-0.03em]">
       {card.notice && (
-        <p className="ml-12 flex max-w-[592px] items-start gap-2 rounded-[10px] bg-[#fcf1df] px-3 py-2 text-sm leading-[22px] text-[#9a5c0c]">
+        <p className="ml-12 flex max-w-[592px] items-start gap-2 rounded-[10px] bg-tone-amber-bg px-3 py-2 text-sm leading-[22px] text-tone-amber-fg">
           <Info aria-hidden="true" className="mt-0.5 size-[18px] shrink-0" />
           {card.notice}
         </p>
       )}
       {isBusy && (
-        <p
-          role="status"
-          className="ml-12 text-sm leading-[22px] text-[#667374]"
-        >
+        <p role="status" className="ml-12 text-sm leading-[22px] text-subtle">
           {card.label ?? '요청'}을(를) 처리하고 있어요…
         </p>
       )}
       {errorLines.length > 0 && (
         <ul
           role="alert"
-          className="ml-12 flex flex-col gap-1 text-sm leading-[22px] text-[#b42318]"
+          className="ml-12 flex flex-col gap-1 text-sm leading-[22px] text-danger"
         >
           {errorLines.map((line) => (
             <li key={line}>{line}</li>
@@ -131,13 +128,13 @@ export default function ActionCard({
       {item.unsaved && (
         <p
           role="alert"
-          className="ml-12 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm leading-[22px] text-[#b42318]"
+          className="ml-12 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm leading-[22px] text-danger"
         >
           결과를 저장하지 못했어요.
           <button
             type="button"
             disabled={isBusy}
-            className="font-semibold text-[#1e4a4c] underline disabled:opacity-60"
+            className="font-semibold text-brand-600 underline disabled:opacity-60"
             onClick={onRetrySave}
           >
             다시 시도

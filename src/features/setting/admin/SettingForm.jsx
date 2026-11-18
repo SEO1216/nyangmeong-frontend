@@ -22,7 +22,7 @@ import { toFieldErrors } from '@/utils/fieldErrors';
  */
 
 /** 묶음을 하나씩 보여 주는 폭 */
-const NARROW_QUERY = '(max-width: 760px)';
+const NARROW_QUERY = '(width < 760px)';
 
 const inputClass =
   'block h-10 w-full rounded-md border bg-white px-3 hover:border-line-strong focus:border-brand-500 focus:ring-focus focus:outline-none';
@@ -152,7 +152,7 @@ function SettingSectionNav({ activeTitle, onSelect }) {
   return (
     <nav
       aria-label="운영 설정 묶음"
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-[#e2e7e7] bg-white pb-[env(safe-area-inset-bottom)] min-[761px]:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white pb-[env(safe-area-inset-bottom)] min-[760px]:hidden"
     >
       <ul className="flex h-[60px]">
         {SETTING_GROUPS.map((group) => {
@@ -163,7 +163,7 @@ function SettingSectionNav({ activeTitle, onSelect }) {
                 type="button"
                 aria-current={isActive ? 'true' : undefined}
                 className={`flex size-full items-center justify-center px-1 text-center text-[15px] ${
-                  isActive ? 'font-bold text-[#285a5c]' : 'text-[#566465]'
+                  isActive ? 'font-bold text-brand-500' : 'text-muted'
                 }`}
                 onClick={() => onSelect(group.title)}
               >
@@ -252,13 +252,13 @@ export default function SettingForm({ settings }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-5 max-[761px]:pb-[calc(60px+env(safe-area-inset-bottom))]"
+      className="space-y-5 max-[760px]:pb-[calc(60px+env(safe-area-inset-bottom))]"
     >
       {SETTING_GROUPS.map((group) => (
         <Card
           key={group.title}
           title={group.title}
-          className={group.title === activeTitle ? '' : 'max-[761px]:hidden'}
+          className={group.title === activeTitle ? '' : 'max-[760px]:hidden'}
         >
           <div className="space-y-5">
             {group.rows.map((row) => (
@@ -293,7 +293,7 @@ export default function SettingForm({ settings }) {
           className={BTN_PRIMARY}
           disabled={!isDirty || save.isPending}
         >
-          저장
+          저장하기
         </button>
       </div>
       <SettingSectionNav
