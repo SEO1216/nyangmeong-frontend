@@ -69,7 +69,7 @@ function KeywordSkeleton() {
   return (
     <div className="space-y-4" aria-busy="true">
       <Skeleton className="h-5 w-[480px] max-w-full" />
-      <div className="grid gap-4 min-[761px]:grid-cols-2">
+      <div className="grid gap-4 min-[760px]:grid-cols-2">
         {NEWS_CATEGORIES.map(({ code }) => (
           <SkeletonCard key={code} className="h-[186px]" />
         ))}
@@ -114,7 +114,7 @@ function NewsCollectButton() {
         {isCollecting ? '수집 중' : '뉴스 수집 실행'}
       </button>
       {hasStarted && (
-        <p className="w-full text-sm text-subtle min-[761px]:order-last">
+        <p className="w-full text-sm text-subtle min-[760px]:order-last">
           실행 결과는{' '}
           <Link
             to={`${PATHS.ADMIN_BATCHES}?batch=${NEWS_COLLECT_BTCH_SE_CD}`}

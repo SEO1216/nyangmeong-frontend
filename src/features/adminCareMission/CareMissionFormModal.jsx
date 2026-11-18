@@ -12,7 +12,7 @@ import {
 import { useUpdateAdminCareMission } from './queries';
 
 const INPUT_CLASS =
-  'block h-10 w-full rounded-[6px] border border-[#d3dae2] bg-white px-3 text-base leading-[1.4] text-[#1a3234] outline-none hover:border-[#b9c4c4] focus:border-[#285a5c] focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)] aria-invalid:border-danger';
+  'block h-10 w-full rounded-[6px] border border-input-line bg-white px-3 text-base leading-[1.4] text-ink outline-none hover:border-line-strong focus:border-brand-500 focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)] aria-invalid:border-danger';
 
 /** 칸 아래에 서버 오류를 보이는 칸: 나머지 칸 오류는 폼 아래 줄 */
 const FIELD_NAMES = ['cmpnPnt', 'achvCrtrNmtm'];
@@ -157,7 +157,7 @@ export default function CareMissionFormModal({ mission, onClose }) {
             className={BTN_PRIMARY}
             disabled={update.isPending}
           >
-            저장
+            저장하기
           </button>
         </>
       }

@@ -9,7 +9,7 @@ import {
 } from './queries';
 
 const TEXTAREA_CLASS =
-  'block min-h-40 w-full resize-y rounded-[6px] border border-[#d3dae2] bg-white px-3 py-2 text-base leading-[1.5] text-[#1a3234] outline-none hover:border-[#b9c4c4] focus:border-[#285a5c] focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)] aria-invalid:border-danger';
+  'block min-h-40 w-full resize-y rounded-[6px] border border-input-line bg-white px-3 py-2 text-base leading-[1.5] text-ink outline-none hover:border-line-strong focus:border-brand-500 focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)] aria-invalid:border-danger';
 
 /** 답변 최대 글자 수 */
 const MAX_ANSWER_LENGTH = 4000;
@@ -145,7 +145,7 @@ export default function InquiryAnswerForm({ inquiry }) {
       return (
         <AnswerEditor
           defaultValue=""
-          submitLabel="답변 등록"
+          submitLabel="답변 등록하기"
           mutation={create}
           onSubmit={handleCreate}
         />
@@ -155,7 +155,7 @@ export default function InquiryAnswerForm({ inquiry }) {
       return (
         <AnswerEditor
           defaultValue={inquiry.ansCn}
-          submitLabel="저장"
+          submitLabel="저장하기"
           mutation={update}
           onSubmit={handleUpdate}
           onCancel={() => setIsEditing(false)}

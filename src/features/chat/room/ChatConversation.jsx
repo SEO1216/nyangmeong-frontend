@@ -235,7 +235,7 @@ export default function ChatConversation({ otoChatRoomSn, onBack, onLeft }) {
               className="grid size-11 place-items-center rounded-full text-ink-2 hover:bg-surface-3"
               onClick={onBack}
             >
-              <Icon name="chevron_left" className="text-[26px]" />
+              <Icon name="chevron_left" className="text-2xl" />
             </button>
           </div>
         )}
@@ -281,7 +281,7 @@ export default function ChatConversation({ otoChatRoomSn, onBack, onLeft }) {
         role="log"
         aria-live="polite"
         aria-label="대화 내용"
-        className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[#fdfcfb] px-4 pt-4 pb-2"
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-page-bg px-4 pt-4 pb-2"
         onScroll={handleScroll}
       >
         {isFetchingNextPage && (

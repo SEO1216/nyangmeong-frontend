@@ -78,14 +78,14 @@ export default function AuditLogFilter({
             label="기간 시작일"
             value={draft.bgngYmd}
             onChange={(value) => setField('bgngYmd', value)}
-            className="min-[761px]:w-40"
+            className="min-[760px]:w-40"
           />
           <span className="text-subtle">~</span>
           <DatePicker
             label="기간 종료일"
             value={draft.endYmd}
             onChange={(value) => setField('endYmd', value)}
-            className="min-[761px]:w-40"
+            className="min-[760px]:w-40"
           />
         </div>
         <button type="submit" className={`${BTN_PRIMARY} max-[760px]:w-full`}>

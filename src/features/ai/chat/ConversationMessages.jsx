@@ -20,16 +20,16 @@ function PhotoMessage({ text, previewUrl }) {
           alt="보낸 사진"
           width="160"
           height="120"
-          className="h-[120px] w-40 rounded-[10px] border border-[#e2e7e7] object-cover"
+          className="h-[120px] w-40 rounded-[10px] border border-line object-cover"
         />
       ) : (
-        <p className="flex h-8 items-center gap-1 rounded-full border border-[#e2e7e7] bg-white px-3 text-sm leading-[1.25] tracking-[-0.03em] text-[#667374]">
+        <p className="flex h-8 items-center gap-1 rounded-full border border-line bg-white px-3 text-sm leading-[1.25] tracking-[-0.03em] text-subtle">
           <ImageIcon aria-hidden="true" className="size-4" />
           사진
         </p>
       )}
       {caption && (
-        <p className="max-w-[592px] whitespace-pre-wrap rounded-[18px_4px_18px_18px] border border-[#e8d27e] bg-[#f9eaa6] px-4 py-3 text-[15px] leading-relaxed text-[#1a3234]">
+        <p className="max-w-[592px] whitespace-pre-wrap rounded-[18px_4px_18px_18px] border border-fab-line bg-accent-300 px-4 py-3 text-[15px] leading-relaxed text-ink">
           {caption}
         </p>
       )}
@@ -153,7 +153,7 @@ export default function ConversationMessages({
     }
     return (
       <li key={message.aiCnvrsMsgSn} className="flex justify-end">
-        <p className="max-w-[592px] whitespace-pre-wrap rounded-[18px_4px_18px_18px] border border-[#e8d27e] bg-[#f9eaa6] px-4 py-3 text-[15px] leading-relaxed text-[#1a3234]">
+        <p className="max-w-[592px] whitespace-pre-wrap rounded-[18px_4px_18px_18px] border border-fab-line bg-accent-300 px-4 py-3 text-[15px] leading-relaxed text-ink">
           {message.cnvrsCn}
         </p>
       </li>

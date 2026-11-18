@@ -27,7 +27,7 @@ import {
 import { findDuplicates } from './routeOverlap';
 
 const INPUT_CLASS =
-  'block h-10 w-full rounded-[6px] border border-[#d3dae2] bg-white px-3 text-base leading-[1.4] text-[#1a3234] outline-none hover:border-[#b9c4c4] focus:border-[#285a5c] focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)] aria-invalid:border-danger';
+  'block h-10 w-full rounded-[6px] border border-input-line bg-white px-3 text-base leading-[1.4] text-ink outline-none hover:border-line-strong focus:border-brand-500 focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)] aria-invalid:border-danger';
 const TEXTAREA_CLASS = `${INPUT_CLASS} h-auto resize-none py-2 leading-[24px]`;
 const LABEL_CLASS = 'mb-1.5 block text-sm font-semibold text-ink-2';
 
@@ -254,7 +254,7 @@ export default function AiRouteFormModal({ route, onClose }) {
               className={BTN_PRIMARY}
               disabled={isPending}
             >
-              저장
+              저장하기
             </button>
           </>
         }
@@ -286,7 +286,7 @@ export default function AiRouteFormModal({ route, onClose }) {
             />
           </div>
 
-          <div className="grid grid-cols-[180px_1fr] gap-4 max-[560px]:grid-cols-1">
+          <div className="grid grid-cols-[180px_1fr] gap-4 max-[760px]:grid-cols-1">
             <div>
               <p className={LABEL_CLASS}>이동 방식</p>
               <Select
@@ -457,7 +457,7 @@ export default function AiRouteFormModal({ route, onClose }) {
         <ConfirmModal
           title="매핑을 삭제할까요?"
           description={`'${route.trgtScrnNm}' 행이 매핑표에서 빠져요. 다음 요청부터 이 지시어로는 이동하지 않아요.`}
-          confirmLabel="삭제"
+          confirmLabel="삭제하기"
           isPending={remove.isPending}
           errorMessage={remove.isError ? remove.error.message : undefined}
           onConfirm={handleDelete}

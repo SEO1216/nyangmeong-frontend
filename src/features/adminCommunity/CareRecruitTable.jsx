@@ -62,7 +62,7 @@ export default function CareRecruitTable({ recruits, onSelect }) {
         </tbody>
       </table>
 
-      <ul className="min-[761px]:hidden">
+      <ul className="min-[760px]:hidden">
         {recruits.map((recruit) => (
           <li
             key={recruit.petPrtcRcrtSn}

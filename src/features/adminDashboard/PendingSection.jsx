@@ -12,7 +12,7 @@ export default function PendingSection({ items }) {
       <h2 id="dashboard-pending" className="text-lg font-bold text-ink">
         처리 대기
       </h2>
-      <ul className="grid grid-cols-2 gap-3 min-[761px]:grid-cols-3 min-[1101px]:grid-cols-6">
+      <ul className="grid grid-cols-2 gap-3 min-[760px]:grid-cols-3 min-[1100px]:grid-cols-6">
         {items.map(({ key, label, value, to, sub }) => {
           const hasValue = value > 0;
           const body = (

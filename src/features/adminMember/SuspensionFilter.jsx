@@ -4,7 +4,7 @@ import Select from '@/components/Select';
 import { SUSPENSION_TYPE_OPTIONS } from './memberLabels';
 
 const INPUT_CLASS =
-  'block h-10 w-full rounded-[6px] border border-[#d3dae2] bg-white px-3 text-base leading-[1.4] text-[#1a3234] outline-none hover:border-[#b9c4c4] focus:border-[#285a5c] focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)]';
+  'block h-10 w-full rounded-[6px] border border-input-line bg-white px-3 text-base leading-[1.4] text-ink outline-none hover:border-line-strong focus:border-brand-500 focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)]';
 
 const TYPE_OPTIONS = [{ value: '', label: '전체' }, ...SUSPENSION_TYPE_OPTIONS];
 

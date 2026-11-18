@@ -14,7 +14,7 @@ import { GNB_MENUS } from './gnbMenus';
  */
 
 /** 헤더 햄버거가 사라지는 폭 */
-const WIDE_QUERY = '(min-width: 1100px)';
+const WIDE_QUERY = '(width >= 1100px)';
 
 /** 2차 메뉴와 별개인 보조 메뉴 */
 const ETC_LINKS = [
@@ -24,7 +24,7 @@ const ETC_LINKS = [
 ];
 
 const linkClass =
-  '-mx-3 flex min-h-12 items-center rounded-lg px-3 text-lg font-semibold text-[#3d4a4b] hover:bg-[#f4f6f6] aria-[current=page]:bg-[#ebf0f0] aria-[current=page]:text-[#285a5c]';
+  '-mx-3 flex min-h-12 items-center rounded-lg px-3 text-lg font-semibold text-ink-2 hover:bg-surface-2 aria-[current=page]:bg-surface-3 aria-[current=page]:text-brand-500';
 
 const sectionClass =
   'mx-8 grid grid-cols-[76px_minmax(0,1fr)] items-start gap-x-3 py-4';
@@ -66,7 +66,7 @@ export default function NavDrawer({ onClose, onLogout }) {
   return (
     <div id="nav-drawer" className="fixed inset-0 z-50">
       <div
-        className="absolute inset-0 bg-[#0f1723]/45"
+        className="absolute inset-0 bg-dim/45"
         aria-hidden="true"
         onClick={onClose}
       />
@@ -76,16 +76,16 @@ export default function NavDrawer({ onClose, onLogout }) {
         aria-label="전체 메뉴"
         className="absolute inset-y-0 right-0 flex w-[min(360px,88vw)] flex-col overflow-hidden bg-white shadow-lg max-[760px]:w-full"
       >
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-[#e2e7e7] pl-8 pr-3">
-          <b className="text-lg font-bold text-[#1a3234]">전체 메뉴</b>
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-line pl-8 pr-3">
+          <b className="text-lg font-bold text-ink">전체 메뉴</b>
           <button
             ref={closeRef}
             type="button"
             aria-label="메뉴 닫기"
-            className="grid h-10 w-10 place-items-center rounded-full text-[#3d4a4b] hover:bg-[#ebf0f0]"
+            className="grid size-8 place-items-center rounded-full text-ink-2 hover:bg-surface-3 max-[760px]:size-11"
             onClick={onClose}
           >
-            <X size={28} />
+            <X size={24} />
           </button>
         </div>
 
@@ -93,10 +93,10 @@ export default function NavDrawer({ onClose, onLogout }) {
           <Link
             to={PATHS.MYPAGE_PROFILE}
             aria-label="회원 정보로 이동"
-            className="flex items-center gap-4 bg-[#f4f6f6] py-5 pl-8 pr-5"
+            className="flex items-center gap-4 bg-surface-2 py-5 pl-8 pr-5"
             onClick={onClose}
           >
-            <span className="size-16 shrink-0 overflow-hidden rounded-full border border-[#e2e7e7] bg-white">
+            <span className="size-16 shrink-0 overflow-hidden rounded-full border border-line bg-white">
               <img
                 src={userAvatar}
                 alt=""
@@ -105,15 +105,15 @@ export default function NavDrawer({ onClose, onLogout }) {
               />
             </span>
             <div className="min-w-0 grow">
-              <div className="flex items-center gap-0.5 text-xl font-bold leading-[1.4] text-[#1a3234]">
+              <div className="flex items-center gap-0.5 text-xl font-bold leading-[1.4] text-ink">
                 {summary ? (
                   summary.mbrNcnm
                 ) : (
                   <Skeleton className="my-1 h-5 w-24" />
                 )}
-                <ChevronRight size={24} className="text-[#667374]" />
+                <ChevronRight size={24} className="text-subtle" />
               </div>
-              <div className="mt-0.5 truncate text-sm text-[#667374]">
+              <div className="mt-0.5 truncate text-sm text-subtle">
                 {summary ? (
                   summary.maskedAcntEml
                 ) : (
@@ -128,9 +128,9 @@ export default function NavDrawer({ onClose, onLogout }) {
               <section
                 key={menu.label}
                 aria-label={menu.label}
-                className={`${sectionClass} border-t border-[#e2e7e7] first:border-t-0`}
+                className={`${sectionClass} border-t border-line first:border-t-0`}
               >
-                <h3 className="pt-3.5 text-sm font-bold leading-[1.4] text-[#667374]">
+                <h3 className="pt-3.5 text-sm font-bold leading-[1.4] text-subtle">
                   {menu.label}
                 </h3>
                 <div className="flex min-w-0 flex-col">
@@ -150,7 +150,7 @@ export default function NavDrawer({ onClose, onLogout }) {
             ))}
 
             <div
-              className={`${sectionClass} border-t border-[#e2e7e7] [&>a]:col-start-2`}
+              className={`${sectionClass} border-t border-line [&>a]:col-start-2`}
             >
               {ETC_LINKS.map((item) => (
                 <Link
@@ -165,10 +165,10 @@ export default function NavDrawer({ onClose, onLogout }) {
               ))}
             </div>
 
-            <div className="mx-8 flex justify-end border-t border-[#e2e7e7] pt-2">
+            <div className="mx-8 flex justify-end border-t border-line pt-2">
               <button
                 type="button"
-                className="flex min-h-12 items-center gap-1.5 rounded-lg px-3 text-base font-semibold text-[#566465] hover:bg-[#f4f6f6]"
+                className="flex min-h-12 items-center gap-1.5 rounded-lg px-3 text-base font-semibold text-muted hover:bg-surface-2"
                 onClick={onLogout}
               >
                 로그아웃

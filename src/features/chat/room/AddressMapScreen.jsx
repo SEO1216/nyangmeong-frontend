@@ -54,7 +54,7 @@ export default function AddressMapScreen({ address, detail, point, onBack }) {
         className="absolute top-3 left-3 z-10 grid size-11 place-items-center rounded-full bg-white text-ink-2 shadow-depth-md hover:bg-surface-2"
         onClick={onBack}
       >
-        <Icon name="chevron_left" className="text-[26px]" />
+        <Icon name="chevron_left" className="text-2xl" />
       </button>
       <div className="flex shrink-0 items-center gap-3 bg-white px-4 py-2.5 pb-[calc(10px+env(safe-area-inset-bottom))] shadow-[0_-1px_0_var(--color-line)]">
         <p className="line-clamp-2 min-w-0 flex-1 text-sm leading-[1.4] font-semibold text-ink">

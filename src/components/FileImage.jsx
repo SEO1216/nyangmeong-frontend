@@ -19,13 +19,13 @@ export default function FileImage({
   const [failedSrc, setFailedSrc] = useState(null);
 
   /** 넘긴 바탕색보다 로딩 색 우선 */
-  if (pending) return <Skeleton className={`${className} bg-[#e9eded]!`} />;
+  if (pending) return <Skeleton className={`${className} bg-surface-2!`} />;
 
   if (!src || failedSrc === src) {
     if (fallback) return fallback;
     return (
       <span
-        className={`grid place-items-center bg-[#f4f6f6] text-[#9aa5a6] ${className}`}
+        className={`grid place-items-center bg-surface-2 text-placeholder ${className}`}
       >
         <ImageOff className="size-6" aria-hidden="true" />
       </span>
@@ -33,7 +33,7 @@ export default function FileImage({
   }
 
   /** 공개 주소 이미지가 오기 전 로딩 색 */
-  const loading = loadedSrc === src ? '' : ' animate-pulse bg-[#e9eded]!';
+  const loading = loadedSrc === src ? '' : ' animate-pulse bg-surface-2!';
   return (
     <img
       src={src}

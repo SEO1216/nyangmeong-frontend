@@ -23,25 +23,25 @@ const components = {
   ol: styled('ol', 'mt-2 list-decimal pl-5 first:mt-0 [&_ol]:mt-1'),
   li: styled('li', 'mt-1 first:mt-0'),
   strong: styled('strong', 'font-bold'),
-  a: styled('a', 'text-[#285a5c] underline underline-offset-2', {
+  a: styled('a', 'text-brand-500 underline underline-offset-2', {
     target: '_blank',
     rel: 'noopener noreferrer',
   }),
-  code: styled('code', 'rounded bg-[#f4f6f6] px-1 text-[14px] leading-[22px]'),
+  code: styled('code', 'rounded bg-surface-2 px-1 text-[14px] leading-[22px]'),
   pre: styled(
     'pre',
-    'mt-2 overflow-x-auto rounded-lg bg-[#f4f6f6] p-3 first:mt-0 [&_code]:bg-transparent [&_code]:p-0',
+    'mt-2 overflow-x-auto rounded-lg bg-surface-2 p-3 first:mt-0 [&_code]:bg-transparent [&_code]:p-0',
   ),
   blockquote: styled(
     'blockquote',
-    'mt-2 border-l-2 border-[#e2e7e7] pl-3 text-[#667374] first:mt-0',
+    'mt-2 border-l-2 border-line pl-3 text-subtle first:mt-0',
   ),
-  hr: styled('hr', 'my-3 border-[#e2e7e7]'),
+  hr: styled('hr', 'my-3 border-line'),
   table: function MarkdownTable(props) {
     const rest = { ...props };
     delete rest.node;
     return (
-      <div className="mt-2 max-w-full overflow-x-auto rounded-lg border border-[#e2e7e7] first:mt-0">
+      <div className="mt-2 max-w-full overflow-x-auto rounded-lg border border-line first:mt-0">
         <table
           className="w-max min-w-full border-collapse text-[14px] leading-[22px] tracking-[-0.03em]"
           {...rest}
@@ -49,14 +49,14 @@ const components = {
       </div>
     );
   },
-  thead: styled('thead', 'bg-[#f4f6f6]'),
+  thead: styled('thead', 'bg-surface-2'),
   th: styled(
     'th',
-    'whitespace-nowrap border-b border-[#e2e7e7] px-3 py-2 text-left font-bold [&:not(:last-child)]:border-r',
+    'whitespace-nowrap border-b border-line px-3 py-2 text-left font-bold [&:not(:last-child)]:border-r',
   ),
   td: styled(
     'td',
-    'whitespace-nowrap border-[#e2e7e7] px-3 py-2 [&:not(:last-child)]:border-r [tr:not(:last-child)>&]:border-b',
+    'whitespace-nowrap border-line px-3 py-2 [&:not(:last-child)]:border-r [tr:not(:last-child)>&]:border-b',
   ),
 };
 

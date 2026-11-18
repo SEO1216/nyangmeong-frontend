@@ -33,7 +33,7 @@ export default function UserLayout() {
 
   return (
     <div
-      className={`flex flex-col bg-[#faf8f5] ${
+      className={`flex flex-col bg-page-bg ${
         isMain ? 'h-dvh overflow-hidden' : 'min-h-screen'
       }`}
     >

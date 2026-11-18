@@ -660,7 +660,7 @@ export default function AiChatScreen({
 
   return (
     <AiHostContext.Provider value={hostValue}>
-      <div className={`flex bg-[#faf8f5] font-sans ${className}`}>
+      <div className={`flex bg-page-bg font-sans ${className}`}>
         <ConversationSidebar
           pets={pets}
           nickname={member?.mbrNcnm ?? ''}
@@ -681,10 +681,10 @@ export default function AiChatScreen({
           {selectedRoomSn === null && (
             <header className={chatHeaderClass}>
               <DrawerButton onClick={openDrawer} />
-              <h1 className="text-lg font-bold text-[#1a3234] max-[760px]:text-base">
+              <h1 className="text-lg font-bold text-ink max-[760px]:text-base">
                 새 대화
               </h1>
-              <span className="shrink-0 rounded-full bg-[#e9f2f2] px-2.5 py-0.5 text-xs font-medium text-[#285a5c]">
+              <span className="shrink-0 rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-500">
                 {selectedPet?.petNm ?? '전체'}
               </span>
               {onBack && <CloseButton onClick={onBack} />}
@@ -713,7 +713,7 @@ export default function AiChatScreen({
             className="min-h-0 flex-1 overflow-y-auto px-6 py-8 max-[760px]:px-4 max-[760px]:py-5"
           >
             {isError && (
-              <p role="alert" className="text-center text-[#667374]">
+              <p role="alert" className="text-center text-subtle">
                 대화를 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요
               </p>
             )}
@@ -823,12 +823,12 @@ export default function AiChatScreen({
               )}
           </div>
           {isAttachFailed && (
-            <p role="alert" className="pb-2 text-center text-sm text-[#b42318]">
+            <p role="alert" className="pb-2 text-center text-sm text-danger">
               {ATTACH_FAILED}
             </p>
           )}
           {answer.status === 'failed' && (
-            <p role="alert" className="pb-2 text-center text-sm text-[#b42318]">
+            <p role="alert" className="pb-2 text-center text-sm text-danger">
               메시지를 보내지 못했어요. 잠시 뒤 다시 시도해 주세요
             </p>
           )}

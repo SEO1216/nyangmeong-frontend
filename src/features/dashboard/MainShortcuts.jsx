@@ -22,10 +22,10 @@ const TYPE_BY_CD = Object.fromEntries(
 const TILE =
   'flex w-24 flex-col items-center gap-1.5 rounded-box p-3 text-center group-hover:bg-brand-50';
 const CIRCLE = 'size-[52px] rounded-full';
-/** 모바일(760px 이하, Modal isSheet와 같은 경계)에서 보이는 바로가기 수. 마지막 칸은 [바로가기 편집] */
+/** 모바일(760px 미만, Modal isSheet와 같은 경계)에서 보이는 바로가기 수. 마지막 칸은 [바로가기 편집] */
 const MOBILE_VISIBLE = 5;
-/** 끌어 놓기는 웹만(761px 이상). 모바일 폭에서는 끌기를 시작하지 않는다 */
-const MOBILE_QUERY = '(max-width: 760px)';
+/** 끌어 놓기는 웹만(760px 이상). 모바일 폭에서는 끌기를 시작하지 않는다 */
+const MOBILE_QUERY = '(width < 760px)';
 
 /** 반려동물별 바로가기 코드: 서버가 양육 중인 반려동물 전부를 주므로 응답에 없으면 빈 목록 */
 const toShortcutMap = (pets, saved) =>
@@ -160,7 +160,7 @@ export default function MainShortcuts({ pets, mbrSn }) {
     <>
       <ul
         aria-label="반려동물 바로가기"
-        className="mx-auto flex w-fit max-w-[304px] flex-wrap justify-start gap-2 min-[761px]:max-w-[616px]"
+        className="mx-auto flex w-fit max-w-[304px] flex-wrap justify-start gap-2 min-[760px]:max-w-[616px]"
       >
         {tiles.map(({ pet, cd }, index) => {
           const key = shortcutKey({ pet, cd });
@@ -220,7 +220,7 @@ export default function MainShortcuts({ pets, mbrSn }) {
           );
         })}
         {/* 모바일은 항상, 웹은 더할 수 있을 때만 */}
-        <li className={`group ${canAddOnWeb ? '' : 'min-[761px]:hidden'}`}>
+        <li className={`group ${canAddOnWeb ? '' : 'min-[760px]:hidden'}`}>
           <button type="button" onClick={() => setForm({})} className={TILE}>
             <PlusTileBody label="바로가기 편집" />
           </button>

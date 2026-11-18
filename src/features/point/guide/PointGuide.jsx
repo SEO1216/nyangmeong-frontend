@@ -3,10 +3,10 @@ import { BTN_SECONDARY } from '@/components/buttonStyles';
 import { CARD, CARD_HEAD, CARD_TITLE } from '../shared/pointStyles';
 
 const STEPS = [
-  { title: '케어미션 완료', desc: '미션마다 1~20P가 쌓여요' },
-  { title: '검진기록 등록', desc: '검진기록을 등록하면 20P가 쌓여요' },
-  { title: '자정에 자동 정산', desc: '미완료 미션은 진행률만큼 정산돼요' },
-  { title: '아이템 상점에서 사용', desc: '픽셀 캐릭터를 꾸밀 수 있어요' },
+  { title: '케어미션 완료', desc: '난이도별 5·10·15P가 쌓여요' },
+  { title: '검진기록 등록', desc: '검진기록을 등록하면 20P예요' },
+  { title: '자정에 자동 정산', desc: '미완료는 진행률만큼 정산돼요' },
+  { title: '아이템 상점에서 사용', desc: '캐릭터를 꾸밀 수 있어요' },
 ];
 
 export default function PointGuide({ onGoCharacter }) {

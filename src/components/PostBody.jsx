@@ -39,7 +39,7 @@ export default function PostBody({
   fileImages = false,
 }) {
   const text = (
-    <div className="text-base leading-[1.6] text-[#1a3234]">
+    <div className="text-base leading-[1.6] text-ink">
       {content
         .split('\n\n')
         .flatMap((paragraph) =>
