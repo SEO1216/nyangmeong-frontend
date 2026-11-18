@@ -73,7 +73,7 @@ export default function AddressShareModal({
       title="주소 공유"
       isWide
       isTop
-      isTitleHidden
+      isTitleHidden={Boolean(selected)}
       isHeaderBorderHidden
       headerLead={
         selected && (
@@ -105,7 +105,10 @@ export default function AddressShareModal({
               className={BTN_PRIMARY}
               disabled={isPending}
               onClick={() =>
-                onSend({ shrnAddr: toShareAddr(selected), detail: detail.trim() })
+                onSend({
+                  shrnAddr: toShareAddr(selected),
+                  detail: detail.trim(),
+                })
               }
             >
               주소 보내기
@@ -124,9 +127,7 @@ export default function AddressShareModal({
             />
             <span className="min-w-0">
               {!selected.isAddress && selected.wtnsPlcNm && (
-                <b className="block font-bold text-ink">
-                  {selected.wtnsPlcNm}
-                </b>
+                <b className="block font-bold text-ink">{selected.wtnsPlcNm}</b>
               )}
               <span
                 className={`block ${selected.isAddress || !selected.wtnsPlcNm ? 'font-bold text-ink' : 'text-sm text-muted'}`}

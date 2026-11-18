@@ -24,6 +24,10 @@ SCR-CMU-001 커뮤니티 · 댓글 답글 「@닉네임」 (시작 2026-11-18) �
 | --- | --- | --- | --- |
 | 추가-1 | `src/features/community/CommentSection.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 답글에 「답글쓰기」를 누르면 입력창에 「@그 답글 작성자 닉네임 」이 미리 들어 있고 커서는 그 뒤에 있다. 등록하면 본문에는 그 「@닉네임 」이 중복되지 않고(서버가 준 「@」만 한 번 보임) 원 댓글에 바로 「답글쓰기」를 누르면 비어 있다 | 요청 2026-11-18 "「@아이디」 답글 클릭한 해당 아이디는 답글 등록 시 입력창에 바로 입력되도록" |
 | 추가-2 | `src/features/community/missing/MissingDetail.jsx`, `src/features/community/care/CareDetail.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 두 상세의 정보 표(실종 정보·돌봄 정보)가 행마다 아래 선이 있는 라인 형태이고(맨 위 선 포함), 값이 두 줄이면 왼쪽 라벨이 그 행의 맨 위에 맞는다(가운데로 내려가지 않음) | 요청 2026-11-18 "펫돌봄·실종센터 상세 본문 영역 기존의 라인 형태로 변경, 내용이 두 줄이면 라벨 상단 정렬" |
+| 추가-3 | `src/features/chat/room/PhotoViewer.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: PC 브라우저를 760px 이하로 줄여도 채팅 사진 보기에 ‹ › 버튼이 보이고 눌러 넘어간다. 터치 기기에서는 버튼 없이 스와이프 | 요청 2026-11-18 "PC 화면을 모바일 크기로 줄였을 때 사진 확대에서 넘길 방법이 없음, 바로 고쳐" |
+| 추가-4 | `src/features/chat/room/AddressShareModal.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 채팅 [주소 공유] 모달의 장소 검색 단계에 제목 「주소 공유」가 보이고, 장소를 고른 단계(‹ 다시 검색)에서는 지금처럼 제목이 숨는다 | 요청 2026-11-18 "채팅창에서 장소 검색 모달 타이틀 추가" |
+| 추가-5 | `src/features/community/care/CareSideBox.jsx`, `src/features/chat/room/ChatRoomList.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 펫돌봄 상세 작성자 패널의 버튼이 모집 중·마감 모두 초록 기본 버튼 「채팅 목록 보기」(모집 중에는 「· N명」)이고, 눌러 열린 채팅 목록 맨 위에 그 글의 방들이 왼쪽 초록 띠와 옅은 초록 배경으로 구분된다(선택한 방은 기존 배경) | 요청 2026-11-18 "채팅 목록 보기로 통일, 버튼 컬러 기존 그린, 그 글의 방이 눈에 띄게" |
+| 추가-6 | `src/features/chat/room/ChatRoomList.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: PC 채팅 모달에서 왼쪽 「내 글·지원한 글」 탭 줄(편집 모드 줄 포함)의 높이가 오른쪽 상대방 이름 줄(60px)과 같고 아래 선이 이어진다 | 요청 2026-11-18 "내글 지원한글 영역과 오른쪽 냥멍테스터 상단 영역 높이를 동일하게" |
 
 ## 다음에 할 것
 
