@@ -25,14 +25,17 @@ const STEPS = ['시작', '기록 고르기', '케어 고르기', '완료'];
 const LAST_STEP = STEPS.length;
 
 /**
- * [튜토리얼 · 기록 항목 편집 모달] (※신규 정책, 흐름도 D1~D7·D10)
+ * [튜토리얼 · 대시보드 편집 모달] (※신규 정책, 흐름도 D1~D7·D10)
+ * - 2단계(기록 고르기)와 편집은 1040px 두 칸, 1·3·4단계는 720px. 단계를 넘기면 너비가 바로 바뀜 (※신규 정책)
  * - mode 'tutorial': 1 시작 → 2 기록 고르기 → 3 케어 고르기 → 4 완료. 1~3단계의 [나중에 할래요]·×·Esc·배경은 추천 3개 저장(D3)이고 케어는 저장하지 않음, 4단계 ×는 [건강기록 보러 가기]와 같음
  * - 3단계 케어 고르기: 5개 이상, 처방·반복 예방 연동 항목은 항상 표시. 4단계에서 기록 항목과 함께 저장(케어 먼저: 기록 항목이 저장되면 튜토리얼이 닫힘)
+ * - isReplay(이미 고른 항목이 있는 회원이 튜토리얼을 다시 엶): 2단계 처음 체크는 savedIds, 1~3단계의 [나중에 할래요]·×·Esc·배경은 저장 없이 닫음. 4단계 저장은 같음 (※신규 정책)
  * - mode 'edit': 2단계만. [저장]은 고른 항목 저장, [취소]·×·Esc·배경은 저장 없이 닫음(D7)
  * - 저장 실패: 서버 message 토스트. [나중에 할래요]·×·Esc는 그래도 닫고(다음에 들어오면 다시 열림), 4단계·편집 저장은 모달을 유지해 다시 시도(저장된 케어는 다시 보내지 않음)
  */
 export default function WidgetTutorialModal({
   mode,
+  isReplay = false,
   mbrSn,
   petSn,
   petNm,
@@ -42,7 +45,9 @@ export default function WidgetTutorialModal({
   const isEdit = mode === 'edit';
   const [step, setStep] = useState(isEdit ? 2 : 1);
   /** 사람이 칩을 누르기 전에는 null: 튜토리얼은 추천 3개를 미리 고름 */
-  const [pickedIds, setPickedIds] = useState(isEdit ? savedIds : null);
+  const [pickedIds, setPickedIds] = useState(
+    isEdit || (isReplay && savedIds.length > 0) ? savedIds : null,
+  );
   const [lastPickedId, setLastPickedId] = useState(null);
   const saveWidgets = useSaveHealthWidgets();
   /** 케어 고르기: 사람이 칩을 누르기 전에는 null -> 서버의 indctYn 그대로 */
@@ -95,7 +100,7 @@ export default function WidgetTutorialModal({
   const saveLater = () => {
     save(
       startIds,
-      `추천 항목 ${startIds.length}개로 시작했어요 · [기록 항목 편집]에서 바꿀 수 있어요`,
+      `추천 항목 ${startIds.length}개로 시작했어요 · [대시보드 편집]에서 바꿀 수 있어요`,
       true,
     );
   };
@@ -127,7 +132,7 @@ export default function WidgetTutorialModal({
   };
 
   const handleDismiss = () => {
-    if (isEdit) onClose();
+    if (isEdit || (isReplay && step !== LAST_STEP)) onClose();
     else if (step === LAST_STEP) saveFinish();
     else saveLater();
   };
@@ -148,7 +153,7 @@ export default function WidgetTutorialModal({
   };
 
   const title = isEdit
-    ? '기록 항목 편집'
+    ? '대시보드 편집'
     : step === 1
       ? `${petNm}에게 필요한 기록과 케어를 골라요`
       : step === 2
@@ -164,7 +169,7 @@ export default function WidgetTutorialModal({
           type="button"
           className="inline-flex h-10 items-center rounded-md px-4 font-semibold text-ink-2 hover:bg-surface-3 hover:text-ink"
           disabled={saveWidgets.isPending}
-          onClick={saveLater}
+          onClick={isReplay ? onClose : saveLater}
         >
           나중에 할래요
         </button>
@@ -261,7 +266,7 @@ export default function WidgetTutorialModal({
       title={title}
       footer={footer}
       isWide
-      width={720}
+      width={step === 2 ? 1040 : 720}
       isPending={isSaving}
       onClose={handleDismiss}
     >
@@ -272,7 +277,7 @@ export default function WidgetTutorialModal({
           <p className="leading-[1.6] text-muted">
             고른 기록은 대시보드와 건강 일지에, 고른 케어는 케어리스트에 보여요.
             <br />
-            지금 안 골라도 나중에 [기록 항목 편집]·[항목 관리]에서 바꿀 수
+            지금 안 골라도 나중에 [대시보드 편집]·[항목 관리]에서 바꿀 수
             있어요.
           </p>
           <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-ink-2">
@@ -353,7 +358,7 @@ export default function WidgetTutorialModal({
           </DoneRow>
           <p className="flex items-center gap-1.5 text-sm text-muted">
             <Icon name="tune" className="text-subtle" />
-            [기록 항목 편집]과 케어리스트 [항목 관리]에서 언제든 더하거나 뺄 수
+            [대시보드 편집]과 케어리스트 [항목 관리]에서 언제든 더하거나 뺄 수
             있어요
           </p>
         </div>

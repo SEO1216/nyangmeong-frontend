@@ -483,7 +483,7 @@ const prescriptionBody = ({ summary }) => {
     (a, b) => Number(b.prscSttsCd === DOSING) - Number(a.prscSttsCd === DOSING),
   );
   if (prescriptions.length === 0) return null;
-  /** [더보기]: 맨 위 처방의 검진상세 처방·투약 탭. 검진기록 번호가 없으면 item.moveTo(건강 일지 검진기록 탭) */
+  /** 「처방 보기 ›」: 맨 위 처방의 검진상세 처방·투약 탭. 검진기록 번호가 없으면 item.moveTo(건강 일지 검진기록 탭) */
   const top = prescriptions[0];
   return {
     tile: { value: top.mdcnNm, sub: `복용 중 ${summary.dosingCount}건` },
