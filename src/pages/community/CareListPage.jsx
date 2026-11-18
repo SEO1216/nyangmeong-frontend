@@ -62,12 +62,12 @@ function CareListSkeleton() {
   return (
     <div
       aria-busy="true"
-      className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 border-t border-line pt-6 max-[1101px]:grid-cols-1"
+      className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 max-[1101px]:grid-cols-1"
     >
       <div className="flex min-w-0 flex-col gap-5">
         <div
           aria-hidden="true"
-          className="grid grid-cols-2 gap-x-9 gap-y-5 max-[760px]:grid-cols-1 max-[760px]:gap-y-4"
+          className="rounded-card border border-line bg-white p-5 shadow-[0_1px_2px_rgba(26,50,52,0.06)] grid grid-cols-2 gap-x-9 gap-y-5 max-[760px]:grid-cols-1 max-[760px]:gap-y-4"
         >
           <Skeleton className="hidden h-10 max-[760px]:block" />
           <Skeleton className="h-16 max-[760px]:hidden" />
@@ -75,7 +75,7 @@ function CareListSkeleton() {
           <Skeleton className="h-16 max-[760px]:hidden" />
           <Skeleton className="h-16 max-[760px]:hidden" />
         </div>
-        <div className="border-t border-line pt-4">
+        <div>
           <Skeleton className="h-9 w-full" />
         </div>
         <div className="flex flex-col gap-3">
@@ -190,7 +190,6 @@ export default function CareListPage() {
       section="community"
       menu={PATHS.COMMUNITY_PETCARE}
       description={DESCRIPTION}
-      contentClassName="min-[1101px]:pt-[7px]"
     >
       {body}
     </SubPageLayout>

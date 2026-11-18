@@ -210,6 +210,7 @@ export default function CareList({ petSn, petNm, mission }) {
                       <CareTile
                         key={item.careArtclSn}
                         item={item}
+                        petSn={petSn}
                         isDone={isDoneToday(item)}
                         isMission={index < missionItems.length}
                         className={
