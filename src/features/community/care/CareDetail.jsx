@@ -14,7 +14,6 @@ import Avatar from '@/components/Avatar';
 import Badge from '@/components/Badge';
 import { TEXT_ACTION, TEXT_ACTION_DANGER } from '@/components/buttonStyles';
 import ConfirmModal from '@/components/ConfirmModal';
-import ImageViewer from '@/components/ImageViewer';
 import LikeButton from '@/components/LikeButton';
 import PostBody from '@/components/PostBody';
 import ReportModal from '@/components/ReportModal';
@@ -30,6 +29,7 @@ import {
   useReportCare,
   useToggleCareLike,
 } from '../careQueries';
+import AttachedImages from '../AttachedImages';
 import CareAreaMap from './CareAreaMap';
 import { CareCheckGuide } from './CareGuideRail';
 import CareSideBox from './CareSideBox';
@@ -51,9 +51,7 @@ function InfoRow({ icon, label, children }) {
         {icon}
         {label}
       </dt>
-      <dd className="min-w-0 leading-6 break-words text-ink">
-        {children}
-      </dd>
+      <dd className="min-w-0 leading-6 break-words text-ink">{children}</dd>
     </div>
   );
 }
@@ -71,7 +69,6 @@ export default function CareDetail({ post }) {
   const remove = useDeleteCare();
   const report = useReportCare();
   const [modal, setModal] = useState('');
-  const [viewerIndex, setViewerIndex] = useState(null);
   const listTo = `${PATHS.COMMUNITY_PETCARE}${state?.listSearch ?? ''}`;
   const isMine = post.owner;
   const isLiked = post.liked;
@@ -154,25 +151,7 @@ export default function CareDetail({ post }) {
         )}
 
         <PostBody content={post.pstCn}>
-          {post.imgs.length > 0 && (
-            <div className="mb-6 flex flex-col items-center gap-3">
-              {post.imgs.map(({ atchFileSn }, index) => (
-                <button
-                  key={atchFileSn}
-                  type="button"
-                  aria-label={`첨부 이미지 ${index + 1} 크게 보기`}
-                  onClick={() => setViewerIndex(index)}
-                  className="max-w-full cursor-zoom-in"
-                >
-                  <img
-                    src={publicFileUrl(atchFileSn)}
-                    alt={`첨부 이미지 ${index + 1}`}
-                    className="h-auto max-h-[min(640px,75vh)] w-auto max-w-full rounded-[10px] object-contain"
-                  />
-                </button>
-              ))}
-            </div>
-          )}
+          <AttachedImages imgs={post.imgs} className="mb-6" />
           <section aria-labelledby="care-info-title">
             <h3 id="care-info-title" className="text-lg font-bold text-ink">
               돌봄 정보
@@ -273,18 +252,6 @@ export default function CareDetail({ post }) {
         <CareCheckGuide />
       </div>
 
-      {viewerIndex !== null && (
-        <ImageViewer
-          images={post.imgs.map(({ atchFileSn }, index) => ({
-            key: atchFileSn,
-            src: publicFileUrl(atchFileSn),
-            name: `첨부 이미지 ${index + 1}`,
-          }))}
-          index={viewerIndex}
-          onChange={setViewerIndex}
-          onClose={() => setViewerIndex(null)}
-        />
-      )}
       {modal === 'delete' && (
         <ConfirmModal
           title="돌봄 요청을 삭제할까요? 삭제한 글은 되돌릴 수 없어요. 이미 나눈 채팅 기록은 그대로 남아요"
