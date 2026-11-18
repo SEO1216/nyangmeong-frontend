@@ -66,12 +66,14 @@ const NOTE_CLASS =
 
 function InfoRow({ icon, label, children }) {
   return (
-    <div className="grid grid-cols-[120px_minmax(0,1fr)] gap-4 border-b border-line px-1 py-3.5 max-[760px]:grid-cols-[96px_minmax(0,1fr)] max-[760px]:gap-3">
-      <dt className="flex items-center gap-1.5 font-semibold text-ink-2">
+    <div className="col-span-2 grid grid-cols-subgrid">
+      <dt className="flex h-6 min-w-[120px] items-center gap-1.5 font-semibold whitespace-nowrap text-ink-2 max-[760px]:min-w-0">
         {icon}
         {label}
       </dt>
-      <dd className="min-w-0 break-words text-ink">{children}</dd>
+      <dd className="min-w-0 leading-6 break-words text-ink">
+        {children}
+      </dd>
     </div>
   );
 }
@@ -98,7 +100,7 @@ function PostHead({ post, children, actions }) {
       >
         {post.pstTtl}
       </h2>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 pb-1">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-b border-line pb-6 max-[760px]:pb-5">
         <p className="flex flex-wrap items-center gap-2 text-sm text-subtle">
           <Avatar src={publicFileUrl(post.mbrAtchFileSn)} className="size-8" />
           {post.mbrNcnm && (
@@ -331,7 +333,7 @@ export default function MissingDetail({ post }) {
               >
                 실종 정보
               </h3>
-              <dl className="mt-3 border-t border-line-strong">
+              <dl className="mt-4 grid grid-cols-[max-content_minmax(0,1fr)] gap-x-4 gap-y-4 max-[760px]:gap-x-3">
                 <InfoRow
                   icon={
                     <PawPrint
