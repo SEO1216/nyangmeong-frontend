@@ -18,12 +18,10 @@ export default function NotificationSettingsPage() {
 
   return (
     <div className="mx-auto w-full max-w-[760px] px-4 py-14">
-      <section className="mb-5 rounded-[20px] border border-[#d3e2dc] bg-[#e6efeb] px-8 py-9">
-        <p className="text-base font-medium text-[#285a5c]">Settings</p>
-        <h1 className="text-2xl font-bold text-[#1a3234]">설정</h1>
-        <p className="text-base text-[#566465]">
-          어떤 알림을 어디로 받을지 정해요
-        </p>
+      <section className="mb-5 rounded-[20px] border border-line bg-tone-green-bg px-8 py-9">
+        <p className="text-base font-medium text-brand-500">Settings</p>
+        <h1 className="text-page font-bold text-ink">설정</h1>
+        <p className="text-base text-muted">어떤 알림을 어디로 받을지 정해요</p>
       </section>
 
       {isPending && (
@@ -34,7 +32,7 @@ export default function NotificationSettingsPage() {
         </PageSkeleton>
       )}
       {isError && (
-        <p role="alert" className="text-[#566465]">
+        <p role="alert" className="text-muted">
           설정을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요
         </p>
       )}

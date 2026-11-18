@@ -127,7 +127,7 @@ export default function Modal({
           {isSheet && (
             <span
               aria-hidden="true"
-              className="absolute top-2 left-1/2 h-1 w-9 -translate-x-1/2 rounded-xs bg-line-strong min-[761px]:hidden"
+              className="absolute top-2 left-1/2 h-1 w-9 -translate-x-1/2 rounded-xs bg-line-strong min-[760px]:hidden"
             />
           )}
           <header
@@ -155,7 +155,7 @@ export default function Modal({
           <div
             className={
               isLarge
-                ? `flex min-h-0 flex-1 flex-col overflow-y-auto ${isAutoHeight ? '' : 'min-[761px]:overflow-hidden'}`
+                ? `flex min-h-0 flex-1 flex-col overflow-y-auto ${isAutoHeight ? '' : 'min-[760px]:overflow-hidden'}`
                 : 'px-6 py-5'
             }
           >
@@ -182,7 +182,7 @@ export default function Modal({
       <dialog
         ref={dialogRef}
         {...dialogProps}
-        className="m-0 size-full max-h-none max-w-none overflow-y-auto overscroll-contain bg-transparent p-0 backdrop:bg-[rgba(15,23,35,0.45)]"
+        className="m-0 size-full max-h-none max-w-none overflow-y-auto overscroll-contain bg-transparent p-0 backdrop:bg-dim/45"
         onCancel={handleCancel}
         onKeyDown={handleKeyDown}
         onMouseDown={handleMouseDown}
@@ -200,11 +200,11 @@ export default function Modal({
     <dialog
       ref={dialogRef}
       {...dialogProps}
-      className={`m-auto bg-white p-0 shadow-depth-lg backdrop:bg-[rgba(15,23,35,0.45)] ${
+      className={`m-auto bg-white p-0 shadow-depth-lg backdrop:bg-dim/45 ${
         isLarge
           ? `${
               isAutoHeight
-                ? 'max-h-[calc(100dvh-2rem)] min-[761px]:h-fit'
+                ? 'max-h-[calc(100dvh-2rem)] min-[760px]:h-fit'
                 : 'h-[min(660px,calc(100dvh-2rem))] max-h-none'
             } ${WIDTH_CLASSES[width] ?? 'w-[min(760px,calc(100vw-2rem))]'} max-w-none flex-col rounded-modal open:flex ${
               isSheet

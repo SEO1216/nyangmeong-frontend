@@ -44,14 +44,14 @@ export default function ApiUsageFilter({ filter, onSearch }) {
             label="기간 시작일"
             value={draft.from}
             onChange={(value) => setField('from', value)}
-            className="min-[761px]:w-40"
+            className="min-[760px]:w-40"
           />
           <span className="text-subtle">~</span>
           <DatePicker
             label="기간 종료일"
             value={draft.to}
             onChange={(value) => setField('to', value)}
-            className="min-[761px]:w-40"
+            className="min-[760px]:w-40"
           />
         </div>
         <Select

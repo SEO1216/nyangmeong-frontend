@@ -58,7 +58,7 @@ export default function ImageViewer({ images, index, onChange, onClose }) {
               <span
                 role="status"
                 aria-label="이미지를 불러오는 중이에요"
-                className="pointer-events-auto size-60 animate-pulse rounded-[10px] bg-[#2b2b2b] max-[760px]:size-48"
+                className="pointer-events-auto size-60 animate-pulse rounded-[10px] bg-viewer max-[760px]:size-48"
               />
             )}
             <img
@@ -74,7 +74,7 @@ export default function ImageViewer({ images, index, onChange, onClose }) {
           <span
             role="img"
             aria-label={`${name} 이미지를 불러오지 못했어요`}
-            className="pointer-events-auto grid size-60 place-items-center rounded-[10px] bg-[#2b2b2b] text-[#8c9899] max-[760px]:size-48"
+            className="pointer-events-auto grid size-60 place-items-center rounded-[10px] bg-viewer text-placeholder max-[760px]:size-48"
           >
             <ImageIcon size={48} aria-hidden="true" />
           </span>

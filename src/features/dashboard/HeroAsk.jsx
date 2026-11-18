@@ -40,7 +40,7 @@ const cloneForMotion = (form, value) => {
 
 export default function HeroAsk({ petNm }) {
   // 480px 이하는 안내 문구가 잘리므로 짧은 문구를 쓴다
-  const isNarrow = useMediaQuery('(max-width: 480px)');
+  const isNarrow = useMediaQuery('(width < 760px)');
   const openAiWindow = useAiWindow();
   const formRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -151,14 +151,14 @@ export default function HeroAsk({ petNm }) {
         />
         <button
           type="submit"
-          className="inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-full bg-brand-50 px-4 text-sm font-semibold text-brand-600 hover:bg-brand-100 max-[700px]:px-3 max-[480px]:size-10 max-[480px]:px-0"
+          className="inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-full bg-brand-50 px-4 text-sm font-semibold text-brand-600 hover:bg-brand-100 max-[760px]:size-10 max-[760px]:px-0"
         >
           <ArrowUp
             size={20}
             aria-hidden="true"
-            className="min-[481px]:hidden"
+            className="min-[760px]:hidden"
           />
-          <span className="max-[480px]:sr-only">AI 매니저</span>
+          <span className="max-[760px]:sr-only">AI 매니저</span>
         </button>
       </form>
       {fileError && (

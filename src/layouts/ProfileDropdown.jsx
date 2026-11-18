@@ -19,7 +19,7 @@ const MENU_LINKS = [
 ];
 
 const itemClass =
-  'flex h-11 w-full items-center rounded-lg px-3 text-left text-base text-[#1a3234] hover:bg-[#f4f6f6]';
+  'flex h-11 w-full items-center rounded-lg px-3 text-left text-base text-ink hover:bg-surface-2';
 
 /** 열릴 때만 마운트: 열 때마다 회원 요약 요청 */
 function ProfileMenuPanel({ onClose, onLogout }) {
@@ -28,14 +28,14 @@ function ProfileMenuPanel({ onClose, onLogout }) {
   return (
     <div
       role="menu"
-      className="absolute right-0 top-[61px] z-40 w-60 rounded-[14px] border border-[#e2e7e7] bg-white p-2 shadow-lg"
+      className="absolute right-0 top-[61px] z-40 w-60 rounded-card border border-line bg-white p-2 shadow-depth-md"
     >
       {/** 요약 로딩 중 상자 크기 고정(min-h) */}
-      <div className="mb-1 min-h-[71px] border-b border-[#edf1f1] px-3 pb-2 pt-3.5">
-        <div className="flex h-[26px] items-center text-base font-bold leading-[26px] text-[#1a3234]">
+      <div className="mb-1 min-h-[71px] border-b border-line-soft px-3 pb-2 pt-3.5">
+        <div className="flex h-[26px] items-center text-base font-bold leading-[26px] text-ink">
           {summary ? summary.mbrNcnm : <Skeleton className="h-4 w-24" />}
         </div>
-        <div className="flex h-[23px] items-center text-sm leading-[23px] text-[#667374]">
+        <div className="flex h-[23px] items-center text-sm leading-[23px] text-subtle">
           {summary ? (
             summary.maskedAcntEml
           ) : (

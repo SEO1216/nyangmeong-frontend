@@ -47,11 +47,11 @@ const isSameLeadTimes = (a, b) =>
 
 function SettingRow({ title, description, children }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-[#edf1f1] px-5 py-4 last:border-b-0">
+    <div className="flex items-center justify-between gap-4 border-b border-line-soft px-5 py-4 last:border-b-0">
       <div>
-        <p className="text-base font-semibold text-[#1a3234]">{title}</p>
+        <p className="text-base font-semibold text-ink">{title}</p>
         {description && (
-          <p className="mt-0.5 text-sm text-[#566465]">{description}</p>
+          <p className="mt-0.5 text-sm text-muted">{description}</p>
         )}
       </div>
       {children}
@@ -136,11 +136,9 @@ export default function NotificationSettingsForm({ settings }) {
           />
         </SettingRow>
         <div className="px-5 py-4">
-          <p className="text-base font-semibold text-[#1a3234]">
+          <p className="text-base font-semibold text-ink">
             미리 알림 시점{' '}
-            <span className="text-xs font-normal text-[#566465]">
-              여러 개 선택
-            </span>
+            <span className="text-xs font-normal text-muted">여러 개 선택</span>
           </p>
           <div className="mt-3 flex gap-2">
             {BEFORE_DAYS.map(({ key, label }) => (
@@ -150,8 +148,8 @@ export default function NotificationSettingsForm({ settings }) {
                 aria-pressed={draft.leadTimes.includes(key)}
                 className={`h-9 rounded-full border px-4 text-sm ${
                   draft.leadTimes.includes(key)
-                    ? 'border-[#285a5c] bg-[#285a5c] text-white'
-                    : 'border-[#d5dcdc] bg-white text-[#3d4a4b]'
+                    ? 'border-brand-500 bg-brand-500 text-white'
+                    : 'border-input-line bg-white text-ink-2'
                 }`}
                 onClick={() => toggleLeadTime(key)}
               >
@@ -159,7 +157,7 @@ export default function NotificationSettingsForm({ settings }) {
               </button>
             ))}
           </div>
-          <p className="mt-3 flex items-center gap-2 rounded-lg bg-[#f4f6f6] px-4 py-3 text-sm text-[#566465]">
+          <p className="mt-3 flex items-center gap-2 rounded-lg bg-surface-2 px-4 py-3 text-sm text-muted">
             <Clock size={16} className="shrink-0" aria-hidden="true" />
             사전 알림은 매일 오전 9시에 발송돼요. 이후에 등록·변경한 오늘 알림은
             발송되지 않아요.
@@ -217,14 +215,14 @@ export default function NotificationSettingsForm({ settings }) {
         {needsLimit && (
           <p
             role="status"
-            className="border-b border-[#edf1f1] bg-[#fff6e5] px-5 py-3 text-sm text-[#7a5200]"
+            className="border-b border-line-soft bg-warn-soft px-5 py-3 text-sm text-warn"
           >
             월 한도를 아직 정하지 않았어요. 가계부에서 한도를 먼저 정해 주세요.
           </p>
         )}
         <Link
           to={PATHS.MYPAGE_EXPENSES}
-          className="flex items-center gap-1 px-5 py-4 text-sm font-semibold text-[#1a3234]"
+          className="flex items-center gap-1 px-5 py-4 text-sm font-semibold text-ink"
         >
           가계부로 이동
           <ChevronRight size={16} aria-hidden="true" />
@@ -234,7 +232,7 @@ export default function NotificationSettingsForm({ settings }) {
       <SettingsCard icon={Lock} title="항상 받는 알림">
         {ALWAYS_ON.map((name) => (
           <SettingRow key={name} title={name}>
-            <span className="rounded-full bg-[#eef1f1] px-2.5 py-1 text-xs text-[#566465]">
+            <span className="rounded-full bg-surface-3 px-2.5 py-1 text-xs text-muted">
               끌 수 없음
             </span>
           </SettingRow>
@@ -246,16 +244,16 @@ export default function NotificationSettingsForm({ settings }) {
           type="button"
           disabled={isPending}
           onClick={handleCancel}
-          className="h-10 rounded-lg border border-[#e2e7e7] bg-white px-8 text-sm font-semibold text-[#1a3234] disabled:cursor-not-allowed disabled:opacity-40"
+          className="h-10 rounded-lg border border-line bg-white px-8 text-sm font-semibold text-ink disabled:cursor-not-allowed disabled:opacity-40"
         >
           취소
         </button>
         <button
           type="submit"
           disabled={!isChanged || isPending}
-          className="h-10 rounded-lg bg-[#285a5c] px-8 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className="h-10 rounded-lg bg-brand-500 px-8 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
         >
-          저장
+          저장하기
         </button>
       </div>
     </form>

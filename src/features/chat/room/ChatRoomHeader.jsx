@@ -51,7 +51,7 @@ export default function ChatRoomHeader({ room, onBack, onLeaveAsk }) {
           className="grid size-11 place-items-center rounded-full text-ink-2 hover:bg-surface-3"
           onClick={onBack}
         >
-          <Icon name="chevron_left" className="text-[26px]" />
+          <Icon name="chevron_left" className="text-2xl" />
         </button>
       )}
       <div className="flex min-w-0 flex-1 items-center gap-2.5">

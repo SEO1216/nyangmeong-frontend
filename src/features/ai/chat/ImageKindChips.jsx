@@ -19,7 +19,7 @@ export default function ImageKindChips({ isDisabled, onSelect }) {
           key={kind}
           type="button"
           disabled={isDisabled}
-          className="h-9 rounded-full border border-[#e2e7e7] bg-white px-4 text-base text-[#3d4a4b] enabled:hover:bg-[#f4f6f6] disabled:cursor-not-allowed disabled:opacity-60"
+          className="h-9 rounded-full border border-line bg-white px-4 text-base text-ink-2 enabled:hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60"
           onClick={() => onSelect(kind)}
         >
           {label}

@@ -15,9 +15,9 @@ import {
 import { toFieldErrors } from '@/utils/fieldErrors';
 
 const INPUT_CLASS =
-  'block h-10 w-full rounded-[6px] border border-[#d3dae2] bg-white px-3 text-base leading-[1.4] text-[#1a3234] outline-none hover:border-[#b9c4c4] focus:border-[#285a5c] focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)] aria-invalid:border-danger';
+  'block h-10 w-full rounded-[6px] border border-input-line bg-white px-3 text-base leading-[1.4] text-ink outline-none hover:border-line-strong focus:border-brand-500 focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)] aria-invalid:border-danger';
 const TEXTAREA_CLASS =
-  'block min-h-[360px] w-full resize-y rounded-[6px] border border-[#d3dae2] bg-white px-3 py-2 text-base leading-6 text-[#1a3234] outline-none hover:border-[#b9c4c4] focus:border-[#285a5c] focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)] aria-invalid:border-danger';
+  'block min-h-[360px] w-full resize-y rounded-[6px] border border-input-line bg-white px-3 py-2 text-base leading-6 text-ink outline-none hover:border-line-strong focus:border-brand-500 focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)] aria-invalid:border-danger';
 
 const KIND_OPTIONS = [
   { value: '', label: '약관 종류' },
@@ -293,7 +293,7 @@ export default function TermsVersionForm({ initialKind, currentByKind }) {
           className={BTN_PRIMARY}
           disabled={!isFilled || create.isPending}
         >
-          등록
+          등록하기
         </button>
       </div>
       {isConfirmOpen && (
@@ -304,7 +304,7 @@ export default function TermsVersionForm({ initialKind, currentByKind }) {
               ? `이전 버전은 더 쓰지 않아요. 지금 쓰는 ${current.trmsVerId}는 사용 안 함으로 바뀌어요.`
               : '이전 버전은 더 쓰지 않아요.'
           }
-          confirmLabel="등록"
+          confirmLabel="등록하기"
           errorMessage={create.isError ? create.error.message : null}
           isPending={create.isPending}
           onConfirm={handleConfirm}

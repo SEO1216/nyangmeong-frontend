@@ -68,7 +68,7 @@ export default function LostReportTable({ reports, onSelect }) {
         </tbody>
       </table>
 
-      <ul className="min-[761px]:hidden">
+      <ul className="min-[760px]:hidden">
         {reports.map((report) => (
           <li
             key={report.lostTpofSn}

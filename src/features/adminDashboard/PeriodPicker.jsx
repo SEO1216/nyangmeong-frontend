@@ -55,7 +55,7 @@ export default function PeriodPicker({ period, onChange }) {
 
   return (
     // 넓은 폭: 기간 버튼 묶음은 늘 오른쪽 끝, 날짜 칸·오류 문구는 그 아래 오른쪽을 맞춘다
-    <div className="flex flex-col items-start gap-2 max-[760px]:w-full min-[761px]:items-end">
+    <div className="flex flex-col items-start gap-2 max-[760px]:w-full min-[760px]:items-end">
       <div
         role="group"
         aria-label="통계 기간"
@@ -93,7 +93,7 @@ export default function PeriodPicker({ period, onChange }) {
                 value={draft.fromYmd}
                 max={todayYmd}
                 onChange={(value) => setField('fromYmd', value)}
-                className="min-[761px]:w-40"
+                className="min-[760px]:w-40"
               />
               <span className="text-subtle">~</span>
               <DatePicker
@@ -101,7 +101,7 @@ export default function PeriodPicker({ period, onChange }) {
                 value={draft.toYmd}
                 max={todayYmd}
                 onChange={(value) => setField('toYmd', value)}
-                className="min-[761px]:w-40"
+                className="min-[760px]:w-40"
               />
             </div>
             <button

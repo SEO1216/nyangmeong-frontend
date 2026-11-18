@@ -10,7 +10,7 @@ import {
 } from './queries';
 
 const INPUT_CLASS =
-  'block h-10 w-full rounded-[6px] border border-[#d3dae2] bg-white px-3 text-base leading-[1.4] text-[#1a3234] outline-none hover:border-[#b9c4c4] focus:border-[#285a5c] focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)] aria-invalid:border-danger';
+  'block h-10 w-full rounded-[6px] border border-input-line bg-white px-3 text-base leading-[1.4] text-ink outline-none hover:border-line-strong focus:border-brand-500 focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)] aria-invalid:border-danger';
 
 const LABEL_CLASS = 'mb-1.5 block text-sm font-semibold text-ink-2';
 
@@ -259,7 +259,7 @@ export default function PointAdjustModal({ initialMember, onClose }) {
             className={BTN_PRIMARY}
             disabled={adjust.isPending || isBalanceShort}
           >
-            저장
+            저장하기
           </button>
         </>
       }
@@ -279,7 +279,7 @@ export default function PointAdjustModal({ initialMember, onClose }) {
         <div className="flex flex-wrap items-start gap-x-8 gap-y-4">
           <fieldset>
             <legend className={LABEL_CLASS}>구분</legend>
-            <div className="flex h-10 overflow-hidden rounded-[6px] border border-[#d3dae2]">
+            <div className="flex h-10 overflow-hidden rounded-[6px] border border-input-line">
               {DIRECTIONS.map(({ value, label }) => (
                 <button
                   key={value}

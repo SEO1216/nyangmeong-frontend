@@ -62,14 +62,14 @@ export default function InquiryFilter({ filter, onSearch }) {
             label="접수일 시작일"
             value={draft.bgngYmd}
             onChange={(value) => setField('bgngYmd', value)}
-            className="min-w-0 flex-1 min-[761px]:w-40"
+            className="min-w-0 flex-1 min-[760px]:w-40"
           />
           <span className="text-subtle">~</span>
           <DatePicker
             label="접수일 종료일"
             value={draft.endYmd}
             onChange={(value) => setField('endYmd', value)}
-            className="min-w-0 flex-1 min-[761px]:w-40"
+            className="min-w-0 flex-1 min-[760px]:w-40"
           />
         </div>
         <label className="inline-flex h-10 items-center gap-1.5 text-base text-ink">

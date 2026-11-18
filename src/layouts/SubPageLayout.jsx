@@ -20,7 +20,7 @@ export default function SubPageLayout({
   headAction,
   onLeave,
   sideBottom,
-  contentClassName = 'min-[1101px]:pt-6',
+  contentClassName = 'min-[1100px]:pt-6',
   children,
 }) {
   const { pathname } = useLocation();
@@ -30,7 +30,7 @@ export default function SubPageLayout({
 
   /** 760px 이하: 하단 여백은 UserLayout main이 바텀 네비 기준으로 맡아 0, 위 여백 0으로 헤더~경로 24px */
   return (
-    <div className="grid grid-cols-1 pt-2 pb-[126px] max-[760px]:pt-0 max-[760px]:pb-0 text-ink leading-[1.6] break-keep min-[1101px]:grid-cols-[210px_minmax(0,1fr)] min-[1101px]:gap-x-12">
+    <div className="grid grid-cols-1 pt-2 pb-[126px] max-[760px]:pt-0 max-[760px]:pb-0 text-ink leading-[1.6] break-keep min-[1100px]:grid-cols-[210px_minmax(0,1fr)] min-[1100px]:gap-x-12">
       <SubPageHead
         section={sectionMenu}
         activeItem={activeItem}
@@ -41,7 +41,7 @@ export default function SubPageLayout({
         hasSwitch={!title && !hasBack}
         onLeave={onLeave}
       />
-      <div className="min-[1101px]:col-start-1 min-[1101px]:row-span-2 min-[1101px]:row-start-2">
+      <div className="min-[1100px]:col-start-1 min-[1100px]:row-span-2 min-[1100px]:row-start-2">
         <SideMenu
           section={section}
           active={activeItem?.to}
@@ -51,7 +51,7 @@ export default function SubPageLayout({
         {sideBottom}
       </div>
       <div
-        className={`flex min-w-0 flex-col min-[1101px]:col-start-2 min-[1101px]:row-start-3 ${contentClassName}`}
+        className={`flex min-w-0 flex-col min-[1100px]:col-start-2 min-[1100px]:row-start-3 ${contentClassName}`}
       >
         {hasBack && <BackLink to={backTo ?? activeItem.to} onLeave={onLeave} />}
         {children}

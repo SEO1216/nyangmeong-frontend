@@ -12,10 +12,10 @@ function SettingSkeleton() {
   return (
     <div className="space-y-5" aria-busy="true">
       <SkeletonCard className="h-[383px]" />
-      <SkeletonCard className="h-[503px] max-[761px]:hidden" />
-      <SkeletonCard className="h-[143px] max-[761px]:hidden" />
-      <SkeletonCard className="h-[203px] max-[761px]:hidden" />
-      <SkeletonCard className="h-[143px] max-[761px]:hidden" />
+      <SkeletonCard className="h-[503px] max-[760px]:hidden" />
+      <SkeletonCard className="h-[143px] max-[760px]:hidden" />
+      <SkeletonCard className="h-[203px] max-[760px]:hidden" />
+      <SkeletonCard className="h-[143px] max-[760px]:hidden" />
     </div>
   );
 }

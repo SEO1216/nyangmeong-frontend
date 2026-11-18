@@ -104,7 +104,7 @@ export default function StatsSection({ stats, fromYmd, toYmd, picker }) {
         </h2>
         {picker}
       </div>
-      <div className="grid gap-3 min-[1101px]:grid-cols-2">
+      <div className="grid gap-3 min-[1100px]:grid-cols-2">
         <DashboardPanel title="일별 가입·탈퇴">
           {hasDaily ? (
             <div className="space-y-4">

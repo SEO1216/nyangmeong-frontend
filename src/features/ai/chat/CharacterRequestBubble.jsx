@@ -2,11 +2,11 @@ import { callName } from '@/utils/josa';
 import PetChoiceChips from './PetChoiceChips';
 
 const bubbleClass =
-  'max-w-[592px] rounded-[4px_18px_18px_18px] border border-[#e2e7e7] bg-white px-4 py-3 text-[15px] leading-relaxed text-[#1a3234]';
+  'max-w-[592px] rounded-[4px_18px_18px_18px] border border-line bg-white px-4 py-3 text-[15px] leading-relaxed text-ink';
 const buttonClass =
-  'h-8 rounded-md px-3 text-base font-semibold disabled:cursor-not-allowed disabled:border-0 disabled:bg-[#ebf0f0] disabled:text-[#b9c4c4]';
-const primaryClass = `${buttonClass} bg-[#285a5c] text-white enabled:hover:bg-[#1e4a4c]`;
-const secondaryClass = `${buttonClass} border border-[#e2e7e7] bg-white text-[#1a3234] enabled:hover:bg-[#f4f6f6]`;
+  'h-8 rounded-md px-3 text-base font-semibold disabled:cursor-not-allowed disabled:border-0 disabled:bg-surface-3 disabled:text-line-strong';
+const primaryClass = `${buttonClass} bg-brand-500 text-white enabled:hover:bg-brand-600`;
+const secondaryClass = `${buttonClass} border border-line bg-white text-ink enabled:hover:bg-surface-2`;
 
 /**
  * [대화창 캐릭터 만들기 말풍선 내용]
