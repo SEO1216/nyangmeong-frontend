@@ -27,7 +27,7 @@ export default function CareList({
 
         <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-1">
           <p aria-live="polite" className="text-sm text-muted">
-            총 <b className="font-bold text-ink">{totalElements}</b>건
+            전체 <b className="font-bold text-ink">{totalElements}</b> 건
           </p>
         </div>
 

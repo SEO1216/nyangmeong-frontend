@@ -4,6 +4,9 @@ import DatePicker from '@/components/DatePicker';
 import AmountInput from '@/components/AmountInput';
 import AutoTextarea from '@/components/AutoTextarea';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import Checkbox from '@/components/Checkbox';
+import FieldError, { Required } from '@/components/FieldError';
+import { INPUT, LABEL } from '@/components/formStyles';
 import ImageAttach from '@/components/ImageAttach';
 import Select from '@/components/Select';
 import { PATHS } from '@/routes/paths';
@@ -22,13 +25,7 @@ import { useBreeds } from '../missingQueries';
 import BreedCombobox from '../missing/BreedCombobox';
 import PlaceSearchModal from '../missing/PlaceSearchModal';
 import CareAreaMap from './CareAreaMap';
-import { Counter, FieldError, Required, Section } from './CareFormParts';
-import {
-  borderOf,
-  INPUT_CLASS,
-  LABEL_CLASS,
-  TEXTAREA_BASE,
-} from './careFormStyles';
+import { Counter, Section } from './CareFormParts';
 import CareWriteGuide from './CareWriteGuide';
 import { CARE_TIMES } from './careUtils';
 
@@ -126,18 +123,15 @@ function BreedField({ petSeCd, label, value, error, onChange }) {
   );
 }
 
-function CheckOption({ checked, onChange, children, name }) {
+function CheckOption({ checked, onChange, children }) {
   return (
-    <label className="flex min-h-8 cursor-pointer items-center gap-2 font-medium text-ink">
-      <input
-        type="checkbox"
-        name={name}
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-        className="size-4 accent-brand-500"
-      />
+    <Checkbox
+      checked={checked}
+      onChange={(event) => onChange(event.target.checked)}
+      className="min-h-8 font-medium text-ink"
+    >
       {children}
-    </label>
+    </Checkbox>
   );
 }
 
@@ -346,14 +340,14 @@ export default function CareForm({
     <div className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-8 max-[1101px]:grid-cols-1 max-[1101px]:gap-6">
       <section
         aria-labelledby="care-form-title"
-        className="rounded-[14px] border border-line bg-white px-9 pt-8 pb-7 shadow-sm max-[760px]:px-5 max-[760px]:pt-[22px] max-[760px]:pb-5"
+        className="rounded-[14px] border border-line bg-white px-9 pt-8 pb-7 max-[760px]:px-5 max-[760px]:pt-6 max-[760px]:pb-5"
       >
         <h2 id="care-form-title" className="sr-only">
           {isEdit ? '돌봄 요청 수정' : '돌봄 요청 작성'}
         </h2>
         {isEdit && (
           <p className="mt-4 mb-1 flex items-start gap-2 rounded-lg bg-brand-50 px-4 py-3 text-sm leading-[1.6] text-brand-600">
-            <Info size={18} aria-hidden="true" className="mt-0.5 shrink-0" />
+            <Info size={18} aria-hidden="true" className="mt-1 shrink-0" />
             <span>
               등록한 정보가 채워져 있어요. 바꿀 항목만 고친 뒤 저장해 주세요.
               이미 나눈 채팅 기록은 글을 고쳐도 바뀌지 않아요.
@@ -366,29 +360,27 @@ export default function CareForm({
             <fieldset
               tabIndex={-1}
               data-invalid={Boolean(errors.species)}
-              className="m-0 flex min-w-0 flex-col gap-1.5 border-0 p-0"
+              className="m-0 flex min-w-0 flex-col gap-2 border-0 p-0"
             >
-              <legend className={`${LABEL_CLASS} mb-1.5`}>
+              <legend className={`${LABEL} mb-2`}>
                 종류
                 <Required />
               </legend>
               <div className="flex gap-7">
                 <CheckOption
-                  name="dog"
                   checked={values.dog}
                   onChange={(dog) => set({ dog }, ['species'])}
                 >
                   강아지
                 </CheckOption>
                 <CheckOption
-                  name="cat"
                   checked={values.cat}
                   onChange={(cat) => set({ cat }, ['species'])}
                 >
                   고양이
                 </CheckOption>
               </div>
-              <FieldError message={errors.species} />
+              <FieldError>{errors.species}</FieldError>
             </fieldset>
 
             {values.dog && (
@@ -403,9 +395,9 @@ export default function CareForm({
                 <fieldset
                   tabIndex={-1}
                   data-invalid={Boolean(errors.dogSize)}
-                  className="m-0 flex min-w-0 flex-col gap-1.5 border-0 p-0"
+                  className="m-0 flex min-w-0 flex-col gap-2 border-0 p-0"
                 >
-                  <legend className={`${LABEL_CLASS} mb-1.5`}>
+                  <legend className={`${LABEL} mb-2`}>
                     강아지 몸무게
                     <Required />
                   </legend>
@@ -424,7 +416,7 @@ export default function CareForm({
                       </RadioOption>
                     ))}
                   </div>
-                  <FieldError message={errors.dogSize} />
+                  <FieldError>{errors.dogSize}</FieldError>
                 </fieldset>
               </>
             )}
@@ -443,9 +435,9 @@ export default function CareForm({
             <fieldset
               tabIndex={-1}
               data-invalid={Boolean(errors.shapes)}
-              className="m-0 flex min-w-0 flex-col gap-1.5 border-0 p-0"
+              className="m-0 flex min-w-0 flex-col gap-2 border-0 p-0"
             >
-              <legend className={`${LABEL_CLASS} mb-1.5`}>
+              <legend className={`${LABEL} mb-2`}>
                 돌봄 형태
                 <Required />
               </legend>
@@ -453,7 +445,6 @@ export default function CareForm({
                 {PRTC_SHP_OPTIONS.map((option) => (
                   <CheckOption
                     key={option.code}
-                    name="prtcShp"
                     checked={values.shapes.includes(option.code)}
                     onChange={(checked) => toggleShape(option.code, checked)}
                   >
@@ -461,7 +452,7 @@ export default function CareForm({
                   </CheckOption>
                 ))}
               </div>
-              <FieldError message={errors.shapes} />
+              <FieldError>{errors.shapes}</FieldError>
             </fieldset>
 
             <fieldset
@@ -469,12 +460,12 @@ export default function CareForm({
               data-invalid={Boolean(errors.when)}
               className="m-0 flex min-w-0 flex-col gap-2 border-0 p-0"
             >
-              <legend className={`${LABEL_CLASS} mb-1.5`}>
+              <legend className={`${LABEL} mb-2`}>
                 돌봄 기간 · 시간
                 <Required />
               </legend>
               <div className="grid grid-cols-2 gap-8 max-[760px]:grid-cols-1">
-                <div className="flex min-w-0 flex-col gap-1.5">
+                <div className="flex min-w-0 flex-col gap-2">
                   <span className="text-sm font-semibold text-ink-2">기간</span>
                   <div className="flex items-center gap-2">
                     <DatePicker
@@ -504,7 +495,7 @@ export default function CareForm({
                     />
                   </div>
                 </div>
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-2">
                   <span className="text-sm font-semibold text-ink-2">
                     시간{' '}
                     <span className="font-medium text-muted">30분 단위</span>
@@ -532,7 +523,6 @@ export default function CareForm({
               </div>
               <div className="flex flex-wrap items-center gap-x-4">
                 <CheckOption
-                  name="nego"
                   checked={values.nego}
                   onChange={(nego) => set({ nego }, ['when'])}
                 >
@@ -542,15 +532,15 @@ export default function CareForm({
                   체크하면 기간 · 시간을 비워 두고 등록할 수 있어요
                 </p>
               </div>
-              <FieldError message={errors.when} />
+              <FieldError>{errors.when}</FieldError>
             </fieldset>
 
             <fieldset
               tabIndex={-1}
               data-invalid={Boolean(amountError)}
-              className="m-0 flex min-w-0 flex-col gap-1.5 border-0 p-0"
+              className="m-0 flex min-w-0 flex-col gap-2 border-0 p-0"
             >
-              <legend className={`${LABEL_CLASS} mb-1.5`}>
+              <legend className={`${LABEL} mb-2`}>
                 비용
                 <Required />
               </legend>
@@ -593,36 +583,38 @@ export default function CareForm({
                   {minWage.lowstHrwgAmt.toLocaleString()}원 이상으로 적어 주세요
                 </p>
               )}
-              <FieldError message={amountError} />
+              <FieldError>{amountError}</FieldError>
             </fieldset>
           </Section>
 
           <Section number={3} title="게시글">
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between gap-2">
-                <label htmlFor="care-title-input" className={LABEL_CLASS}>
-                  제목
-                  <Required />
-                </label>
-                <Counter value={values.title} max={TITLE_MAX} />
+            <div className="flex flex-col gap-2">
+              <label htmlFor="care-title-input" className={LABEL}>
+                제목
+                <Required />
+              </label>
+              <div className="relative">
+                <input
+                  id="care-title-input"
+                  type="text"
+                  maxLength={TITLE_MAX}
+                  value={values.title}
+                  placeholder="예: 보리(몰티즈) 저녁 산책 도와주실 분 구해요"
+                  aria-invalid={Boolean(errors.title)}
+                  onChange={(event) =>
+                    set({ title: event.target.value }, ['title'])
+                  }
+                  className={INPUT}
+                />
+                <span className="absolute top-full right-0 mt-1">
+                  <Counter value={values.title} max={TITLE_MAX} />
+                </span>
               </div>
-              <input
-                id="care-title-input"
-                type="text"
-                maxLength={TITLE_MAX}
-                value={values.title}
-                placeholder="예: 보리(몰티즈) 저녁 산책 도와주실 분 구해요"
-                aria-invalid={Boolean(errors.title)}
-                onChange={(event) =>
-                  set({ title: event.target.value }, ['title'])
-                }
-                className={`${INPUT_CLASS} ${borderOf(errors.title)}`}
-              />
-              <FieldError message={errors.title} />
+              <FieldError>{errors.title}</FieldError>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="care-body" className={LABEL_CLASS}>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="care-body" className={LABEL}>
                 상세 설명
                 <Required />
               </label>
@@ -638,13 +630,13 @@ export default function CareForm({
                   onChange={(event) =>
                     set({ body: event.target.value }, ['body'])
                   }
-                  className={`${TEXTAREA_BASE} max-h-[600px] min-h-[200px] resize-y py-3 leading-[1.7] ${borderOf(errors.body)}`}
+                  className={`${INPUT} max-h-[600px] min-h-[200px] resize-y py-3 leading-[1.7]`}
                 />
-                <span className="absolute top-full right-0 mt-1.5">
+                <span className="absolute top-full right-0 mt-1">
                   <Counter value={values.body} max={BODY_MAX} />
                 </span>
               </div>
-              <FieldError message={errors.body} />
+              <FieldError>{errors.body}</FieldError>
             </div>
 
             <ImageAttach
@@ -655,7 +647,7 @@ export default function CareForm({
 
           <Section number={4} title="장소">
             <div className="flex flex-col gap-2">
-              <span id="care-place-label" className={LABEL_CLASS}>
+              <span id="care-place-label" className={LABEL}>
                 돌봄 장소
                 <Required />
               </span>
@@ -666,7 +658,7 @@ export default function CareForm({
                   tabIndex={-1}
                   aria-labelledby="care-place-label"
                   onClick={() => setIsPlaceOpen(true)}
-                  className={`flex min-h-10 min-w-0 flex-1 cursor-pointer items-center gap-1.5 rounded-md border bg-surface-2 px-3 text-left hover:border-line-strong ${placeError ? 'border-danger' : 'border-input-line'} ${values.place ? 'text-ink' : 'text-muted'}`}
+                  className={`flex min-h-10 min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md border bg-surface-2 px-3 text-left hover:border-line-strong ${placeError ? 'border-danger' : 'border-input-line'} ${values.place ? 'text-ink' : 'text-muted'}`}
                 >
                   <MapPin
                     size={16}
@@ -697,26 +689,26 @@ export default function CareForm({
                 개인정보 보호를 위해 게시글에는 동네까지만 보여요. 상세 주소는
                 채팅의 주소 공유로 전해 주세요.
               </p>
-              <FieldError message={placeError} />
+              <FieldError>{placeError}</FieldError>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="flex min-h-8 cursor-pointer items-start gap-2.5">
-                <input
-                  type="checkbox"
+            <div className="flex flex-col gap-2">
+              {/* 빠진 항목으로 이동할 때 이 줄을 찾도록 data-invalid를 바깥 칸에 둔다(공용 Checkbox는 aria-invalid를 받지 않는다) */}
+              <div tabIndex={-1} data-invalid={Boolean(errors.agree)}>
+                <Checkbox
                   checked={values.agree}
-                  aria-invalid={Boolean(errors.agree)}
                   onChange={(event) =>
                     set({ agree: event.target.checked }, ['agree'])
                   }
-                  className="mt-1 size-4 shrink-0 accent-brand-500"
-                />
-                <span>
-                  <b>(필수)</b> 우리동네 펫돌봄 이용수칙에 따라 반려동물 정보,
-                  대략적인 장소, 비용이 게시글에 공개되는 것에 동의해요
-                </span>
-              </label>
-              <FieldError message={errors.agree} />
+                  className="min-h-8"
+                >
+                  <span>
+                    <b>(필수)</b> 우리동네 펫돌봄 이용수칙에 따라 반려동물 정보,
+                    대략적인 장소, 비용이 게시글에 공개되는 것에 동의해요
+                  </span>
+                </Checkbox>
+              </div>
+              <FieldError>{errors.agree}</FieldError>
             </div>
           </Section>
         </form>
@@ -741,7 +733,7 @@ export default function CareForm({
             disabled={isPending}
             className={`${BTN_PRIMARY} min-w-[120px] max-[760px]:h-12 max-[760px]:min-w-0 max-[760px]:flex-1`}
           >
-            {isEdit ? '저장' : '등록'}
+            {isEdit ? '저장하기' : '등록하기'}
           </button>
         </div>
       </section>

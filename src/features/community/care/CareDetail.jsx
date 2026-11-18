@@ -42,12 +42,12 @@ import {
 } from './careUtils';
 
 const ARTICLE_CLASS =
-  'rounded-[14px] border border-line bg-white px-9 pt-8 pb-7 max-[760px]:px-5 max-[760px]:pt-[22px] max-[760px]:pb-5';
+  'rounded-[14px] border border-line bg-white px-9 pt-8 pb-7 max-[760px]:px-5 max-[760px]:pt-6 max-[760px]:pb-5';
 
 function InfoRow({ icon, label, children }) {
   return (
-    <div className="col-span-2 grid grid-cols-subgrid border-b border-line py-3.5">
-      <dt className="flex h-6 min-w-[120px] items-center gap-1.5 font-semibold whitespace-nowrap text-ink-2 max-[760px]:min-w-0">
+    <div className="col-span-2 grid grid-cols-subgrid border-b border-line py-4">
+      <dt className="flex h-6 min-w-[120px] items-center gap-2 font-semibold whitespace-nowrap text-ink-2 max-[760px]:min-w-0">
         {icon}
         {label}
       </dt>
@@ -85,7 +85,7 @@ export default function CareDetail({ post }) {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-8 max-[1101px]:grid-cols-1 max-[1101px]:gap-10">
       <article className={ARTICLE_CLASS} aria-labelledby="care-title">
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-2">
           {post.owner && (
             <Badge tone="mine" bordered>
               내 글
@@ -100,7 +100,7 @@ export default function CareDetail({ post }) {
         </div>
         <h2
           id="care-title"
-          className="mt-3 text-2xl leading-[1.35] font-bold tracking-[-0.24px] break-words text-ink max-[760px]:text-xl"
+          className="mt-3 text-2xl leading-[1.35] font-bold tracking-[-0.01em] break-words text-ink max-[760px]:text-lg"
         >
           {post.pstTtl}
         </h2>
@@ -168,7 +168,7 @@ export default function CareDetail({ post }) {
                 icon={<HeartHandshake {...iconProps} />}
                 label="돌봄 형태"
               >
-                <span className="flex flex-wrap gap-1.5">
+                <span className="flex flex-wrap gap-2">
                   {getShapeNames(post).map((name) => (
                     <Badge key={name} tone="outline">
                       {name}
@@ -177,7 +177,7 @@ export default function CareDetail({ post }) {
                 </span>
               </InfoRow>
               <InfoRow icon={<CalendarDays {...iconProps} />} label="돌봄 일정">
-                <span className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <span>{schedule.date}</span>
                   {schedule.time && (
                     <span className="inline-flex items-center gap-1">
@@ -198,7 +198,7 @@ export default function CareDetail({ post }) {
               </InfoRow>
               <InfoRow icon={<MapPin {...iconProps} />} label="장소">
                 전북 {post.rlsRgnNm} 인근
-                <span className="mt-0.5 block text-sm text-muted">
+                <span className="mt-1 block text-sm text-muted">
                   개인정보 보호를 위해 대략적인 위치만 보여요
                 </span>
               </InfoRow>
@@ -230,7 +230,7 @@ export default function CareDetail({ post }) {
               type="button"
               aria-label="신고"
               onClick={() => setModal('report')}
-              className="ml-auto inline-flex min-h-9 cursor-pointer items-center gap-1.5 px-1 text-sm font-medium text-subtle hover:text-ink max-[760px]:min-w-9 max-[760px]:justify-center"
+              className="ml-auto inline-flex min-h-9 cursor-pointer items-center gap-2 px-1 text-sm font-medium text-subtle hover:text-ink max-[760px]:min-w-9 max-[760px]:justify-center"
             >
               <Flag
                 size={20}
@@ -256,6 +256,7 @@ export default function CareDetail({ post }) {
         <ConfirmModal
           title="돌봄 요청을 삭제할까요? 삭제한 글은 되돌릴 수 없어요. 이미 나눈 채팅 기록은 그대로 남아요"
           confirmLabel="삭제하기"
+          isDanger
           isPending={remove.isPending}
           errorMessage={remove.isError && '게시글을 삭제하지 못했어요'}
           onConfirm={() =>
