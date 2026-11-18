@@ -97,7 +97,7 @@ function AdminDrawer({ onClose }) {
   return (
     <div id="admin-drawer" className="fixed inset-0 z-50">
       <div
-        className="absolute inset-0 bg-[#0f1723]/45"
+        className="absolute inset-0 bg-dim/45"
         aria-hidden="true"
         onClick={onClose}
       />

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 export default function GnbDropdown({ items, onNavigate }) {
   return (
     <ul
-      className="absolute left-0 top-[58px] z-40 w-[180px] rounded-[10px] border border-[#e2e7e7] bg-white p-1.5 shadow-sm"
+      className="absolute left-0 top-[58px] z-40 w-[180px] rounded-card border border-line bg-white p-1.5 shadow-depth-md"
       role="menu"
       data-menu="gnb"
     >
@@ -14,7 +14,7 @@ export default function GnbDropdown({ items, onNavigate }) {
             to={item.to}
             role="menuitem"
             onClick={onNavigate}
-            className="block rounded-md px-3 py-[9px] text-base leading-6 text-[#3d4a4b] hover:bg-[#ebf0f0] focus-visible:bg-[#ebf0f0]"
+            className="block rounded-md px-3 py-[9px] text-base leading-6 text-ink-2 hover:bg-surface-3 focus-visible:bg-surface-3"
           >
             {item.label}
           </Link>

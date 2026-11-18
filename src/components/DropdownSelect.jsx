@@ -60,15 +60,15 @@ export default function DropdownSelect({
     const borderClass = invalid
       ? `border-danger ${isOpen ? 'shadow-[0_0_0_3px_rgba(180,71,58,0.18)]' : ''}`
       : isOpen
-        ? 'border-[#285a5c] shadow-[0_0_0_3px_rgba(182,218,172,0.5)]'
-        : 'border-[#d3dae2] hover:enabled:border-[#b9c4c4]';
+        ? 'border-brand-500 shadow-[0_0_0_3px_rgba(182,218,172,0.5)]'
+        : 'border-input-line hover:enabled:border-line-strong';
     buttonClass = `flex w-full items-center rounded-md border bg-white pr-9 pl-3 disabled:bg-surface-2 ${isXs ? 'h-[34px] text-sm' : isSmall ? 'h-9 text-sm' : 'h-10 text-base max-[760px]:h-11'} ${borderClass}`;
   }
 
   let labelColor = '';
   if (!isPill && !isText) {
     if (disabled) labelColor = 'text-subtle';
-    else labelColor = selected ? 'text-[#1a3234]' : 'text-[#8c9899]';
+    else labelColor = selected ? 'text-ink' : 'text-placeholder';
   }
 
   const open = () => {
@@ -164,7 +164,7 @@ export default function DropdownSelect({
         <ChevronDown
           size={isText ? 16 : isSmall ? 18 : 20}
           aria-hidden="true"
-          className={`pointer-events-none absolute top-1/2 -translate-y-1/2 ${isPill ? 'right-4 text-white' : isText ? 'right-0' : 'right-2.5 text-[#566465]'}`}
+          className={`pointer-events-none absolute top-1/2 -translate-y-1/2 ${isPill ? 'right-4 text-white' : isText ? 'right-0' : 'right-2.5 text-muted'}`}
         />
       </button>
       {isOpen && (
@@ -176,7 +176,7 @@ export default function DropdownSelect({
           // <label> 안에 둘 때 목록 클릭이 라벨을 거쳐 버튼을 다시 누르지 않게(목록이 다시 열림)
           onClick={(event) => event.preventDefault()}
           style={{ maxHeight: listMaxHeight }}
-          className={`absolute left-0 z-30 ${isText ? 'w-max min-w-28' : 'right-0'} ${isPill ? 'min-w-max' : ''} overflow-y-auto rounded-lg border border-[#e2e7e7] bg-white p-1 shadow-[0_12px_32px_-8px_rgba(15,23,35,0.18),0_2px_6px_rgba(15,23,35,0.06)] ${isUp ? 'bottom-[calc(100%+6px)]' : 'top-[calc(100%+6px)]'}`}
+          className={`absolute left-0 z-30 ${isText ? 'w-max min-w-28' : 'right-0'} ${isPill ? 'min-w-max' : ''} overflow-y-auto rounded-lg border border-line bg-white p-1 shadow-[0_12px_32px_-8px_rgba(15,23,35,0.18),0_2px_6px_rgba(15,23,35,0.06)] ${isUp ? 'bottom-[calc(100%+6px)]' : 'top-[calc(100%+6px)]'}`}
         >
           {options.map((option, index) => {
             const isSelected = index === selectedIndex;
@@ -189,14 +189,14 @@ export default function DropdownSelect({
                 aria-disabled={option.disabled || undefined}
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => pick(index)}
-                className={`flex h-9 cursor-pointer items-center justify-between gap-2 rounded px-2.5 pt-px ${isSmall ? 'text-sm' : 'text-base'} ${isSelected ? 'bg-[#e9f2f2] font-semibold text-[#1e4a4c]' : option.disabled ? 'cursor-not-allowed text-[#8c9899]' : 'text-[#1a3234]'} ${index === activeIndex && !isSelected ? 'bg-[#f4f6f6]' : ''} ${isSelected || option.disabled ? '' : 'hover:bg-[#f4f6f6]'}`}
+                className={`flex h-9 cursor-pointer items-center justify-between gap-2 rounded px-2.5 pt-px ${isSmall ? 'text-sm' : 'text-base'} ${isSelected ? 'bg-brand-50 font-semibold text-brand-600' : option.disabled ? 'cursor-not-allowed text-placeholder' : 'text-ink'} ${index === activeIndex && !isSelected ? 'bg-surface-2' : ''} ${isSelected || option.disabled ? '' : 'hover:bg-surface-2'}`}
               >
                 {option.label}
                 {isSelected && (
                   <Check
                     size={18}
                     aria-hidden="true"
-                    className="shrink-0 text-[#285a5c]"
+                    className="shrink-0 text-brand-500"
                   />
                 )}
               </li>

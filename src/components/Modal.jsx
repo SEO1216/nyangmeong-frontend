@@ -182,7 +182,7 @@ export default function Modal({
       <dialog
         ref={dialogRef}
         {...dialogProps}
-        className="m-0 size-full max-h-none max-w-none overflow-y-auto overscroll-contain bg-transparent p-0 backdrop:bg-[rgba(15,23,35,0.45)]"
+        className="m-0 size-full max-h-none max-w-none overflow-y-auto overscroll-contain bg-transparent p-0 backdrop:bg-dim/45"
         onCancel={handleCancel}
         onKeyDown={handleKeyDown}
         onMouseDown={handleMouseDown}
@@ -200,7 +200,7 @@ export default function Modal({
     <dialog
       ref={dialogRef}
       {...dialogProps}
-      className={`m-auto bg-white p-0 shadow-depth-lg backdrop:bg-[rgba(15,23,35,0.45)] ${
+      className={`m-auto bg-white p-0 shadow-depth-lg backdrop:bg-dim/45 ${
         isLarge
           ? `${
               isAutoHeight

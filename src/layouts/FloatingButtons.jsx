@@ -86,7 +86,7 @@ export default function FloatingButtons({ hasBottomNav = false }) {
       </div>
       <button
         type="button"
-        className="h-[52px] w-[52px] rounded-2xl border border-[#e2e7e7] bg-white text-base font-bold text-[#3d4a4b] max-[760px]:hidden"
+        className="h-[52px] w-[52px] rounded-2xl border border-line bg-white text-base font-bold text-ink-2 max-[760px]:hidden"
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       >
         TOP
@@ -122,11 +122,5 @@ function PetBody({ pet }) {
 function DefaultBody({ petSeCd, className = '' }) {
   const image =
     petSeCd === PET_SE.CAT ? defaultCatCharacter : defaultDogCharacter;
-  return (
-    <img
-      src={image}
-      alt=""
-      className={`${BODY_CLASS} ${className}`}
-    />
-  );
+  return <img src={image} alt="" className={`${BODY_CLASS} ${className}`} />;
 }

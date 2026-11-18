@@ -1320,6 +1320,22 @@
 - 완료 조건: 칩 취두부에서 "까미 …" 새 대화 → 방 태그·칩·카드 모두 까미 / 이름 없음·둘 이상이면 칩 태그 / 열린 방은 그대로
 - 완료 조건 결과: 검증 `통과`(2026-11-09, 1회차), 사람 확인 2026-11-09
 
+## SCR-COM-002 UI 통일 1-A · 공용 기반(토큰·components·layouts·404) — 끝
+- 기능: (사람 지시 2026-11-18 "UI 체크리스트_결정반영" CSV 86행, 명세 FN 추가 없음) 결정된 기준 중 공용 파일(`index.html`·`assets/index.css`·`components/`·`layouts/`·`routes/`)에 들어가는 것
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 U1~U12 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): U1~U12 검증 2회차 통과(1회차 실패: 새 토큰 `--color-page`가 `--text-page`와 겹침 → `--color-page-bg`), 사람 확인. 기획과 달라진 것: 404는 `pages/notFound/NotFoundPage.jsx`, `MYPAGE_CAREGIVERS`는 지우지 않고 AI `SCR-MYP-004`만 `/mypage/pets`로, 서랍·채팅 창 닫기는 760px 이하 44px
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 1-B · LJS 담당 화면 적용(메인·AI·채팅·설정·관리자) — 대기
+- 기능: 1-A 공용 기반을 LJS 담당 폴더(`features/dashboard`·`ai`·`chat`·`notification`·`admin*`, `pages/` 같은 화면)에 적용. 체크리스트 2(20·22·26·30·32px → 단계 안 값)·5·11·29·42(분기점 390·760·1100)·92·93·95. 랜딩 항목(2의 17px·3·4·32 PAWEVER·36 랜딩 푸터·39 H1)은 빼고 랜딩 교체(SCR-MAN-002) 때(사람 2026-11-18)
+- 완료 조건: LJS 폴더에 단계 밖 글자 크기·직접 쓴 hex·761/1101/1281 분기점이 남지 않는다 / 설정·채팅·AI 창 H1이 기준값
+
+## SCR-COM-002 UI 통일 2 · 다른 담당 폴더 적용 — 대기
+- 기능: 같은 기준을 `features/health`(JAJ), `pet`·`point`·`expense`(SJM), `community`·`inquiry`·`notice`·`faq`·`news`(KSJ), `member`·`place`(YAY)에 적용. 도메인 하나씩 나눠 진행하고 PR 본문·팀 채널로 담당자에게 알린다. 체크리스트 6·12·15·16·18·26·27·31·37·56·58·62·66·68·69·71~74·76·79·80·83·84·94·96·98
+- 버그 후보(담당자에게 먼저 알림): 78 펫이야기 상세 내 글에도 신고 버튼(`community/PostDetail.jsx`, KSJ), 82 `ZONES` 순서 반대(`health/CareChipPicker.jsx`·`CareItemFields.jsx`, JAJ)
+- 이번엔 안 함: 기준 미정 18행(55·57·61·63·64·65·67·70·77·81·85·88~91), 메모 "변경없음"·"잠시 패스"·"정하지 않음" 행(8·17·19·21·25·30·35·75·86·97)
+
 ## SCR-COM-002 공통 ⋮ 메뉴 공통화 — 대기
 - 기능: (사람 지시 2026-11-08 "리팩토링 때 한번에", 명세 FN 추가 없음) A1 `components/KebabMenu.jsx` variant 추가, A2 `CareItemMenu`·A3 `ExpenseMenu`를 KebabMenu 껍데기로, A4 `MainShortcuts`의 `ShortcutMenu`를 KebabMenu로
 - 기다리는 것: 없음

@@ -2,9 +2,16 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-004 알림 드롭다운 · 모두 읽음 서버 연결 (2026-11-17, 검증 1회차 통과, 사람 확인). 코드 변경 없음, 실제 `POST /api/notifications/read-all`로 성공 흐름·0건 비활성 확인
+끝남: SCR-COM-002 UI 통일 1-A · 공용 기반 (2026-11-18, 검증 2회차 통과, 사람 확인). 기준은 "UI 체크리스트_결정반영" CSV(86행). 토큰 정리·대비 4.5:1(`--color-alert` #d4411c·`--color-subtle` #5f6b6c·`--color-cat-hosp-fg` #496f97)·`ConfirmModal` → `Modal isConfirm`·헤더 드롭다운·서랍·닫기 32px·404 화면·공용 부품 5개(FieldError·Checkbox·UnderlineTabs·NoticeBox·ProgressBar)·칩 규격(`CHIP`·`FILTER_CHIP`)
 
 ## 다음에 할 것
+
+### SCR-COM-002 UI 통일 다음 단계(사람 결정 2026-11-18)
+
+- 다음 /start: `UI 통일 1-B · LJS 담당 화면 적용`(마일스톤 대기). 그다음 `UI 통일 2 · 다른 담당 폴더 적용`(도메인 하나씩, 담당자 알림). 결정: 글자 단계는 체크리스트 V1(12·13·14·15·16·18·24·28px, 짝수 규칙보다 우선), 분기점 390·760·1100, 칩은 항목 선택 `CHIP`(1번 채움)·필터 `FILTER_CHIP`(2번 연한 바탕+연한 테두리, 건강기록·케어미션), 랜딩 항목(17px·굵기 800·색·H1·PAWEVER·푸터 대비)은 랜딩 교체(SCR-MAN-002) 때
+- 팀 알림(PR 본문 + 팀 채널): ① `ConfirmModal`이 공용 `Modal isConfirm` 모양(440px·[취소][확인] 꽉 참)으로 바뀌어 커뮤니티·건강기록·가계부·고객센터·회원 확인 창이 파일 수정 없이 같이 바뀜 ② 토큰 값 변경: `--color-subtle` #5f6b6c, `--color-cat-hosp-fg` #496f97, `--color-tone-gray-bg` #f4f6f6, 알림 배지 #d4411c ③ 새 공용 부품·칩 규격을 2단계에서 쓴다 ④ SJM: `routes/paths.js` `MYPAGE_CAREGIVERS`(화면 없음, `docs/routes.md` MYP-004)는 그대로 두고 AI 바로가기만 `/mypage/pets`로 보냄. 상수·문서·AI 서버 매핑 정리 여부는 SJM이 정함
+- 버그 후보 알림: KSJ `community/PostDetail.jsx` 내 글에도 신고 버튼(체크리스트 78), JAJ `health/CareChipPicker.jsx`·`CareItemFields.jsx` `ZONES` 순서 반대(82)
+- 참고(검증 보고, 판정 밖): `components/`의 `rgba(...)` 직접 값(그림자·포커스 링·딤) 몇 곳은 이번 hex 대상 밖이라 남음
 
 ### SCR-COM-004 모두 읽음 남은 문서 일
 
