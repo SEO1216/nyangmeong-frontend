@@ -2,12 +2,15 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 UI 통일 2-H 펫돌봄 값·부품 정리 (2026-11-18, 검증 1회차 통과, 사람 확인)
+끝남: SCR-COM-002 UI 통일 2-I 실종센터 값·부품 정리 (2026-11-18, 검증 1회차 통과, 사람 확인)
 
 ## 다음에 할 것
 
 ### SCR-COM-002 UI 통일 다음 단계(사람 결정 2026-11-18)
 
+- 2-I 팀 알림(PR 본문 + 팀 채널, KSJ): ① 실종 상태 배지가 공용 `Badge`(실종 `rose`·찾았어요 `green` + 테두리, 기간 만료 `gray`) ② 카드·필터 상자·글쓰기 카드·오른쪽 요약 상자·품종 목록 팝업 그림자 삭제, 찾았어요 상자 테두리 `#cfe3d6` → `border-tone-green-fg/12`, 4px 간격(안내 아이콘 `mt-0.5` → `mt-1`) ③ 상세 제목 24/모바일 18px, 찾았어요 상자 제목 18px ④ 글쓰기 "등록하기"·"저장하기", 글 삭제 확인 `isDanger` ⑤ 글쓰기 폼 `formStyles`·`FieldError`·`Required`·공용 `Checkbox`, 제목·본문 글자 수 칸 아래 오른쪽 ⑥ "총 N건" → "전체 N 건", 목록 조회 실패 `LoadError`([다시 시도]) ⑦ 펫돌봄도 같이 바뀜: `care/`가 가져다 쓰는 `missing/BreedCombobox`(공용 `LABEL`·`INPUT`·`FieldError`, 오류 문구 아이콘)·`PlaceSearchModal`·`MissingMap`(지도 위 칩 테두리 `ring`)·`CheckList`(간격)
+- 2-I 참고(검증 보고, 판정 밖): 기간 만료 배지는 화면 못 봄(만료 글은 작성자에게만, 코드로만 확인). 로컬 계정에 내 실종 글이 없어 삭제 확인은 Playwright route로 `owner`를 바꿔 확인, 수정 "저장하기"는 코드로만. 라벨 `leading-[1.4]`는 공용 `LABEL` 값이라 남음
+- 다음 2 조각 후보(2-I 뒤): YAY `member`·`place`(회원 `profileStyles` → `components/formStyles`)
 - 2-H 팀 알림(PR 본문 + 팀 채널, KSJ): ① 펫돌봄 상태 배지가 공용 `Badge`(모집중 `ok` 점+테두리, 매칭완료 `blue`+테두리, 거래완료 `gray` 바탕 `bg-surface-2`), 내 채팅 배지도 `Badge` ② 카드·필터 상자·글쓰기 카드·오른쪽 요약 상자 그림자 삭제, 4px 간격 ③ 상세 제목 24/모바일 18px ④ 글쓰기 "등록하기"·"저장하기", 글 삭제 확인 `isDanger` ⑤ 글쓰기 폼 `formStyles`·`FieldError`·`Required`·공용 `Checkbox`, `careFormStyles.js` 삭제, `CareFormParts`에는 `Counter`·`Section`만, 제목 글자 수 칸 아래 오른쪽 ⑥ "총 N건" → "전체 N 건", 목록 조회 실패 `LoadError`([다시 시도])
 - 2-H 버그 후보(KSJ, 판정 밖): `CareForm` 빠진 항목으로 이동이 `setErrors` 반영 전에 `[aria-invalid]`를 찾아 첫 [등록하기] 뒤 포커스가 제출 버튼에 남음(2-H 전에도 같음). 품종 오류 문구(`missing/BreedCombobox`)는 아이콘 없음 → 2-I에서 볼 것
 - 2-H 참고: 빈 결과 [필터 초기화] 버튼은 자체 36px 클래스 그대로(기획 밖). 동의 체크박스는 공용 `Checkbox`가 `aria-invalid`를 받지 않아 바깥 칸 `data-invalid`로 둠

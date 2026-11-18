@@ -1388,8 +1388,15 @@
 - 결과(2026-11-18): H1~H8 검증 1회차 통과, 사람 확인. 기획과 달라진 것: H7 페이지 이동 간격은 이미 48/32px라 그대로, 동의 체크박스 `aria-invalid` 대신 바깥 칸 `data-invalid`
 - 연결 남음: 없음
 
+## SCR-COM-002 UI 통일 2-I · 실종센터(KSJ) 값·부품 정리 — 끝
+- 기능: (2 마일스톤의 아홉 번째 조각, 2026-11-18, 기준 `docs/ui-checklist.csv`) `features/community/missing`과 `pages/community/Missing*Page`에 체크리스트 2·6·9·11·12·13·16·18·27·29·56·62·71·72·74·79·80·93·98 적용
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 I1~I8 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): I1~I8 검증 1회차 통과, 사람 확인. 기획과 달라진 것: 페이지 이동 간격은 이미 48/32px라 그대로, 찾았어요 테두리는 초록 토큰이 없어 `border-tone-green-fg/12`, `missing/` 공용 부품 4개 변경이 펫돌봄 화면에도 반영
+- 연결 남음: 없음
+
 ## SCR-COM-002 UI 통일 2 · 다른 담당 폴더 적용 — 대기
-- 남은 것(2026-11-18): 건강기록은 2-A·2-B, 가계부는 2-C, 반려동물(`pet`)은 2-D, 포인트(`point`)는 2-E, 고객센터·펫뉴스(`inquiry`·`notice`·`faq`·`news`)는 2-F, 펫이야기·커뮤니티 공용 부품은 2-G, 펫돌봄(`care/`)은 2-H로 끝. 남은 도메인 KSJ `community`의 실종센터(`missing/`), YAY `member`·`place`. 아래 다른 도메인(기준 `docs/ui-checklist.csv`), 회원 `profileStyles` → `components/formStyles`, 삭제 확인 창 `isDanger`
+- 남은 것(2026-11-18): 건강기록은 2-A·2-B, 가계부는 2-C, 반려동물(`pet`)은 2-D, 포인트(`point`)는 2-E, 고객센터·펫뉴스(`inquiry`·`notice`·`faq`·`news`)는 2-F, 펫이야기·커뮤니티 공용 부품은 2-G, 펫돌봄(`care/`)은 2-H, 실종센터(`missing/`)는 2-I로 끝. 남은 도메인 YAY `member`·`place`. 아래 다른 도메인(기준 `docs/ui-checklist.csv`), 회원 `profileStyles` → `components/formStyles`, 삭제 확인 창 `isDanger`
 - 기능: 같은 기준을 `features/health`(JAJ), `pet`·`point`·`expense`(SJM), `community`·`inquiry`·`notice`·`faq`·`news`(KSJ), `member`·`place`(YAY)에 적용. 도메인 하나씩 나눠 진행하고 PR 본문·팀 채널로 담당자에게 알린다. 체크리스트 6·12·15·16·18·26·27·31·37·56·58·62·66·68·69·71~74·76·79·80·83·84·94·96·98
 - 버그 후보(담당자에게 먼저 알림): 78 펫이야기 상세 내 글에도 신고 버튼(`community/PostDetail.jsx`, KSJ), 82 `ZONES` 순서 반대(`health/CareChipPicker.jsx`·`CareItemFields.jsx`, JAJ)
 - 이번엔 안 함: 기준 미정 18행(55·57·61·63·64·65·67·70·77·81·85·88~91), 메모 "변경없음"·"잠시 패스"·"정하지 않음" 행(8·17·19·21·25·30·35·75·86·97)

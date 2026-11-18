@@ -110,16 +110,16 @@ export default function PlaceSearchModal({
           <button
             type="button"
             onClick={() => setSelected(null)}
-            className="-ml-1 inline-flex min-h-8 items-center gap-0.5 text-sm font-medium text-muted hover:text-ink"
+            className="-ml-1 inline-flex min-h-8 items-center gap-1 text-sm font-medium text-muted hover:text-ink"
           >
             <ChevronLeft size={16} aria-hidden="true" />
             다시 검색
           </button>
-          <p className="mt-2 flex items-start gap-1.5">
+          <p className="mt-2 flex items-start gap-2">
             <MapPin
               size={18}
               aria-hidden="true"
-              className="mt-0.5 shrink-0 text-brand-500"
+              className="mt-1 shrink-0 text-brand-500"
             />
             <span className="min-w-0">
               <b className="block font-bold text-ink">{selected.wtnsPlcNm}</b>
@@ -206,19 +206,19 @@ export default function PlaceSearchModal({
                   <button
                     type="button"
                     onClick={() => handlePick(row)}
-                    className="flex w-full items-start gap-2 px-3 py-2.5 text-left hover:bg-surface-2"
+                    className="flex w-full items-start gap-2 px-3 py-3 text-left hover:bg-surface-2"
                   >
                     {row.isAddress ? (
                       <MapIcon
                         size={16}
                         aria-hidden="true"
-                        className="mt-0.5 shrink-0 text-subtle"
+                        className="mt-1 shrink-0 text-subtle"
                       />
                     ) : (
                       <MapPin
                         size={16}
                         aria-hidden="true"
-                        className="mt-0.5 shrink-0 text-brand-500"
+                        className="mt-1 shrink-0 text-brand-500"
                       />
                     )}
                     <span className="min-w-0">
