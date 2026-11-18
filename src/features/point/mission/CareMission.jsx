@@ -4,10 +4,17 @@ import {
   CircleCheckBig,
   Info,
   PawPrint,
-  RotateCw,
 } from 'lucide-react';
 import { useState } from 'react';
-import { BTN_PRIMARY } from '@/components/buttonStyles';
+import Badge from '@/components/Badge';
+import {
+  BTN_PRIMARY,
+  FILTER_CHIP,
+  FILTER_CHIP_ON,
+} from '@/components/buttonStyles';
+import EmptyResult from '@/components/EmptyResult';
+import LoadError from '@/components/LoadError';
+import ProgressBar from '@/components/ProgressBar';
 import SkeletonCard from '@/components/SkeletonCard';
 import { parseYmd, toYmd } from '@/utils/formatDate';
 import { useCareMissions } from '../queries';
@@ -25,56 +32,37 @@ const shiftYmd = (ymd, delta) => {
   return toYmd(date);
 };
 
-const TAB =
-  'inline-flex h-10 items-center gap-2 rounded-full border px-4 font-semibold';
-
 /** 주양육 동물이 없을 때 케어미션 영역을 대신하는 등록 유도 */
 function MissionEmpty({ onRegister }) {
   return (
-    <div className="flex flex-col items-center px-6 py-16 text-center">
-      <span className="grid size-14 place-items-center rounded-full bg-brand-50 text-brand-500">
-        <PawPrint className="size-7" aria-hidden="true" />
-      </span>
-      <p className="mt-4 text-lg font-bold">
-        반려동물을 등록하면 케어미션을 받을 수 있어요
-      </p>
-      <p className="mt-1 text-muted">
-        케어미션은 주양육자로 등록한 반려동물에게만 주어져요
-      </p>
-      <button
-        type="button"
-        onClick={onRegister}
-        className={`${BTN_PRIMARY} mt-4`}
+    <div className="p-6">
+      <EmptyResult
+        icon={<PawPrint className="size-7" aria-hidden="true" />}
+        title="반려동물을 등록하면 케어미션을 받을 수 있어요"
+        description="케어미션은 주양육자로 등록한 반려동물에게만 주어져요"
+        isCompact
       >
-        반려동물 등록하기
-      </button>
+        <button type="button" onClick={onRegister} className={BTN_PRIMARY}>
+          반려동물 등록하기
+        </button>
+      </EmptyResult>
     </div>
   );
 }
 
 /** 그 동물의 미션이 그날 0건일 때 */
 function MissionNone() {
-  return (
-    <p className="py-12 text-center text-subtle">
-      이 날은 출제된 미션이 없어요
-    </p>
-  );
+  return <EmptyResult title="이 날은 출제된 미션이 없어요" isCompact />;
 }
 
 /** 그 동물의 미션을 못 받았을 때 */
 function MissionError({ onRetry }) {
   return (
-    <div className="flex flex-col items-center py-12 text-center">
-      <p className="font-bold">미션을 불러오지 못했어요</p>
-      <button
-        type="button"
-        onClick={onRetry}
-        className={`${BTN_PRIMARY} mt-4 gap-1.5`}
-      >
-        <RotateCw className="size-4" aria-hidden="true" />
-        다시 시도
-      </button>
-    </div>
+    <LoadError
+      message="미션을 불러오지 못했어요"
+      onRetry={onRetry}
+      className="py-12"
+    />
   );
 }
 
@@ -85,30 +73,22 @@ function MissionPanel({ pet, isToday }) {
 
   return (
     <div>
-      <div className="rounded-box bg-surface-2 px-5 pt-[22px] pb-4">
+      <div className="rounded-box bg-surface-2 px-5 pt-6 pb-4">
         <div className="flex items-baseline justify-between">
-          <b className="text-[32px] leading-[1.2]">
+          <b className="text-[28px] leading-[1.2]">
             {doneList.length}
             <small className="text-base font-semibold text-muted">
               {' '}
               / {pet.missions.length} 완료
             </small>
           </b>
-          <span className="text-xl font-bold text-brand-600">{percent}%</span>
+          <span className="text-lg font-bold text-brand-600">{percent}%</span>
         </div>
-        <div
-          role="progressbar"
-          aria-label={`${pet.petNm} 진행률`}
-          aria-valuenow={percent}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          className="mt-3 h-2.5 overflow-hidden rounded-full bg-surface-3"
-        >
-          <div
-            className="h-full bg-brand-500"
-            style={{ width: `${percent}%` }}
-          />
-        </div>
+        <ProgressBar
+          value={percent}
+          label={`${pet.petNm} 진행률`}
+          className="mt-3"
+        />
         <p className="mt-3 flex flex-wrap gap-2 text-sm text-muted">
           <span>
             {isToday ? '오늘 획득' : '이날 획득'}{' '}
@@ -138,11 +118,12 @@ function MissionPanel({ pet, isToday }) {
               >
                 +{formatPoint(mission.scorPnt)}
               </span>
-              <span
-                className={`inline-flex h-6 min-w-16 items-center justify-center rounded-full px-2.5 text-badge font-semibold ${isDone ? 'bg-tone-green-bg text-tone-green-fg' : 'bg-tone-gray-bg text-tone-gray-fg'}`}
+              <Badge
+                tone={isDone ? 'green' : 'gray'}
+                className="min-w-16 justify-center"
               >
                 {isDone ? '완료' : '미완료'}
-              </span>
+              </Badge>
             </li>
           );
         })}
@@ -189,7 +170,7 @@ export default function CareMission({
   if (!ownPets || !data)
     return (
       <div aria-busy="true">
-        <SkeletonCard className="h-[927px] lg:h-[839px]" />
+        <SkeletonCard className="h-[927px] min-[1100px]:h-[839px]" />
       </div>
     );
 
@@ -223,11 +204,7 @@ export default function CareMission({
               <ChevronLeft className="size-5" />
             </button>
             <b>{ymd}</b>
-            {isToday && (
-              <span className="inline-flex h-6 items-center rounded-full bg-brand-50 px-2.5 text-badge font-semibold text-brand-600">
-                오늘
-              </span>
-            )}
+            {isToday && <Badge tone="brand">오늘</Badge>}
             <button
               type="button"
               onClick={() => setYmd(shiftYmd(ymd, 1))}
@@ -243,7 +220,7 @@ export default function CareMission({
       {!hasOwnPets ? (
         <MissionEmpty onRegister={onRegister} />
       ) : (
-        <div className="px-[22px] pt-5 pb-[22px]">
+        <div className="px-6 pt-5 pb-6">
           <div
             role="group"
             aria-label="반려동물 선택"
@@ -261,11 +238,11 @@ export default function CareMission({
                   type="button"
                   aria-pressed={isSelected}
                   onClick={() => setSelectedPetSn(item.petSn)}
-                  className={`${TAB} ${isSelected ? 'border-brand-500 bg-brand-500 text-white' : 'border-line bg-white hover:border-line-strong'}`}
+                  className={isSelected ? FILTER_CHIP_ON : FILTER_CHIP}
                 >
                   {item.petNm}
                   <span
-                    className={`text-sm ${isSelected ? 'text-brand-100' : 'text-subtle'}`}
+                    className={isSelected ? 'text-brand-500' : 'text-subtle'}
                   >
                     {item.missions ? `${doneCount}/${missions.length}` : '!'}
                   </span>
