@@ -402,9 +402,15 @@ const stoolBody = ({ stools }) => {
   return {
     tile: { value: latestName, sub: latestTime },
     period: `최근 ${stools.length}건`,
+    /** 기록 시간은 기간 줄 오른쪽 끝(「기록하기 ›」 아래 줄), 값 옆에는 두지 않음 */
+    periodAside: (
+      <p className="shrink-0 text-sm whitespace-nowrap text-subtle">
+        {latestTime}
+      </p>
+    ),
     body: (
       <>
-        <BigValue value={latestName} unit={latestTime} />
+        <BigValue value={latestName} />
         <ul
           aria-label="배변 상태별 횟수"
           className="mt-auto grid grid-cols-5 gap-2 pt-4 text-center"
