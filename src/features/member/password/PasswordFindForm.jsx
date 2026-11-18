@@ -3,7 +3,8 @@ import AuthCard from '../shared/AuthCard';
 import AuthField from '../shared/AuthField';
 import AuthHeading from '../shared/AuthHeading';
 import AuthNotice from '../shared/AuthNotice';
-import { OUTLINE_BTN, PRIMARY_BTN, TEXT_LINK } from '../shared/authStyles';
+import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import { TEXT_LINK } from '../shared/authStyles';
 import { resendLabel } from '../shared/emailCert';
 import { SNS_NAME } from '../shared/snsCodes';
 import { PASSWORD_MESSAGES as MSG } from './passwordMessages';
@@ -49,9 +50,9 @@ export default function PasswordFindForm({
         <button
           type="button"
           onClick={onGoLogin}
-          className={`${PRIMARY_BTN} mt-8`}
+          className={`${BTN_PRIMARY} w-full mt-8`}
         >
-          로그인 화면으로
+          로그인으로
         </button>
       </AuthCard>
     );
@@ -108,7 +109,7 @@ export default function PasswordFindForm({
             <button
               type="button"
               onClick={() => onRecover(form.email)}
-              className={OUTLINE_BTN}
+              className={`${BTN_SECONDARY} w-full`}
             >
               재가입 복구 절차
             </button>
@@ -120,8 +121,8 @@ export default function PasswordFindForm({
               disabled={form.isPending || form.resendSeconds > 0}
               className={
                 form.isCodeLocked
-                  ? `${PRIMARY_BTN} flex-1`
-                  : `${OUTLINE_BTN} basis-[120px]`
+                  ? `${BTN_PRIMARY} w-full flex-1`
+                  : `${BTN_SECONDARY} w-full basis-[120px]`
               }
             >
               {resendLabel(form.resendSeconds)}
@@ -130,7 +131,7 @@ export default function PasswordFindForm({
               <button
                 type="submit"
                 disabled={form.isPending}
-                className={`${PRIMARY_BTN} flex-1`}
+                className={`${BTN_PRIMARY} w-full flex-1`}
               >
                 인증번호 확인
               </button>
@@ -170,7 +171,11 @@ export default function PasswordFindForm({
           error={form.errors.email}
           hasGuide={target === 'email'}
         />
-        <button type="submit" disabled={form.isPending} className={PRIMARY_BTN}>
+        <button
+          type="submit"
+          disabled={form.isPending}
+          className={`${BTN_PRIMARY} w-full`}
+        >
           인증번호 보내기
         </button>
       </form>

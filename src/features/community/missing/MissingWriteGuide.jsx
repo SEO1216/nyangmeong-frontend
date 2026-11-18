@@ -24,7 +24,7 @@ export default function MissingWriteGuide() {
       <section aria-labelledby="missing-guide-title">
         <h2
           id="missing-guide-title"
-          className="pb-2 text-lg leading-[1.4] font-bold text-ink"
+          className="pb-2 text-lg font-bold text-ink"
         >
           이렇게 쓰면 찾을 확률이 높아져요
         </h2>
@@ -32,7 +32,7 @@ export default function MissingWriteGuide() {
           {ITEMS.map(([title, description]) => (
             <li
               key={title}
-              className="flex flex-col gap-1 border-t border-line py-3.5 first:border-t-0 first:pt-1.5"
+              className="flex flex-col gap-1 border-t border-line py-4 first:border-t-0 first:pt-2"
             >
               <b className="font-semibold text-ink">{title}</b>
               <p className="text-sm leading-[1.6] text-muted">{description}</p>

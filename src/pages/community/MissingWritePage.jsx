@@ -65,7 +65,7 @@ export default function MissingWritePage() {
             </button>
           }
         >
-          <div className="mt-2 flex flex-col gap-1.5 text-muted">
+          <div className="mt-2 flex flex-col gap-2 text-muted">
             <p>
               아이를 찾으면 게시글에서{' '}
               <b className="text-ink">&apos;찾았어요&apos;</b>를 눌러 주세요.

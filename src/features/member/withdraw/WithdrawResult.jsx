@@ -1,6 +1,6 @@
 import AiErrorGuide from '@/components/AiErrorGuide';
+import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import AuthNotice from '../shared/AuthNotice';
-import { OUTLINE_BTN, PRIMARY_BTN } from '../shared/authStyles';
 import { WITHDRAW_MESSAGES as MSG } from './withdrawMessages';
 
 /**
@@ -25,21 +25,29 @@ export default function WithdrawResult({
       <div className="-mt-4 mb-6">
         <AiErrorGuide message={isUnknown ? MSG.checking : MSG.failedGuide} />
       </div>
-      <div className="flex gap-2 max-md:flex-col-reverse">
-        <button type="button" onClick={onClose} className={OUTLINE_BTN}>
-          안내 닫기
+      <div className="flex gap-2 max-[760px]:flex-col-reverse">
+        <button
+          type="button"
+          onClick={onClose}
+          className={`${BTN_SECONDARY} min-[760px]:flex-1`}
+        >
+          닫기
         </button>
         {isUnknown ? (
           <button
             type="button"
             onClick={onCheck}
             disabled={isChecking}
-            className={PRIMARY_BTN}
+            className={`${BTN_PRIMARY} min-[760px]:flex-1`}
           >
             {isChecking ? '확인하는 중…' : '결과 확인'}
           </button>
         ) : (
-          <button type="button" onClick={onRetry} className={PRIMARY_BTN}>
+          <button
+            type="button"
+            onClick={onRetry}
+            className={`${BTN_PRIMARY} min-[760px]:flex-1`}
+          >
             다시 시도
           </button>
         )}

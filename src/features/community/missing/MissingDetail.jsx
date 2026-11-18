@@ -60,14 +60,14 @@ import {
 } from './missingUtils';
 
 const ARTICLE_CLASS =
-  'rounded-[14px] border border-line bg-white px-9 pt-8 pb-7 max-[760px]:px-5 max-[760px]:pt-[22px] max-[760px]:pb-5';
+  'rounded-[14px] border border-line bg-white px-9 pt-8 pb-7 max-[760px]:px-5 max-[760px]:pt-6 max-[760px]:pb-5';
 const NOTE_CLASS =
   'mt-5 flex items-start gap-2 rounded-lg px-4 py-3 text-sm leading-[1.6]';
 
 function InfoRow({ icon, label, children }) {
   return (
-    <div className="col-span-2 grid grid-cols-subgrid border-b border-line py-3.5">
-      <dt className="flex h-6 min-w-[120px] items-center gap-1.5 font-semibold whitespace-nowrap text-ink-2 max-[760px]:min-w-0">
+    <div className="col-span-2 grid grid-cols-subgrid border-b border-line py-4">
+      <dt className="flex h-6 min-w-[120px] items-center gap-2 font-semibold whitespace-nowrap text-ink-2 max-[760px]:min-w-0">
         {icon}
         {label}
       </dt>
@@ -81,7 +81,7 @@ function InfoRow({ icon, label, children }) {
 function PostHead({ post, children, actions }) {
   return (
     <>
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-2">
         {post.owner && (
           <Badge tone="mine" bordered>
             내 글
@@ -94,7 +94,7 @@ function PostHead({ post, children, actions }) {
       </div>
       <h2
         id="missing-title"
-        className="mt-3 text-2xl leading-[1.35] font-bold tracking-[-0.24px] break-words text-ink max-[760px]:text-xl"
+        className="mt-3 text-2xl leading-[1.35] font-bold tracking-[-0.01em] break-words text-ink max-[760px]:text-lg"
       >
         {post.pstTtl}
       </h2>
@@ -130,14 +130,14 @@ function FoundPublicView({ post, listTo }) {
         </PostHead>
         <div
           role="status"
-          className="mt-6 flex flex-col items-center gap-2 rounded-[14px] border border-[#cfe3d6] bg-tone-green-bg px-6 py-9 text-center"
+          className="mt-6 flex flex-col items-center gap-2 rounded-[14px] border border-tone-green-fg/12 bg-tone-green-bg px-6 py-9 text-center"
         >
           <PartyPopper
             size={48}
             aria-hidden="true"
             className="text-tone-green-fg"
           />
-          <h3 className="text-xl font-bold text-ink">
+          <h3 className="text-lg font-bold text-ink">
             {post.petNm ? `${post.petNm}가 ` : ''}무사히 가족의 품으로
             돌아갔어요
           </h3>
@@ -149,7 +149,7 @@ function FoundPublicView({ post, listTo }) {
           <LockKeyhole
             size={18}
             aria-hidden="true"
-            className="mt-0.5 shrink-0 text-subtle"
+            className="mt-1 shrink-0 text-subtle"
           />
           <span>
             찾았어요로 바뀐 글은 보호자의 개인정보 보호를 위해 본문 · 사진 ·
@@ -176,7 +176,7 @@ function FoundPublicView({ post, listTo }) {
                   to={generatePath(PATHS.COMMUNITY_MISSING_DETAIL, {
                     lostTpofSn: item.lostTpofSn,
                   })}
-                  className="group flex min-h-[52px] items-center gap-2.5"
+                  className="group flex min-h-[52px] items-center gap-2"
                 >
                   <MissingStatusBadge post={item} className="shrink-0" />
                   <span className="min-w-0 flex-1 truncate font-medium text-ink group-hover:text-brand-600">
@@ -285,7 +285,7 @@ export default function MissingDetail({ post }) {
             <p
               className={`${NOTE_CLASS} border border-warn-line bg-warn-soft text-warn`}
             >
-              <Clock size={18} aria-hidden="true" className="mt-0.5 shrink-0" />
+              <Clock size={18} aria-hidden="true" className="mt-1 shrink-0" />
               <span>
                 게시 종료까지 <b>{remainDays}일</b> 남았어요. 아직 찾고 계시면
                 오른쪽에서 <b>30일 더 게시</b>할 수 있어요.
@@ -294,7 +294,7 @@ export default function MissingDetail({ post }) {
           )}
           {isMine && found && (
             <p
-              className={`${NOTE_CLASS} border border-[#cfe3d6] bg-tone-green-bg text-tone-green-fg`}
+              className={`${NOTE_CLASS} border border-tone-green-fg/12 bg-tone-green-bg text-tone-green-fg`}
             >
               <span>
                 &apos;찾았어요&apos;로 바뀌었어요. 이제 다른 사용자에게는 본문 ·
@@ -389,7 +389,7 @@ export default function MissingDetail({ post }) {
                   label="목격 장소"
                 >
                   {post.wtnsPlcNm}
-                  <span className="mt-0.5 block text-sm text-muted">
+                  <span className="mt-1 block text-sm text-muted">
                     {post.rgnNm}
                   </span>
                 </InfoRow>
@@ -427,7 +427,7 @@ export default function MissingDetail({ post }) {
                 type="button"
                 aria-label="신고"
                 onClick={() => setModal('report')}
-                className="ml-auto inline-flex min-h-9 cursor-pointer items-center gap-1.5 px-1 text-sm font-medium text-subtle hover:text-ink max-[760px]:min-w-9 max-[760px]:justify-center"
+                className="ml-auto inline-flex min-h-9 cursor-pointer items-center gap-2 px-1 text-sm font-medium text-subtle hover:text-ink max-[760px]:min-w-9 max-[760px]:justify-center"
               >
                 <Flag
                   size={20}
@@ -466,6 +466,7 @@ export default function MissingDetail({ post }) {
         <ConfirmModal
           title="실종 게시글을 삭제할까요? 삭제한 글과 제보 댓글은 되돌릴 수 없어요. 찾으셨다면 삭제 대신 '찾았어요'를 눌러 주세요"
           confirmLabel="삭제하기"
+          isDanger
           isPending={remove.isPending}
           errorMessage={remove.isError && '게시글을 삭제하지 못했어요'}
           onConfirm={() =>

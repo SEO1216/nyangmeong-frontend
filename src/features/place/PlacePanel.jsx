@@ -1,12 +1,15 @@
 import { MapPinOff } from 'lucide-react';
 import DropdownSelect from '@/components/DropdownSelect';
+import EmptyResult from '@/components/EmptyResult';
+import LoadError from '@/components/LoadError';
+import Skeleton from '@/components/Skeleton';
 import PlaceListItem from './PlaceListItem';
 import PlaceSearchForm from './PlaceSearchForm';
 import { SORT_OPTIONS } from './placeData';
 import { PLACE_LIST_ID } from './placeFormat';
 
 const groupTitle =
-  'flex items-baseline gap-1.5 px-4 pt-4 text-sm font-semibold text-ink-2 md:px-5';
+  'flex items-baseline gap-2 px-4 pt-4 text-sm font-semibold text-ink-2 min-[760px]:px-5';
 
 export default function PlacePanel({
   search,
@@ -31,30 +34,29 @@ export default function PlacePanel({
       id={PLACE_LIST_ID}
       aria-label="장소 목록"
       style={{ '--sheet-y': `${sheet.sheetY}px` }}
-      className={`relative z-[2] flex min-h-0 min-w-0 flex-col overflow-hidden border-r border-line bg-white max-md:absolute max-md:inset-x-0 max-md:bottom-0 max-md:z-[6] max-md:h-[calc(100%-56px)] max-md:translate-y-[calc(100%-var(--sheet-y))] max-md:rounded-t-[20px] max-md:border-0 max-md:shadow-[0_-6px_24px_rgba(26,50,52,0.14)] ${
+      className={`relative z-[2] flex min-h-0 min-w-0 flex-col overflow-hidden border-r border-line bg-white max-[760px]:absolute max-[760px]:inset-x-0 max-[760px]:bottom-0 max-[760px]:z-[6] max-[760px]:h-[calc(100%-56px)] max-[760px]:translate-y-[calc(100%-var(--sheet-y))] max-[760px]:rounded-t-[20px] max-[760px]:border-0 max-[760px]:shadow-[0_-6px_24px_rgba(26,50,52,0.14)] ${
         sheet.isDragging
           ? ''
-          : 'max-md:transition-transform max-md:duration-300 max-md:ease-[cubic-bezier(.2,.8,.2,1)] motion-reduce:transition-none'
-      } ${isCollapsed ? 'md:invisible' : ''}`}
+          : 'max-[760px]:transition-transform max-[760px]:duration-300 max-[760px]:ease-[cubic-bezier(.2,.8,.2,1)] motion-reduce:transition-none'
+      } ${isCollapsed ? 'min-[760px]:invisible' : ''}`}
     >
       <button
         type="button"
         aria-label="목록 크기 바꾸기"
         onPointerDown={(event) => sheet.startDrag(event, true)}
         onClick={sheet.handleHandleClick}
-        className="flex w-full cursor-grab touch-none flex-col items-center gap-1.5 pb-1.5 pt-2.5 before:h-1 before:w-10 before:rounded-sm before:bg-line-strong before:content-[''] md:hidden"
+        className="flex w-full cursor-grab touch-none flex-col items-center gap-2 pb-2 pt-3 before:h-1 before:w-10 before:rounded-sm before:bg-line-strong before:content-[''] min-[760px]:hidden"
       >
         <span className="text-sm text-subtle">
           {sheet.isFull ? '아래로 내려 지도 보기' : '위로 올려 목록 보기'}
         </span>
       </button>
 
-      <div className="hidden flex-col gap-3 px-5 pb-4 pt-6 md:flex">
+      <div className="hidden flex-col gap-3 px-5 pb-4 pt-6 min-[760px]:flex">
         <h1 className="text-2xl font-bold leading-[1.3] tracking-[-0.02em] text-ink">
           반려동물 플레이스
         </h1>
         <PlaceSearchForm
-          id="place-q"
           q={search.q}
           category={search.category}
           onSearch={onSearch}
@@ -62,10 +64,10 @@ export default function PlacePanel({
         />
       </div>
 
-      <div className="flex min-h-12 items-center justify-between gap-3 border-y border-line bg-surface-2 px-5 max-md:border-t-0 max-md:bg-white max-md:px-4 md:min-h-[52px]">
+      <div className="flex min-h-12 items-center justify-between gap-3 border-y border-line bg-surface-2 px-5 max-[760px]:border-t-0 max-[760px]:bg-white max-[760px]:px-4 min-[760px]:min-h-[52px]">
         <p
           onPointerDown={(event) => sheet.startDrag(event, false)}
-          className="min-w-0 flex-1 touch-none truncate text-sm text-muted max-md:cursor-grab"
+          className="min-w-0 flex-1 touch-none truncate text-sm text-muted max-[760px]:cursor-grab"
         >
           <b className="font-semibold text-ink">{regionText}</b> · 결과{' '}
           {totalCount}곳
@@ -123,32 +125,31 @@ export default function PlacePanel({
             )}
           </h2>
           {query.isPending ? (
-            <p className="px-6 py-12 text-center text-muted">
-              검색 결과를 불러오는 중이에요
-            </p>
+            <ul aria-label="검색 결과를 불러오는 중">
+              {[0, 1, 2].map((index) => (
+                <li
+                  key={index}
+                  className="border-b border-line-soft px-4 py-4 min-[760px]:px-5"
+                >
+                  <Skeleton className="h-6 w-1/2" />
+                  <Skeleton lines={2} className="mt-3" />
+                </li>
+              ))}
+            </ul>
           ) : query.isError ? (
-            <div className="flex flex-col items-center gap-2.5 px-6 py-12 text-center text-muted">
-              <p className="text-lg font-bold text-ink">
-                검색 결과를 불러오지 못했어요
-              </p>
-              <p>{query.error.message}</p>
-              <button
-                type="button"
-                onClick={() => query.refetch()}
-                className="mt-1 h-10 rounded-md bg-brand-500 px-5 font-semibold text-white hover:bg-brand-600"
-              >
-                다시 시도
-              </button>
-            </div>
+            <LoadError
+              message="검색 결과를 불러오지 못했어요"
+              onRetry={() => query.refetch()}
+              className="px-6 py-12"
+            />
           ) : results.length === 0 ? (
-            <div className="flex flex-col items-center gap-2.5 px-6 py-12 text-center text-muted">
-              <span className="grid size-16 place-items-center rounded-full bg-brand-50 text-brand-500">
-                <MapPinOff className="size-8" />
-              </span>
-              <p className="text-lg font-bold text-ink">
-                이 지도 영역에 검색 결과가 없어요
-              </p>
-              <p>지도를 옮기거나 검색어를 바꿔 보세요</p>
+            <div className="p-4">
+              <EmptyResult
+                isCompact
+                icon={<MapPinOff className="size-8" />}
+                title="이 지도 영역에 검색 결과가 없어요"
+                description="지도를 옮기거나 검색어를 바꿔 보세요"
+              />
             </div>
           ) : (
             <>
