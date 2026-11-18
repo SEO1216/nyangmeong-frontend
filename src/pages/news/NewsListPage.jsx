@@ -4,6 +4,7 @@ import { getCategoryCode } from '@/features/news/newsCodes';
 import { useNewsList } from '@/features/news/queries';
 import SubPageLayout from '@/layouts/SubPageLayout';
 import { PATHS } from '@/routes/paths';
+import LoadError from '@/components/LoadError';
 import PageSkeleton from '@/components/PageSkeleton';
 import Skeleton from '@/components/Skeleton';
 
@@ -15,12 +16,12 @@ function NewsCardSkeleton() {
   return (
     <div
       aria-hidden="true"
-      className="grid h-[208px] grid-cols-[minmax(0,1fr)_200px] gap-x-8 gap-y-3.5 rounded-[14px] border border-[#e2e7e7] bg-white px-7 py-6 max-[760px]:h-auto max-[760px]:grid-cols-1 max-[760px]:gap-3 max-[760px]:px-4 max-[760px]:pt-4 max-[760px]:pb-[18px]"
+      className="grid h-[208px] grid-cols-[minmax(0,1fr)_200px] gap-x-8 gap-y-4 rounded-[14px] border border-line bg-white px-7 py-6 max-[760px]:h-auto max-[760px]:grid-cols-1 max-[760px]:gap-3 max-[760px]:px-4 max-[760px]:pt-4 max-[760px]:pb-5"
     >
       <div className="min-w-0 max-[760px]:order-2">
         <Skeleton className="h-[22px] w-14 rounded-full" />
         <Skeleton className="mt-3 h-[22px] w-3/4" />
-        <Skeleton className="mt-3.5 h-3.5 w-full" />
+        <Skeleton className="mt-4 h-3.5 w-full" />
         <Skeleton className="mt-2 h-3.5 w-3/5" />
       </div>
       <Skeleton className="col-start-2 row-span-2 row-start-1 h-[150px] w-full self-start rounded-[10px] max-[760px]:order-1 max-[760px]:col-start-1 max-[760px]:row-span-1 max-[760px]:row-start-auto max-[760px]:aspect-[16/9] max-[760px]:h-auto" />
@@ -41,14 +42,14 @@ function NewsListSkeleton() {
         aria-hidden="true"
         className="flex flex-wrap items-center justify-between gap-3 max-[760px]:flex-col max-[760px]:items-stretch"
       >
-        <div className="flex max-w-full gap-1.5 overflow-hidden">
+        <div className="flex max-w-full gap-2 overflow-hidden">
           {Array.from({ length: 5 }, (_, index) => (
-            <Skeleton key={index} className="h-10 w-16 rounded-full" />
+            <Skeleton key={index} className="h-9 w-16 rounded-full" />
           ))}
         </div>
         <Skeleton className="h-10 w-[300px] max-[760px]:w-full" />
       </div>
-      <div className="flex flex-col gap-3 max-[760px]:gap-2.5">
+      <div className="flex flex-col gap-3 max-[760px]:gap-3">
         {Array.from({ length: PAGE_SIZE }, (_, index) => (
           <NewsCardSkeleton key={index} />
         ))}
@@ -70,6 +71,7 @@ export default function NewsListPage() {
     data: news,
     isPending,
     isError,
+    refetch,
   } = useNewsList({ page, size: PAGE_SIZE, newsClsfCd, keyword });
 
   const setQuery = (next) =>
@@ -92,9 +94,10 @@ export default function NewsListPage() {
     body = <NewsListSkeleton />;
   } else if (isError) {
     body = (
-      <p role="alert" className="text-[#566465]">
-        뉴스를 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요
-      </p>
+      <LoadError
+        message="뉴스를 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요"
+        onRetry={refetch}
+      />
     );
   } else {
     body = (

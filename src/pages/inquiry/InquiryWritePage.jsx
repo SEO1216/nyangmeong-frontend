@@ -6,6 +6,7 @@ import {
 } from 'react-router-dom';
 import PageSkeleton from '@/components/PageSkeleton';
 import SkeletonCard from '@/components/SkeletonCard';
+import LoadError from '@/components/LoadError';
 import { INQUIRY_TYPE_PIXEL_CHARACTER } from '@/features/inquiry/api';
 import InquiryForm from '@/features/inquiry/InquiryForm';
 import {
@@ -55,11 +56,7 @@ export default function InquiryWritePage() {
     );
   }
   if (types.isError) {
-    return (
-      <p role="alert" className="text-[#566465]">
-        {types.error.message}
-      </p>
-    );
+    return <LoadError message={types.error.message} onRetry={types.refetch} />;
   }
 
   /** 캐릭터 화면에서 넘겨받은 pixelCharSn은 유형이 픽셀 캐릭터 그대로일 때만 보낸다 */

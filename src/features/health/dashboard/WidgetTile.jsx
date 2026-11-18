@@ -2,7 +2,7 @@ import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Badge from '@/components/Badge';
 import Icon from '@/components/Icon';
-import { getMoveState } from './widgetItems';
+import { getMovePath, getMoveState } from './widgetItems';
 
 /** 칩 색 */
 
@@ -17,8 +17,8 @@ export default function WidgetTile({ item, content, petSn, petNm }) {
 
   return (
     <Link
-      to={content?.moveTo ?? item.moveTo}
-      state={getMoveState(item, petSn)}
+      to={getMovePath(item, content, petSn)}
+      state={getMoveState(item)}
       aria-label={`${petNm}의 ${item.nm} ${item.typeCd ? '기록하기' : '기록 화면으로 이동'}`}
       className="flex min-w-0 flex-col gap-1 rounded-card border border-line bg-white p-3.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 min-[760px]:hidden"
     >
