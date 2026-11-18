@@ -128,7 +128,7 @@ function CommentMenu({ comment, onReport }) {
       {open && (
         <div
           role="menu"
-          className="absolute top-[calc(100%+4px)] right-0 z-20 min-w-32 rounded-md border border-line bg-white p-1 shadow-depth-sm"
+          className="absolute top-[calc(100%+4px)] right-0 z-20 min-w-32 rounded-md border border-line bg-white p-1"
         >
           <button
             type="button"

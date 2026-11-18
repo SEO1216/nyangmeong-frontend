@@ -2,43 +2,15 @@
 
 ## 지금 하는 것
 
-### SCR-COM-002 UI 통일 2-G · 펫이야기·커뮤니티 공용 부품(KSJ `community`) 값·부품 정리 — 구현 끝, 검증 전 (승인 2026-11-18 17:18), 시작 2026-11-18 17:14
-
-- 상태(2026-11-18, 사람 지시로 멈춤): G1~G9 구현을 커밋·푸시했다. `yarn -s lint`·`yarn -s build` 종료 코드 0. 검증 에이전트는 판정 전에 멈췄다(검증 루프 잠금 없음). 다음 세션에서 `/impl`로 이어 검증 에이전트부터 부른다(이미 구현돼 있으니 검증 명령만 다시 돌리고 바로 검증)
-- 검증 때 볼 것: ① 댓글 ⋮ 메뉴 팝업에 그림자 `shadow-depth-sm`을 남겨 G1 grep(`shadow` 0건)에 1건 걸린다(행 9 기준 "shadow-depth-sm 하나로", 떠 있는 메뉴라 남김). 검증이 실패로 보면 팝업 그림자를 뺀다 ② 기획 밖 손질: 모바일 답글 들여쓰기 42 → 40px에 맞춰 연결선 위치 -27 → -25px·가로 23 → 21px, `StoryRail` [인기 포토] 사진 위 라벨은 `Badge`로 바꾸지 않고 글자만 `text-badge`(13px), 글 목록 로딩 뼈대도 새 카드 크기(썸네일 150·칩 36·배지 24·페이지 이동 48/32)에 맞춤
-
-- 범위: `features/community`의 펫이야기 파일(`PostList`·`PostFilters`·`PostDetail`·`PostForm`·`PostBadges`·`PostWriteGuide`·`StoryRail`)과 커뮤니티 공용 파일(`ListFilterParts`·`CommentSection`·`AttachedImages`), `pages/community/Post*Page.jsx`. 공용 파일은 펫돌봄·실종센터 화면도 같이 바뀐다(필터 칩·체크 옵션·댓글). 펫돌봄(`care/`)·실종센터(`missing/`) 자체 파일은 다음 조각 2-H·2-I
-- 기준: `docs/ui-checklist.csv`의 "결정된 기준" 행 2·6·9·11·12·13·15·16·18·27·29·56·62·71·72·73·74·76·79·80·93·98. 화면설계서·기능명세서는 바뀌지 않는 값 정리라 읽지 않음
-- 디자인: 없음(Figma 토큰 없음, `html/`에 SCR-COM-002 파일 없음). 체크리스트 기준과 2-F에서 맞춘 고객센터·펫뉴스 화면 모양을 따른다
-- API: 없음(화면 모양만)
-- G1 색·그림자(행 9·11): 위 파일의 직접 색(`#1a3234`·`#e2e7e7`·`#667374` 등)을 토큰(`text-ink`·`border-line`·`text-subtle`…)으로, 카드 그림자(`PostList` 카드·hover, `StoryRail`, `PostForm` `shadow-sm`) 삭제
-  - 완료: `명령:` `grep -nE '#[0-9a-fA-F]{6}|shadow' <위 파일>` 0건(`StoryRail` 사진 위 검은 덮개 `black/40`·`from-black/55`는 그대로) / `화면:` /community·글 상세·글쓰기 색이 전과 같고 카드 그림자 없음
-- G2 글자(행 2·6·18): `StoryRail` 인용 17 → 16px, 글 상세 제목 24/모바일 20 → 24/18px, 섹션 제목(`text-lg`)의 `leading-[1.4]` 빼고 기본 28px, 자간 px → em(`-0.01em`), 카드 제목 600 유지
-  - 완료: `명령:` `grep -nE 'text-\[1[37]px\]|text-xl|tracking-\[-?[0-9.]+px\]' <위 파일>` 0건 / `화면:` 1280·390에서 글 상세 제목 24·18px
-- G3 간격(행 98): `0.5`·`1.5`·`2.5`·`3.5` 단계와 `[22px]`·`[18px]`·`[13px]`·`[7px]`·`[9px]` 같은 4px 배수가 아닌 간격을 가까운 4px 배수로(아이콘 옆 `gap-1`·`gap-2` 등). `CommentSection` 답글 연결선(`before:` 29·21·23px)은 그림이라 그대로
-  - 완료: `명령:` `grep -nE '(p|m|gap|gap-x|gap-y|px|py|pt|pb|mt|mb)-(0\.5|1\.5|2\.5|3\.5)\b' <위 파일>` 0건 / `화면:` 목록·상세·글쓰기 배치가 깨지지 않음
-- G4 칩·체크(행 15·62·73): `ListFilterParts` `Chips`를 공용 `FILTER_CHIP`·`FILTER_CHIP_ON`(높이 40 → 36, 고른 칩 연한 청록), `CheckOption`(내 글만 보기 등)을 공용 `Checkbox`, `FilterToggle`([상세 필터])을 `BTN_SECONDARY`
-  - 완료: `화면:` /community 게시판 칩 36px·고른 칩 연한 청록, [내 글만 보기] 체크하면 목록이 내 글만. /community/petcare·/community/missing 필터 칩도 같은 모양, 390에서 [상세 필터]로 열고 닫힘
-- G5 배지(행 56): `PostBadges` [인기]를 공용 `Badge tone="rose"`로(`POPULAR_CLASS` 삭제, 불꽃 아이콘 유지), 댓글 작성자 배지의 `h-[22px] px-2` 덮어쓰기 빼고 공용 크기
-  - 완료: `화면:` 목록 카드 [내 글]·[인기]·게시판 배지가 같은 높이 24px
-- G6 버튼·문구(행 12·13·29·62·93): 글쓰기 제출 "등록" → "등록하기", 수정 "저장" → "저장하기", 댓글·답글 제출 "댓글 등록"·"답글 등록" → "등록하기", 빈 결과 [펫이야기 목록으로] `BTN_SECONDARY`(36 → 40), 글·댓글 삭제 확인 "삭제" → "삭제하기" + `isDanger`
-  - 완료: `화면:` 내 글 상세 [삭제] → 빨간 [삭제하기] 확인 창(취소로 닫기만 함), 댓글 입력칸 [등록하기], 검색 결과 없음 버튼 40px
-- G7 폼(행 16·71·72·74): `PostForm`의 자체 `INPUT_CLASS`·`LABEL_CLASS`·오류 문구를 `components/formStyles`(`INPUT`·`LABEL`)·`FieldError`·`Required`로, 오류 테두리는 `aria-invalid`, 제목 글자 수를 라벨 줄 → 칸 아래 오른쪽(본문과 같은 자리), `CommentSection` 댓글 입력칸도 `formStyles` 기반
-  - 완료: `화면:` 글쓰기에서 빈 제목·본문으로 [등록하기] → 두 칸 빨간 테두리 + 아이콘 붙은 오류 문구, 제목·본문 글자 수가 둘 다 칸 아래 오른쪽. 실제 등록은 하지 않음
-- G8 목록(행 27·79·80): `PostList` 카드 썸네일 높이 150px 고정(뉴스 목록과 같은 방식, 모바일 16:9 그대로), 건수 "총 N건" → "전체 N 건", 목록과 페이지 이동 사이 28/12 → 48/32px, `PostListPage` 조회 실패 문구를 공용 `LoadError`([다시 시도])로
-  - 완료: `화면:` /community 1280에서 썸네일 150px, "전체 N 건", 목록 API를 막으면(Playwright route) [다시 시도]가 보이고 누르면 다시 요청
-- G9 상세 최신글(행 76): `PostDetail` 오른쪽 최신글 목록의 박스(테두리·배경·안쪽 여백)를 없애고 목록만(2-F 공지 상세와 같은 모양)
-  - 완료: `화면:` 글 상세 1280에서 최신글이 박스 없이 줄 목록, 제목 hover 청록
-- G10 공통: `명령:` `yarn -s lint`·`yarn -s build` 종료 코드 0
-- 이번엔 안 함: 행 78 펫이야기 내 글에 [신고] 보이는 것(버그 후보, KSJ에게 알림만), 펫돌봄·실종 자체 파일, 기준 미정 행, 검색 아이콘 누르는 영역(행 37, 공용 `SearchInput` 몫)
-- 질문: 댓글·답글 제출 문구를 "등록하기"로 바꿀까요, "댓글 등록"·"답글 등록"으로 둘까요? (추천: "등록하기", W1 기준)
-  - 결정: 추천안대로("등록하기")
-- 새 의존성: 없음
+끝남: SCR-COM-002 UI 통일 2-G 펫이야기·커뮤니티 공용 부품 값·부품 정리 (2026-11-18, 검증 2회차 통과, 사람 확인). 1회차 실패(목록-페이지 이동 간격 68/52px, ⋮ 메뉴 그림자 grep, 로컬 임시 파일 lint)를 고침
 
 ## 다음에 할 것
 
 ### SCR-COM-002 UI 통일 다음 단계(사람 결정 2026-11-18)
 
+- 2-G 팀 알림(PR 본문 + 팀 채널, KSJ): ① 커뮤니티 공용 `ListFilterParts` 칩이 `FILTER_CHIP`·`FILTER_CHIP_ON`(40 → 36, 고른 칩 연한 청록), [내 글만 보기] 등 체크가 공용 `Checkbox`, [상세 필터]가 `BTN_SECONDARY`라 펫돌봄·실종센터 목록도 같이 바뀜 ② `CommentSection`: 댓글·답글 제출 "등록하기", 삭제 확인 "삭제하기" + `isDanger`, ⋮ 메뉴 그림자 없음, 입력칸 `formStyles`, 모바일 답글 연결선 -25px·21px ③ 펫이야기 카드·레일·글쓰기 카드 그림자 삭제, 썸네일 높이 150px, "총 N건" → "전체 N 건", 목록-페이지 이동 48/32px, [인기] 공용 `Badge tone="rose"`, 조회 실패 `LoadError` ④ 글쓰기 "등록하기"·"저장하기", 폼 `formStyles`·`FieldError`·`Required`, 제목 글자 수 칸 아래 오른쪽 ⑤ 글 상세 제목 24/모바일 18px, 오른쪽 최신글 박스 없음
+- 2-G 참고(판정 밖): 행 78 펫이야기 내 글에도 [신고] 보이는 것은 그대로(KSJ 버그 후보). 캡처는 목록만(화면 ID가 SCR-COM-002 하나라 상세·글쓰기 캡처 이름이 겹침). `.playwright-mcp/`가 eslint 검사 대상이라 그 폴더에 `require` 쓰는 임시 스크립트를 두면 lint가 깨짐(`eslint.config.js` ignores 추가는 사람 결정)
+- 다음 2 조각 후보(2-G 뒤): KSJ 펫돌봄(`care/`) 2-H·실종센터(`missing/`) 2-I, YAY `member`·`place`
 - 2-F 팀 알림(PR 본문 + 팀 채널, KSJ): ① 문의·FAQ 탭이 공용 `UnderlineTabs`(PC 높이 72 → 48, 탭 패널 id는 고른 탭 id `inquiry-status-*`·`faq-category-*`), FAQ 검색창 줄 아래 여백 16 → 4, 검색창 좁힘 1280 → 1100 ② 펫뉴스 카테고리 칩 `FILTER_CHIP`·`FILTER_CHIP_ON`(40 → 36, 고른 칩 연한 청록) ③ 문의 상태·뉴스 카테고리·공지 고정 배지가 공용 `Badge` tone ④ 버튼 `BTN_PRIMARY`·`BTN_SECONDARY`(빈 안내 버튼 36 → 40, 원문 기사 보기 44 → 40), 문구 "문의 제출" → "등록하기", "저장" → "저장하기", 삭제 확인 "삭제하기" + `isDanger` ⑤ 문의 폼 `formStyles`·`FieldError`·`Required`, 제목 글자 수가 칸 아래 오른쪽, 문의 유형 칸 오류 빨간 테두리 ⑥ 조회 실패 `LoadError`([다시 시도]), 문의 수정 화면 조회 실패는 [목록으로] 링크 없어짐, 뉴스 빈 결과 `EmptyResult` ⑦ 공지 상세 "최신 공지" 박스 없앰, 상세 제목 모바일 20 → 18px, 카드 그림자 삭제, 4px 간격
 - 2-F 참고(검증 보고, 판정 밖): 문의 작성 제목 칸이 42px라 문의 유형 칸(40px)보다 2px 높음(`py-2`+`leading-6`+테두리). 커뮤니티 필터 칩(`ListFilterParts` `Chips`)과 "총 N건"은 csv 15·80행으로 커뮤니티 조각에서
 - 다음 2 조각 후보(2-F 뒤): KSJ `community`(펫이야기·펫돌봄·실종센터), YAY `member`·`place`

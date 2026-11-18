@@ -68,7 +68,7 @@ function PostListSkeleton() {
             <PostCardSkeleton key={index} hasThumbOnMobile={index % 2 === 0} />
           ))}
         </div>
-        <div aria-hidden="true" className="mt-12 max-[760px]:mt-8">
+        <div aria-hidden="true" className="mt-7 max-[760px]:mt-3">
           <Skeleton className="mx-auto h-9 w-64" />
         </div>
       </div>

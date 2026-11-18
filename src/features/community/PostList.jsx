@@ -142,7 +142,7 @@ export default function PostList({
           </ul>
         )}
 
-        <div className="mt-12 max-[760px]:mt-8">
+        <div className="mt-7 max-[760px]:mt-3">
           <BoardPagination
             page={page}
             totalPages={totalPages}
