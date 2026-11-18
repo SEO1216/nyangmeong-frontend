@@ -44,14 +44,22 @@ export default function DashboardCard({
           <ChevronRight className="size-4.5" aria-hidden="true" />
         </Link>
       }
-      className={`min-h-[260px] ${className}`}
+      className={`h-[300px] ${className}`}
       bodyClassName="flex flex-col"
     >
       {content ? (
         <>
-          {content.period && (
-            <p className="mb-3 text-sm text-subtle">{content.period}</p>
-          )}
+          {content.period &&
+            (content.periodAside ? (
+              <div className="mb-3 flex items-end justify-between gap-2">
+                <p className="text-sm whitespace-nowrap text-subtle">
+                  {content.period}
+                </p>
+                {content.periodAside}
+              </div>
+            ) : (
+              <p className="mb-3 text-sm text-subtle">{content.period}</p>
+            ))}
           <div className="flex grow flex-col">{content.body}</div>
         </>
       ) : (

@@ -64,30 +64,6 @@ const deltaChip = (delta, unit) => {
 /** 처방·투약 카드 최대 줄 수 */
 const PRESCRIPTION_ROW_COUNT = 3;
 
-function Delta({ label, delta, unit }) {
-  if (delta == null) return null;
-  const Arrow = delta > 0 ? ArrowUp : ArrowDown;
-  const amount = Math.abs(round2(delta));
-
-  return (
-    <p className="flex items-center gap-2 text-sm">
-      <span className="text-subtle">{label}</span>
-      <Badge>
-        {amount === 0 ? (
-          '변화 없음'
-        ) : (
-          <>
-            <Arrow className="size-4" aria-hidden="true" />
-            <span className="sr-only">{delta > 0 ? '증가 ' : '감소 '}</span>
-            {amount}
-            {unit}
-          </>
-        )}
-      </Badge>
-    </p>
-  );
-}
-
 function BigValue({ value, unit }) {
   return (
     <p className="flex max-w-full min-w-0 items-baseline gap-1">
@@ -101,15 +77,6 @@ function BigValue({ value, unit }) {
       </b>
       {unit && <span className="text-muted">{unit}</span>}
     </p>
-  );
-}
-
-function ValueRow({ value, unit, children }) {
-  return (
-    <div className="flex flex-wrap items-end justify-between gap-x-3 gap-y-1">
-      <BigValue value={value} unit={unit} />
-      {children}
-    </div>
   );
 }
 
@@ -129,14 +96,25 @@ function Row({ children }) {
   );
 }
 
-function KeyValue({ label, value }) {
+/**
+ * 마우스를 올리면 전체 값(title)
+ * - isTruncate: 값을 한 줄 말줄임(예방·정기검진)
+ * - isTwoLine: 값을 최대 2줄, 글자 단위 줄바꿈 후 말줄임(알레르기·기저질환, 추가-5)
+ */
+function KeyValue({ label, value, isTruncate = false, isTwoLine = false }) {
+  const clampClass = isTruncate
+    ? 'truncate'
+    : isTwoLine
+      ? 'line-clamp-2 break-all'
+      : '';
   return (
     <Row>
       <span className="shrink-0 text-ink-2">{label}</span>
       <b
         className={`ml-auto min-w-0 text-right font-semibold ${
           value ? 'text-ink' : 'font-normal text-muted'
-        }`}
+        } ${clampClass}`}
+        title={(isTruncate || isTwoLine) && value ? value : undefined}
       >
         {value || '등록된 내용 없음'}
       </b>
@@ -165,19 +143,14 @@ const weightBody = ({ indicators }) => {
     period: '최근 5건',
     body: (
       <>
-        <ValueRow value={toNumber(weight.latestNvl)} unit="kg">
-          <Delta
-            label="직전 기록 대비"
-            delta={toNumber(weight.prevDiff)}
-            unit="kg"
-          />
-        </ValueRow>
+        {/* 최근 체중은 말풍선(마지막 점)으로만 보임 */}
         {values.length > 0 && (
-          <div className="mt-auto pt-3">
+          <div className="mt-auto pt-2">
             <LineChart
               points={toPoints(values, labels)}
               formatValue={(v) => `${v}kg`}
               ariaLabel={`체중 꺾은선 그래프 · ${joinSeries(values, labels, 'kg')}`}
+              height={146}
             />
           </div>
         )}
@@ -211,32 +184,48 @@ const dailySumBody =
       : shownSum != null && prevSum != null
         ? round2(shownSum - prevSum)
         : null;
+    const average =
+      sums.length > 0
+        ? round2(sums.reduce((a, b) => a + b, 0) / sums.length)
+        : null;
     return {
       tile: {
         value: `${shownSum}${unit}`,
         chip: deltaChip(delta, unit),
-        sub:
-          sums.length > 0
-            ? `최근 5개 기록 평균 ${round2(sums.reduce((a, b) => a + b, 0) / sums.length)}${unit}`
-            : '',
+        sub: average != null ? `최근 5개 기록 평균 ${average}${unit}` : '',
       },
       period: '최근 5개 기록',
+      periodAside: (
+        <p className="flex shrink-0 items-baseline gap-1 text-sm text-subtle">
+          {isToday ? '오늘' : labels.at(-1)} 합계
+          <b className="text-2xl leading-none font-bold text-ink">{shownSum}</b>
+          {unit}
+        </p>
+      ),
       body: (
         <>
-          <ValueRow
-            value={shownSum}
-            unit={`${unit} / ${isToday ? '오늘' : labels.at(-1)} 합계`}
-          >
-            <Delta label="직전 기록일 대비" delta={delta} unit={unit} />
-          </ValueRow>
+          {average != null && (
+            <p className="flex items-center gap-1.5 text-sm text-ink-2">
+              <svg width="16" height="2" aria-hidden="true">
+                <path
+                  d="M0 1H16"
+                  stroke="var(--color-brand-500)"
+                  strokeWidth="1.5"
+                  strokeDasharray="4 3"
+                />
+              </svg>
+              평균 {average}
+              {unit}
+            </p>
+          )}
           {values.length > 0 && (
-            <div className="mt-auto pt-3">
+            <div className="mt-auto pt-2">
               <BarChart
                 points={toPoints(values, labels)}
                 formatValue={(v) => `${v}${unit}`}
                 ariaLabel={`${chartName} 일 합계 막대그래프 · ${joinSeries(values, labels, unit)} · 점선은 평균`}
+                showAverageLabel={false}
               />
-              <Note>점선은 평균</Note>
             </div>
           )}
         </>
@@ -267,8 +256,6 @@ function InspectionTrend({ trends, initialInspection }) {
   const low = toNumber(trend.refLlmtNvl);
   const high = toNumber(trend.refUplmtNvl);
   const band = low != null && high != null ? [low, high] : undefined;
-  const latest = values[values.length - 1];
-  const delta = values.length >= 2 ? latest - values[values.length - 2] : null;
 
   return (
     <>
@@ -285,23 +272,18 @@ function InspectionTrend({ trends, initialInspection }) {
           onChange={setSelectedNm}
         />
       </div>
-      <ValueRow value={latest} unit={unitNm}>
-        <Delta label="지난 검사 대비" delta={delta} unit="" />
-      </ValueRow>
-      {values.length >= 2 && (
-        <div className="mt-auto pt-3">
+      {/* 최근 값은 말풍선(마지막 점)으로만 보임. 기록 1회면 점 하나 + 말풍선(추가-4) */}
+      {values.length >= 1 && (
+        <div className="mt-auto pt-2">
           <LineChart
             key={trend.inspNm}
             points={toPoints(values, labels)}
             band={band}
             formatValue={(v) => `${v}${unitNm}`}
             ariaLabel={`${trend.inspNm} 수치 꺾은선 그래프 · ${joinSeries(values, labels, '')} ${unitNm}`}
+            height={126}
+            labelEvery={values.length >= 5 ? 2 : 1}
           />
-          {band && (
-            <Note>
-              점선은 참고범위 {low}~{high}
-            </Note>
-          )}
         </div>
       )}
     </>
@@ -321,7 +303,7 @@ const inspectionBody = ({ summary, initialInspection }) => {
 };
 
 /** 첨부 자료 한 줄 수 */
-const ATTACHMENT_ROW_COUNT = 4;
+const ATTACHMENT_ROW_COUNT = 3;
 
 const isImageAttachment = (attachment) =>
   attachment.fileExtnCd !== FILE_EXT_PDF;
@@ -400,7 +382,7 @@ const attachmentBody = ({ summary, petSn }) => {
       value: latest.orgnlFileNm,
       sub: formatDate(getYmdOf(latest.regDt)),
     },
-    period: '최근 4건',
+    period: '최근 3건',
     body: <AttachmentRows petSn={petSn} attachments={summary.attachments} />,
   };
 };
@@ -448,15 +430,18 @@ const stoolBody = ({ stools }) => {
   };
 };
 
+/** 검진기록 카드 줄 수(조회 개수 CHECKUP_COUNT와 따로) */
+const CHECKUP_ROW_COUNT = 3;
+
 const checkupBody = ({ checkups }) => {
   const today = getTodayYmd();
   const past = (checkups ?? []).filter((checkup) => checkup.ckupYmd <= today);
   if (past.length === 0) return null;
   return {
-    period: '최근 5건',
+    period: '최근 3건',
     body: (
       <Rows>
-        {past.map((checkup) => {
+        {past.slice(0, CHECKUP_ROW_COUNT).map((checkup) => {
           const type = getCheckupType(checkup.ckupTypeCd);
           const detail = [checkup.hsptlNm, checkup.ckupCn?.split('\n')[0]]
             .filter(Boolean)
@@ -520,7 +505,7 @@ const prescriptionBody = ({ summary }) => {
 function ObservationFigure({ petSn, label, cycle, cycleNo, diffText }) {
   return (
     <figure className="min-w-0">
-      <div className="grid h-24 place-items-center overflow-hidden rounded-[10px] border border-dashed border-line-strong bg-surface-2 text-subtle">
+      <div className="grid h-16 place-items-center overflow-hidden rounded-[10px] border border-dashed border-line-strong bg-surface-2 text-subtle">
         <ObservationPhoto
           petSn={petSn}
           obsrvCyclSn={cycle.obsrvCyclSn}
@@ -579,7 +564,6 @@ const observationBody = ({ summary, petSn }) => {
         ? `${item.obsrvArtclNm} · ${days}일 동안`
         : item.obsrvArtclNm,
     },
-    period: `관찰 중 ${summary.observations.length}건`,
     body: (
       <>
         <p className="font-semibold text-ink">
@@ -619,8 +603,8 @@ const allergyBody = ({ summary }) => {
     body: (
       <>
         <Rows>
-          <KeyValue label="알레르기" value={algyCn?.trim()} />
-          <KeyValue label="기저질환" value={dssCn?.trim()} />
+          <KeyValue isTwoLine label="알레르기" value={algyCn?.trim()} />
+          <KeyValue isTwoLine label="기저질환" value={dssCn?.trim()} />
         </Rows>
       </>
     ),
@@ -638,15 +622,6 @@ const preventionBody = ({ summary }) => {
     !nextRegularYmd
   )
     return null;
-  const vaccinationText =
-    latestVaccination &&
-    [
-      formatDate(latestVaccination.ckupYmd),
-      latestVaccination.ckupCn?.split('\n')[0],
-      '(완료)',
-    ]
-      .filter(Boolean)
-      .join(' ');
   const tileYmd = latestVaccination?.ckupYmd ?? nextVaccinationYmd;
   return {
     tile: {
@@ -655,30 +630,34 @@ const preventionBody = ({ summary }) => {
         ? `다음 접종 ${formatMonthDayDot(nextVaccinationYmd)} 예정`
         : '예정 없음',
     },
-    period: '예방 · 정기검진',
     body: (
       <Rows>
-        <KeyValue label="예방접종" value={vaccinationText} />
+        {/* 값은 날짜만(추가-7) */}
         <KeyValue
+          isTruncate
+          label="예방접종"
+          value={latestVaccination && formatDate(latestVaccination.ckupYmd)}
+        />
+        <KeyValue
+          isTruncate
           label="다음 접종 예정"
           value={
             nextVaccinationYmd
-              ? `${formatDate(nextVaccinationYmd)} (예정)`
+              ? formatDate(nextVaccinationYmd)
               : '등록된 예정 일정 없음'
           }
         />
         <KeyValue
+          isTruncate
           label="최근 검진"
-          value={
-            latestRegularYmd &&
-            `${formatDate(latestRegularYmd)} 정기검진 (완료)`
-          }
+          value={latestRegularYmd && formatDate(latestRegularYmd)}
         />
         <KeyValue
+          isTruncate
           label="다음 검진 예정"
           value={
             nextRegularYmd
-              ? `${formatDate(nextRegularYmd)} (예정)`
+              ? formatDate(nextRegularYmd)
               : '등록된 예정 일정 없음'
           }
         />

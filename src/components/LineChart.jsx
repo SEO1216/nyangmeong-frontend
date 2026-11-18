@@ -62,6 +62,7 @@ const getCurvePath = (points, slopes) => {
  * - points: [{ label, value }] 1개 이상(1개면 가운데 점 하나), band: [최소, 최대], goal: 목표, formatValue: 말풍선 값, formatTag: 범위 라벨 값
  * - bandLabelSide: 'left'(기본, 오른쪽 라벨 없이 왼쪽 눈금을 최대·최소로) / 'right'(오른쪽 최대·최소 라벨)
  * - activeIndex: 말풍선을 띄울 점(points의 순번). 없으면 마지막 점, null이면 말풍선 없이 점만
+ * - 말풍선은 점 위, 자리가 없으면 점 아래(꼬리는 위로, 세로 점선은 말풍선 아래부터). 점 아래가 날짜 줄에 닿으면 맨 위쪽에 붙임
  * - isLeftColumn: 최대·목표·최소을 모두 왼쪽 한 열의 라벨로 두고 오른쪽 라벨은 없앤다(모바일 건강기록 변화). bandLabelSide보다 우선
  * - labelFill: 아래 날짜 글자 색. 기본은 subtle(지속 관찰 PC는 placeholder 토큰, 추가 요청)
  * - isEdgeToEdge: 범위·목표 라벨이 없는 그래프에서 좌우 라벨 자리를 비우지 않고 폭 전체를 씀(지속 관찰, 추가 요청)
@@ -137,30 +138,36 @@ function Chart({
   const isSmall = width < 600;
   const hasTag =
     !isLeftColumn && ((band != null && !isBandLeft) || goal != null);
+  // 범위·목표 라벨이 없으면 좌우 라벨 자리 없이 12만 남김
+  const hasGuide = band != null || goal != null;
   const left = isEdgeToEdge
     ? 0
-    : isBandLeft
-      ? isSmall
-        ? 64
-        : 80
-      : isSmall
-        ? 40
-        : 56;
+    : !hasGuide
+      ? 12
+      : isBandLeft
+        ? isSmall
+          ? 64
+          : 80
+        : isSmall
+          ? 40
+          : 56;
   // 왼쪽 라벨일 때는 마지막 날짜 글자가 잘리지 않게 오른쪽을 조금 남김
   const right = isEdgeToEdge
     ? 0
-    : hasTag
-      ? isSmall
-        ? 76
-        : 92
-      : isBandLeft
+    : !hasGuide
+      ? 12
+      : hasTag
         ? isSmall
-          ? 28
-          : 32
-        : isSmall
-          ? 12
-          : 24;
-  const top = 52;
+          ? 76
+          : 92
+        : isBandLeft
+          ? isSmall
+            ? 28
+            : 32
+          : isSmall
+            ? 12
+            : 24;
+  const top = 16;
   const bottom = 34;
   const pad = isSmall ? 16 : 28;
 
@@ -198,7 +205,17 @@ function Chart({
   const tipMinX = Math.max(left, TIP_INSET) + tipWidth / 2;
   const tipMaxX = Math.min(width - right + 4, width - TIP_INSET) - tipWidth / 2;
   const tipX = Math.min(Math.max(tipPointX, tipMinX), tipMaxX);
-  const tipY = tipPointY - 48;
+  // 말풍선은 점 위, 위에 자리가 없으면 점 아래(꼬리는 위로).
+  // 점 아래로 내리면 날짜 줄에 닿을 때는 맨 위쪽에 붙임(꼬리는 아래로, 추가-10)
+  const hasRoomAbove = tipPointY - 48 >= TIP_INSET;
+  const isBelowOnDates = tipPointY + 18 + 30 > height - bottom;
+  const isTipBelow = !hasRoomAbove && !isBelowOnDates;
+  const tipY = hasRoomAbove
+    ? tipPointY - 48
+    : isTipBelow
+      ? tipPointY + 18
+      : TIP_INSET;
+  const guideStartY = isTipBelow ? tipY + 30 : tipPointY + 10;
   const tagWidth = right - 12;
 
   /** 왼쪽 한 열: 값이 가까워 라벨이 겹치면 아래로 밀어 LABEL_GAP 간격 확보 */
@@ -346,9 +363,9 @@ function Chart({
             ) : null,
           )}
 
-      {hasTip && (
+      {hasTip && guideStartY < height - bottom && (
         <path
-          d={`M${tipPointX} ${tipPointY + 10}V${height - bottom}`}
+          d={`M${tipPointX} ${guideStartY}V${height - bottom}`}
           stroke={COLORS.brandLine}
           strokeWidth="1.5"
           strokeDasharray="4 4"
@@ -397,7 +414,11 @@ function Chart({
               strokeWidth="1.5"
             />
             <path
-              d={`M${tipPointX - 5} ${tipY + 30}L${tipPointX} ${tipY + 36}L${tipPointX + 5} ${tipY + 30}Z`}
+              d={
+                isTipBelow
+                  ? `M${tipPointX - 5} ${tipY}L${tipPointX} ${tipY - 6}L${tipPointX + 5} ${tipY}Z`
+                  : `M${tipPointX - 5} ${tipY + 30}L${tipPointX} ${tipY + 36}L${tipPointX + 5} ${tipY + 30}Z`
+              }
               fill={COLORS.brand}
             />
             <text
