@@ -66,7 +66,7 @@ const NOTE_CLASS =
 
 function InfoRow({ icon, label, children }) {
   return (
-    <div className="col-span-2 grid grid-cols-subgrid">
+    <div className="col-span-2 grid grid-cols-subgrid border-b border-line py-3.5">
       <dt className="flex h-6 min-w-[120px] items-center gap-1.5 font-semibold whitespace-nowrap text-ink-2 max-[760px]:min-w-0">
         {icon}
         {label}
@@ -312,7 +312,7 @@ export default function MissingDetail({ post }) {
               >
                 실종 정보
               </h3>
-              <dl className="mt-4 grid grid-cols-[max-content_minmax(0,1fr)] gap-x-4 gap-y-4 max-[760px]:gap-x-3">
+              <dl className="mt-3 grid grid-cols-[max-content_minmax(0,1fr)] gap-x-4 border-t border-line-strong max-[760px]:gap-x-3">
                 <InfoRow
                   icon={
                     <PawPrint
