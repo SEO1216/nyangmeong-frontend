@@ -2,10 +2,10 @@ import BoardPagination from '@/components/BoardPagination';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import PdfFailureTable from './PdfFailureTable';
 import ProcessingFilter from './ProcessingFilter';
-import ProcessingListError from './ProcessingListError';
 import ProcessingSkeleton from './ProcessingSkeleton';
 import ProcessingStatCards from './ProcessingStatCards';
 import { useAdminPdfAnalyses } from './queries';
+import LoadError from '@/components/LoadError';
 
 const PAGE_SIZE = 20;
 
@@ -46,7 +46,7 @@ export default function PdfAnalysisPanel({
       <ProcessingSkeleton
         filterClass="h-10 w-full max-w-[420px] max-[760px]:h-[88px]"
         cardCount={4}
-        cardGridClass="min-[761px]:grid-cols-4"
+        cardGridClass="min-[760px]:grid-cols-4"
         cardClass="h-[84px]"
         tableClass="h-[486px]"
       />
@@ -66,14 +66,14 @@ export default function PdfAnalysisPanel({
         onSearch={handleSearch}
       />
       {analyses.isError ? (
-        <ProcessingListError
+        <LoadError
           message="검사결과지 분석 현황을 불러오지 못했어요."
           onRetry={() => analyses.refetch()}
         />
       ) : (
         <>
           <ProcessingStatCards
-            className="min-[761px]:grid-cols-4"
+            className="min-[760px]:grid-cols-4"
             items={[
               { key: 'tot', label: '요청', value: summary.totCnt },
               { key: 'scs', label: '성공', value: summary.scsCnt },

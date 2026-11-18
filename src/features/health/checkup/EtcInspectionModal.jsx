@@ -61,6 +61,7 @@ export default function EtcInspectionModal({
     <FormModal
       icon="assignment"
       title="기타검사 추가"
+      submitLabel="등록하기"
       widthClassName="w-[min(560px,calc(100%-32px))]"
       isPending={isPending}
       onSubmit={handleSubmit}

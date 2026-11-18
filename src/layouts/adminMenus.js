@@ -93,11 +93,6 @@ export const ADMIN_MENUS = [
         pathKey: 'ADMIN_AI_ROUTES',
       },
       {
-        label: '키워드 사전',
-        screenId: 'SCR-ADM-081',
-        pathKey: 'ADMIN_AI_KEYWORDS',
-      },
-      {
         label: '처리 현황',
         screenId: 'SCR-ADM-082',
         pathKey: 'ADMIN_PROCESSING',

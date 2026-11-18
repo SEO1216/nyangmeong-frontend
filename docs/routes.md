@@ -77,7 +77,6 @@
 | ADM-072 | 포인트 | `/admin/points` (`?mbrSn=`) | LJS | |
 | ADM-073 | 기본 캐릭터 | `/admin/default-characters` | LJS | |
 | ADM-080 | 라우팅 매핑표 | `/admin/ai-routes` | LJS | |
-| ADM-081 | 키워드 사전 | `/admin/ai-keywords` (`?tab=`) | LJS | |
 | ADM-082 | 처리 현황 | `/admin/processing` (`?tab=`) | LJS | |
 | ADM-090 | 알림 템플릿 | `/admin/notification-templates` | LJS | |
 | ADM-091 | 발송 이력 | `/admin/notification-logs` | LJS | |

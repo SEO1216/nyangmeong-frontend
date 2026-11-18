@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Icon from '@/components/Icon';
+import { CHIP, CHIP_ON } from '@/components/buttonStyles';
 import {
   RECOMMENDED_IDS,
   WIDGET_GROUPS,
@@ -51,7 +52,7 @@ export default function WidgetPicker({
   return (
     <div className="flex min-w-0 flex-col gap-5">
       <div>
-        <h3 className="text-lg/[1.4] font-bold text-ink">
+        <h3 className="text-lg font-bold text-ink">
           {isEdit
             ? '기록할 항목을 바꿔요'
             : `${petNm}에게 어떤 기록을 남길까요?`}
@@ -125,8 +126,8 @@ export default function WidgetPicker({
         </p>
       </div>
 
-      <p className="flex flex-wrap items-center gap-x-2 gap-y-2 rounded-[10px] bg-surface-2 px-3.5 py-3 text-muted max-sm:flex-col max-sm:items-stretch">
-        <span className="flex min-w-0 flex-1 items-start gap-2 sm:contents">
+      <p className="flex flex-wrap items-center gap-x-2 gap-y-2 rounded-[10px] bg-surface-2 px-3.5 py-3 text-muted max-[760px]:flex-col max-[760px]:items-stretch">
+        <span className="flex min-w-0 flex-1 items-start gap-2 min-[760px]:contents">
           <Icon name="tips_and_updates" className="shrink-0 text-subtle" />
           <span className="min-w-0 flex-1 break-keep">
             {`처음이라면 ${joinWidgetNames(RECOMMENDED_IDS)}부터 시작해 보세요`}
@@ -134,7 +135,7 @@ export default function WidgetPicker({
         </span>
         <button
           type="button"
-          className="inline-flex h-8 items-center rounded-md bg-brand-50 px-3 font-semibold whitespace-nowrap text-brand-600 hover:bg-brand-100 max-sm:self-end"
+          className="inline-flex h-8 items-center rounded-md bg-brand-50 px-3 font-semibold whitespace-nowrap text-brand-600 hover:bg-brand-100 max-[760px]:self-end"
           onClick={() => onRecommend(RECOMMENDED_IDS)}
         >
           추천대로 고르기
@@ -157,11 +158,7 @@ export default function WidgetPicker({
                   key={item.id}
                   type="button"
                   aria-pressed={isOn}
-                  className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 whitespace-nowrap ${
-                    isOn
-                      ? 'border-brand-500 bg-brand-500 text-white'
-                      : 'border-line bg-white text-ink-2 hover:border-line-strong hover:text-ink'
-                  }`}
+                  className={`${isOn ? CHIP_ON : CHIP} gap-1.5`}
                   onClick={() => onToggle(item.id)}
                 >
                   <Icon name={item.icon} className="text-lg" />

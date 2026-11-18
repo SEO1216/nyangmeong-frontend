@@ -2,6 +2,23 @@
 
 기준: 공통레이아웃_기능명세서_v0.4_20261001, AI매니저_기능명세서_v0.7_20261009 (DMS, 2026-10-17), 커뮤니티_기능명세서_v0.7_20261019 (CMU-005만, KSJ 마일스톤에서 옮김, 2026-10-21), AI매니저_기능명세서_v0.9_20261026 (SCR-AIM-013만, DMS 업로드 전 로컬 사본, 2026-10-26), 관리자_기능명세서_v0.2_20261030 (DMS, 2026-10-30. 화면설계서 `관리자_화면설계서_v0.1_20261030`, 순서는 백엔드 `docs/admin/implementation-plan.md` 3절 단계)
 
+## SCR-COM-002 기본 레이아웃 · 공용 Modal 밖 dialog 뒤 스크롤 잠금 — 끝
+- 기능: 명세 기능 ID 추가 없음(버그, 사람 요청 2026-11-16 "다음 작업으로"), 걸치는 기능 FN-COM-002
+- 배경: `showModal()`을 직접 부르고 `useScrollLock`이 없는 창은 열린 채 뒤 페이지가 휠로 스크롤된다. 5180·8081에서 확인(2026-11-16): `ScheduleModal`(일정 추가·수정), `FormModal`(건강 일지 입력 틀, 관찰 항목 추가로 확인), `ConfirmModal`(단독, 게시글 삭제 확인), `ImageViewer`(첨부 이미지 크게 보기), `ExpenseDetailSheet`(390px 지출 상세). 공용 `Modal`(오늘 기록 추가·게시글 신고)은 막힘. 창을 연 채 `useScrollLock`과 같은 html 스타일을 걸면 막히는 것까지 확인(ConfirmModal·ImageViewer)
+- 정할 것: 스크롤만 막으려면 다섯 곳에 `useScrollLock()` 한 줄씩(모양 그대로). 공용 `Modal`로 옮기면 Esc 연타 강제 닫힘 방지(`Modal` `handleKeyDown`, `FormModal`·`ScheduleModal`에 없음)·스크롤 잠금 같은 수정이 한 곳에 모이고 그림자·모서리·배경색이 통일된다. 옮긴다면 단계안:
+  - 1단계 `ConfirmModal` → `Modal` `isConfirm`: 320px 왼쪽 정렬·버튼 오른쪽 → 440px 가운데·버튼 꽉 채움으로 20개 파일 모양이 바뀜. `errorMessage`와 열 때 취소 버튼 포커스를 `Modal`에 넣어야 함
+  - 1단계 `ExpenseDetailSheet` → `Modal` `isSheet`: 제목 줄 ✕ 자리에 [편집](`isCloseIconHidden` + 버튼 자리), PC에서 숨기는 동작이 다름
+  - 2단계 `FormModal`·`ScheduleModal`: `<form>`이 본문과 [저장]까지 감싸 Enter·[저장]이 submit인데 `Modal`은 본문·`footer`를 따로 그려 묶을 수 없음. `Modal`이 form으로 감싸는 기능을 먼저 받고 옮김(머리 아이콘·20px 모서리·회색 푸터도 다름)
+  - `ImageViewer`: 흰 판·제목·푸터 없이 화면 전체를 덮는 보기라 `Modal` 틀이 맞지 않음. `useScrollLock()`만 넣음
+- 함께 볼 것: `NavDrawer`·`AdminLayout` 드로어는 `body` 잠금(헤더 밀림 원인과 같은 방식), `LandingHeader` 모바일 메뉴는 잠금 없음(코드만 봄)
+- 기다리는 것: 없음. `features/health`(JAJ)·`features/expense`(SJM) 파일을 고치므로 담당에게 알림
+- 완료 조건 후보: 다섯 창을 연 채 배경 휠로 `scrollY`가 그대로, 창이 겹쳐 닫혀도 마지막에만 풀림
+- 결정: 다섯 곳에 `useScrollLock()` 한 줄씩(사람 "추천안대로" 2026-11-16), 공용 `Modal`로 옮기기는 안 함
+- 완료 조건: 기획(핸드오프 "지금 하는 것") S1~S6
+- 완료 조건 결과: 검증 `통과`(2026-11-16, 2회차 S1~S6, 1회차는 백엔드 미기동으로 확인 못 함), 사람 확인 2026-11-16
+- 이번엔 안 함: 공용 `Modal`로 옮기기, 드로어 `body` 잠금, `LandingHeader` 모바일 메뉴
+- 연결 남음: 없음
+
 ## SCR-COM-002 기본 레이아웃 · 헤더 프로필 사진 · 플로팅 AI 말풍선·기본 캐릭터 · 바로가기 편집 반려동물 왼쪽 정렬 — 끝
 - 기능: 명세 기능 ID 추가 없음(사람 요청 2026-11-16), 걸치는 기능 FN-COM-002-15 헤더 프로필·FN-COM-002-19 플로팅 AI 버튼, 걸치는 화면 SCR-MAN-001 바로가기 편집 창
 - 기다리는 것: 없음(`GET /auth/me` `atchFileSn` 있음, 백엔드 `docs/api/member.md` AuthMeResponse)
@@ -1040,11 +1057,14 @@
 - 완료 조건 결과: B1·B2·B3 통과(B3는 구역 이름 없는 응답으로 바꿔 확인), lint·build 0. 검증 1회차 통과, 사람 확인 2026-11-11
 - 연결 남음: 없음
 
-## SCR-ADM-001 관리자 공통 · 페이지 틀·조회 오류 컴포넌트 정리 — 대기
+## SCR-ADM-001 관리자 공통 · 페이지 틀·조회 오류 컴포넌트 정리 — 끝
 - 기능: 명세 기능 ID 추가 없음. 관리자 페이지(`pages/admin/`) 전체와 관리자 features의 조회 오류 묶음
 - 기다리는 것: 남은 관리자 화면 구현이 다 끝난 뒤 맨 마지막에 한다(사람 결정 2026-11-03 "리팩토링이니까 마지막으로", 2026-11-10 다시 "후순위, 백엔드 연결부터")
 - 완료 조건: 조회 오류 안내 + [다시 시도] 묶음(지금 36개 파일에 복사)을 `components/` 공통 컴포넌트 하나로 바꾸고, 가운데 정렬 틀(`mx-auto max-w-[1200px]`)·제목 `h1`·오른쪽 버튼 줄(27~29개 페이지에 복사)을 공통 페이지 틀로 묶는다. 바꾼 뒤에도 화면 모양과 동작(403 `AdminForbidden` 포함)은 그대로다. 기능 작업과 섞지 않는다(요청 2026-11-03)
 - 기획 초안(2026-11-03, 승인 전 보류): `components/LoadError.jsx`(`message`·`onRetry`·`className`) 38곳, `pages/admin/AdminPageFrame.jsx`(`title`·`actions`·`children`) 28개 파일 31곳
+- 결과: `components/LoadError.jsx` 42개 파일, `pages/admin/AdminPageFrame.jsx` 32개 파일 35곳(운영 설정은 폭·오른쪽 문구가 달라 틀 밖). `ProcessingListError`·`DashboardError`·지역 `LoadError` 6곳 지움
+- 완료 조건 결과: 검증 `통과`(2026-11-16 1회차, 바꾸기 전 HEAD와 대표 8화면 1440·390 비교 차이 0, 500·403 가로채기), 사람 확인 2026-11-16
+- 연결 남음: 없음
 
 ## SCR-ADM-101 품종 · 품종 API 연결 — 끝
 - 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-101-01
@@ -1151,17 +1171,21 @@
 - 완료 조건 결과: 검증 `통과`(2026-11-10 1회차, 5180·8081 관리자), 사람 확인 2026-11-10
 - 연결 남음: 없음
 
-## SCR-ADM-081 키워드 사전 · 관리자 키워드 사전 API 연결 — 대기
-- 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-081-01·02
-- 기다리는 것: 백엔드 SCR-ADM-081 키워드 사전 · 프론트 연결 관리자 키워드 사전 API(LJS, 끝 2026-11-05). 계약은 백엔드 `docs/api/ai.md` "관리자 API" 절의 `/admin/ai/keywords` 네 행과 DTO 절
-- 완료 조건: `features/adminAiKeyword/api.js`의 가짜 네 함수를 실제 `GET /api/admin/ai/keywords?dictUsgCd=&kwrdClsfNm=`(배열, 페이지 없음)·`POST /api/admin/ai/keywords`(201 `{ kwrdDictSn }`)·`PATCH /api/admin/ai/keywords/{kwrdDictSn}`(보낸 칸만, 바뀐 행을 돌려줌)·`DELETE /api/admin/ai/keywords/{kwrdDictSn}`로 바꾸고 sessionStorage 가짜를 지운다. 가정과 다른 것: `useYn`은 true/false('Y' 아님), 행에 `mpngCdNm`(연결 코드 이름)이 더 있다, 없는 행 404 `AI_KEYWORD_NOT_FOUND`(가짜 `KEYWORD_NOT_FOUND` 아님), 수정에서 해석 결과·연결 코드·비고를 비우려면 빈 문자열(`null`은 그대로 둠), 용도·분류는 수정되지 않는다. 연결 코드는 `일정 종류`(HLTG19)·`검진유형`(HLTG01)·`가계부 카테고리`(MYPG05)만 필수이고 다른 분류에 보내면 400 `INVALID_INPUT_VALUE`. `kwrdClsfNm`은 서버가 글자 그대로 검사하므로 `SCR-ADM-081 키워드 사전 · 탭·칸 이름을 쉬운 말로` 절에서 바꾸는 것은 화면 표시만이다. 가계부 카테고리 초기 데이터 6건(병원~돌봄, 기타 없음)은 공용 DB에 있다
+## SCR-ADM-081 키워드 사전 · 화면 없애기 — 끝
+- 기능: FN-ADM-081-01·02·03 없앰(사람 결정 2026-11-16: AI가 도구 호출로 바뀌어 키워드 사전을 읽지 않음, AI 서버 develop `59ba84f` 확인)
+- 기다리는 것: 없음. 백엔드 API·테이블 지우기는 백엔드 저장소에서 따로, 문서 정리는 사람
+- 완료 조건: `features/adminAiKeyword/`·`AdminAiKeywordsPage.jsx`·라우트·`ADMIN_AI_KEYWORDS`·메뉴 항목·`docs/routes.md`·TC 문서의 키워드 사전 부분이 없고, 관리자 메뉴 AI 묶음의 남은 두 화면이 열린다. lint·build 0
+- 예전 계획(연결, 2026-11-16 취소): `features/adminAiKeyword/api.js`의 가짜 네 함수를 실제 `GET /api/admin/ai/keywords?dictUsgCd=&kwrdClsfNm=`(배열, 페이지 없음)·`POST /api/admin/ai/keywords`(201 `{ kwrdDictSn }`)·`PATCH /api/admin/ai/keywords/{kwrdDictSn}`(보낸 칸만, 바뀐 행을 돌려줌)·`DELETE /api/admin/ai/keywords/{kwrdDictSn}`로 바꾸고 sessionStorage 가짜를 지운다. 가정과 다른 것: `useYn`은 true/false('Y' 아님), 행에 `mpngCdNm`(연결 코드 이름)이 더 있다, 없는 행 404 `AI_KEYWORD_NOT_FOUND`(가짜 `KEYWORD_NOT_FOUND` 아님), 수정에서 해석 결과·연결 코드·비고를 비우려면 빈 문자열(`null`은 그대로 둠), 용도·분류는 수정되지 않는다. 연결 코드는 `일정 종류`(HLTG19)·`검진유형`(HLTG01)·`가계부 카테고리`(MYPG05)만 필수이고 다른 분류에 보내면 400 `INVALID_INPUT_VALUE`. `kwrdClsfNm`은 서버가 글자 그대로 검사하므로 `SCR-ADM-081 키워드 사전 · 탭·칸 이름을 쉬운 말로` 절에서 바꾸는 것은 화면 표시만이다. 가계부 카테고리 초기 데이터 6건(병원~돌봄, 기타 없음)은 공용 DB에 있다
 - 이미 바뀐 것: `features/adminAiKeyword/api.js`·`keywordLabels.js`(가짜)
+- 연결 남음: FN-ADM-081-01·02·03 (백엔드 연결 관리자·내부 키워드 사전 API 삭제, 백엔드 저장소에서 /start)
 
-## SCR-ADM-082 처리 현황 · 검사결과지 분석 현황 API 연결 — 대기
+## SCR-ADM-082 처리 현황 · 검사결과지 분석 현황 API 연결 — 끝
 - 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-082-03
 - 기다리는 것: 백엔드 SCR-ADM-082 처리 현황 · 검사결과지 분석 현황 API(LJS, 끝 2026-11-05). 계약은 백엔드 `docs/api/global.md` `/admin/processing/pdf-analyses` 행
 - 완료 조건: `features/adminProcessing/api.js`의 `getAdminPdfAnalyses` 가짜를 실제 `GET /api/admin/processing/pdf-analyses?fromYmd=&toYmd=&page=&size=20`로 바꾼다. 응답은 `{ summary: { totCnt, scsCnt, tmotCnt, errCnt }, content: [{ extlApiCallLogSn, callRsltCd, failRsn, callDt }], page, size, totalElements, totalPages, hasNext }`로 가짜와 같은 모양이다. 기간은 둘 다 선택(호출일 양끝 포함), `fromYmd`가 `toYmd`보다 뒤면 400 `INVALID_INPUT_VALUE`. 검사결과지가 아닌 파일은 Python이 성공(SYSC0021)으로 통지해 `scsCnt`·`totCnt`에 들어가고 실패 목록에는 없다. 결과 코드 SYSC0021 성공·SYSC0022 실패(API 오류)·SYSC0023 시간초과
 - 이미 바뀐 것: `features/adminProcessing/api.js`(가짜 `getAdminPdfAnalyses`)
+- 완료 조건 결과(2026-11-17): `getAdminPdfAnalyses`를 실제 API로 바꾸고 가짜·`?fake=`를 지움, 빈 값 빼기를 `compactParams`로 묶음. 검증 `통과`(1회차, 5180·8081 관리자), 사람 확인 2026-11-17
+- 연결 남음: 없음
 
 ## SCR-ADM-110 운영 설정 · 운영 설정 API 연결 — 끝
 - 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-110-01~04 (2026-11-10 SCR-ADM-110 절 "연결 남음"에서 옮김)
@@ -1296,6 +1320,33 @@
 - 완료 조건: 칩 취두부에서 "까미 …" 새 대화 → 방 태그·칩·카드 모두 까미 / 이름 없음·둘 이상이면 칩 태그 / 열린 방은 그대로
 - 완료 조건 결과: 검증 `통과`(2026-11-09, 1회차), 사람 확인 2026-11-09
 
+## SCR-COM-002 UI 통일 1-A · 공용 기반(토큰·components·layouts·404) — 끝
+- 기능: (사람 지시 2026-11-18 "UI 체크리스트_결정반영" CSV 86행, 명세 FN 추가 없음) 결정된 기준 중 공용 파일(`index.html`·`assets/index.css`·`components/`·`layouts/`·`routes/`)에 들어가는 것
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 U1~U12 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): U1~U12 검증 2회차 통과(1회차 실패: 새 토큰 `--color-page`가 `--text-page`와 겹침 → `--color-page-bg`), 사람 확인. 기획과 달라진 것: 404는 `pages/notFound/NotFoundPage.jsx`, `MYPAGE_CAREGIVERS`는 지우지 않고 AI `SCR-MYP-004`만 `/mypage/pets`로, 서랍·채팅 창 닫기는 760px 이하 44px
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 1-B · LJS 담당 화면 적용(메인·AI·채팅·설정·관리자) — 끝
+- 기능: 1-A 공용 기반을 LJS 담당 폴더(`features/dashboard`·`ai`·`chat`·`notification`·`admin*`, `pages/` 같은 화면)에 적용. 체크리스트 2(20·22·26·30·32px → 단계 안 값)·5·11·29·42(분기점 390·760·1100)·92·93·95. 랜딩 항목(2의 17px·3·4·32 PAWEVER·36 랜딩 푸터·39 H1)은 빼고 랜딩 교체(SCR-MAN-002) 때(사람 2026-11-18)
+- 완료 조건: LJS 폴더에 단계 밖 글자 크기·직접 쓴 hex·761/1101/1281 분기점이 남지 않는다 / 설정 H1 28px, 채팅·AI 창 H1은 별도 창 예외 18px(사람 2026-11-18)
+- 결과(2026-11-18): B1~B6·Q1 검증 1회차 통과, 추가-1(옛 분기점 주석) 재검증 통과, 사람 확인. 기획과 달라진 것: `CareDealCard` 559/560은 컨테이너 쿼리라 그대로, `HeroAsk`는 760 미만 아이콘만(390 아님), JS 조건 5곳 더(`AdminLayout`·`NavDrawer`·`useAiDock`·`ChatInput`·`HeroAsk`)
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 2-A · 건강기록(JAJ) 값·문구·칩 정리 — 끝
+- 기능: (2 마일스톤을 도메인 하나씩 나눈 첫 조각, 2026-11-18) `features/health`·`pages/health`에 체크리스트 2·6·11·12·15·29·42·62·93·98 적용(색 토큰, 글자 단계, 분기점 390·760·1100, 섹션 제목 행간, 4px 간격, 버튼·칩 규격, 버튼 문구)
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 H1~H8 / `yarn -s lint`·`yarn -s build` 0
+- 다음 조각: 건강기록 부품 교체(56·58·68·69·72·73·83·26·27·71)는 아래 2 마일스톤에 남김
+- 결과(2026-11-18): H1~H8 검증 1회차 통과, 사람 확인. 기획과 달라진 것: `BTN_SM`(checkupStyles) 없앰, 오늘 기록 항목 편집·튜토리얼 완료 칩도 `CHIP`, 반려동물 고르기 [등록] 타일 → "등록하기"
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 2 · 다른 담당 폴더 적용 — 대기
+- 남은 것(2026-11-18): 건강기록 부품 교체 조각(Badge·공용 Modal 틀·차트 한 벌·UnderlineTabs·FieldError·Checkbox·NoticeBox·스켈레톤·LoadError·폼 상수) + 아래 다른 도메인
+- 기능: 같은 기준을 `features/health`(JAJ), `pet`·`point`·`expense`(SJM), `community`·`inquiry`·`notice`·`faq`·`news`(KSJ), `member`·`place`(YAY)에 적용. 도메인 하나씩 나눠 진행하고 PR 본문·팀 채널로 담당자에게 알린다. 체크리스트 6·12·15·16·18·26·27·31·37·56·58·62·66·68·69·71~74·76·79·80·83·84·94·96·98
+- 버그 후보(담당자에게 먼저 알림): 78 펫이야기 상세 내 글에도 신고 버튼(`community/PostDetail.jsx`, KSJ), 82 `ZONES` 순서 반대(`health/CareChipPicker.jsx`·`CareItemFields.jsx`, JAJ)
+- 이번엔 안 함: 기준 미정 18행(55·57·61·63·64·65·67·70·77·81·85·88~91), 메모 "변경없음"·"잠시 패스"·"정하지 않음" 행(8·17·19·21·25·30·35·75·86·97)
+
 ## SCR-COM-002 공통 ⋮ 메뉴 공통화 — 대기
 - 기능: (사람 지시 2026-11-08 "리팩토링 때 한번에", 명세 FN 추가 없음) A1 `components/KebabMenu.jsx` variant 추가, A2 `CareItemMenu`·A3 `ExpenseMenu`를 KebabMenu 껍데기로, A4 `MainShortcuts`의 `ShortcutMenu`를 KebabMenu로
 - 기다리는 것: 없음
@@ -1405,10 +1456,32 @@
 - 완료 조건 결과: 검증 `통과`(2026-11-14, 1회차, 8080 백엔드), 사람 확인 2026-11-14
 - 연결 남음: 없음
 
-## SCR-ADM-042 1:1 문의 · 캐릭터 무료 재생성 Python 호출 — 대기
+## SCR-ADM-042 1:1 문의 · 캐릭터 무료 재생성 Python 호출 — 끝
 - 기능: 명세 기능 ID 추가 없음. 걸치는 기능 FN-ADM-042-07, FN-MYP-010-23
 - 기다리는 것: 백엔드 SCR-MYP-010 무료 재생성 Python 연결(끝 2026-11-16, develop 병합 전), ai 재생성 입구(ai-39 구현, 첫 생성 success의 photo는 다음 ai 세션)
 - 완료 조건: 캐릭터 오류 처리에서 CHRC0008(무료 재생성) 응답의 `regenJobSn`으로 Python `POST /ai/admin/characters/jobs/{regenJobSn}/regenerate`(관리자 쿠키, 202)를 부른다. 상세의 `regenJobSttsCd`·`regenJobSttsCdNm`으로 재생성 상태를 보여 주고, CHRC0004(실패)면 다시 처리(CHRC0008·CHRC0009) 버튼을 보인다. 진행 중 다시 처리는 409 `PIXEL_CHARACTER_CREATING`, 성공 뒤는 409 `ALREADY_PROCESSED`. 계약은 백엔드 `docs/api/support.md` character-error 행과 `AdminInquiryResponse`
+- 결과(2026-11-16): `features/adminInquiry/api.js` `regenerateAdminCharacter`, `queries.js` 무료 재생성 뒤 AI 서버 호출(실패해도 처리는 성공, 토스트로 알림)·요청·생성 중 5초 다시 받기, `InquiryCharacterError.jsx` 재생성 상태 표시·생성 실패면 다시 처리 버튼. 추가-1 요청·생성 중 로딩 아이콘과 안내. 검증 2회차 통과, 사람 확인
+
+## SCR-ADM-070 아이템 · 그림 교체 뒤 전체 굽기 다시 시작 — 대기
+- 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-070-03
+- 기다리는 것: 백엔드 SCR-ADM-070 아이템 · 굽기를 그림 참고로만(LJS 백엔드, 끝 2026-11-17). 굽기 지시(`bakeHint`)가 요청·응답에서 없어졌고, 굽기 대상은 `bakeImgRefYn: true` 아이템뿐이다. 굽기 대상 아이템(수정 후 true)의 그림을 `PATCH /admin/items/{itemSn}` `image`로 바꾸면 백엔드가 그 아이템의 착용 시트·실패 표시를 지워 모든 캐릭터가 다시 대상이 된다
+- 완료 조건: 수정 모달에서 굽기 대상 아이템의 그림을 바꿔 저장하면 등록 때처럼 전체 굽기(`POST /ai/items/{itemSn}/bake` 반복)가 자동 시작된다. `bakeImgRefYn`만 바꾸면 시작하지 않는다. `features/adminItem/api.js` 목록 주석과 `useItemBake.js` `canBakeItem`에서 `bakeHint`를 뺀다. 이미 그렇게 동작하면 확인만 하고 끝낸다
+
+## SCR-COM-004 알림 드롭다운 · 모두 읽음 — 끝
+- 기능: 명세 기능 ID 새로 필요(FN-COM-004 "모두 읽음", DMS 수정은 사람). 걸치는 기능 FN-COM-004-05
+- 배경: 헤더 알림 목록은 서버가 최대 5건(안 읽음 우선)만 주고 전체 알림 화면이 없다. 미읽음이 5건을 넘으면 배지 숫자와 목록이 어긋나고 뒤 알림은 앞을 읽어야 올라온다(사람 2026-11-17)
+- 기다리는 것: 백엔드 "모두 읽음" API(LJS 백엔드, 2026-11-17 backend 세션에 요청). 제안 계약 `POST /api/notifications/read-all`: 탭과 상관없이 숨김 기준(기본 7일) 안의 내 미읽음 알림 전부 읽음 처리
+- 완료 조건 후보: 패널 머리 "미읽음 N" 옆 [모두 읽음] 버튼(미읽음 0이면 비활성, 요청 중 잠금, 확인창 없음) → 성공하면 배지 0·목록 전부 읽음 모양·토스트 "모두 읽었어요". 성공 뒤 `notificationKeys.unreadCount`·`list` 무효화
+- 열린 질문(`/start`에서 사람이 정함): 5건 제한 유지 + [전체 보기] 화면 추가 / 제한 늘리기(명세 FN-COM-004-05·백엔드 limit 같이 변경)
+- 결정(2026-11-17): FN-COM-004-16(전체 페이지 없음)에 따라 5건 제한·[전체 보기] 없음 유지. 디자인은 화면설계서 기준(추천안대로)
+- 결과(2026-11-17): `features/notification/api.js` `readAllNotifications`, `queries.js` `useReadAllNotifications`(성공 시 미읽음 수·목록 무효화·토스트, 실패 토스트), `layouts/NotificationDropdown.jsx` 머리 [모두 읽음](미읽음 0·요청 중 비활성). 검증 1회차 통과(route 흉내), 사람 확인 2026-11-17
+- 연결 남음: FN-COM-004 모두 읽음 (백엔드 연결 `POST /api/notifications/read-all`, 백엔드 저장소에서 /start) → 해소(2026-11-17, "모두 읽음 서버 연결" 절)
+
+## SCR-COM-004 알림 드롭다운 · 모두 읽음 서버 연결 — 끝
+- 기능: FN-COM-004 모두 읽음(DMS 기능 ID 추가 전, 백엔드 제안 FN-COM-004-17). 걸치는 기능 FN-COM-004-02·05
+- 배경: 백엔드 `POST /api/notifications/read-all`이 develop에 들어옴(백엔드 PR #261). 응답 `{count}`(바꾼 건수, 0건도 200). 프론트 코드는 이미 같은 주소를 부른다
+- 완료 조건: 실제 API로 [모두 읽음] 성공 흐름(토스트 "모두 읽었어요"·배지 사라짐·"미읽음 0"·목록 읽음 모양) 확인. 코드 변경이 필요 없으면 확인만 하고 끝낸다
+- 결과(2026-11-17): 코드 변경 없음. 검증 1회차 통과(8081 실제 API, 미읽음 2건 → `count` 2·토스트·배지 사라짐·미읽음 0, 0건 회원은 버튼 비활성), 사람 확인 2026-11-17
 
 ## 제외
 - FN-AIM-009-01~27: 화면 담당이 JAJ(milestone.md "화면과 API 담당이 다른 곳" — AIM-009 영수증 결과 규칙, 화면은 SCR-HLT-002)

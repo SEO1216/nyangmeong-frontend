@@ -5,7 +5,7 @@ import SkeletonCard from '@/components/SkeletonCard';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import { showToast } from '@/components/toastStore';
 import { PATHS } from '@/routes/paths';
-import { useAcceptInvitation, useInvitation } from '../queries';
+import { useAcceptInvitation, useInvitation, usePetLimit } from '../queries';
 import PetFace from '@/components/PetFace';
 import InvitationClosed from './InvitationClosed';
 import InvitationMismatch from './InvitationMismatch';
@@ -24,17 +24,20 @@ import InvitationRejectDialog from './InvitationRejectDialog';
 const CARD =
   'mx-auto w-full max-w-[560px] overflow-hidden rounded-card border border-line bg-white shadow-depth-sm';
 
-function InvitePetCard({ pet, checked, onToggle }) {
+function InvitePetCard({ pet, checked, disabled, onToggle }) {
   const desc = pet.vrtyDrctInptNm || pet.vrtyNm;
   return (
     <li>
-      <label className="relative flex cursor-pointer flex-col items-center gap-1 rounded-box bg-surface-2 px-5 pt-[22px] pb-4 text-center shadow-[inset_0_0_0_1.5px_var(--color-line)] has-checked:bg-brand-50 has-checked:shadow-[inset_0_0_0_2px_var(--color-brand-500)]">
+      <label
+        className={`relative flex flex-col items-center gap-1 rounded-box bg-surface-2 px-5 pt-[22px] pb-4 text-center shadow-[inset_0_0_0_1.5px_var(--color-line)] has-checked:bg-brand-50 has-checked:shadow-[inset_0_0_0_2px_var(--color-brand-500)] ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+      >
         <input
           type="checkbox"
           checked={checked}
+          disabled={disabled}
           onChange={onToggle}
           aria-label={`${pet.petNm} 수락`}
-          className="absolute top-3 left-3 size-5 cursor-pointer accent-brand-500"
+          className="absolute top-3 left-3 size-5 cursor-[inherit] accent-brand-500"
         />
         <PetFace
           petSn={pet.petSn}
@@ -62,9 +65,12 @@ export default function InvitationAccept({
     isError,
   } = useInvitation(jntBrupInvtnSn);
   const acceptInvitation = useAcceptInvitation();
+  const petLimit = usePetLimit();
   const [isRejecting, setIsRejecting] = useState(false);
   /** null: 손대기 전(초대의 모든 동물이 선택된 상태) */
   const [selectedPetSns, setSelectedPetSns] = useState(null);
+  /** 수락 400이 알려 준 남은 자리(없으면 초대 상세의 remainingPetCount) */
+  const [limitOverride, setLimitOverride] = useState(null);
 
   if (isPending) {
     return (
@@ -88,15 +94,23 @@ export default function InvitationAccept({
   }
 
   const petNames = invitation.pets.map((pet) => pet.petNm).join(', ');
-  const pickedPetSns =
-    selectedPetSns ?? invitation.pets.map((pet) => pet.petSn);
+  /** 더 받을 수 있는 수. 서버가 값을 주지 않으면 제한 없음 */
+  const limit =
+    limitOverride ?? invitation.remainingPetCount ?? invitation.pets.length;
+  const isLimited = limit < invitation.pets.length;
+  /** 불러오는 중이거나 실패하면 undefined라 최대 수 문장을 뺀다 */
+  const petMaxCnt = petLimit.data?.petMaxCnt;
+  const pickedPetSns = (
+    selectedPetSns ?? invitation.pets.map((pet) => pet.petSn)
+  ).slice(0, limit);
 
-  const handleToggle = (petSn) =>
-    setSelectedPetSns(
-      pickedPetSns.includes(petSn)
-        ? pickedPetSns.filter((sn) => sn !== petSn)
-        : [...pickedPetSns, petSn],
-    );
+  const handleToggle = (petSn) => {
+    if (pickedPetSns.includes(petSn)) {
+      setSelectedPetSns(pickedPetSns.filter((sn) => sn !== petSn));
+    } else if (pickedPetSns.length < limit) {
+      setSelectedPetSns([...pickedPetSns, petSn]);
+    }
+  };
 
   const handleAccept = () =>
     acceptInvitation.mutate(
@@ -110,7 +124,14 @@ export default function InvitationAccept({
               ).petSn,
             },
           }),
-        onError: (error) => showToast(error.message),
+        onError: (error) => {
+          showToast(error.message);
+          const remaining = error.data?.remainingPetCount;
+          if (error.code === 'PET_LIMIT_EXCEEDED' && remaining != null) {
+            setLimitOverride(remaining);
+            setSelectedPetSns(pickedPetSns.slice(0, remaining));
+          }
+        },
       },
     );
 
@@ -128,25 +149,46 @@ export default function InvitationAccept({
         </p>
       </div>
       <div className="flex flex-col gap-5 px-[22px] pt-5 pb-[22px]">
+        {isLimited && (
+          <p
+            role="status"
+            className="flex items-start gap-2.5 rounded-lg bg-warn-soft px-3.5 py-3 text-warn"
+          >
+            <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            <span>
+              {petMaxCnt != null &&
+                `반려동물은 공동양육을 포함해 ${petMaxCnt}마리까지예요. `}
+              {limit === 0
+                ? '지금은 더 받을 자리가 없어 수락할 수 없어요'
+                : `${limit}마리 더 받을 수 있어요`}
+            </span>
+          </p>
+        )}
         <ul className="grid grid-cols-2 gap-3">
           {invitation.pets.map((pet) => (
             <InvitePetCard
               key={pet.petSn}
               pet={pet}
               checked={pickedPetSns.includes(pet.petSn)}
+              disabled={
+                !pickedPetSns.includes(pet.petSn) &&
+                pickedPetSns.length >= limit
+              }
               onToggle={() => handleToggle(pet.petSn)}
             />
           ))}
         </ul>
-        <p className="flex items-start gap-2.5 rounded-lg bg-surface-2 px-3.5 py-3 text-muted">
-          <Info
-            className="mt-0.5 size-4 shrink-0 text-subtle"
-            aria-hidden="true"
-          />
-          <span>
-            함께 돌볼 반려동물을 골라 주세요. 빼면 그 반려동물만 거절돼요
-          </span>
-        </p>
+        {limit > 0 && (
+          <p className="flex items-start gap-2.5 rounded-lg bg-surface-2 px-3.5 py-3 text-muted">
+            <Info
+              className="mt-0.5 size-4 shrink-0 text-subtle"
+              aria-hidden="true"
+            />
+            <span>
+              함께 돌볼 반려동물을 골라 주세요. 빼면 그 반려동물만 거절돼요
+            </span>
+          </p>
+        )}
       </div>
       <div className="flex items-center justify-end gap-2 border-t border-line bg-[#fbfcfd] px-7 py-4">
         <Link

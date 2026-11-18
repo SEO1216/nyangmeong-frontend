@@ -27,7 +27,7 @@ export default function ChatInput({
   const [picked, setPicked] = useState(null);
   const [fileError, setFileError] = useState('');
   // 480px 이하는 안내 문구가 잘리므로 짧은 문구를 쓴다
-  const isNarrow = useMediaQuery('(max-width: 480px)');
+  const isNarrow = useMediaQuery('(width < 760px)');
 
   const canSubmit = (picked !== null || text.trim() !== '') && !isDisabled;
 
@@ -164,30 +164,30 @@ export default function ChatInput({
           onChange={handleChange}
           onKeyDown={handleKeyDown}
         />
-        <span className="shrink-0 pb-2.5 text-sm text-[#667374] max-[760px]:hidden">
+        <span className="shrink-0 pb-2.5 text-sm text-subtle max-[760px]:hidden">
           <b>{text.length}</b>/ {MAX_LENGTH.toLocaleString()}
         </span>
         <button
           type="submit"
           aria-label="전송"
           disabled={!canSubmit}
-          className="grid size-10 shrink-0 place-items-center rounded-full bg-[#285a5c] text-white disabled:bg-surface-2 disabled:text-placeholder"
+          className="grid size-10 shrink-0 place-items-center rounded-full bg-brand-500 text-white disabled:bg-surface-2 disabled:text-placeholder"
         >
           <ArrowUp size={20} aria-hidden="true" />
         </button>
       </form>
       {fileError && (
-        <p role="alert" className="mt-2 text-sm text-[#b4473a]">
+        <p role="alert" className="mt-2 text-sm text-danger">
           {fileError}
         </p>
       )}
       {isTrimmed && (
-        <p role="status" className="mt-2 text-center text-sm text-[#b42318]">
+        <p role="status" className="mt-2 text-center text-sm text-danger">
           {MAX_LENGTH.toLocaleString()}자까지 입력할 수 있어요. 넘는 부분은
           잘랐어요
         </p>
       )}
-      <p className="mt-2 text-center text-sm text-[#667374] max-[760px]:mt-1.5 max-[760px]:text-xs break-keep">
+      <p className="mt-2 text-center text-sm text-subtle max-[760px]:mt-1.5 max-[760px]:text-xs break-keep">
         AI 매니저는 진단·의료 판단을 하지 않습니다.
         <br className="hidden max-[760px]:inline" /> 이상 징후가 있으면 수의사와
         상담하세요.

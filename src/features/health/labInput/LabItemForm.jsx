@@ -32,9 +32,9 @@ export default function LabItemForm({ form, errors, isEdit, onChange }) {
             id="lab-kind"
             value="혈액검사"
             readOnly
-            className={`${INPUT_CLASS} bg-[#f4f6f6]! pr-11 text-[#667374]!`}
+            className={`${INPUT_CLASS} bg-surface-2! pr-11 text-subtle!`}
           />
-          <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-[#667374]">
+          <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-subtle">
             고정
           </span>
         </div>

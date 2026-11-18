@@ -15,6 +15,8 @@ import { useAdminPost } from '@/features/adminCommunity/queries';
 import { PATHS } from '@/routes/paths';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 const PAGE_SIZE = 20;
 
@@ -70,12 +72,10 @@ export default function AdminPostDetailPage() {
     }
     if (post.isError) {
       return (
-        <div role="alert" className="flex flex-col items-center gap-3 py-16">
-          <p className="text-base text-subtle">게시글을 불러오지 못했어요.</p>
-          <button type="button" className={BTN_SECONDARY} onClick={handleRetry}>
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message="게시글을 불러오지 못했어요."
+          onRetry={handleRetry}
+        />
       );
     }
 
@@ -128,10 +128,5 @@ export default function AdminPostDetailPage() {
     );
   };
 
-  return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">게시글 상세</h1>
-      {renderBody()}
-    </div>
-  );
+  return <AdminPageFrame title="게시글 상세">{renderBody()}</AdminPageFrame>;
 }

@@ -24,6 +24,16 @@ export const RCRT_STTS_LABEL = {
   [RCRT_STTS.DONE]: '거래완료',
 };
 
+/**
+ * 글의 상태 이름. 거래완료(PCAC0003)인데 매칭 이력이 없으면(matched=false) 일정이 지나 마감된 글이라 「모집 종료」
+ * matched가 없으면(서버가 안 준 경우) 기존대로 「거래완료」
+ */
+export const isClosedWithoutMatch = (post) =>
+  post.rcrtSttsCd === RCRT_STTS.DONE && post.matched === false;
+
+export const getRcrtSttsLabel = (post) =>
+  isClosedWithoutMatch(post) ? '모집 종료' : RCRT_STTS_LABEL[post.rcrtSttsCd];
+
 export const CST_UNIT = { HOUR: 'PCAC0004', CASE: 'PCAC0005' };
 
 export const CST_UNIT_OPTIONS = [

@@ -8,6 +8,7 @@ import {
   PROCESSING_TABS,
 } from '@/features/adminProcessing/processingLabels';
 import AdminForbidden from './AdminForbidden';
+import AdminPageFrame from './AdminPageFrame';
 
 /** 탭 키별 본문 */
 const PANELS = {
@@ -38,8 +39,7 @@ export default function AdminProcessingPage() {
   const handleParamsChange = (next) => setSearchParams(withTab(tab.key, next));
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">처리 현황</h1>
+    <AdminPageFrame title="처리 현황">
       <div
         role="tablist"
         aria-label="처리 종류"
@@ -73,6 +73,6 @@ export default function AdminProcessingPage() {
           renderForbidden={renderForbidden}
         />
       </div>
-    </div>
+    </AdminPageFrame>
   );
 }

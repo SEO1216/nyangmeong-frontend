@@ -8,8 +8,6 @@ export const TEXT_BTN =
 
 export const TEXT_BTN_DEL = 'font-semibold text-muted hover:underline';
 
-export const BTN_SM = 'h-8! px-3!';
-
 export const TAG =
   'inline-flex h-6 items-center rounded-full border border-line bg-surface-2 px-2 text-[13px] text-ink-2';
 

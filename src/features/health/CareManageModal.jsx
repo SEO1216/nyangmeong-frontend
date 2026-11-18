@@ -1,10 +1,16 @@
 import { useRef, useState } from 'react';
 import Modal from '@/components/Modal';
-import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import {
+  BTN_DANGER,
+  BTN_PRIMARY,
+  BTN_SECONDARY,
+  TEXT_ACTION_DANGER,
+} from '@/components/buttonStyles';
 import { showToast } from '@/components/toastStore';
 import CareChipPicker from './CareChipPicker';
 import CareItemFields from './CareItemFields';
 import { CareWarnBox } from './CareShortageNotice';
+import SegmentSwitch from './SegmentSwitch';
 import {
   EMPTY_CARE_FIELDS,
   MIN_CARE_COUNT,
@@ -29,10 +35,21 @@ const toChipValues = (fields) => {
   };
 };
 
+const MODE = { PICK: 'pick', EDIT: 'edit' };
+const MODES = [
+  { cd: MODE.PICK, nm: '고르기' },
+  { cd: MODE.EDIT, nm: '수정' },
+];
+const EDIT_HINT = '고칠 항목을 눌러 주세요';
+
 /**
  * [케어 항목 관리 모달] (※신규 정책)
- * - 왼쪽: 전체 항목 칩 고르기(5개 이상), 오른쪽: 새 항목 만들기·직접 만든 항목 수정
- * - [저장]: 생성 -> 수정 -> 고른 항목 저장 -> 삭제. 실패하면 닫지 않고 남은 단계만 다시 시도
+ * - 왼쪽 맨 위 [고르기 | 수정] 전환(처음 고르기)
+ *   - 고르기: 칩으로 켜고 끔(5개 이상), 오른쪽은 새 항목 만들기
+ *   - 수정: 칩을 누르면 오른쪽에서 고침. 직접 만든 항목은 전체 칸 + [삭제하기], 기본 정기관리는 주기만
+ *   - 상태를 바꾸면 [수정 반영]한 내용은 남고 고치던 칸은 버림
+ * - [삭제하기]: 확인창 뒤 칩만 빠지고 실제 삭제는 [저장하기] 때
+ * - [저장하기]: 생성 -> 수정 -> 고른 항목 저장 -> 삭제. 실패하면 닫지 않고 남은 단계만 다시 시도
  * - isForced: 보이는 항목이 5개 미만이라 자동으로 열린 상태 -> 5개를 맞춰 저장해야 닫힘
  */
 export default function CareManageModal({
@@ -54,6 +71,8 @@ export default function CareManageModal({
   const [removedSns, setRemovedSns] = useState([]);
   const [fields, setFields] = useState(EMPTY_CARE_FIELDS);
   const [editingKey, setEditingKey] = useState(null);
+  const [mode, setMode] = useState(MODE.PICK);
+  const [deletingItem, setDeletingItem] = useState(null);
   const nameRef = useRef(null);
   const newCountRef = useRef(0);
   /** 끝난 저장 단계: 다시 시도할 때 새 항목이 두 번 생기지 않게 보관 */
@@ -71,6 +90,16 @@ export default function CareManageModal({
   const isShort = pickedCount < MIN_CARE_COUNT;
   const editingItem = items.find((item) => item.chipKey === editingKey);
   const canApply = isCareFieldsValid(fields);
+  const isEditMode = mode === MODE.EDIT;
+  /** 기본 정기관리: 주기만 고침 */
+  const isCycleOnly = editingItem?.bscArtclYn === true;
+
+  /** 상태 전환: 반영하지 않은 입력칸은 버림 */
+  const handleModeChange = (nextMode) => {
+    if (nextMode === mode) return;
+    setMode(nextMode);
+    resetPanel();
+  };
 
   const changeFields = (patch) => setFields((prev) => ({ ...prev, ...patch }));
 
@@ -130,6 +159,7 @@ export default function CareManageModal({
     if (careArtclSn != null) setRemovedSns((prev) => [...prev, careArtclSn]);
     setItems((prev) => prev.filter((item) => item.chipKey !== target.chipKey));
     if (editingKey === target.chipKey) resetPanel();
+    setDeletingItem(null);
   };
 
   const handleSave = () => {
@@ -201,7 +231,7 @@ export default function CareManageModal({
           disabled={isShort || saveChanges.isPending}
           onClick={handleSave}
         >
-          저장
+          저장하기
         </button>
       </div>
     </>
@@ -219,7 +249,7 @@ export default function CareManageModal({
       isPending={saveChanges.isPending}
       onClose={onClose}
     >
-      <div className="grid gap-6 px-6 py-5 min-[901px]:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid gap-6 px-6 py-5 min-[1100px]:grid-cols-[minmax(0,1fr)_360px]">
         <div className="flex min-w-0 flex-col gap-4">
           {/** 더 고를 개수 = 5 − 지금 보이는 개수 (※신규 정책) */}
           {isForced && (
@@ -228,74 +258,140 @@ export default function CareManageModal({
               이상 더 골라 주세요.
             </CareWarnBox>
           )}
+          <SegmentSwitch
+            options={MODES}
+            selected={mode}
+            className="w-full max-w-60"
+            onSelect={handleModeChange}
+          />
           <p className="text-muted">
             {petNm}에게 챙겨 줄 케어를 5개 이상 골라요.
           </p>
           <CareChipPicker
             items={items}
             isOn={(item) => item.isOn}
+            isEditMode={isEditMode}
             editingKey={editingKey}
             onToggle={handleToggle}
             onEdit={handleEdit}
-            onDelete={handleDelete}
           />
         </div>
 
-        <section
-          aria-label={editingItem ? '항목 수정' : '새 항목 만들기'}
-          className={`flex flex-col gap-4 self-start rounded-[14px] border bg-surface-2 p-4 ${
-            editingItem ? 'border-brand-500' : 'border-transparent'
-          }`}
-        >
-          <div>
-            <h3 className="font-bold break-keep text-ink">
-              {editingItem
-                ? `항목 수정 · ${editingItem.careArtclNm}`
-                : '새 항목 만들기'}
-            </h3>
-            {!editingItem && (
-              <p className="mt-1 text-sm text-muted">
-                만든 항목은 켜진 상태로 왼쪽에 추가돼요
+        {isEditMode && !editingItem ? (
+          <section
+            aria-label="항목 수정"
+            className="self-start rounded-[14px] border border-transparent bg-surface-2 p-4"
+          >
+            <p className="text-sm text-muted">{EDIT_HINT}</p>
+          </section>
+        ) : (
+          <section
+            aria-label={
+              editingItem
+                ? isCycleOnly
+                  ? '주기 수정'
+                  : '항목 수정'
+                : '새 항목 만들기'
+            }
+            className={`flex flex-col gap-4 self-start rounded-[14px] border bg-surface-2 p-4 ${
+              editingItem ? 'border-brand-500' : 'border-transparent'
+            }`}
+          >
+            <div>
+              <h3 className="font-bold break-keep text-ink">
+                {editingItem
+                  ? `${isCycleOnly ? '주기 수정' : '항목 수정'} · ${editingItem.careArtclNm}`
+                  : '새 항목 만들기'}
+              </h3>
+              {!editingItem && (
+                <p className="mt-1 text-sm text-muted">
+                  만든 항목은 켜진 상태로 왼쪽에 추가돼요
+                </p>
+              )}
+            </div>
+            <CareItemFields
+              fields={fields}
+              isEdit={editingItem?.careArtclSn != null}
+              isCycleOnly={isCycleOnly}
+              lastCmptnYmd={editingItem?.lastCmptnYmd}
+              nameRef={nameRef}
+              onChange={changeFields}
+            />
+            {isCycleOnly && (
+              <p className="text-sm text-muted">
+                기본 항목은 주기만 바꿀 수 있어요
               </p>
             )}
-          </div>
-          <CareItemFields
-            fields={fields}
-            isEdit={editingItem?.careArtclSn != null}
-            lastCmptnYmd={editingItem?.lastCmptnYmd}
-            nameRef={nameRef}
-            onChange={changeFields}
-          />
-          {editingItem ? (
-            <div className="flex gap-2">
+            {editingItem ? (
+              <>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className={`${BTN_SECONDARY} flex-1`}
+                    onClick={() => resetPanel()}
+                  >
+                    수정 취소
+                  </button>
+                  <button
+                    type="button"
+                    className={`${BTN_PRIMARY} flex-1`}
+                    disabled={!canApply}
+                    onClick={handleApplyEdit}
+                  >
+                    수정 반영
+                  </button>
+                </div>
+                {!isCycleOnly && (
+                  <button
+                    type="button"
+                    className={`${TEXT_ACTION_DANGER} self-center`}
+                    onClick={() => setDeletingItem(editingItem)}
+                  >
+                    삭제하기
+                  </button>
+                )}
+              </>
+            ) : (
               <button
                 type="button"
-                className={`${BTN_SECONDARY} flex-1`}
-                onClick={() => resetPanel()}
-              >
-                수정 취소
-              </button>
-              <button
-                type="button"
-                className={`${BTN_PRIMARY} flex-1`}
+                className={`${BTN_PRIMARY} w-full`}
                 disabled={!canApply}
-                onClick={handleApplyEdit}
+                onClick={handleAdd}
               >
-                수정 반영
+                추가
               </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              className={`${BTN_PRIMARY} w-full`}
-              disabled={!canApply}
-              onClick={handleAdd}
-            >
-              추가
-            </button>
-          )}
-        </section>
+            )}
+          </section>
+        )}
       </div>
+
+      {/** 삭제 확인: [삭제하기]를 눌러도 칩만 빠지고 실제 DELETE는 [저장하기] 때 (※신규 정책) */}
+      {deletingItem && (
+        <Modal
+          title={`${deletingItem.careArtclNm}을(를) 삭제할까요?`}
+          description="완료 기록도 함께 사라져요. 모달 아래 [저장하기]를 눌러야 최종으로 삭제돼요."
+          isConfirm
+          onClose={() => setDeletingItem(null)}
+          footer={
+            <>
+              <button
+                type="button"
+                className={BTN_SECONDARY}
+                onClick={() => setDeletingItem(null)}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className={BTN_DANGER}
+                onClick={() => handleDelete(deletingItem)}
+              >
+                삭제하기
+              </button>
+            </>
+          }
+        />
+      )}
     </Modal>
   );
 }

@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import Icon from '@/components/Icon';
 import Modal from '@/components/Modal';
 import Skeleton from '@/components/Skeleton';
-import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import { BTN_PRIMARY, BTN_SECONDARY, CHIP } from '@/components/buttonStyles';
 import { showToast } from '@/components/toastStore';
 import CareChipPicker from '../CareChipPicker';
 import { MIN_CARE_COUNT, isLinkedCareItem } from '../careDue';
@@ -201,7 +201,7 @@ export default function WidgetTutorialModal({
           className={`${BTN_PRIMARY} min-w-20`}
           onClick={isEdit ? saveEdit : () => setStep(3)}
         >
-          {isEdit ? '저장' : '다음'}
+          {isEdit ? '저장하기' : '다음'}
         </button>
       </>
     ) : step === 3 ? (
@@ -409,7 +409,7 @@ function DoneRow({ label, children }) {
 
 function DoneChip({ icon, name }) {
   return (
-    <li className="inline-flex h-9 items-center gap-1.5 rounded-full border border-line bg-white px-3.5 text-ink-2">
+    <li className={`${CHIP} gap-1.5`}>
       <Icon name={icon} className="text-lg text-brand-500" />
       {name}
     </li>

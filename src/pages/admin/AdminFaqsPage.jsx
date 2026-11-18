@@ -11,6 +11,8 @@ import FaqTable from '@/features/adminFaq/FaqTable';
 import { useAdminFaqs, useFaqCategories } from '@/features/adminFaq/queries';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 const PAGE_SIZE = 20;
 
@@ -79,18 +81,10 @@ export default function AdminFaqsPage() {
     const renderList = () => {
       if (faqs.isError) {
         return (
-          <div role="alert" className="flex flex-col items-center gap-3 py-16">
-            <p className="text-base text-subtle">
-              FAQ 목록을 불러오지 못했어요.
-            </p>
-            <button
-              type="button"
-              className={BTN_SECONDARY}
-              onClick={handleRetry}
-            >
-              다시 시도
-            </button>
-          </div>
+          <LoadError
+            message="FAQ 목록을 불러오지 못했어요."
+            onRetry={handleRetry}
+          />
         );
       }
       if (faqs.data.content.length === 0) {
@@ -119,14 +113,10 @@ export default function AdminFaqsPage() {
 
     if (categories.isError) {
       return (
-        <div role="alert" className="flex flex-col items-center gap-3 py-16">
-          <p className="text-base text-subtle">
-            FAQ 카테고리를 불러오지 못했어요.
-          </p>
-          <button type="button" className={BTN_SECONDARY} onClick={handleRetry}>
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message="FAQ 카테고리를 불러오지 못했어요."
+          onRetry={handleRetry}
+        />
       );
     }
 
@@ -153,8 +143,7 @@ export default function AdminFaqsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">FAQ</h1>
+    <AdminPageFrame title="FAQ">
       {renderBody()}
       {editing != null && categories.isSuccess && (
         <FaqFormModal
@@ -163,6 +152,6 @@ export default function AdminFaqsPage() {
           onClose={handleModalClose}
         />
       )}
-    </div>
+    </AdminPageFrame>
   );
 }

@@ -9,6 +9,7 @@ import {
   getNotificationSettings,
   getNotifications,
   getUnreadCount,
+  readAllNotifications,
   readNotification,
   saveNotificationSettings,
 } from './api';
@@ -45,6 +46,21 @@ export const useReadNotification = () => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount });
       queryClient.invalidateQueries({ queryKey: notificationKeys.list });
     },
+  });
+};
+
+export const useReadAllNotifications = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: readAllNotifications,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount });
+      queryClient.invalidateQueries({ queryKey: notificationKeys.list });
+      showToast('모두 읽었어요');
+    },
+    onError: () =>
+      showToast('모두 읽음 처리하지 못했어요. 잠시 뒤 다시 시도해 주세요'),
   });
 };
 

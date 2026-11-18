@@ -3,10 +3,10 @@ import { isForbiddenError } from '@/utils/isForbiddenError';
 import CharacterJobTable from './CharacterJobTable';
 import { CHAR_JOB_STTS, CHAR_JOB_STTS_FAIL } from './processingLabels';
 import ProcessingFilter from './ProcessingFilter';
-import ProcessingListError from './ProcessingListError';
 import ProcessingSkeleton from './ProcessingSkeleton';
 import ProcessingStatCards from './ProcessingStatCards';
 import { useAdminCharacterJobs } from './queries';
+import LoadError from '@/components/LoadError';
 
 const PAGE_SIZE = 20;
 
@@ -48,7 +48,7 @@ export default function CharacterJobPanel({
       <ProcessingSkeleton
         filterClass="h-10 w-full max-w-[620px] max-[760px]:h-[136px]"
         cardCount={5}
-        cardGridClass="min-[761px]:grid-cols-5"
+        cardGridClass="min-[760px]:grid-cols-5"
         cardClass="h-[84px]"
         tableClass="h-[1025px]"
       />
@@ -59,7 +59,7 @@ export default function CharacterJobPanel({
   }
   if (jobs.isError) {
     return (
-      <ProcessingListError
+      <LoadError
         message="캐릭터 생성 현황을 불러오지 못했어요."
         onRetry={() => jobs.refetch()}
       />
@@ -81,7 +81,7 @@ export default function CharacterJobPanel({
         onSearch={handleSearch}
       />
       <ProcessingStatCards
-        className="min-[761px]:grid-cols-5"
+        className="min-[760px]:grid-cols-5"
         items={[
           { key: 'all', label: '전체', value: total },
           ...CHAR_JOB_STTS.map(({ comCd, comCdNm }) => ({

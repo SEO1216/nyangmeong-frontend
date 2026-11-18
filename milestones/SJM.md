@@ -237,6 +237,46 @@
 - 추가 요청(2026-11-16): 초대당 1행·⋮ 메뉴·"일부 수락" 배지, 날짜 문구("N일 후 만료"·"MM-DD 보냄"·"메일로 보냄"), 모바일 배치, 취소·404 안내 카드와 아이콘
 - 연결 남음: 없음
 
+## SCR-MYP-001·002·003·005·040 반려동물 10마리 한도 연결·등록 진입점·[사진 제거] — 끝
+
+- 기능: 명세 기능 ID 추가 없음. FN-MYP-002-01(등록 상한)·003-01(등록)·005-05(수락)·002-02(점 줄 ＋)·001-01(홈 내 반려동물 줄)·040-02·08(프로필 사진)에 걸친다
+- 기다리는 것: 백엔드 `POST /pets` 합계 한도, `GET /caregiver-invitations/{sn}`의 `remainingPetCount`, `POST …/accept` 400 `PET_LIMIT_EXCEEDED`(data `remainingPetCount`)(SJM, 백엔드 PR #250 병합됨)
+- 완료 조건: 등록 카드 "모두 등록했어요" 판정이 주양육 + 공동양육 합계 10. 등록 400 `PET_LIMIT_EXCEEDED`는 서버 문구 토스트. 수락 화면은 `remainingPetCount`까지만 고르고(0이면 수락 불가) 안내, 수락 400이면 data의 남은 자리로 다시 맞춘다. 반려동물 관리 점 줄 ＋를 초록 테두리 원·hover 안내로, 홈 "내 반려동물 N마리" 줄에 [＋ 등록]. 회원정보 수정 [기본 이미지로] → [사진 제거]. `yarn -s lint`, `yarn -s build` 종료 코드 0
+
+- 추가 요청(2026-11-16): `PetEmpty.jsx` 0마리 문구를 "공동양육을 포함해"로(추가-1), 수락 남은 0이면 아래 안내 숨김(추가-2)
+- 연결 남음: 없음
+
+## SCR-MYP-003 반려동물 등록/수정 · 운영 설정값 반려동물 최대 수 표시 — 끝
+
+- 기능: 명세 기능 ID 추가 없음. FN-MYP-003-01 등록 카드 "모두 등록했어요"와 FN-MYP-002-01·FN-MYP-002-06 등록 상한 안내의 "10마리"를 운영 설정값으로 바꾼다
+- 기다리는 것: 백엔드 `GET /pets/limit` → `{petMaxCnt, linkedPetCount, remainingPetCount}` (SJM, 백엔드 끝남)
+- 완료 조건: `PetListPage`·`PetSlide`·`PetEmpty`의 "10마리"와 등록 비활성 판정이 `petMaxCnt`·`remainingPetCount`를 따르고, 불러오는 중·실패 때 숫자를 임의로 보여 주지 않는다. `MAX_OWN_PETS`는 지우지 않는다(`InvitationAccept`·JAJ `PetSwitcher`가 아직 쓴다). `yarn -s lint`, `yarn -s build` 종료 코드 0
+
+## SCR-MYP-005 공동양육자 추가 · 수락 화면 안내 문구를 운영 설정값으로 — 끝
+
+- 기능: 명세 기능 ID 추가 없음. FN-MYP-005-05 수락 화면 안내 문구의 "10마리"를 운영 설정값으로 바꾼다
+- 기다리는 것: 백엔드 `GET /pets/limit`·`GET /caregiver-invitations/{sn}`의 `remainingPetCount`·수락 400 `PET_LIMIT_EXCEEDED`의 `message`와 `data.remainingPetCount` (SJM, 백엔드 끝남)
+- 완료 조건: `InvitationAccept`의 안내 문구가 `MAX_OWN_PETS`가 아니라 `petMaxCnt`(또는 서버 `message`)를 쓴다. 고르는 수는 `remainingPetCount`로 막는다. `yarn -s lint`, `yarn -s build` 종료 코드 0
+
+## SCR-MYP-020 포인트 관리/케어미션 · 포인트 안내 문구를 등급 배점으로 — 끝
+
+- 기능: 명세 기능 ID 추가 없음. 걸치는 기능 FN-MYP-020-05 (미션 포인트 지급 규칙)
+- 기다리는 것: 백엔드 케어미션 개편(쉬움 5·보통 10·어려움 15P, 하루 60P) (SJM, 백엔드 끝남)
+- 완료 조건: `features/point/guide/PointGuide.jsx` 6행 "미션마다 1~20P가 쌓여요"를 등급 배점(쉬움 5·보통 10·어려움 15P, 하루 60P) 기준 문구로 바꾼다. `yarn -s lint`, `yarn -s build` 종료 코드 0
+- 추가 요청: 추가-1 `utils/petCodes.js`의 `MAX_OWN_PETS` 삭제, 추가-2·3 안내 4칸 문구를 1440·1280·390px에서 한 줄로(실제 문구는 핸드오프 기록)
+
+## SCR-MYP-001 마이페이지 홈 · "+ 등록" 삭제 — 끝
+
+- 기능: FN-MYP-001-01
+- 기다리는 것: 없음
+- 내용: 마이페이지 홈 반려동물 영역(features/pet/home/MyPetsSection.jsx) 헤더의 "+ 등록" 버튼을 삭제한다. 0마리 홈의 PetEmpty [반려동물 등록하기]는 관리 화면으로 이동하지 않고 홈에서 바로 등록 모달을 연다(MyPetsSection이 넘기는 onRegister만 바꾼다).
+- 그대로 둘 것:
+  - 반려동물 관리 화면(PetListPage)의 슬라이드 마지막 등록 카드(PetSlide.jsx의 AddSlide)와 점 줄 끝 ＋. 남은 자리가 있으면 지금처럼 나온다
+  - PetEmpty 컴포넌트(반려동물 관리의 0마리 화면 동작 포함)
+  - PetFormModal
+- 완료 조건: yarn -s lint·build 0, /mypage 홈 헤더에 "반려동물 관리 >"만 남음, 회원 58(1마리)의 반려동물 관리 슬라이드 끝 등록 카드에서 등록 모달이 열림, 회원 31(0마리) 홈의 PetEmpty에서 이동 없이 등록 모달이 열림(모달은 저장하지 않고 닫음)
+- 추가 요청: 추가-1 PC(761px 이상)에서 홈 반려동물 카드를 [더보기] 없이 전부 보이기. 모바일(760px 이하)은 처음 6마리와 [더보기] 그대로(회원 94, 9마리로 확인)
+
 ## 제외
 
 - 없음. 마이페이지 명세의 화면은 모두 SJM 담당이다

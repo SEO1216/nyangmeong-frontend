@@ -14,7 +14,7 @@ export default function BottomNav({ menu }) {
   return (
     <nav
       aria-label={`${menu.label} 메뉴`}
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-[#e2e7e7] bg-white pb-[env(safe-area-inset-bottom)] min-[760px]:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white pb-[env(safe-area-inset-bottom)] min-[760px]:hidden"
     >
       <ul className="flex h-[60px]">
         {menu.items.map((item) => {
@@ -25,7 +25,7 @@ export default function BottomNav({ menu }) {
                 to={item.to}
                 aria-current={isActive ? 'page' : undefined}
                 className={`flex h-full items-center justify-center text-[15px] ${
-                  isActive ? 'font-bold text-[#285a5c]' : 'text-[#566465]'
+                  isActive ? 'font-bold text-brand-500' : 'text-muted'
                 }`}
               >
                 {item.label}

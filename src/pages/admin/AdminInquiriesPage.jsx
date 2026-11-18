@@ -10,6 +10,8 @@ import { useAdminInquiries } from '@/features/adminInquiry/queries';
 import { PATHS } from '@/routes/paths';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 const PAGE_SIZE = 20;
 
@@ -79,7 +81,7 @@ export default function AdminInquiriesPage() {
       state: { listSearch: `?${searchParams.toString()}` },
     });
 
-  /** 입력값 오류는 서버 문구, 그 밖의 오류는 다시 시도 */
+  /** 입력값 오류는 서버 문구, 그 밖의 오류는 조회 오류 안내(LoadError) */
   const renderList = () => {
     if (inquiries.error?.code === 'INVALID_INPUT_VALUE') {
       return (
@@ -90,14 +92,10 @@ export default function AdminInquiriesPage() {
     }
     if (inquiries.isError) {
       return (
-        <div role="alert" className="flex flex-col items-center gap-3 py-16">
-          <p className="text-base text-subtle">
-            문의 목록을 불러오지 못했어요.
-          </p>
-          <button type="button" className={BTN_SECONDARY} onClick={handleRetry}>
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message="문의 목록을 불러오지 못했어요."
+          onRetry={handleRetry}
+        />
       );
     }
     if (inquiries.data.content.length === 0) {
@@ -144,8 +142,7 @@ export default function AdminInquiriesPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">1:1 문의</h1>
+    <AdminPageFrame title="1:1 문의">
       <div
         role="tablist"
         aria-label="문의 처리 상태"
@@ -172,6 +169,6 @@ export default function AdminInquiriesPage() {
         })}
       </div>
       <div role="tabpanel">{renderBody()}</div>
-    </div>
+    </AdminPageFrame>
   );
 }

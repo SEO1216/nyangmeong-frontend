@@ -41,9 +41,9 @@ import {
 
 const WIDTH = 'w-[min(760px,calc(100%-32px))]';
 
-const REQUIRED = <span className="ml-0.5 font-bold text-[#b4473a]">*</span>;
+const REQUIRED = <span className="ml-0.5 font-bold text-danger">*</span>;
 const OPTIONAL = (
-  <span className="ml-1 text-[13px] font-medium text-[#667374]">선택</span>
+  <span className="ml-1 text-[13px] font-medium text-subtle">선택</span>
 );
 
 const aiClass = (isAi) => (isAi ? 'border-dashed' : '');
@@ -248,7 +248,7 @@ export default function ReceiptResultStep({
       <FormModal
         icon="receipt_long"
         title="인식 결과 확인"
-        submitLabel="저장"
+        submitLabel="등록하기"
         cancelLabel="다시 촬영하기"
         hasRequiredNote={false}
         widthClassName={WIDTH}
@@ -279,7 +279,7 @@ export default function ReceiptResultStep({
               src={imgSrc}
               pending={isImgPending}
               className="size-full object-cover"
-              fallback={<Icon name="receipt_long" className="text-3xl" />}
+              fallback={<Icon name="receipt_long" className="text-[28px]" />}
             />
           </button>
           <p className="text-sm text-muted">
@@ -289,7 +289,7 @@ export default function ReceiptResultStep({
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-x-4 max-sm:grid-cols-1 max-sm:gap-y-5">
+        <div className="grid grid-cols-2 gap-x-4 max-[760px]:grid-cols-1 max-[760px]:gap-y-5">
           <label className="flex flex-col gap-1.5">
             <span className={LABEL_CLASS}>검진일{REQUIRED}</span>
             <DatePicker

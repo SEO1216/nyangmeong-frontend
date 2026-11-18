@@ -4,7 +4,6 @@ import { generatePath, Link, useLocation, useNavigate } from 'react-router-dom';
 import Avatar from '@/components/Avatar';
 import { TEXT_ACTION, TEXT_ACTION_DANGER } from '@/components/buttonStyles';
 import ConfirmModal from '@/components/ConfirmModal';
-import ImageViewer from '@/components/ImageViewer';
 import LikeButton from '@/components/LikeButton';
 import PostBody from '@/components/PostBody';
 import ReportModal from '@/components/ReportModal';
@@ -13,6 +12,7 @@ import { showToast } from '@/components/toastStore';
 import { PATHS } from '@/routes/paths';
 import { formatDateTime, formatMonthDayDot } from '@/utils/formatDate';
 import { publicFileUrl } from '@/utils/fileUrl';
+import AttachedImages from './AttachedImages';
 import CommentSection from './CommentSection';
 import PostBadges from './PostBadges';
 import {
@@ -38,7 +38,6 @@ export default function PostDetail({ post }) {
   const report = useReportPost();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isReporting, setIsReporting] = useState(false);
-  const [viewerIndex, setViewerIndex] = useState(null);
   const listTo = `${PATHS.COMMUNITY}${state?.listSearch ?? ''}`;
   const isLiked = post.liked;
 
@@ -87,25 +86,7 @@ export default function PostDetail({ post }) {
           </div>
 
           <PostBody content={post.pstCn}>
-            {post.imgs.length > 0 && (
-              <div className="flex flex-col items-center gap-3">
-                {post.imgs.map((img, index) => (
-                  <button
-                    key={img.atchFileSn}
-                    type="button"
-                    aria-label={`첨부 이미지 ${index + 1} 크게 보기`}
-                    onClick={() => setViewerIndex(index)}
-                    className="max-w-full cursor-zoom-in"
-                  >
-                    <img
-                      src={publicFileUrl(img.atchFileSn)}
-                      alt={`첨부 이미지 ${index + 1}`}
-                      className="h-auto max-h-[min(640px,75vh)] w-auto max-w-full rounded-[10px] object-contain"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
+            <AttachedImages imgs={post.imgs} />
           </PostBody>
 
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-[#e2e7e7] pt-4">
@@ -180,18 +161,6 @@ export default function PostDetail({ post }) {
         </section>
       </aside>
 
-      {viewerIndex !== null && (
-        <ImageViewer
-          images={post.imgs.map((img, index) => ({
-            key: img.atchFileSn,
-            src: publicFileUrl(img.atchFileSn),
-            name: `첨부 이미지 ${index + 1}`,
-          }))}
-          index={viewerIndex}
-          onChange={setViewerIndex}
-          onClose={() => setViewerIndex(null)}
-        />
-      )}
       {isDeleting && (
         <ConfirmModal
           title="게시글을 삭제할까요? 삭제한 글은 되돌릴 수 없어요"

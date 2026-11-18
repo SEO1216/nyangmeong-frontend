@@ -1,4 +1,4 @@
-import { ImageIcon } from 'lucide-react';
+import { ImageIcon, LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import ConfirmModal from '@/components/ConfirmModal';
@@ -6,6 +6,11 @@ import Skeleton from '@/components/Skeleton';
 import { showToast } from '@/components/toastStore';
 import { CHARACTER_ERROR_OPTIONS } from './inquiryLabels';
 import { useProcessAdminInquiryCharacterError } from './queries';
+
+/** 무료 재생성 작업 실패(CHRG01): 다시 처리할 수 있다 */
+const REGEN_FAILED_CODE = 'CHRC0004';
+/** 무료 재생성 작업이 끝나지 않은 상태(CHRG01): 요청, 생성 중 */
+const REGEN_RUNNING_CODES = ['CHRC0001', 'CHRC0002'];
 
 /** 접수 시점 캐릭터: 받는 중 undefined, 실패 null */
 function CharacterImage({ url }) {
@@ -35,6 +40,7 @@ function CharacterImage({ url }) {
  * [캐릭터 오류 처리]
  * - 픽셀 캐릭터 문의만: 접수 시점 캐릭터 + [무료 재생성]/[원래 캐릭터 복원] -> 확인 뒤 실행
  * - 처리한 뒤나 회원이 삭제한 문의는 결과만, 버튼 없음
+ * - 무료 재생성이면 재생성 상태도 보이고, 재생성이 실패했으면 버튼을 다시 보인다
  * - imageUrl: 접수 시점 캐릭터 이미지 주소(첨부 이미지와 같은 주소 묶음)
  */
 export default function InquiryCharacterError({ inquiry, imageUrl }) {
@@ -42,8 +48,12 @@ export default function InquiryCharacterError({ inquiry, imageUrl }) {
   const process = useProcessAdminInquiryCharacterError();
 
   const isProcessed = inquiry.charErrPrcsRsltCd != null;
+  const isRegenFailed = inquiry.regenJobSttsCd === REGEN_FAILED_CODE;
+  const isRegenRunning = REGEN_RUNNING_CODES.includes(inquiry.regenJobSttsCd);
   const canProcess =
-    !isProcessed && !inquiry.delYn && inquiry.pixelCharSn != null;
+    (!isProcessed || isRegenFailed) &&
+    !inquiry.delYn &&
+    inquiry.pixelCharSn != null;
 
   const handleOpen = (option) => {
     process.reset();
@@ -57,9 +67,13 @@ export default function InquiryCharacterError({ inquiry, imageUrl }) {
         charErrPrcsRsltCd: selected.value,
       },
       {
-        onSuccess: () => {
+        onSuccess: ({ regenFailed }) => {
           setSelected(null);
-          showToast(`${selected.label}을 실행했어요`);
+          showToast(
+            regenFailed
+              ? '재생성 요청을 보내지 못했어요. 잠시 뒤 상태를 확인해 주세요'
+              : `${selected.label}을 실행했어요`,
+          );
         },
       },
     );
@@ -67,12 +81,33 @@ export default function InquiryCharacterError({ inquiry, imageUrl }) {
   const renderStatus = () => {
     if (isProcessed) {
       return (
-        <p className="text-base text-ink-2">
-          처리 결과:{' '}
-          <span className="font-semibold">
-            {inquiry.charErrPrcsRsltCdNm ?? inquiry.charErrPrcsRsltCd}
-          </span>
-        </p>
+        <div className="flex flex-col gap-1">
+          <p className="text-base text-ink-2">
+            처리 결과:{' '}
+            <span className="font-semibold">
+              {inquiry.charErrPrcsRsltCdNm ?? inquiry.charErrPrcsRsltCd}
+            </span>
+            {inquiry.regenJobSttsCd != null && (
+              <>
+                {' · '}재생성 상태:{' '}
+                <span className="font-semibold">
+                  {inquiry.regenJobSttsCdNm ?? inquiry.regenJobSttsCd}
+                </span>
+                {isRegenRunning && (
+                  <LoaderCircle
+                    className="ml-1 inline-block size-4 animate-spin align-[-3px] text-subtle"
+                    aria-hidden="true"
+                  />
+                )}
+              </>
+            )}
+          </p>
+          {isRegenRunning && (
+            <p role="status" className="text-sm text-subtle">
+              생성이 끝나면 자동으로 바뀌어요
+            </p>
+          )}
+        </div>
       );
     }
     if (inquiry.delYn) {

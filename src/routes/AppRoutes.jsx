@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, lazy } from 'react';
 import { useRoutes } from 'react-router-dom';
 import PageLoading from '@/components/PageLoading';
 import { MEMBER_ROLE } from '@/constants/memberRole';
@@ -6,6 +6,8 @@ import AdminLayout from '@/layouts/AdminLayout';
 import UserLayout from '@/layouts/UserLayout';
 import domainRoutes from './domains';
 import ProtectedRoute from './ProtectedRoute';
+
+const NotFoundPage = lazy(() => import('@/pages/notFound/NotFoundPage'));
 
 /**
  * [라우트 진입점]
@@ -31,6 +33,11 @@ const routes = [
   {
     element: <ProtectedRoute allowedRoles={[MEMBER_ROLE.ADMIN]} />,
     children: [{ element: <AdminLayout />, children: pick('admin', 'admin') }],
+  },
+  /** 없는 주소: 헤더와 안내가 보이게 회원 레이아웃 안에 둔다 */
+  {
+    element: <UserLayout />,
+    children: [{ path: '*', element: <NotFoundPage /> }],
   },
 ];
 

@@ -9,6 +9,8 @@ import AiRouteTable from '@/features/adminAiRoute/AiRouteTable';
 import { useAdminAiRoutes } from '@/features/adminAiRoute/queries';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import AdminPageFrame from './AdminPageFrame';
+import LoadError from '@/components/LoadError';
 
 /** 등록 모달을 연 상태 */
 const NEW_ROUTE = 'new';
@@ -71,18 +73,10 @@ export default function AdminAiRoutesPage() {
   const renderList = () => {
     if (routes.isError) {
       return (
-        <div role="alert" className="flex flex-col items-center gap-3 py-16">
-          <p className="text-base text-subtle">
-            라우팅 매핑표를 불러오지 못했어요.
-          </p>
-          <button
-            type="button"
-            className={BTN_SECONDARY}
-            onClick={() => routes.refetch()}
-          >
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message="라우팅 매핑표를 불러오지 못했어요."
+          onRetry={() => routes.refetch()}
+        />
       );
     }
     if (routes.data.length === 0) {
@@ -116,13 +110,10 @@ export default function AdminAiRoutesPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-2 text-2xl font-bold text-ink">라우팅 매핑표</h1>
-      <p className="mb-5 text-sm leading-[22px] text-subtle">
-        AI 대화창이 지시어를 보고 이동할 화면을 정하는 표예요. 가장 길게 일치한
-        지시어가 먼저고, 길이가 같으면 우선순위가 높은(숫자가 작은) 행이
-        먼저예요.
-      </p>
+    <AdminPageFrame
+      title="라우팅 매핑표"
+      description="AI 대화창이 지시어를 보고 이동할 화면을 정하는 표예요. 가장 길게 일치한 지시어가 먼저고, 길이가 같으면 우선순위가 높은(숫자가 작은) 행이 먼저예요."
+    >
       {renderBody()}
       {editing != null && (
         <AiRouteFormModal
@@ -130,6 +121,6 @@ export default function AdminAiRoutesPage() {
           onClose={() => setEditing(null)}
         />
       )}
-    </div>
+    </AdminPageFrame>
   );
 }

@@ -23,6 +23,7 @@ import {
   getCharacterPreview,
   getInvitation,
   getPet,
+  getPetLimit,
   getLatestWeightRecord,
   getPets,
   getPixelCharacter,
@@ -42,6 +43,7 @@ import {
 export const petKeys = {
   all: ['pets'],
   list: () => ['pets', 'list'],
+  limit: () => ['pets', 'limit'],
   detail: (petSn) => ['pets', petSn],
   lastWeight: (petSn) => ['pets', petSn, 'last-weight'],
   caregivers: (petSn) => ['pets', petSn, 'caregivers'],
@@ -69,6 +71,10 @@ export const invitationKeys = {
 
 export const usePets = () =>
   useQuery({ queryKey: petKeys.list(), queryFn: getPets });
+
+/** 등록 가능 수(운영 설정 최대 수·남은 자리). 불러오기 전·실패 땐 data가 없다 */
+export const usePetLimit = () =>
+  useQuery({ queryKey: petKeys.limit(), queryFn: getPetLimit });
 
 const CHAR_POLL_MS = 4000;
 const CHAR_POLL_LIMIT_MS = 12 * 60 * 1000;
@@ -158,7 +164,10 @@ export const useUpdatePet = () => {
  * 목록만 먼저 다시 읽어 슬라이드가 다른 동물로 넘어가게 한 뒤 그 동물의 쿼리를 지운다.
  */
 const refreshAfterPetGone = async (qc, petSn) => {
-  await qc.invalidateQueries({ queryKey: petKeys.list() });
+  await Promise.all([
+    qc.invalidateQueries({ queryKey: petKeys.list() }),
+    qc.invalidateQueries({ queryKey: petKeys.limit() }),
+  ]);
   qc.removeQueries({ queryKey: petKeys.detail(petSn) });
 };
 
@@ -201,6 +210,7 @@ export const useDeleteCaregiver = () => {
     onSuccess: (_, { petSn }) => {
       qc.invalidateQueries({ queryKey: petKeys.caregivers(petSn) });
       qc.invalidateQueries({ queryKey: petKeys.list() });
+      qc.invalidateQueries({ queryKey: petKeys.limit() });
     },
     /** 이미 해제된 연동이면 목록을 다시 읽어 맞춘다 */
     onError: (error, { petSn }) => {

@@ -64,7 +64,7 @@ export default function OverviewSection({ overview }) {
       <h2 id="dashboard-overview" className="text-lg font-bold text-ink">
         운영 현황
       </h2>
-      <ul className="grid grid-cols-2 gap-3 min-[1101px]:grid-cols-4">
+      <ul className="grid grid-cols-2 gap-3 min-[1100px]:grid-cols-4">
         {cards.map(({ key, label, value, note }) => (
           <li
             key={key}
@@ -84,7 +84,7 @@ export default function OverviewSection({ overview }) {
           </li>
         ))}
       </ul>
-      <div className="grid gap-3 min-[1101px]:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+      <div className="grid gap-3 min-[1100px]:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <DashboardPanel title="최근 가입 회원 5명">
           <DashboardTable
             columns={MEMBER_COLUMNS}

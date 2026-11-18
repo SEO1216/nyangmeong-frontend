@@ -16,7 +16,7 @@ import { useCreateChatRoom } from '@/features/chat/queries';
 import useChatWindow from '@/hooks/useChatWindow';
 
 const headButton =
-  'grid size-11 place-items-center rounded-full text-ink-2 hover:bg-surface-3';
+  'grid size-8 place-items-center rounded-full text-ink-2 hover:bg-surface-3 max-[760px]:size-11';
 
 function ChatModalPanel() {
   const { otoChatRoomSn, pstSn, listPstSn, close, selectRoom } = useChatModal();
@@ -138,7 +138,7 @@ export default function ChatModal() {
 
   return (
     <>
-      <div className="fixed inset-0 z-35 bg-[#0f1723]/45" aria-hidden="true" />
+      <div className="fixed inset-0 z-35 bg-dim/45" aria-hidden="true" />
       <ChatModalPanel />
     </>
   );

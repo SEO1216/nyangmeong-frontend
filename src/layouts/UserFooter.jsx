@@ -13,7 +13,7 @@ const FAX_PLACEHOLDER = '02-0000-0000';
 export default function UserFooter({ className = '' }) {
   return (
     <footer
-      className={`relative border-t border-[#e2e7e7] bg-[#f5f2ee] text-[#566465] ${className}`}
+      className={`relative border-t border-line bg-footer text-muted ${className}`}
     >
       {/** 푸터 윗선 위 장식 띠, 760px 이하는 모바일 전용 그림 */}
       <picture>
@@ -54,16 +54,16 @@ export default function UserFooter({ className = '' }) {
               ))}
             </ul>
           </div>
-          <nav className="ml-auto flex items-center gap-8 font-bold max-[1100px]:order-first max-[1100px]:-mx-8 max-[1100px]:w-[calc(100%+4rem)] max-[1100px]:justify-between max-[1100px]:border-b max-[1100px]:border-[#eae6e0] max-[1100px]:px-24 max-[1100px]:py-5 max-[1100px]:text-lg max-[760px]:-mx-5 max-[760px]:w-[calc(100%+2.5rem)] max-[760px]:gap-3 max-[760px]:px-5 max-[760px]:text-base">
+          <nav className="ml-auto flex items-center gap-8 font-bold max-[1100px]:order-first max-[1100px]:-mx-8 max-[1100px]:w-[calc(100%+4rem)] max-[1100px]:justify-between max-[1100px]:border-b max-[1100px]:border-footer-line max-[1100px]:px-24 max-[1100px]:py-5 max-[1100px]:text-lg max-[760px]:-mx-5 max-[760px]:w-[calc(100%+2.5rem)] max-[760px]:gap-3 max-[760px]:px-5 max-[760px]:text-base">
             <Link to={PATHS.NOTICES}>공지사항</Link>
-            <i className="h-4 w-px bg-[#b9c4c4]" />
+            <i className="h-4 w-px bg-line-strong" />
             <Link to={PATHS.FAQS}>자주하는 질문</Link>
-            <i className="h-4 w-px bg-[#b9c4c4]" />
+            <i className="h-4 w-px bg-line-strong" />
             <Link to={PATHS.INQUIRIES}>1:1 문의</Link>
           </nav>
         </div>
 
-        <hr className="my-6 border-[#eae6e0]" />
+        <hr className="my-6 border-footer-line" />
         <div className="flex items-center justify-between gap-4 text-sm max-[1100px]:flex-col max-[1100px]:items-start max-[1100px]:gap-2 max-[760px]:gap-3">
           <p>
             본 사이트는 팀 [꼬리연구소]의 공동 역량 증명을 위한 포트폴리오

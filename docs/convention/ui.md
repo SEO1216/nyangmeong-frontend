@@ -85,6 +85,14 @@ function CalendarSkeleton() {
 </PageSkeleton>;
 ```
 
+## 화면 폭 분기점
+
+화면 폭 분기점은 390·760·1100px 셋만 쓴다(UI 체크리스트 42, 2026-11-18). 760 미만이 모바일, 1100 이상이 넓은 PC다.
+
+- Tailwind 4의 `max-[N]`은 N 미만, `min-[N]`은 N 이상이다. 짝은 같은 숫자로 쓴다: `max-[760px]:…`와 `min-[760px]:…`. `min-[761px]`처럼 1px 올리면 760px 폭이 어느 쪽에도 들지 않는다.
+- JS(`matchMedia`·`useMediaQuery`)도 같은 경계로 쓴다: `'(width < 760px)'`, `'(width >= 1100px)'`. `(max-width: 760px)`는 760을 포함해 CSS와 1px 어긋난다.
+- 카드 안 배치처럼 부모 폭을 보는 컨테이너 쿼리(`@max-[…]`·`@min-[…]`)는 화면 분기점이 아니라 이 규칙 밖이다.
+
 ## 모바일 바텀 네비
 
 760px 미만에서 메인(랜딩 포함)·플레이스를 뺀 사용자 화면은 푸터를 두지 않고 하단에 바텀 네비를 둔다.
@@ -92,7 +100,7 @@ function CalendarSkeleton() {
 - 항목은 그 화면이 속한 메뉴의 서브 메뉴다. 글자만 쓴다.
 - AI 플로팅 버튼은 바텀 네비 위에 둔다.
 - `layouts/bottomNavMenus.js`의 `paths`는 하위 경로까지 포함한다(`/mypage`면 `/mypage/pets`도). 새 메뉴 영역을 만들면 `{ label, paths, items }`를 추가한다. `UserLayout`이 이 목록으로 푸터를 숨기고 바텀 네비를 둔다.
-- 관리자 화면에는 공통 바텀 네비가 없다. 예외로 운영 설정(`features/setting/admin/SettingForm.jsx`)은 760px 이하에서 묶음을 하단 버튼으로 나눠 고른 묶음만 보인다.
+- 관리자 화면에는 공통 바텀 네비가 없다. 예외로 운영 설정(`features/setting/admin/SettingForm.jsx`)은 760px 미만에서 묶음을 하단 버튼으로 나눠 고른 묶음만 보인다.
 
 ## html/ 디자인 파일
 

@@ -3,12 +3,12 @@ import BoardPagination from '@/components/BoardPagination';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import { OCR_SOURCES } from './processingLabels';
 import ProcessingFilter from './ProcessingFilter';
-import ProcessingListError from './ProcessingListError';
 import ProcessingSkeleton from './ProcessingSkeleton';
 import ProcessingStatCards from './ProcessingStatCards';
 import { useAdminReceipts, useOcrStatuses } from './queries';
 import ReceiptImageModal from './ReceiptImageModal';
 import ReceiptTable from './ReceiptTable';
+import LoadError from '@/components/LoadError';
 
 const PAGE_SIZE = 20;
 
@@ -56,7 +56,7 @@ export default function OcrStatusPanel({
       <ProcessingSkeleton
         filterClass="h-10 w-full max-w-[820px] max-[760px]:h-[184px]"
         cardCount={5}
-        cardGridClass="min-[761px]:grid-cols-5"
+        cardGridClass="min-[760px]:grid-cols-5"
         cardClass="h-[106px]"
         tableClass="h-[1105px]"
       />
@@ -80,14 +80,14 @@ export default function OcrStatusPanel({
         onSearch={handleSearch}
       />
       {receipts.isError ? (
-        <ProcessingListError
+        <LoadError
           message="영수증 OCR 현황을 불러오지 못했어요."
           onRetry={() => receipts.refetch()}
         />
       ) : (
         <>
           <ProcessingStatCards
-            className="min-[761px]:grid-cols-5"
+            className="min-[760px]:grid-cols-5"
             items={[
               { key: 'tot', label: '요청', value: summary.totCnt },
               { key: 'scs', label: '성공', value: summary.scsCnt },

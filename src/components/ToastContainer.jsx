@@ -21,7 +21,7 @@ export default function ToastContainer() {
     <div
       ref={containerRef}
       popover="manual"
-      className="fixed top-auto right-auto bottom-6 left-1/2 z-50 m-0 flex -translate-x-1/2 flex-col gap-2 overflow-visible border-0 bg-transparent p-0 max-[761px]:bottom-[calc(76px+env(safe-area-inset-bottom))]"
+      className="fixed top-auto right-auto bottom-6 left-1/2 z-50 m-0 flex -translate-x-1/2 flex-col gap-2 overflow-visible border-0 bg-transparent p-0 max-[760px]:bottom-[calc(76px+env(safe-area-inset-bottom))]"
       role="status"
       aria-live="polite"
     >

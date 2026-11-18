@@ -14,7 +14,6 @@ import Avatar from '@/components/Avatar';
 import Badge from '@/components/Badge';
 import { TEXT_ACTION, TEXT_ACTION_DANGER } from '@/components/buttonStyles';
 import ConfirmModal from '@/components/ConfirmModal';
-import ImageViewer from '@/components/ImageViewer';
 import LikeButton from '@/components/LikeButton';
 import PostBody from '@/components/PostBody';
 import ReportModal from '@/components/ReportModal';
@@ -30,6 +29,7 @@ import {
   useReportCare,
   useToggleCareLike,
 } from '../careQueries';
+import AttachedImages from '../AttachedImages';
 import CareAreaMap from './CareAreaMap';
 import { CareCheckGuide } from './CareGuideRail';
 import CareSideBox from './CareSideBox';
@@ -46,12 +46,12 @@ const ARTICLE_CLASS =
 
 function InfoRow({ icon, label, children }) {
   return (
-    <div className="grid grid-cols-[120px_minmax(0,1fr)] gap-4 border-b border-line px-1 py-3.5 max-[760px]:grid-cols-[96px_minmax(0,1fr)] max-[760px]:gap-3">
-      <dt className="flex items-center gap-1.5 font-semibold text-ink-2">
+    <div className="col-span-2 grid grid-cols-subgrid">
+      <dt className="flex h-6 min-w-[120px] items-center gap-1.5 font-semibold whitespace-nowrap text-ink-2 max-[760px]:min-w-0">
         {icon}
         {label}
       </dt>
-      <dd className="min-w-0 break-words text-ink">{children}</dd>
+      <dd className="min-w-0 leading-6 break-words text-ink">{children}</dd>
     </div>
   );
 }
@@ -69,7 +69,6 @@ export default function CareDetail({ post }) {
   const remove = useDeleteCare();
   const report = useReportCare();
   const [modal, setModal] = useState('');
-  const [viewerIndex, setViewerIndex] = useState(null);
   const listTo = `${PATHS.COMMUNITY_PETCARE}${state?.listSearch ?? ''}`;
   const isMine = post.owner;
   const isLiked = post.liked;
@@ -105,7 +104,7 @@ export default function CareDetail({ post }) {
         >
           {post.pstTtl}
         </h2>
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pb-1">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line pb-6 max-[760px]:pb-5">
           <p className="flex flex-wrap items-center gap-2 text-sm text-subtle">
             <Avatar
               src={publicFileUrl(post.mbrAtchFileSn)}
@@ -152,30 +151,12 @@ export default function CareDetail({ post }) {
         )}
 
         <PostBody content={post.pstCn}>
-          {post.imgs.length > 0 && (
-            <div className="mb-6 flex flex-col items-center gap-3">
-              {post.imgs.map(({ atchFileSn }, index) => (
-                <button
-                  key={atchFileSn}
-                  type="button"
-                  aria-label={`첨부 이미지 ${index + 1} 크게 보기`}
-                  onClick={() => setViewerIndex(index)}
-                  className="max-w-full cursor-zoom-in"
-                >
-                  <img
-                    src={publicFileUrl(atchFileSn)}
-                    alt={`첨부 이미지 ${index + 1}`}
-                    className="h-auto max-h-[min(640px,75vh)] w-auto max-w-full rounded-[10px] object-contain"
-                  />
-                </button>
-              ))}
-            </div>
-          )}
+          <AttachedImages imgs={post.imgs} className="mb-6" />
           <section aria-labelledby="care-info-title">
             <h3 id="care-info-title" className="text-lg font-bold text-ink">
               돌봄 정보
             </h3>
-            <dl className="mt-3 border-t border-line-strong">
+            <dl className="mt-4 grid grid-cols-[max-content_minmax(0,1fr)] gap-x-4 gap-y-4 max-[760px]:gap-x-3">
               <InfoRow icon={<PawPrint {...iconProps} />} label="반려동물">
                 {formatPetKinds(post).map((line) => (
                   <span key={line} className="block">
@@ -211,7 +192,7 @@ export default function CareDetail({ post }) {
                 </span>
               </InfoRow>
               <InfoRow icon={<Wallet {...iconProps} />} label="비용">
-                <span className="text-lg font-bold tabular-nums">
+                <span className="text-lg leading-6 font-bold tabular-nums">
                   {getCostLabel(post)}
                 </span>
               </InfoRow>
@@ -271,18 +252,6 @@ export default function CareDetail({ post }) {
         <CareCheckGuide />
       </div>
 
-      {viewerIndex !== null && (
-        <ImageViewer
-          images={post.imgs.map(({ atchFileSn }, index) => ({
-            key: atchFileSn,
-            src: publicFileUrl(atchFileSn),
-            name: `첨부 이미지 ${index + 1}`,
-          }))}
-          index={viewerIndex}
-          onChange={setViewerIndex}
-          onClose={() => setViewerIndex(null)}
-        />
-      )}
       {modal === 'delete' && (
         <ConfirmModal
           title="돌봄 요청을 삭제할까요? 삭제한 글은 되돌릴 수 없어요. 이미 나눈 채팅 기록은 그대로 남아요"

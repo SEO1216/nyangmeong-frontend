@@ -2,7 +2,6 @@ import { useSearchParams } from 'react-router-dom';
 import PageSkeleton from '@/components/PageSkeleton';
 import Skeleton from '@/components/Skeleton';
 import SkeletonCard from '@/components/SkeletonCard';
-import DashboardError from '@/features/adminDashboard/DashboardError';
 import {
   DEFAULT_PERIOD_KEY,
   PERIOD_CUSTOM,
@@ -27,6 +26,8 @@ import { PATHS } from '@/routes/paths';
 import { addDays, getTodayYmd } from '@/utils/formatDate';
 import { isForbiddenError } from '@/utils/isForbiddenError';
 import AdminForbidden from './AdminForbidden';
+import LoadError from '@/components/LoadError';
+import AdminPageFrame from './AdminPageFrame';
 
 /** 1:1 문의 미답변 상태(CSCG03) */
 const INQUIRY_STATUS_UNANSWERED = 'CSCC0012';
@@ -135,7 +136,8 @@ export default function AdminHomePage() {
     body = (
       <div className="flex flex-col gap-8">
         {overview.isError ? (
-          <DashboardError
+          <LoadError
+            className="rounded-[14px] border border-line bg-white py-16"
             message="운영 현황과 처리 대기를 불러오지 못했어요."
             onRetry={() => overview.refetch()}
           />
@@ -146,7 +148,8 @@ export default function AdminHomePage() {
           </>
         )}
         {stats.isError ? (
-          <DashboardError
+          <LoadError
+            className="rounded-[14px] border border-line bg-white py-16"
             message="이용 통계를 불러오지 못했어요."
             onRetry={() => stats.refetch()}
           />
@@ -168,12 +171,7 @@ export default function AdminHomePage() {
     );
   }
 
-  return (
-    <div className="mx-auto max-w-[1200px]">
-      <h1 className="mb-5 text-2xl font-bold text-ink">대시보드</h1>
-      {body}
-    </div>
-  );
+  return <AdminPageFrame title="대시보드">{body}</AdminPageFrame>;
 }
 
 /** 첫 진입 로딩: 운영 현황·처리 대기·이용 통계 배치 */
@@ -183,19 +181,19 @@ function DashboardSkeleton() {
       <div className="flex flex-col gap-8">
         <div className="space-y-3">
           <Skeleton className="h-7 w-24" />
-          <div className="grid grid-cols-2 gap-3 min-[1101px]:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 min-[1100px]:grid-cols-4">
             {Array.from({ length: 4 }, (_, index) => (
               <SkeletonCard key={index} className="h-[106px]" />
             ))}
           </div>
-          <div className="grid gap-3 min-[1101px]:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+          <div className="grid gap-3 min-[1100px]:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
             <SkeletonCard className="h-[300px]" />
             <SkeletonCard className="h-[300px]" />
           </div>
         </div>
         <div className="space-y-3">
           <Skeleton className="h-7 w-24" />
-          <div className="grid grid-cols-2 gap-3 min-[761px]:grid-cols-3 min-[1101px]:grid-cols-6">
+          <div className="grid grid-cols-2 gap-3 min-[760px]:grid-cols-3 min-[1100px]:grid-cols-6">
             {Array.from({ length: 6 }, (_, index) => (
               <SkeletonCard key={index} className="h-[106px]" />
             ))}
@@ -206,7 +204,7 @@ function DashboardSkeleton() {
             <Skeleton className="h-7 w-56" />
             <Skeleton className="h-10 w-[260px]" />
           </div>
-          <div className="grid gap-3 min-[1101px]:grid-cols-2">
+          <div className="grid gap-3 min-[1100px]:grid-cols-2">
             <SkeletonCard className="h-[560px]" />
             <SkeletonCard className="h-[560px]" />
             <SkeletonCard className="h-[300px]" />

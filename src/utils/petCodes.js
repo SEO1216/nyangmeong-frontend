@@ -85,9 +85,6 @@ export const COLR_OPTIONS = {
 export const findColrName = (code) =>
   Object.values(COLR).find((colr) => colr.code === code)?.name ?? '';
 
-/** 주양육 동물 등록 상한 */
-export const MAX_OWN_PETS = 10;
-
 /** 주양육·공동양육 구분 (공통코드 생기면 값 맞춤) */
 export const PET_REL = {
   OWNER: 'OWNER',

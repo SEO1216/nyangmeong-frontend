@@ -6,6 +6,7 @@ import Skeleton from '@/components/Skeleton';
 import { showToast } from '@/components/toastStore';
 import { formatDate } from '@/utils/formatDate';
 import { useAssignHealthTip, useHealthTipCandidates } from './queries';
+import LoadError from '@/components/LoadError';
 
 /** 펫정보 게시판·정상 상태 코드 */
 const PET_INFO_BBS_CD = 'CMUC0001';
@@ -66,20 +67,15 @@ export default function HealthTipAssignModal({ onClose }) {
     }
     if (candidates.isError) {
       return (
-        <div role="alert" className="flex flex-col items-center gap-3 py-10">
-          <p className="text-base text-subtle">
-            {candidates.error?.code === 'INVALID_INPUT_VALUE'
+        <LoadError
+          message={
+            candidates.error?.code === 'INVALID_INPUT_VALUE'
               ? candidates.error.message
-              : '게시글을 불러오지 못했어요.'}
-          </p>
-          <button
-            type="button"
-            className={BTN_SECONDARY}
-            onClick={() => candidates.refetch()}
-          >
-            다시 시도
-          </button>
-        </div>
+              : '게시글을 불러오지 못했어요.'
+          }
+          onRetry={() => candidates.refetch()}
+          className="py-10"
+        />
       );
     }
     if (candidates.data.content.length === 0) {

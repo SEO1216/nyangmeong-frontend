@@ -16,7 +16,7 @@ const POPOVER_HEIGHT = 340;
 const EDGE_GAP = 16;
 
 const NAV_BUTTON =
-  'grid size-8 place-items-center rounded-md text-[#566465] hover:enabled:bg-[#f4f6f6] disabled:cursor-not-allowed disabled:text-[#c8d0d0]';
+  'grid size-8 place-items-center rounded-md text-muted hover:enabled:bg-surface-2 disabled:cursor-not-allowed disabled:text-line-strong';
 
 /** 'YYYY-MM-DD'에 날짜 수를 더한다 */
 const addDays = (ymd, days) => {
@@ -184,11 +184,11 @@ export default function DatePicker({
   const borderClass = invalid
     ? `border-danger ${isOpen ? 'shadow-[0_0_0_3px_rgba(180,71,58,0.18)]' : ''}`
     : isOpen
-      ? 'border-[#285a5c] shadow-[0_0_0_3px_rgba(182,218,172,0.5)]'
-      : 'border-[#d3dae2] hover:enabled:border-[#b9c4c4]';
-  let labelColor = 'text-[#8c9899]';
+      ? 'border-brand-500 shadow-[0_0_0_3px_rgba(182,218,172,0.5)]'
+      : 'border-input-line hover:enabled:border-line-strong';
+  let labelColor = 'text-placeholder';
   if (disabled) labelColor = 'text-subtle';
-  else if (value) labelColor = 'text-[#1a3234]';
+  else if (value) labelColor = 'text-ink';
 
   return (
     <div ref={rootRef} className={`relative min-w-0 ${className}`}>
@@ -213,7 +213,7 @@ export default function DatePicker({
         <CalendarDays
           size={18}
           aria-hidden="true"
-          className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-[#566465]"
+          className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-muted"
         />
       </button>
       {isOpen && (
@@ -228,7 +228,7 @@ export default function DatePicker({
             left: offsetX,
             width: popoverWidth,
           }}
-          className={`absolute z-30 rounded-lg border border-[#e2e7e7] bg-white p-3 shadow-[0_12px_32px_-8px_rgba(15,23,35,0.18),0_2px_6px_rgba(15,23,35,0.06)] ${isUp ? 'bottom-[calc(100%+6px)]' : 'top-[calc(100%+6px)]'}`}
+          className={`absolute z-30 rounded-lg border border-line bg-white p-3 shadow-[0_12px_32px_-8px_rgba(15,23,35,0.18),0_2px_6px_rgba(15,23,35,0.06)] ${isUp ? 'bottom-[calc(100%+6px)]' : 'top-[calc(100%+6px)]'}`}
         >
           <div className="mb-2 flex items-center justify-between">
             <button
@@ -242,7 +242,7 @@ export default function DatePicker({
             </button>
             <span
               aria-live="polite"
-              className="text-base leading-tight font-semibold tracking-[-0.03em] text-[#1a3234]"
+              className="text-base leading-tight font-semibold tracking-[-0.03em] text-ink"
             >
               {viewYear}년 {viewMonth + 1}월
             </span>
@@ -260,7 +260,7 @@ export default function DatePicker({
             {[...WEEKDAYS].map((weekday) => (
               <span
                 key={weekday}
-                className="flex h-8 items-center justify-center text-xs leading-tight tracking-[-0.01em] text-[#8c9899]"
+                className="flex h-8 items-center justify-center text-xs leading-tight tracking-[-0.01em] text-placeholder"
               >
                 {weekday}
               </span>
@@ -286,11 +286,11 @@ export default function DatePicker({
                   aria-current={isToday ? 'date' : undefined}
                   onClick={() => pick(ymd)}
                   onMouseEnter={() => setActiveYmd(ymd)}
-                  className={`mx-auto flex size-9 items-center justify-center rounded-md text-sm leading-tight tracking-[-0.03em] disabled:cursor-not-allowed disabled:text-[#c8d0d0] ${
+                  className={`mx-auto flex size-9 items-center justify-center rounded-md text-sm leading-tight tracking-[-0.03em] disabled:cursor-not-allowed disabled:text-line-strong ${
                     isSelected
-                      ? 'bg-[#e9f2f2] font-semibold text-[#1e4a4c]'
-                      : `text-[#1a3234] ${isActive && !isDisabled ? 'bg-[#f4f6f6]' : ''}`
-                  } ${isToday && !isSelected ? 'font-semibold ring-1 ring-[#b9c4c4] ring-inset' : ''}`}
+                      ? 'bg-brand-50 font-semibold text-brand-600'
+                      : `text-ink ${isActive && !isDisabled ? 'bg-surface-2' : ''}`
+                  } ${isToday && !isSelected ? 'font-semibold ring-1 ring-line-strong ring-inset' : ''}`}
                 >
                   {day}
                 </button>

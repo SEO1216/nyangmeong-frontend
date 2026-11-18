@@ -7,11 +7,12 @@ import { showToast } from '@/components/toastStore';
 import Toggle from '@/components/Toggle';
 import { useAdminFaq, useCreateAdminFaq, useUpdateAdminFaq } from './queries';
 import { toFieldErrors } from '@/utils/fieldErrors';
+import LoadError from '@/components/LoadError';
 
 const INPUT_CLASS =
-  'block h-10 w-full rounded-[6px] border border-[#d3dae2] bg-white px-3 text-base leading-[1.4] text-[#1a3234] outline-none hover:border-[#b9c4c4] focus:border-[#285a5c] focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)]';
+  'block h-10 w-full rounded-[6px] border border-input-line bg-white px-3 text-base leading-[1.4] text-ink outline-none hover:border-line-strong focus:border-brand-500 focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)]';
 const TEXTAREA_CLASS =
-  'block min-h-[200px] w-full resize-y rounded-[6px] border border-[#d3dae2] bg-white px-3 py-2 text-base leading-[1.6] text-[#1a3234] outline-none hover:border-[#b9c4c4] focus:border-[#285a5c] focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)]';
+  'block min-h-[200px] w-full resize-y rounded-[6px] border border-input-line bg-white px-3 py-2 text-base leading-[1.6] text-ink outline-none hover:border-line-strong focus:border-brand-500 focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)]';
 
 /** 질문 최대 글자 수 */
 const MAX_QSTN_LENGTH = 200;
@@ -133,7 +134,7 @@ function FaqEditor({ faq, categories, onClose }) {
       footer={
         <FormFooter
           formId={formId}
-          submitLabel={isEdit ? '저장' : '등록'}
+          submitLabel={isEdit ? '저장하기' : '등록하기'}
           isDisabled={!canSubmit}
           isPending={save.isPending}
           onClose={onClose}
@@ -240,7 +241,7 @@ function FaqEditLoader({ faqSn, categories, onClose }) {
       footer={
         <FormFooter
           formId=""
-          submitLabel="저장"
+          submitLabel="저장하기"
           isDisabled
           isPending={false}
           onClose={onClose}
@@ -248,16 +249,11 @@ function FaqEditLoader({ faqSn, categories, onClose }) {
       }
     >
       {detail.isError ? (
-        <div role="alert" className="flex flex-col items-center gap-3 py-10">
-          <p className="text-base text-subtle">{detail.error.message}</p>
-          <button
-            type="button"
-            className={BTN_SECONDARY}
-            onClick={() => detail.refetch()}
-          >
-            다시 시도
-          </button>
-        </div>
+        <LoadError
+          message={detail.error.message}
+          onRetry={() => detail.refetch()}
+          className="py-10"
+        />
       ) : (
         <div className="space-y-5" aria-busy="true">
           <Skeleton className="h-[66px] w-full" />
