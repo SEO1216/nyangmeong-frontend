@@ -2,7 +2,7 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 UI 통일 2-J 회원정보·탈퇴 값·부품 정리 (2026-11-18, 검증 1회차 통과, 사람 확인)
+끝남: SCR-COM-002 UI 통일 2-K 로그인·가입 계열 값·부품 정리 (2026-11-18, 검증 통과, 사람 확인)
 
 ## 다음에 할 것
 
@@ -10,7 +10,9 @@
 
 - 2-J 팀 알림(PR 본문 + 팀 채널, YAY): ① 회원정보 카드 그림자 삭제, 섹션 제목 20 → 18px, 줄 오른쪽 [수정]·[변경]·[연동하기]가 `BTN_SECONDARY`(높이 32 → 40) ② `shared/profileStyles.js`에서 `INPUT`·`LABEL`·`HELP`·`ROW_BTN` 없어짐(입력칸은 `components/formStyles`), `FieldMessage`의 `ErrorText` 없어지고 오류 문구는 공용 `FieldError`(위 여백 6px 생김), `OkText`는 남음 ③ 탈퇴 화면 버튼 `BTN_PRIMARY`·`BTN_SECONDARY`(높이 50 → 40, 둥글기 12 → 6), "안내 닫기" → "닫기", 확인 체크가 공용 `Checkbox` ④ 분기점 640·768 → 760 ⑤ 회원 정보 조회 실패 `LoadError`([다시 시도]) ⑥ 4px 간격, 편집 줄 라벨 `pt-[18px]` → `pt-4`
 - 2-J 참고(검증 보고, 판정 밖): 탈퇴 안내 체크 오류는 체크 전 [계속]이 비활성이라 화면에서 못 띄움(Playwright route로 400을 돌려 확인). `WithdrawResult`는 코드로만 확인. 탈퇴 버튼 반반 폭은 PC만(`min-[760px]:flex-1`)
-- 다음 2 조각 후보(2-J 뒤): 2-K YAY 로그인·가입 계열(`member/login`·`signup`·`password`·`recovery`·`shared/auth*`·`withdraw/WithdrawComplete`, 체크리스트 2·12·71·72·73·83·94·37), 2-L YAY `place`
+- 2-K 팀 알림(PR 본문 + 팀 채널, YAY): ① 로그인·가입·비밀번호 찾기·재설정·재가입 복구·탈퇴 완료 버튼이 `BTN_PRIMARY`·`BTN_SECONDARY` + `w-full`(높이 50 → 40, 둥글기 12 → 6, 15px 굵게 → 16px 600, 떠오르는 hover 없음), 입력칸 옆 버튼도 40px `BTN_SECONDARY` ② `shared/authStyles.js`에서 `PRIMARY_BTN`·`OUTLINE_BTN`·`SIDE_BTN` 없어지고 `TEXT_LINK`만 남음, `shared/AuthCheckBox.jsx` 삭제(공용 `Checkbox`) ③ `AuthField`·보안코드 칸 48px·둥글기 12 → 40px·6px(공용 `INPUT` 값), 라벨 13px → 공용 `LABEL`, `*` → `Required`, 오류 문구 → 공용 `FieldError`(아이콘, 위 여백 6px) ④ 제목 26px → 24px, `AuthNotice` 14px·여백 12 ⑤ 약관 › 누르는 영역 PC 24·모바일 44 ⑥ 문구 "로그인 화면으로"·"로그인 방법 선택으로" → "로그인으로", "인증번호 발송" → "인증번호 보내기", "중복 확인" → "중복확인", SNS 가입 "회원가입 완료" → "회원가입" ⑦ 분기점 768 → 760
+- 2-K 참고(검증 보고, 판정 밖): 기획 K2 grep이 `features/member` 전체라 2-J의 `profileStyles` `SIDE_BTN`(다른 상수) 5줄이 걸림, auth 쪽 0건으로 통과(사람 확인). 빈 값 제출은 [로그인] 비활성이라 오류 문구는 Playwright route로 확인. 보안코드 칸은 코드로만. SNS 로그인 버튼(`SnsLoginButtons`, 48px·둥글기 12)은 사람 결정으로 그대로. `AuthHeading` 모바일 여백 `calc(12vh-67px)`·`calc(12vh-43px)`는 칸·버튼 높이 변경 뒤 다시 계산하지 않음
+- 다음 2 조각 후보(2-K 뒤): 2-L YAY `place`
 - 2-I 팀 알림(PR 본문 + 팀 채널, KSJ): ① 실종 상태 배지가 공용 `Badge`(실종 `rose`·찾았어요 `green` + 테두리, 기간 만료 `gray`) ② 카드·필터 상자·글쓰기 카드·오른쪽 요약 상자·품종 목록 팝업 그림자 삭제, 찾았어요 상자 테두리 `#cfe3d6` → `border-tone-green-fg/12`, 4px 간격(안내 아이콘 `mt-0.5` → `mt-1`) ③ 상세 제목 24/모바일 18px, 찾았어요 상자 제목 18px ④ 글쓰기 "등록하기"·"저장하기", 글 삭제 확인 `isDanger` ⑤ 글쓰기 폼 `formStyles`·`FieldError`·`Required`·공용 `Checkbox`, 제목·본문 글자 수 칸 아래 오른쪽 ⑥ "총 N건" → "전체 N 건", 목록 조회 실패 `LoadError`([다시 시도]) ⑦ 펫돌봄도 같이 바뀜: `care/`가 가져다 쓰는 `missing/BreedCombobox`(공용 `LABEL`·`INPUT`·`FieldError`, 오류 문구 아이콘)·`PlaceSearchModal`·`MissingMap`(지도 위 칩 테두리 `ring`)·`CheckList`(간격)
 - 2-I 참고(검증 보고, 판정 밖): 기간 만료 배지는 화면 못 봄(만료 글은 작성자에게만, 코드로만 확인). 로컬 계정에 내 실종 글이 없어 삭제 확인은 Playwright route로 `owner`를 바꿔 확인, 수정 "저장하기"는 코드로만. 라벨 `leading-[1.4]`는 공용 `LABEL` 값이라 남음
 - 다음 2 조각 후보(2-I 뒤): YAY `member`·`place`(회원 `profileStyles` → `components/formStyles`)

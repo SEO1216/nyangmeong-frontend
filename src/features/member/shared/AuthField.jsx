@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { ArrowBigUpDash, Eye, EyeOff } from 'lucide-react';
 import AiErrorGuide from '@/components/AiErrorGuide';
+import FieldError, { Required } from '@/components/FieldError';
+import { HELP, LABEL } from '@/components/formStyles';
 import useCapsLock from '@/hooks/useCapsLock';
 
+// 칸 겉틀은 공용 INPUT(components/formStyles)과 같은 값. 아이콘·비밀번호 보기 버튼이 같은 테두리 안에 있어 focus-within으로 둔다
 // 포커스 링은 상태별로 하나만 붙인다(초록·빨강 링이 겹치면 초록이 이김, 추가-2)
-const WRAP =
-  'flex h-12 items-center gap-2.5 rounded-xl border bg-white px-3.5 text-sm';
+const WRAP = 'flex h-10 items-center gap-2.5 rounded-md border bg-white px-3';
 
 export default function AuthField({
   id,
@@ -34,21 +36,16 @@ export default function AuthField({
 
   return (
     <div className="relative">
-      <label
-        htmlFor={id}
-        className="mb-1.5 block text-[13px] leading-6 font-semibold text-ink"
-      >
+      <label htmlFor={id} className={`${LABEL} mb-1.5 text-ink`}>
         {label}
-        <span aria-hidden="true" className="ml-0.5 text-danger">
-          *
-        </span>
+        <Required />
       </label>
       <div className="flex gap-2">
         <div
           className={`${WRAP} min-w-0 flex-1 ${
             error
               ? 'border-danger focus-within:ring-error'
-              : 'border-input-line focus-within:border-brand-500 focus-within:ring-focus'
+              : 'border-input-line hover:border-line-strong focus-within:border-brand-500 focus-within:ring-focus'
           } ${readOnly ? 'bg-surface-2' : ''}`}
         >
           {Icon && <Icon className="size-5 shrink-0 text-subtle" />}
@@ -94,23 +91,16 @@ export default function AuthField({
         </p>
       )}
       {/* AI 안내가 붙으면 같은 문구가 두 번 보이지 않게 말풍선만 보인다. 말풍선은 aria-hidden이라 이 문구를 화면 읽기용으로 남긴다 */}
-      {error && (
-        <p
-          id={`${id}-error`}
-          role="alert"
-          className={
-            hasGuide ? 'sr-only' : 'mt-2 text-sm leading-5 text-danger'
-          }
-        >
+      {error && hasGuide && (
+        <p id={`${id}-error`} role="alert" className="sr-only">
           {error}
         </p>
       )}
+      {!hasGuide && <FieldError id={`${id}-error`}>{error}</FieldError>}
       {!error && success && (
-        <p className="mt-2 text-sm leading-5 text-tone-green-fg">{success}</p>
+        <p className="mt-1.5 text-sm leading-5 text-tone-green-fg">{success}</p>
       )}
-      {!error && !success && help && (
-        <p className="mt-2 text-sm leading-5 text-muted">{help}</p>
-      )}
+      {!error && !success && help && <p className={`${HELP} mt-1.5`}>{help}</p>}
       {error && hasGuide && <AiErrorGuide message={error} />}
     </div>
   );
