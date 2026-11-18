@@ -58,7 +58,10 @@ export default function CareProgressBox({ doneCount, totalCount, mission }) {
   );
 }
 
-/** 오늘의 케어미션 상자: 색은 index.css의 warn 토큰만 */
+/**
+ * 오늘의 케어미션 상자: 색은 index.css의 brand 토큰만
+ * - 숫자 줄 아래에 미션 배지 안내 한 줄. 공동양육자의 적립 안내는 숫자 줄에 그대로 (※신규 정책)
+ */
 function MissionBox({ mission }) {
   const percent = toPercent(mission.doneCount, mission.totalCount);
   const hasPoint = mission.prmyYn && mission.earnedPoint != null;
@@ -71,7 +74,7 @@ function MissionBox({ mission }) {
           <Icon name="chevron_right" className="ml-auto text-lg" />
         )}
       </p>
-      <div className="mt-1 mb-3 flex flex-wrap items-baseline justify-between gap-x-3">
+      <div className="mt-1 mb-1 flex flex-wrap items-baseline justify-between gap-x-3">
         <b className={NUMBER_CLASS}>
           {mission.doneCount}
           <small className={UNIT_CLASS}> / {mission.totalCount} 완료</small>
@@ -88,24 +91,28 @@ function MissionBox({ mission }) {
           </span>
         )}
       </div>
+      <p className="mb-3 flex items-center gap-1.5 text-sm font-medium break-keep">
+        <PawPrint className="size-4 flex-none" aria-hidden="true" />
+        배지가 붙은 항목이 오늘의 미션이에요
+      </p>
       <div
         role="progressbar"
         aria-label="오늘 케어미션 진행률"
         aria-valuenow={percent}
         aria-valuemin={0}
         aria-valuemax={100}
-        className={`${BAR_CLASS} bg-warn-line`}
+        className={`${BAR_CLASS} bg-brand-100`}
       >
-        <div className="h-full bg-warn" style={{ width: `${percent}%` }} />
+        <div className="h-full bg-brand-500" style={{ width: `${percent}%` }} />
       </div>
     </>
   );
-  const boxClass = `${BOX_CLASS} bg-warn-soft text-warn`;
+  const boxClass = `${BOX_CLASS} bg-brand-50 text-brand-600`;
 
   return mission.prmyYn ? (
     <Link
       to={PATHS.MYPAGE_POINTS}
-      className={`${boxClass} hover:shadow-[inset_0_0_0_1px_var(--color-warn-line)]`}
+      className={`${boxClass} hover:shadow-[inset_0_0_0_1px_var(--color-brand-100)]`}
     >
       {body}
     </Link>
