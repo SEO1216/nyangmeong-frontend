@@ -2,6 +2,12 @@ import { Megaphone, Newspaper, SearchX } from 'lucide-react';
 import { useState } from 'react';
 import { generatePath, Link, useLocation } from 'react-router-dom';
 import BoardPagination from '@/components/BoardPagination';
+import {
+  BTN_SECONDARY,
+  FILTER_CHIP,
+  FILTER_CHIP_ON,
+} from '@/components/buttonStyles';
+import EmptyResult from '@/components/EmptyResult';
 import SearchInput from '@/components/SearchInput';
 import { PATHS } from '@/routes/paths';
 import { formatDate } from '@/utils/formatDate';
@@ -33,14 +39,14 @@ function NewsCard({ item, search }) {
           newsSn: item.newsSn,
         })}
         state={{ listSearch: search }}
-        className={`group grid gap-x-8 gap-y-3.5 rounded-[14px] border border-[#e2e7e7] bg-white px-7 py-6 shadow-[0_1px_2px_rgba(26,50,52,0.06)] transition hover:border-[#cfe2e2] hover:shadow-[0_4px_12px_rgba(26,50,52,0.1)] max-[760px]:grid-cols-1 max-[760px]:gap-3 max-[760px]:px-4 max-[760px]:pt-4 max-[760px]:pb-[18px] ${hasThumb ? 'grid-cols-[minmax(0,1fr)_200px]' : 'grid-cols-1'}`}
+        className={`group grid gap-x-8 gap-y-4 rounded-[14px] border border-line bg-white px-7 py-6 transition hover:border-brand-100 max-[760px]:grid-cols-1 max-[760px]:gap-3 max-[760px]:px-4 max-[760px]:pt-4 max-[760px]:pb-5 ${hasThumb ? 'grid-cols-[minmax(0,1fr)_200px]' : 'grid-cols-1'}`}
       >
         <div className="min-w-0 max-[760px]:order-2">
           <NewsCategoryBadge news={item} />
-          <h3 className="mt-2.5 truncate text-lg leading-[1.4] font-semibold tracking-[-0.18px] text-[#1a3234] group-hover:text-[#285a5c] max-[760px]:line-clamp-2 max-[760px]:whitespace-normal">
+          <h3 className="mt-3 truncate text-lg leading-[1.4] font-semibold tracking-[-0.01em] text-ink group-hover:text-brand-500 max-[760px]:line-clamp-2 max-[760px]:whitespace-normal">
             {item.newsTtl}
           </h3>
-          <p className="mt-3.5 line-clamp-2 min-h-[3.2em] text-base leading-[1.6] text-[#3d4a4b] max-[760px]:mt-2 max-[760px]:text-sm">
+          <p className="mt-4 line-clamp-2 min-h-[3.2em] text-base leading-[1.6] text-ink-2 max-[760px]:mt-2 max-[760px]:text-sm">
             {hasSummary(item) ? item.newsCn : ''}
           </p>
         </div>
@@ -51,12 +57,12 @@ function NewsCard({ item, search }) {
             className="col-start-2 row-span-2 row-start-1 h-[150px] w-full self-start max-[760px]:order-1 max-[760px]:h-auto max-[760px]:col-start-1 max-[760px]:row-span-1 max-[760px]:row-start-auto max-[760px]:aspect-[16/9] max-[760px]:min-h-0"
           />
         )}
-        <div className="flex items-center gap-x-3 text-sm text-[#667374] max-[760px]:order-3">
-          <span className="inline-flex items-center gap-1.5 font-semibold text-[#3d4a4b]">
+        <div className="flex items-center gap-x-3 text-sm text-subtle max-[760px]:order-3">
+          <span className="inline-flex items-center gap-2 font-semibold text-ink-2">
             {isAdmin ? <Megaphone size={16} /> : <Newspaper size={16} />}
             {getPressName(item)}
           </span>
-          <i className="text-[#b9c4c4] not-italic">·</i>
+          <i className="text-line-strong not-italic">·</i>
           <time>{formatDate(item.pblcnDt)}</time>
         </div>
       </Link>
@@ -78,7 +84,7 @@ export default function NewsList({
   const { content, page, totalPages } = news;
 
   const tabClass = (selected) =>
-    `inline-flex h-10 shrink-0 cursor-pointer items-center rounded-full border px-3.5 text-sm whitespace-nowrap ${selected ? 'border-brand-500 bg-brand-500 font-semibold text-white' : 'border-input-line bg-white font-medium text-ink-2 hover:border-line-strong'}`;
+    `${selected ? FILTER_CHIP_ON : FILTER_CHIP} cursor-pointer`;
 
   return (
     <div className="flex flex-col gap-5">
@@ -86,7 +92,7 @@ export default function NewsList({
         <div
           role="tablist"
           aria-label="뉴스 카테고리"
-          className="flex gap-1.5 overflow-x-auto"
+          className="flex gap-2 overflow-x-auto"
         >
           <button
             type="button"
@@ -123,29 +129,24 @@ export default function NewsList({
 
       <div className="min-w-0">
         {content.length === 0 ? (
-          <div className="flex flex-col items-center gap-2.5 rounded-[14px] border border-[#e2e7e7] bg-white px-6 py-[72px] text-center text-[#566465] shadow-[0_1px_2px_rgba(26,50,52,0.06)]">
-            <span className="grid size-16 place-items-center rounded-full bg-[#f4f6f6] text-[#b9c4c4]">
-              <SearchX size={32} />
-            </span>
-            <p className="text-lg font-bold text-[#1a3234]">
-              해당하는 뉴스가 없어요
-            </p>
-            <p className="text-base">
-              다른 카테고리를 고르거나 검색어를 바꿔 보세요
-            </p>
+          <EmptyResult
+            icon={<SearchX size={32} aria-hidden="true" />}
+            title="해당하는 뉴스가 없어요"
+            description="다른 카테고리를 고르거나 검색어를 바꿔 보세요"
+          >
             <button
               type="button"
               onClick={() => {
                 setInput('');
                 onReset();
               }}
-              className="mt-1 h-9 cursor-pointer rounded-md border border-[#e2e7e7] bg-white px-3 text-sm font-medium text-[#1a3234] hover:bg-[#f4f6f6]"
+              className={BTN_SECONDARY}
             >
               전체 뉴스 보기
             </button>
-          </div>
+          </EmptyResult>
         ) : (
-          <ul className="flex flex-col gap-3 max-[760px]:gap-2.5">
+          <ul className="flex flex-col gap-3 max-[760px]:gap-3">
             {content.map((item) => (
               <NewsCard key={item.newsSn} item={item} search={search} />
             ))}

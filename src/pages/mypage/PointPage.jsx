@@ -62,7 +62,7 @@ export default function PointPage() {
           onGoHealth={() => navigate(PATHS.HEALTH_DIARY)}
           onGoCharacter={goCharacter}
         />
-        <div className="grid items-stretch gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)]">
+        <div className="grid items-stretch gap-5 min-[1100px]:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)]">
           <CareMission
             todayYmd={todayYmd}
             ownPets={ownPets}

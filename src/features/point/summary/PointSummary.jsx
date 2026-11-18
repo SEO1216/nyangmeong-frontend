@@ -1,23 +1,24 @@
 import { CircleCheckBig, ShoppingBag, TrendingUp } from 'lucide-react';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import LoadError from '@/components/LoadError';
 import SkeletonCard from '@/components/SkeletonCard';
 import { formatDate } from '@/utils/formatDate';
 import { usePointBalance } from '../queries';
 import { formatSignedPoint, getPercent } from '../shared/pointFormat';
 
 const STAT =
-  'flex min-w-0 flex-col gap-1.5 border-t border-line-soft px-5 py-[18px] text-left first:border-t-0 hover:bg-surface-2 md:border-t-0 md:border-l md:first:border-l-0 max-[760px]:gap-0.5 max-[760px]:border-t-0 max-[760px]:border-l max-[760px]:px-2.5 max-[760px]:py-3 max-[760px]:first:border-l-0';
+  'flex min-w-0 flex-col gap-2 border-l border-line-soft px-5 py-5 text-left first:border-l-0 hover:bg-surface-2 max-[760px]:gap-1 max-[760px]:px-3 max-[760px]:py-3';
 
 function Stat({ icon, label, value, unit, sub, onClick }) {
   return (
     <button type="button" onClick={onClick} className={STAT}>
-      <span className="flex items-center gap-1.5 text-muted max-[760px]:text-xs max-[760px]:whitespace-nowrap [&>svg]:max-[760px]:hidden">
+      <span className="flex items-center gap-2 text-muted max-[760px]:text-xs max-[760px]:whitespace-nowrap [&>svg]:max-[760px]:hidden">
         {icon}
         {label}
       </span>
-      <span className="text-[30px] leading-[1.1] font-bold tracking-[-0.02em] text-brand-600 tabular-nums max-[760px]:text-lg">
+      <span className="text-[28px] leading-[1.2] font-bold tracking-[-0.02em] text-brand-600 tabular-nums max-[760px]:text-lg">
         {value}
-        <small className="ml-0.5 text-base font-semibold text-muted">
+        <small className="ml-1 text-base font-semibold text-muted">
           {unit}
         </small>
       </span>
@@ -33,7 +34,7 @@ export default function PointSummary({
   onGoHealth,
   onGoCharacter,
 }) {
-  const { data: point, isPending } = usePointBalance();
+  const { data: point, isPending, isError, refetch } = usePointBalance();
 
   if (isPending)
     return (
@@ -41,33 +42,41 @@ export default function PointSummary({
         <SkeletonCard className="h-[297px] max-[760px]:h-[350px]" />
       </div>
     );
+  if (isError)
+    return (
+      <LoadError
+        message="포인트를 불러오지 못했어요"
+        onRetry={refetch}
+        className="rounded-card border border-line bg-white py-16"
+      />
+    );
   if (!point) return null;
 
   return (
     <section
       aria-label="포인트 관리 / 케어미션 요약"
-      className="rounded-card border border-brand-100 bg-brand-50 p-5 md:p-8"
+      className="rounded-card border border-brand-100 bg-brand-50 p-5 min-[760px]:p-8"
     >
       <p className="mb-3 flex items-center justify-end gap-2 text-muted">
         <span className="size-2 rounded-full bg-brand-500" aria-hidden="true" />
         {formatDate(todayYmd)} 기준
       </p>
-      <div className="grid gap-4 lg:grid-cols-[minmax(280px,340px)_minmax(0,1fr)]">
+      <div className="grid gap-4 min-[1100px]:grid-cols-[minmax(280px,340px)_minmax(0,1fr)]">
         <div className="flex items-center gap-5 rounded-modal border border-brand-100 bg-white px-6 py-5">
           <span className="grid size-14 shrink-0 place-items-center rounded-card bg-warn-soft text-warn">
-            <b className="text-3xl leading-none" aria-hidden="true">
+            <b className="text-[28px] leading-none" aria-hidden="true">
               P
             </b>
           </span>
           <div>
             <p className="text-muted">보유 포인트</p>
-            <p className="mt-1 text-[32px] leading-[1.2] font-bold text-brand-600 tabular-nums">
+            <p className="mt-1 text-[28px] leading-[1.2] font-bold text-brand-600 tabular-nums">
               {point.hldPnt.toLocaleString()}
               <small className="ml-1 text-base text-brand-500">P</small>
             </p>
           </div>
         </div>
-        <div className="grid overflow-hidden rounded-modal border border-brand-100 bg-white max-[760px]:grid-cols-3 md:grid-cols-3">
+        <div className="grid grid-cols-3 overflow-hidden rounded-modal border border-brand-100 bg-white">
           <Stat
             icon={<TrendingUp className="size-4" aria-hidden="true" />}
             label="이번 달 적립"
@@ -98,7 +107,7 @@ export default function PointSummary({
           />
         </div>
       </div>
-      <div className="mt-[18px] flex flex-wrap justify-end gap-2">
+      <div className="mt-5 flex flex-wrap justify-end gap-2">
         <button type="button" onClick={onGoHealth} className={BTN_SECONDARY}>
           건강 일지
         </button>
