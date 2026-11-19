@@ -27,7 +27,7 @@ const GUIDE_ITEMS = [
 /** 「자세한 대처 요령 보기」가 여는 공지사항 글(/notices/42) */
 const GUIDE_NOTICE_SN = 42;
 
-const H2_CLASS = 'pb-3 text-lg font-bold text-ink';
+const H2_CLASS = 'pb-2 text-lg font-bold tracking-[-0.01em] text-ink';
 
 /** 실종센터 목록 오른쪽 레일: 실종 체크 가이드 · 최근 실종 소식 · 최근 찾은 반려동물 */
 export default function MissingRail() {
@@ -42,7 +42,7 @@ export default function MissingRail() {
         <CheckList items={GUIDE_ITEMS} />
         <Link
           to={generatePath(PATHS.NOTICE_DETAIL, { ntcMttrSn: GUIDE_NOTICE_SN })}
-          className="mt-1 inline-flex min-h-10 items-center gap-1 text-sm font-semibold text-brand-600 hover:underline"
+          className="mt-3 flex h-10 items-center justify-center gap-1 rounded-md bg-brand-50 text-base font-semibold text-brand-600 hover:bg-brand-100"
         >
           자세한 대처 요령 보기
           <ChevronRight size={16} aria-hidden="true" />
