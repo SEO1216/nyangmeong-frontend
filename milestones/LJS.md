@@ -1428,6 +1428,21 @@
 - 기다리는 것: 없음
 - 완료 조건: 390 폭 목록(예: `/community`, `/notices`)에서 쪽 번호 5개와 [‹]·[›]가 한 줄에 보이고, 6쪽 이상으로 넘어가면 다음 5개 묶음이 보인다 / 760 이상은 지금처럼 10개 / `yarn -s lint`·`yarn -s build` 0
 - 결과(2026-11-19): `components/BoardPagination.jsx`가 `useMediaQuery('(width < 760px)')`로 묶음 5/10. `Pagination.jsx`는 이미 5개라 그대로. 검증 1회차 통과, 사람 확인 2026-11-19
+- 추가 요청(사람 2026-11-19): 추가-1 AI 매니저 첫 말풍선을 회원별 키(`nyangmeong-ai-bubble-seen.<mbrSn>`)로, 메인·비로그인에서는 본 것으로 치지 않음(`hooks/useAiDock.js`·`layouts/FloatingButtons.jsx`). 검증 통과, 사람 확인 2026-11-19
+- 연결 남음: 없음
+
+## SCR-COM-007 AI 매니저 진입 · 같은 주소 이동에도 AI 모달 닫기 — 끝
+- 기능: (사람 요청 2026-11-19, 버그, 명세 기능 ID 추가 없음) 메인에서 연 AI 모달이 헤더 로고(같은 `/main`)를 눌러도 안 닫힘. `AiChatModal`(선택: `ChatModal`)의 닫는 기준을 `pathname` → `location.key`
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 L1~L2 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-19): L1·L2 검증 1회차 통과, 추가-1(다른 주소 이동도 [✕]와 같은 닫는 연출, 플로팅에서 열었으면 작아짐) 2회차 통과, 사람 확인. 기획과 달라진 것: 기획은 다른 주소 이동 때 바로 닫힘이었으나 추가-1로 연출을 탐(메인 검색창에서 연 모달이 메인을 떠나면 돌아갈 자리가 없어 바로 닫힘)
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 2-N · 반려동물 캐릭터 표시 통일 — 끝
+- 기능: (2026-11-19, 사람 요청) 종합 건강기록 배너(JAJ `features/health/summary/SummaryBanner`)의 캐릭터를 마이페이지 반려동물 카드(SJM `features/pet/list/PetSlide`) 모양으로, 캐릭터 목록 조회(`usePixelCharacters`)를 `hooks/` 하나로
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 N1~N4 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-19): N1~N4 검증 2회차 통과(1회차 실패: `/mypage/characters` → `/health` 이동 때 `/pixel-characters` 재요청 → 새 훅에 `staleTime` 5분), 추가-1(등록·초대 수락 뒤 캐릭터 목록 무효화, staleTime 부작용 Playwright 재현 뒤 사람 요청) 통과, 사람 확인. 기획과 달라진 것: 첫 기획(공용 `PetStage`, 배너 모양 기준)을 사람 결정으로 마이페이지 카드 기준·`usePixelCharacters` 통합으로 바꿈
 - 연결 남음: 없음
 
 ## SCR-COM-002 UI 통일 2-M · 남은 옛 분기점·삭제 확인 정리 — 대기
@@ -1576,6 +1591,11 @@
 - 배경: 백엔드 `POST /api/notifications/read-all`이 develop에 들어옴(백엔드 PR #261). 응답 `{count}`(바꾼 건수, 0건도 200). 프론트 코드는 이미 같은 주소를 부른다
 - 완료 조건: 실제 API로 [모두 읽음] 성공 흐름(토스트 "모두 읽었어요"·배지 사라짐·"미읽음 0"·목록 읽음 모양) 확인. 코드 변경이 필요 없으면 확인만 하고 끝낸다
 - 결과(2026-11-17): 코드 변경 없음. 검증 1회차 통과(8081 실제 API, 미읽음 2건 → `count` 2·토스트·배지 사라짐·미읽음 0, 0건 회원은 버튼 비활성), 사람 확인 2026-11-17
+
+## SCR-COM-004 알림 드롭다운 · 목록 더 불러오기 연결 — 끝
+- 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-COM-004-04·05·12·15
+- 기다리는 것: 백엔드 SCR-COM-004 목록 더 불러오기(LJS, 끝, PR은 이 연결 PR과 같이 병합)
+- 완료 조건: 헤더 알림 드롭다운이 `GET /api/notifications?tab=&page=&size=` 응답의 `data.content`를 읽고, 목록 끝에 닿으면 다음 쪽(기본 5건)을 불러오며 `hasNext` false면 멈춘다. `inappNotiSn`으로 중복을 거르고, 탭 변경·다시 열기는 1쪽부터, 0건이면 '새 알림이 없어요'
 
 ## 제외
 - FN-AIM-009-01~27: 화면 담당이 JAJ(milestone.md "화면과 API 담당이 다른 곳" — AIM-009 영수증 결과 규칙, 화면은 SCR-HLT-002)

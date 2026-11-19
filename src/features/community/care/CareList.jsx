@@ -64,7 +64,7 @@ export default function CareList({
         </div>
       </div>
 
-      <div className="flex min-w-0 flex-col gap-8 max-[1101px]:contents">
+      <div className="flex min-w-0 flex-col gap-10 max-[1101px]:contents">
         <div className="max-[1101px]:order-first">{action}</div>
         <CareGuideRail />
       </div>

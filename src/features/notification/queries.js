@@ -1,5 +1,5 @@
 import {
-  keepPreviousData,
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
@@ -29,12 +29,32 @@ export const useUnreadCount = (enabled = true) =>
     refetchInterval: 60_000,
   });
 
-/** tab별 캐시 알림 목록 */
+/** 쪽 경계에서 새 알림이 끼면 같은 행이 두 쪽에 올 수 있어 inappNotiSn으로 거른다 */
+const mergePages = (data) => {
+  const seen = new Set();
+  return data.pages
+    .flatMap((page) => page.content)
+    .filter((notification) => {
+      if (seen.has(notification.inappNotiSn)) return false;
+      seen.add(notification.inappNotiSn);
+      return true;
+    });
+};
+
+/**
+ * tab별 알림 목록(5건씩 더 불러오기)
+ * gcTime 0: 패널을 닫거나 탭을 떠나면 캐시를 버려 다시 열 때 1쪽부터
+ * 탭을 바꾸면 이전 탭 목록을 남기지 않고 첫 쪽 스켈레톤부터(placeholderData 없음)
+ */
 export const useNotifications = (tab) =>
-  useQuery({
+  useInfiniteQuery({
     queryKey: [...notificationKeys.list, tab.key],
-    queryFn: () => getNotifications({ tab: tab.tab }),
-    placeholderData: keepPreviousData,
+    queryFn: ({ pageParam }) =>
+      getNotifications({ tab: tab.tab, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (last) => (last.hasNext ? last.page + 1 : undefined),
+    select: mergePages,
+    gcTime: 0,
   });
 
 export const useReadNotification = () => {
@@ -56,7 +76,8 @@ export const useReadAllNotifications = () => {
     mutationFn: readAllNotifications,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount });
-      queryClient.invalidateQueries({ queryKey: notificationKeys.list });
+      /** 불러온 쪽을 모두 다시 받지 않고 1쪽부터 */
+      queryClient.resetQueries({ queryKey: notificationKeys.list });
       showToast('모두 읽었어요');
     },
     onError: () =>
