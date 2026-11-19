@@ -63,7 +63,7 @@ function CareListSkeleton() {
   return (
     <div
       aria-busy="true"
-      className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 max-[1101px]:grid-cols-1"
+      className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 max-[1100px]:grid-cols-1"
     >
       <div className="flex min-w-0 flex-col gap-5">
         <div
@@ -88,7 +88,7 @@ function CareListSkeleton() {
       </div>
       <div
         aria-hidden="true"
-        className="flex h-[500px] flex-col gap-4 rounded-[14px] border border-line bg-white p-6 max-[1101px]:h-[477px]"
+        className="flex h-[500px] flex-col gap-4 rounded-[14px] border border-line bg-white p-6 max-[1100px]:h-[477px]"
       >
         <Skeleton className="h-5 w-32" />
         <Skeleton className="h-3.5 w-full" />
