@@ -6,6 +6,7 @@ import defaultCatCharacter from '@/assets/pets/default-character-cat-full.png';
 import defaultDogCharacter from '@/assets/pets/default-character-dog-full.png';
 import FileImage from '@/components/FileImage';
 import { useMyPets } from '@/features/health/queries';
+import { useMe } from '@/features/member/queries';
 import PetFormModal from '@/features/pet/list/PetFormModal';
 import { usePetLimit } from '@/features/pet/queries';
 import useAiDock from '@/hooks/useAiDock';
@@ -19,7 +20,9 @@ export default function FloatingButtons({ hasBottomNav = false }) {
   const openAiWindow = useAiWindow();
   const isMain = useLocation().pathname === PATHS.MAIN;
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
-  const dock = useAiDock();
+  const { data: me } = useMe();
+  /** 메인은 버튼을 안 그리므로 말풍선도 본 것으로 치지 않음 */
+  const dock = useAiDock({ mbrSn: me?.mbrSn, shown: !isMain });
   /** AI 버튼 캐릭터: 대표 반려동물만. 대표가 없으면 강아지 기본 캐릭터 */
   const { data: pets } = useMyPets();
   const facePet = pets?.find((pet) => pet.rprsPetYn) ?? null;

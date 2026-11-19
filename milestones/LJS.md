@@ -1428,6 +1428,7 @@
 - 기다리는 것: 없음
 - 완료 조건: 390 폭 목록(예: `/community`, `/notices`)에서 쪽 번호 5개와 [‹]·[›]가 한 줄에 보이고, 6쪽 이상으로 넘어가면 다음 5개 묶음이 보인다 / 760 이상은 지금처럼 10개 / `yarn -s lint`·`yarn -s build` 0
 - 결과(2026-11-19): `components/BoardPagination.jsx`가 `useMediaQuery('(width < 760px)')`로 묶음 5/10. `Pagination.jsx`는 이미 5개라 그대로. 검증 1회차 통과, 사람 확인 2026-11-19
+- 추가 요청(사람 2026-11-19): 추가-1 AI 매니저 첫 말풍선을 회원별 키(`nyangmeong-ai-bubble-seen.<mbrSn>`)로, 메인·비로그인에서는 본 것으로 치지 않음(`hooks/useAiDock.js`·`layouts/FloatingButtons.jsx`). 검증 통과, 사람 확인 2026-11-19
 - 연결 남음: 없음
 
 ## SCR-COM-002 UI 통일 2-M · 남은 옛 분기점·삭제 확인 정리 — 대기
