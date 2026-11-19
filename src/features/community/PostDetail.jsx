@@ -102,19 +102,21 @@ export default function PostDetail({ post }) {
               <i className="mx-1 h-4 w-px bg-line-strong" aria-hidden="true" />
               <SharePanel title={post.pstTtl} />
             </div>
-            <button
-              type="button"
-              aria-label="신고"
-              onClick={() => setIsReporting(true)}
-              className="ml-auto inline-flex min-h-9 cursor-pointer items-center gap-2 px-1 text-sm font-medium text-subtle hover:text-ink max-[760px]:min-h-11 max-[760px]:min-w-11 max-[760px]:justify-center"
-            >
-              <Flag
-                size={20}
-                aria-hidden="true"
-                className="min-[761px]:hidden"
-              />
-              <span className="max-[760px]:hidden">신고</span>
-            </button>
+            {!post.owner && (
+              <button
+                type="button"
+                aria-label="신고"
+                onClick={() => setIsReporting(true)}
+                className="ml-auto inline-flex min-h-9 cursor-pointer items-center gap-2 px-1 text-sm font-medium text-subtle hover:text-ink max-[760px]:min-h-11 max-[760px]:min-w-11 max-[760px]:justify-center"
+              >
+                <Flag
+                  size={20}
+                  aria-hidden="true"
+                  className="min-[761px]:hidden"
+                />
+                <span className="max-[760px]:hidden">신고</span>
+              </button>
+            )}
           </div>
         </article>
 
