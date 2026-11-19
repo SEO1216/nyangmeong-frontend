@@ -1,4 +1,5 @@
-import { Cat, Dog } from 'lucide-react';
+import defaultCatCharacter from '@/assets/pets/default-character-cat-full.png';
+import defaultDogCharacter from '@/assets/pets/default-character-dog-full.png';
 import Badge from '@/components/Badge';
 import { BTN_PRIMARY } from '@/components/buttonStyles';
 import FileImage from '@/components/FileImage';
@@ -41,7 +42,15 @@ export default function CharacterCard({
     ...characterImageOptions(pet.petSn, 'full'),
     enabled: isDone,
   });
-  const Icon = pet.petSeCd === PET_SE.CAT ? Cat : Dog;
+  const defaultImage =
+    pet.petSeCd === PET_SE.CAT ? defaultCatCharacter : defaultDogCharacter;
+  const defaultCharacter = (
+    <img
+      src={defaultImage}
+      alt=""
+      className="size-full object-contain [image-rendering:pixelated]"
+    />
+  );
 
   const stage = (
     <span
@@ -55,7 +64,7 @@ export default function CharacterCard({
       />
       <span
         aria-hidden="true"
-        className={`relative z-[2] grid aspect-square w-[62%] place-items-center text-brand-500 ${
+        className={`relative z-[2] grid aspect-square w-[62%] place-items-center ${
           isError ? 'opacity-55 grayscale' : ''
         } ${isNone || isGenerating ? 'opacity-[0.12] brightness-0' : ''}`}
       >
@@ -64,10 +73,10 @@ export default function CharacterCard({
             src={src}
             pending={isPending}
             className="size-full object-contain [image-rendering:pixelated]"
-            fallback={<Icon className="size-3/5" />}
+            fallback={defaultCharacter}
           />
         ) : (
-          <Icon className="size-3/5" />
+          defaultCharacter
         )}
       </span>
       {isNone && (
