@@ -604,7 +604,9 @@ export default function CareForm({
                   placeholder="예: 보리(몰티즈) 저녁 산책 도와주실 분 구해요"
                   aria-invalid={Boolean(errors.title)}
                   onChange={(event) =>
-                    set({ title: event.target.value }, ['title'])
+                    set({ title: event.target.value.slice(0, TITLE_MAX) }, [
+                      'title',
+                    ])
                   }
                   className={INPUT}
                 />
@@ -630,7 +632,9 @@ export default function CareForm({
                   aria-required="true"
                   aria-invalid={Boolean(errors.body)}
                   onChange={(event) =>
-                    set({ body: event.target.value }, ['body'])
+                    set({ body: event.target.value.slice(0, BODY_MAX) }, [
+                      'body',
+                    ])
                   }
                   className={`${INPUT} max-h-[600px] min-h-[200px] resize-y py-3 leading-[1.7]`}
                 />

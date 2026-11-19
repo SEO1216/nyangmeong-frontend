@@ -208,7 +208,7 @@ export default function BreedCombobox({
             onChange={(event) =>
               onChange({
                 vrtyNm: null,
-                vrtyDrctInptNm: event.target.value,
+                vrtyDrctInptNm: event.target.value.slice(0, 20),
                 typed: '',
               })
             }
