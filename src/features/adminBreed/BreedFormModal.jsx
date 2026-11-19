@@ -86,7 +86,9 @@ export default function BreedFormModal({
   };
 
   const handleSaved = () => {
-    showToast(isEdit ? '품종을 수정했어요' : '품종을 추가했어요');
+    showToast(isEdit ? '품종을 수정했어요' : '품종을 추가했어요', {
+      type: 'success',
+    });
     onClose();
   };
 

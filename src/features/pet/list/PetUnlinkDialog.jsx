@@ -31,11 +31,11 @@ export default function PetUnlinkDialog({ pet, onClose }) {
       {
         onSuccess: () => {
           onClose();
-          showToast('연동을 해제했어요');
+          showToast('연동을 해제했어요', { type: 'success' });
         },
         onError: (error) => {
           if (error.code === 'CAREGIVER_NOT_FOUND') onClose();
-          showToast(error.message);
+          showToast(error.message, { type: 'error' });
         },
       },
     );

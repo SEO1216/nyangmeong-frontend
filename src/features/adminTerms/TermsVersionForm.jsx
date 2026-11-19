@@ -147,7 +147,7 @@ export default function TermsVersionForm({ initialKind, currentByKind }) {
       { ...values, esntlAgreYn },
       {
         onSuccess: (saved) => {
-          showToast('새 버전을 등록했어요');
+          showToast('새 버전을 등록했어요', { type: 'success' });
           navigate(PATHS.ADMIN_TERMS, {
             state: { registeredTerms: saved },
           });

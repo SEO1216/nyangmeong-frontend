@@ -31,9 +31,9 @@ export default function SharePanel({ title, locked = false }) {
     setOpen(false);
     try {
       await navigator.clipboard.writeText(window.location.href);
-      showToast('링크를 복사했어요');
+      showToast('링크를 복사했어요', { type: 'success' });
     } catch {
-      showToast('링크를 복사하지 못했어요');
+      showToast('링크를 복사하지 못했어요', { type: 'error' });
     }
   };
 

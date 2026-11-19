@@ -472,6 +472,7 @@ function PetForm({
       onSuccess: (saved) => {
         showToast(
           isEdit ? '반려동물 정보를 수정했어요.' : '반려동물을 등록했어요.',
+          { type: 'success' },
         );
         if (!isEdit && onCreated) onCreated(saved);
         else onClose();
@@ -484,7 +485,7 @@ function PetForm({
             ),
           );
         } else {
-          showToast(error.message);
+          showToast(error.message, { type: 'error' });
         }
       },
     };

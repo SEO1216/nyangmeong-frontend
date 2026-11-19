@@ -17,7 +17,7 @@ export default function AppointAdminModal({ onClose }) {
   const handleAppoint = () =>
     appoint.mutate(selected.mbrSn, {
       onSuccess: () => {
-        showToast('관리자로 지정했어요');
+        showToast('관리자로 지정했어요', { type: 'success' });
         onClose();
       },
     });

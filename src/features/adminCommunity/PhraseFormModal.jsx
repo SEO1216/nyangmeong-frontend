@@ -43,7 +43,9 @@ export default function PhraseFormModal({ phrase, onClose }) {
   const error = isSubmitted ? validate(phrsCn) : '';
 
   const handleSaved = () => {
-    showToast(isEdit ? '문구를 수정했어요' : '문구를 등록했어요');
+    showToast(isEdit ? '문구를 수정했어요' : '문구를 등록했어요', {
+      type: 'success',
+    });
     onClose();
   };
 

@@ -113,13 +113,16 @@ export default function ItemShopModal({ pet, worn, onClose }) {
       },
       {
         onSuccess: () => {
-          showToast('아이템을 구매했어요. 보관함에서 확인해 보세요');
+          showToast('아이템을 구매했어요. 보관함에서 확인해 보세요', {
+            type: 'success',
+          });
           onClose();
         },
         onError: (error) =>
           showToast(
             PURCHASE_ERRORS[error.code] ??
               '구매하지 못했어요. 잠시 뒤 다시 시도해 주세요',
+            { type: 'error' },
           ),
       },
     );

@@ -48,7 +48,7 @@ function KeywordCategoryCard({ category, keywords }) {
       {
         onSuccess: () => {
           setKwrdCn('');
-          showToast('키워드를 추가했어요');
+          showToast('키워드를 추가했어요', { type: 'success' });
         },
         onError: (error) => setInputError(error.message),
       },
@@ -57,7 +57,7 @@ function KeywordCategoryCard({ category, keywords }) {
 
   const handleDelete = (keyword) =>
     remove.mutate(keyword.kwrdDictSn, {
-      onSuccess: () => showToast('키워드를 삭제했어요'),
+      onSuccess: () => showToast('키워드를 삭제했어요', { type: 'success' }),
     });
 
   const deletingSn = remove.isPending ? remove.variables : null;

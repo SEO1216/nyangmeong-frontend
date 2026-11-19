@@ -30,7 +30,7 @@ export default function ReportRestoreModal({ report, onClose }) {
       { dclrSn: report.dclrSn, chgRsn: trimmedRsn },
       {
         onSuccess: () => {
-          showToast('대상을 복구했어요');
+          showToast('대상을 복구했어요', { type: 'success' });
           onClose();
         },
       },

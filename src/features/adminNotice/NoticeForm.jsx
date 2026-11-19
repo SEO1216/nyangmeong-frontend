@@ -127,6 +127,7 @@ export default function NoticeForm({ notice }) {
     if (next.length > MAX_CN_LENGTH) {
       showToast(
         `내용이 ${MAX_CN_LENGTH.toLocaleString()}자를 넘어 이미지를 넣지 못했어요`,
+        { type: 'error' },
       );
       return;
     }
@@ -144,17 +145,19 @@ export default function NoticeForm({ notice }) {
     if (!file) return;
     const reason = await validateReceiptFile(file);
     if (reason) {
-      showToast(reason);
+      showToast(reason, { type: 'error' });
       return;
     }
     upload.mutate(file, {
       onSuccess: ({ atchFileSn }) => insertImageLine(atchFileSn),
-      onError: (error) => showToast(error.message),
+      onError: (error) => showToast(error.message, { type: 'error' }),
     });
   };
 
   const handleSaved = () => {
-    showToast(isEdit ? '공지를 수정했어요' : '공지를 등록했어요');
+    showToast(isEdit ? '공지를 수정했어요' : '공지를 등록했어요', {
+      type: 'success',
+    });
     navigate(PATHS.ADMIN_NOTICES);
   };
 

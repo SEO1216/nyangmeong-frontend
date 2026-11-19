@@ -73,6 +73,7 @@ export default function InquiryCharacterError({ inquiry, imageUrl }) {
             regenFailed
               ? '재생성 요청을 보내지 못했어요. 잠시 뒤 상태를 확인해 주세요'
               : `${selected.label}을 실행했어요`,
+            { type: regenFailed ? 'error' : 'success' },
           );
         },
       },

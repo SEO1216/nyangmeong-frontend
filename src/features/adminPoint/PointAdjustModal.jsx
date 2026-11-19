@@ -198,6 +198,7 @@ export default function PointAdjustModal({ initialMember, onClose }) {
         onSuccess: () => {
           showToast(
             `${member.mbrNcnm} 님 포인트를 ${direction === 'take' ? '차감' : '지급'}했어요`,
+            { type: 'success' },
           );
           onClose();
         },
