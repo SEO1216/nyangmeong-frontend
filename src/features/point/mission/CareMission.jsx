@@ -96,10 +96,15 @@ function MissionPanel({ pet, isToday }) {
               +{formatPoint(sumGiven(pet.missions))}
             </b>
           </span>
-          <span aria-hidden="true">·</span>
-          <span className="tabular-nums">
-            남은 미션 {restList.length}개 (+{formatPoint(sumScore(restList))})
-          </span>
+          {isToday && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span className="tabular-nums">
+                남은 미션 {restList.length}개 (+
+                {formatPoint(sumScore(restList))})
+              </span>
+            </>
+          )}
         </p>
       </div>
       <ul className="mt-2">
@@ -257,10 +262,12 @@ export default function CareMission({
           ) : (
             <MissionPanel pet={pet} isToday={isToday} />
           )}
-          <p className="mt-2 flex items-center gap-2 text-sm text-subtle">
-            <Info className="size-4 shrink-0" aria-hidden="true" />
-            미완료 미션은 자정에 진행률만큼 정산돼요
-          </p>
+          {isToday && (
+            <p className="mt-2 flex items-center gap-2 text-sm text-subtle">
+              <Info className="size-4 shrink-0" aria-hidden="true" />
+              미완료 미션은 자정에 진행률만큼 정산돼요
+            </p>
+          )}
         </div>
       )}
     </section>

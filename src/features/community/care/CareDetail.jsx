@@ -83,7 +83,7 @@ export default function CareDetail({ post }) {
   const closeModal = () => setModal('');
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-8 max-[1101px]:grid-cols-1 max-[1101px]:gap-10">
+    <div className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-8 max-[1100px]:grid-cols-1 max-[1100px]:gap-10">
       <article className={ARTICLE_CLASS} aria-labelledby="care-title">
         <div className="flex flex-wrap gap-2">
           {post.owner && (
@@ -235,7 +235,7 @@ export default function CareDetail({ post }) {
               <Flag
                 size={20}
                 aria-hidden="true"
-                className="min-[761px]:hidden"
+                className="min-[760px]:hidden"
               />
               <span className="max-[760px]:hidden">신고</span>
             </button>
@@ -254,7 +254,8 @@ export default function CareDetail({ post }) {
 
       {modal === 'delete' && (
         <ConfirmModal
-          title="돌봄 요청을 삭제할까요? 삭제한 글은 되돌릴 수 없어요. 이미 나눈 채팅 기록은 그대로 남아요"
+          title="돌봄 요청을 삭제할까요?"
+          description="삭제한 글은 되돌릴 수 없어요. 이미 나눈 채팅 기록은 그대로 남아요."
           confirmLabel="삭제하기"
           isDanger
           isPending={remove.isPending}
@@ -262,7 +263,7 @@ export default function CareDetail({ post }) {
           onConfirm={() =>
             remove.mutate(post.petPrtcRcrtSn, {
               onSuccess: () => {
-                showToast('게시글을 삭제했어요');
+                showToast('게시글을 삭제했어요', { type: 'success' });
                 navigate(listTo, { replace: true });
               },
             })
@@ -284,7 +285,7 @@ export default function CareDetail({ post }) {
               { pstSn: post.pstSn, ...values },
               {
                 onSuccess: () => {
-                  showToast('신고가 접수되었어요');
+                  showToast('신고가 접수되었어요', { type: 'success' });
                   closeModal();
                 },
               },

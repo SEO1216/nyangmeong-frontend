@@ -45,18 +45,17 @@ export default function SentInvitationDialog({
     mutation.mutate(invitation.jntBrupInvtnSn, {
       onSuccess: () => {
         onClose();
-        showToast(text.done);
+        showToast(text.done, { type: 'success' });
       },
       onError: (error) => {
         onClose();
-        showToast(error.message);
+        showToast(error.message, { type: 'error' });
       },
     });
 
   return (
     <Modal
       isConfirm
-      isSpacious
       isPending={mutation.isPending}
       title={text.title(invitation.invtnTrgtEml)}
       description={`${petNames.join('·')} 초대예요. ${text.description}`}

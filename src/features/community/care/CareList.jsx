@@ -21,7 +21,7 @@ export default function CareList({
   const { content, page, totalPages, totalElements } = posts;
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 max-[1101px]:grid-cols-1">
+    <div className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 max-[1100px]:grid-cols-1">
       <div className="flex min-w-0 flex-col gap-5">
         <CareFilters filters={filters} onChange={onChange} onReset={onReset} />
 
@@ -64,8 +64,8 @@ export default function CareList({
         </div>
       </div>
 
-      <div className="flex min-w-0 flex-col gap-8 max-[1101px]:contents">
-        <div className="max-[1101px]:order-first">{action}</div>
+      <div className="flex min-w-0 flex-col gap-10 max-[1100px]:contents">
+        <div className="max-[1100px]:order-first">{action}</div>
         <CareGuideRail />
       </div>
     </div>

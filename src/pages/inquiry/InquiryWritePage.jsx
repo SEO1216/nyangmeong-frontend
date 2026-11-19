@@ -16,6 +16,7 @@ import {
 } from '@/features/inquiry/queries';
 import { useCharacterImage } from '@/hooks/useCharacterImage';
 import { PATHS } from '@/routes/paths';
+import { profanityFieldsOf } from '@/utils/profanity';
 
 /**
  * 문의 유형 미리 선택
@@ -92,6 +93,7 @@ export default function InquiryWritePage() {
       fieldErrors={error?.fields}
       characterLinked={state?.pixelCharSn != null}
       characterImage={characterImage}
+      profanityFields={profanityFieldsOf(error)}
       onSubmit={handleSubmit}
     />
   );

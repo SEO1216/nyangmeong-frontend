@@ -82,7 +82,9 @@ export default function ExpenseAddModal({ expndYmd, pets, onSaved, onClose }) {
   };
 
   const showSaveError = () =>
-    showToast('저장하지 못했어요. 잠시 후 다시 시도해 주세요');
+    showToast('저장하지 못했어요. 잠시 후 다시 시도해 주세요', {
+      type: 'error',
+    });
   const create = (request) =>
     createExpenses.mutate(request, {
       onSuccess: () => onSaved(request.expndYmd),
@@ -197,7 +199,8 @@ export default function ExpenseAddModal({ expndYmd, pets, onSaved, onClose }) {
       )}
       {isRetakeOpen && (
         <ConfirmModal
-          title="입력한 내용이 사라져요. 다시 촬영할까요?"
+          title="다시 촬영할까요?"
+          description="입력한 내용은 사라져요."
           confirmLabel="다시 촬영"
           onConfirm={handleRetake}
           onCancel={() => setIsRetakeOpen(false)}

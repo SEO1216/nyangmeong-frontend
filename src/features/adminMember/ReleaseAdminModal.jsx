@@ -13,7 +13,7 @@ export default function ReleaseAdminModal({ admin, onClose }) {
   const handleRelease = () =>
     release.mutate(admin.mbrSn, {
       onSuccess: () => {
-        showToast('관리자를 해제했어요');
+        showToast('관리자를 해제했어요', { type: 'success' });
         onClose();
       },
     });

@@ -34,7 +34,9 @@ export default function WearPreview({ pet, itemSns, enabled = true, onFail }) {
   }, [isSuccess, isPlaceholderData, key]);
 
   const handleFail = useEffectEvent((failure) => {
-    showToast(failure.code === 'ITEM_BAKING' ? BAKING_MESSAGE : FAIL_MESSAGE);
+    showToast(failure.code === 'ITEM_BAKING' ? BAKING_MESSAGE : FAIL_MESSAGE, {
+      type: 'error',
+    });
     if (confirmedRef.current) onFail?.(confirmedRef.current);
   });
   useEffect(() => {

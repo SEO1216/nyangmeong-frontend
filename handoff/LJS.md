@@ -2,9 +2,32 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 공용 페이지 이동 · 모바일 쪽 번호 5개(760 미만 `BoardPagination` 5개 묶음) (2026-11-19, 검증 통과, 사람 확인)
+끝남: SCR-COM-002 공용 확인 창 왼쪽 정렬·제목·설명 (2026-11-19, C1~C4 검증 1회차 통과, 사람 확인). 공용 `Modal isConfirm` 왼쪽 정렬·제목 18px 600·설명 16px, 760 이상 버튼 오른쪽 자기 너비·미만 반반, `isSpacious` 삭제, 제목만 있던 창에 설명, 두 문장 제목을 제목·설명으로
 
 ## 다음에 할 것
+
+- SCR-COM-002 공용 확인 창 팀 알림(PR 본문 + 팀 채널, 모두): 확인 창(`ConfirmModal`·`Modal isConfirm`)이 왼쪽 정렬·제목 18px 600·설명 16px 회색, 760px 이상은 버튼이 오른쪽에 자기 너비(최소 80px), 760 미만은 반반 꽉 참. 파일 수정 없이 전체 적용. `Modal`의 `isSpacious` 없어짐(SJM `pet/list` 4곳에서 지움). 문구: 로그아웃 "로그아웃할까요?"+설명, JAJ 건강기록 삭제 창 5곳 설명 추가·일정 삭제·반려동물 변경·다시 촬영 제목/설명 나눔, KSJ 댓글 삭제 설명 추가·게시글·돌봄·실종·문의 삭제·글쓰기 나가기 제목/설명 나눔, SJM 가계부 다시 촬영 제목/설명 나눔. 확인 창 제목은 질문 한 문장, 덧붙일 말은 `description`에 쓰기
+- 확인 창 참고(검증 보고·구현, 판정 밖): `components/ConfirmModal.jsx` 위 주석 "가운데 정렬, 버튼 꽉 참"이 이제 코드와 다름(다음에 이 파일을 고칠 때). `inquiry/InquiryForm.jsx` 나가기 창 제목에 두 문장이 붙어 있음(기획 목록 밖, KSJ). PC 프로필 메뉴로 연 로그아웃 창은 폭을 1100 아래로 줄이면 닫힘(헤더 드롭다운이 사라짐, 전부터)
+- 카카오 지도 키 도메인(2026-11-19 확인): `localhost:5180`·`127.0.0.1`은 등록되지 않아 `sdk.js` 401 `domain mismatched`(5173·5174는 됨). 검증(5180)에서 지도 확인이 필요하면 키 관리자가 카카오 개발자 콘솔 Web 사이트 도메인에 `http://localhost:5180`을 추가해야 함
+
+- SCR-COM-002 UI 통일 2-M 팀 알림(PR 본문 + 팀 채널, KSJ·SJM): 펫돌봄·실종센터·펫이야기 상세(`features/community`·`pages/community/CareListPage`) 분기점이 `min-[760px]`·`max-[1100px]`·`min-[1100px]`로 바뀌어 폭이 정확히 760·1100px일 때 PC 쪽 모양. 가계부 전체 내역(`ExpenseHistory`)도 760px부터 PC. AI 대화 삭제·관리자 라우팅 매핑 삭제 확인 버튼이 빨간색
+- 2-M 참고(검증 보고, 판정 밖): `care/CareFilters.jsx`·`missing/MissingFilters.jsx` 주석 "760px 미만는" 조사 오타(→ "미만은"). 다음에 이 파일을 고칠 때 같이. 2-M 범위 밖으로 남긴 옛 분기점: `components/Card` `sm:`, `adminTableStyles` `md:`, `AuthLayout`·`MyPageHomePage`, 랜딩 `LandingHeader` 768·`ProcessSection` 1280(랜딩 교체 SCR-MAN-002 때)
+
+- SCR-COM-002 공용 토스트 팀 알림(PR 본문 + 팀 채널, 모두, 사람이 전달): `showToast(message, { type: 'success' | 'error' })` 생김(인자 없으면 info). JAJ·SJM·KSJ·YAY 폴더 호출부 약 70개 파일에 type을 붙임(문구·시점 그대로, 일부 Prettier 줄바꿈). 같은 문구 합침·최대 3개, 두 문장은 문장마다 새 줄. 760 미만에서 화면 아래 고정 막대를 새로 만들면 `data-toast-above`(안쪽 요소 기준이면 `="form"`처럼 선택자) 달기
+- SCR-COM-002 토스트 범위 밖(말만): 모바일 캐릭터 꾸미기 저장 줄(`CharacterDecorate.jsx`, SJM)·PC 장소 지도 팝업(`PlacePopup`, YAY)과 토스트 겹침, 닫기 버튼·hover 멈춤
+- SCR-COM-002 토스트 참고(검증 보고, 판정 밖): 기획 T4는 CSS `:has`로 적었으나 구현은 JS로 막대 위 끝을 재서 인라인 `bottom`. Vite HMR 뒤 콘솔에서 `import('/src/components/toastStore.js')`로 부르면 앱과 다른 모듈이라 안 뜸(`performance` 리소스 주소로 import)
+- 버그 후보(KSJ, 검증 중 발견): 390 채팅 모달에서 주소 메시지가 있는 방을 열면 화면이 비어 버림. `features/chat/room/AddressMessage.jsx:25` `kakao.maps.StaticMap is not a constructor`
+- SCR-COM-002 UI 통일 2-N 팀 알림(PR 본문 + 팀 채널, JAJ·SJM): ① 종합 건강기록 배너 캐릭터가 마이페이지 반려동물 카드와 같은 모양(회색 원에 꽉 참, 연한 청록 무대 원 없앰) ② 캐릭터 목록 조회가 `@/hooks/usePixelCharacters` 하나로(키 `pixelCharacterKeys.all`, 5분 `staleTime`). `features/pet`·`features/health`의 `usePixelCharacters`·`getPixelCharacters`·`healthKeys.pixelCharacters` 없어짐. 반려동물 등록·초대 수락 뒤에도 캐릭터 목록을 다시 읽음 ③ 캐릭터 상태가 바뀌는 새 기능을 만들면 `pixelCharacterKeys.all`을 무효화해야 함(안 하면 5분 동안 옛 값)
+- 2-N 사람이 정할 것: 마이페이지 반려동물 카드에도 캐릭터 없는 주양육 동물일 때 점선 [캐릭터 만들기]를 넣을지(배너와 같게, `features/pet/list/PetSlide.jsx`, SJM 화면). 2026-11-19 물었고 답 없이 마무리
+- 2-N 참고(검증 보고, 판정 밖): 캐릭터 없는 동물의 `GET /pets/{petSn}/character-image` 404(백엔드 기본 그림 교체 건, 백엔드 재시작 필요). 추가-1 초대 수락은 route로만 확인(다음 `/health` 진입 때 다시 읽음)
+- SCR-COM-004 알림 목록 더 불러오기 팀 알림·PR(PR 본문): 백엔드 PR #271(`GET /notifications` 쪽 응답 `{ content, page, size, totalElements, totalPages, hasNext }`)과 이 프론트 PR을 같이 병합한다(한쪽만 병합하면 알림 목록을 못 읽음). 드롭다운이 5건씩 끝에서 더 불러오고, 탭을 바꾸면 이전 탭 목록 없이 스켈레톤부터, 로딩 중 목록 칸 스크롤 막음. `useNotifications`가 `useInfiniteQuery`(`gcTime: 0`)로 바뀜
+- SCR-COM-004 사람이 고치는 문서: 공통레이아웃 기능명세서 v0.10 FN-COM-004-05 "최대 5건을 미리보기로" → "5건씩, 목록 끝에서 다음 5건을 더 불러온다", 화면설계서 v0.13 SCR-COM-004 ③ 같은 문구
+- SCR-COM-004 참고(검증 보고, 판정 밖): 목록 맨 아래에서 [모두 읽음]을 누르면 1쪽만 다시 받고, 끝 줄이 보이는 자리여도 다음 쪽을 저절로 부르지 않음(한 번 위로 올렸다 내리면 부름). 0건 탭·두 쪽 겹침·다음 쪽 실패는 Playwright route로만 확인
+
+- SCR-COM-007 참고(검증 보고 2026-11-19, 판정 밖): `pages/ai/AiChatModal.jsx` `useCloseWithMotion` 위 주석 "화면 이동으로 닫을 때는 이 함수를 쓰지 않는다"가 이제 코드와 다름(이제 이동에도 씀). 다음에 이 파일을 고칠 때 한 줄 고친다. 390은 AI 모달이 화면 아래까지 덮어 바텀 네비를 누를 수 없음. 모달 안 바로가기 이동(`handleOpenMain`)은 코드로만 확인
+- SCR-COM-007 팀 알림(PR 본문 + 팀 채널, KSJ): 펫돌봄 채팅 모달(`layouts/ChatModal.jsx`)이 같은 주소로 다시 이동(로고·같은 GNB)해도 닫힌다(`location.key` 기준). 모달이 열린 동안 뒤 화면이 주소의 `?` 값을 바꾸면 모달이 닫히니 그런 화면을 만들면 알려 달라
+
+- 기본 캐릭터 네모 임시 그림 없애기(사람 2026-11-19): 백엔드 `resources/character/default-dog.png`·`default-cat.png`(`CharacterDefaultImage`, 캐릭터 없음·오류 확인 중일 때 `GET /pets/{petSn}/character-image`가 200으로 줌)를 프론트 `src/assets/pets/default-character-*.png` 도트 그림으로 교체 요청. 백엔드 연결: 기본 캐릭터 그림 교체(백엔드 저장소에서 /start). 백엔드 회신 2026-11-19: 1안으로 기획, 사람 승인 대기. 백엔드 그림을 프론트 `default-character-*-full.png`(512 전신)로 바꾸고 얼굴은 기존 자르기로 프론트 얼굴 그림과 같은 픽셀. API 그대로, 프론트 할 일 없음. 백엔드 회신 2 2026-11-19: 교체·검증 통과(face 256·full 512 도트, 캐릭터 없음·오류 확인 중 모두 200), 백엔드 커밋·사람 확인 대기. 프론트에서 보려면 백엔드 재시작 필요
 
 - SCR-COM-002 쪽 번호 팀 알림(PR 본문 + 팀 채널, 모두): 760 미만에서 공용 `BoardPagination` 쪽 번호가 5개 묶음(1~5, 6~10 …)으로 바뀜(760 이상은 10개 그대로). 카드 쪽 번호 `Pagination`은 원래 5개라 그대로
 
@@ -17,7 +40,6 @@
 - 사람이 고치는 문서: 공통레이아웃 기능명세서 FN-COM-002-27 "플로팅 반려동물 등록 버튼" 추가, 화면설계서 SCR-COM-002 ⑦ 플로팅 버튼 설명
 - 참고(검증 보고, 판정 밖): `/mypage/pets`에는 화면의 [반려동물 등록]과 플로팅 버튼이 같은 이름으로 둘 보인다(낭독기에서 헷갈릴 수 있음). 등록 성공 뒤 동작(토스트 후 그 자리)은 공용 DB라 코드로만 확인
 
-- SCR-COM-002 UI 통일 2-M(남은 옛 분기점 KSJ 커뮤니티 7개 파일·SJM `ExpenseHistory` JS, AI 대화·라우팅 매핑 삭제 확인 `isDanger`, `ui.md` 예시 `min-[1101px]`): 2026-11-19 기획했다가 플로팅 등록 버튼 먼저(사람). 다음 `/start`에서 다시 기획
 
 ### SCR-COM-002 UI 통일 다음 단계(사람 결정 2026-11-18)
 

@@ -1,3 +1,5 @@
+import useProfanityErrors from '@/hooks/useProfanityErrors';
+import { isProfanityError, profanityFieldsOf } from '@/utils/profanity';
 import { Info, MapPin } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
@@ -158,6 +160,11 @@ function RadioOption({ checked, onChange, children, name, value }) {
  * - 돌봄 지역은 입력 없음: 고른 장소의 시·군·구와 동에서 결정(서버는 좌표를 역지오코딩). 공개 화면에는 동네까지만 표시
  * - 수정에서는 정확한 좌표가 없어 장소를 다시 고르지 않으면 장소 값 미전송(서버는 유지)
  */
+const PROFANITY_FIELDS = {
+  pstTtl: { key: 'title', id: 'care-title-input' },
+  pstCn: { key: 'body', id: 'care-body' },
+};
+
 export default function CareForm({
   initial,
   mode,
@@ -174,6 +181,11 @@ export default function CareForm({
   const { data: minWage } = useMinimumWage();
   const [values, setValues] = useState(initial);
   const [errors, setErrors] = useState({});
+  useProfanityErrors(
+    profanityFieldsOf(submitError),
+    PROFANITY_FIELDS,
+    setErrors,
+  );
   const [isPlaceOpen, setIsPlaceOpen] = useState(false);
   /** 장소를 다시 고르면 그때의 서버 오류는 장소 칸에서 지운다 */
   const [placeSeenError, setPlaceSeenError] = useState(null);
@@ -200,7 +212,11 @@ export default function CareForm({
         ? minWageMessage(minWage)
         : submitError.message
       : '');
-  const errorMessage = !isRegionError && !isWageError && submitError?.message;
+  const errorMessage =
+    !isRegionError &&
+    !isWageError &&
+    !isProfanityError(submitError) &&
+    submitError?.message;
   const isDirty = snapshot(values) !== initialSnap;
 
   useEffect(() => {
@@ -339,7 +355,7 @@ export default function CareForm({
     : '아직 고르지 않았어요';
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-8 max-[1101px]:grid-cols-1 max-[1101px]:gap-6">
+    <div className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-8 max-[1100px]:grid-cols-1 max-[1100px]:gap-6">
       <section
         aria-labelledby="care-form-title"
         className="rounded-[14px] border border-line bg-white px-9 pt-8 pb-7 max-[760px]:px-5 max-[760px]:pt-6 max-[760px]:pb-5"

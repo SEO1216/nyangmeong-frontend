@@ -21,6 +21,6 @@ export const useSaveMainShortcuts = () => {
     mutationFn: saveMainShortcuts,
     onSuccess: (shortcuts) =>
       queryClient.setQueryData(dashboardKeys.shortcuts, shortcuts),
-    onError: (error) => showToast(error.message),
+    onError: (error) => showToast(error.message, { type: 'error' }),
   });
 };

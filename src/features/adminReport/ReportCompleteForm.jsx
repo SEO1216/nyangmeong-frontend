@@ -46,7 +46,7 @@ export default function ReportCompleteForm({ report, onReject }) {
           suspnRsn: trimmedRsn,
         }),
       },
-      { onSuccess: () => showToast('신고를 처리했어요') },
+      { onSuccess: () => showToast('신고를 처리했어요', { type: 'success' }) },
     );
 
   return (

@@ -93,7 +93,7 @@ function NewsCollectButton() {
   const handleConfirm = () =>
     run.mutate(NEWS_COLLECT_BTCH_SE_CD, {
       onSuccess: () => {
-        showToast('뉴스 수집을 시작했어요');
+        showToast('뉴스 수집을 시작했어요', { type: 'success' });
         setHasStarted(true);
         setIsConfirming(false);
       },
@@ -168,16 +168,18 @@ function NewsTab() {
       { newsSn: news.newsSn, useYn },
       {
         onSuccess: () =>
-          showToast(useYn ? '뉴스를 사용으로 바꿨어요' : '뉴스를 숨겼어요'),
-        onError: (error) => showToast(error.message),
+          showToast(useYn ? '뉴스를 사용으로 바꿨어요' : '뉴스를 숨겼어요', {
+            type: 'success',
+          }),
+        onError: (error) => showToast(error.message, { type: 'error' }),
       },
     );
   const handleChangeCategory = (news, nextCategory) =>
     update.mutate(
       { newsSn: news.newsSn, newsClsfCd: nextCategory },
       {
-        onSuccess: () => showToast('카테고리를 바꿨어요'),
-        onError: (error) => showToast(error.message),
+        onSuccess: () => showToast('카테고리를 바꿨어요', { type: 'success' }),
+        onError: (error) => showToast(error.message, { type: 'error' }),
       },
     );
 

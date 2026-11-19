@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CountBadge from '@/components/CountBadge';
 import Icon from '@/components/Icon';
+import LoadError from '@/components/LoadError';
 import Skeleton from '@/components/Skeleton';
 import NotificationItem from '@/features/notification/shared/NotificationItem';
 import { NOTI_TABS, NOTI_TYPE } from '@/features/notification/shared/notiTabs';
@@ -18,7 +19,50 @@ import { useMe } from '@/features/member/queries';
 /** 열릴 때만 마운트: 알림 목록 요청과 탭 상태를 열 때마다 초기화 */
 function NotificationPanel({ unreadCount, onClose, onDismiss }) {
   const [tab, setTab] = useState(NOTI_TABS[0]);
-  const { data, isPending } = useNotifications(tab);
+  const {
+    data,
+    isPending,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
+    fetchNextPage,
+  } = useNotifications(tab);
+  const listRef = useRef(null);
+  const sentinelRef = useRef(null);
+  /** 관찰 콜백이 마지막 렌더 값을 읽게 */
+  const canLoadMoreRef = useRef(false);
+  const fetchNextPageRef = useRef(fetchNextPage);
+  const canLoadMore =
+    hasNextPage && !isFetchingNextPage && !isFetchNextPageError;
+  useEffect(() => {
+    canLoadMoreRef.current = canLoadMore;
+    fetchNextPageRef.current = fetchNextPage;
+  }, [canLoadMore, fetchNextPage]);
+
+  /**
+   * 목록 끝 줄이 새로 보이게 된 순간에만 다음 5건을 한 번 부른다
+   * (보임 상태로 부르면 다음 쪽 도착 직후 끝 줄이 아직 보이는 것으로 남아 한 쪽 더 부름)
+   * 실패하면 [다시 시도]로만 다시 부른다
+   */
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && canLoadMoreRef.current) {
+          fetchNextPageRef.current();
+        }
+      },
+      { root: listRef.current },
+    );
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  /** 탭을 바꾸면 목록 칸을 맨 위로: 맨 아래에 있던 끝 줄이 새 탭에서 바로 보이지 않게 */
+  const handleTabChange = (item) => {
+    listRef.current.scrollTop = 0;
+    setTab(item);
+  };
+
   const readNotification = useReadNotification();
   const readAll = useReadAllNotifications();
   const navigate = useNavigate();
@@ -89,14 +133,22 @@ function NotificationPanel({ unreadCount, onClose, onDismiss }) {
                 ? 'border-brand-500 bg-brand-500 text-white'
                 : 'border-line bg-white text-ink-2 hover:bg-surface-2'
             }`}
-            onClick={() => setTab(item)}
+            onClick={() => handleTabChange(item)}
           >
             {item.label}
           </button>
         ))}
       </div>
-      {/** 목록 칸 높이 고정(4.5행): 알림 수·탭과 관계없이 패널 크기가 같고, 5건부터 칸 안에서만 스크롤 */}
-      <div className="h-[264px] overflow-y-auto overscroll-contain">
+      {/**
+       * 목록 칸 높이 고정(4.5행): 알림 수·탭과 관계없이 패널 크기가 같고, 5건부터 칸 안에서만 스크롤
+       * 첫 쪽 스켈레톤 5행은 칸보다 높아 로딩 중에는 스크롤을 막는다(열기·탭 바꾸기 때 칸이 움직이지 않게)
+       */}
+      <div
+        ref={listRef}
+        className={`h-[264px] overscroll-contain ${
+          isPending ? 'overflow-hidden' : 'overflow-y-auto'
+        }`}
+      >
         {isPending && (
           <div aria-busy="true">
             {Array.from({ length: 5 }, (_, index) => (
@@ -121,6 +173,21 @@ function NotificationPanel({ unreadCount, onClose, onDismiss }) {
             onClick={handleItemClick}
           />
         ))}
+        {/** 목록 끝 감지 줄: 패널이 열릴 때 한 번 관찰을 걸어 항상 둔다. 내용은 다음 쪽이 있을 때만 */}
+        <div ref={sentinelRef}>
+          {hasNextPage &&
+            (isFetchNextPageError ? (
+              <LoadError
+                message="불러오지 못했어요"
+                onRetry={() => fetchNextPage()}
+                className="py-4"
+              />
+            ) : (
+              <div aria-busy="true" className="px-[18px] py-4">
+                <Skeleton className="my-[5px] h-4 w-4/5" />
+              </div>
+            ))}
+        </div>
       </div>
     </div>
   );

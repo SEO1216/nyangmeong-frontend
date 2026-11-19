@@ -2,22 +2,22 @@ import { Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Icon from '@/components/Icon';
 import PetFace from '@/components/PetFace';
+import { usePixelCharacters } from '@/hooks/usePixelCharacters';
 import { PATHS } from '@/routes/paths';
 import { diffDays, formatDate } from '@/utils/formatDate';
 import { BRUP_ROLE } from '@/utils/petCodes';
 import { formatAge, getPetSeName } from '@/utils/petFormat';
 import { DOSING } from '../checkup/checkupTypes';
-import { usePixelCharacters } from '../queries';
 import { getInspectionName } from '../summaryApi';
 import { round2 } from '../numberFormat';
 import { formatRange } from './summaryUtils';
 
-/** 캐릭터 무대 원 크기: 760px 미만 64px(요약 띠 높이, ※신규 정책) · 760~1099px 128px · 1100px 이상 160px */
+/** 캐릭터 원 크기: 760px 미만 64px(요약 띠 높이, ※신규 정책) · 760~1099px 128px · 1100px 이상 160px */
 const STAGE_SIZE = 'size-16 min-[760px]:size-32 min-[1100px]:size-40';
 
 /**
  * [종합 건강기록 배너] (※신규 정책, 기능 ID 없음. FN-HLT-011-02 요약 바를 대신한다)
- * - 흰 카드. 왼쪽 캐릭터 무대(연한 청록 원), 오른쪽 위 이름·기준일, 오른쪽 아래 요약 3칸(최근 검진·검사 수치·현재 처방)
+ * - 흰 카드. 왼쪽 캐릭터 원(마이페이지 반려동물 카드와 같은 모양: 회색 바탕 원에 꽉 참 + 안쪽 테두리), 오른쪽 위 이름·기준일, 오른쪽 아래 요약 3칸(최근 검진·검사 수치·현재 처방)
  * - 반려동물 선택은 건강기록 공통 반려동물 카드(shared/PetSwitcher)가 맡는다. 품종·나이·성별·체중은 그 카드와 겹쳐 뺐다
  * - 주양육이고 캐릭터가 없으면(GET /pixel-characters 행에 pixelCharSn 없음) 같은 크기·자리에 점선 원 [캐릭터 만들기]
  * - 공동양육·캐릭터 있음(생성 중·실패 포함)·캐릭터 목록 조회 중·실패는 PetFace
@@ -49,17 +49,12 @@ export default function SummaryBanner({ pet, summary }) {
       {isCharacterSlot ? (
         <CharacterSlot />
       ) : (
-        <div
-          className={`grid shrink-0 place-items-center self-center rounded-full bg-white min-[760px]:row-span-2 min-[760px]:bg-brand-50 ${STAGE_SIZE}`}
-        >
-          <PetFace
-            petSn={pet.petSn}
-            petSeCd={pet.petSeCd}
-            isError={pet.bscCharSbstYn}
-            className="size-14 shrink-0 overflow-hidden rounded-modal text-subtle min-[760px]:size-24 min-[1100px]:size-32"
-            iconClassName="size-3/5"
-          />
-        </div>
+        <PetFace
+          petSn={pet.petSn}
+          petSeCd={pet.petSeCd}
+          isError={pet.bscCharSbstYn}
+          className={`shrink-0 self-center rounded-full bg-surface-2 shadow-[inset_0_0_0_1px_var(--color-line-strong)] min-[760px]:row-span-2 ${STAGE_SIZE}`}
+        />
       )}
 
       <div className="flex min-w-0 flex-col justify-center gap-1 min-[760px]:flex-row min-[760px]:items-baseline min-[760px]:justify-between min-[760px]:gap-4">

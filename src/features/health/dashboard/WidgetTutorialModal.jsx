@@ -97,7 +97,7 @@ export default function WidgetTutorialModal({
       { mbrSn, widgetIds: keepWidgetOrder(widgetIds) },
       {
         onSuccess: () => {
-          showToast(message);
+          showToast(message, { type: 'success' });
           onClose();
         },
         onError: () => {

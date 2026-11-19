@@ -2,45 +2,12 @@
 
 ## 지금 하는 것
 
-SCR-CMU-001 커뮤니티 · 댓글 답글 「@닉네임」 (시작 2026-11-18) — 상태: 끝 (검증 3회차 `통과`, `yarn -s lint` 0·`yarn -s build` 0, 사람 확인 2026-11-18). 답글 앞 「@닉네임」과 답글 입력창 미리 채우기, 두 상세 정보 표 라인 형태
-
-### 기획
-
-- 기능: 명세 기능 ID 추가 없음(사람 요청 2026-11-18, 기능명세서 v0.8에 「@」 표시 없음). 걸치는 FN-CMU-001-11 댓글·대댓글(펫이야기), FN-CMU-002-07 댓글·대댓글(실종센터). 두 상세가 같은 `CommentSection.jsx`를 쓴다
-- API: 백엔드 PR #266 병합됨(2026-11-18). `GET /api/posts/{pstSn}/comments`와 `POST` 응답에 `rplyTrgtCmntSn`·`rplyTrgtMbrNcnm`. 대댓글을 `prntCmntSn`으로 보내면 서버가 부모를 원 댓글로 바꾸고 대상을 저장한다. 최상위 댓글에 바로 단 답글·일반 댓글은 두 필드 null, 대상이 나중에 삭제돼도 닉네임을 준다, 이 댓글이 삭제됐으면 null, 파기 회원은 「탈퇴한 회원」
-- 디자인: 없음(`html/SCR-CMU-001-*`에 「@」 표시 없음). 스타일은 사람 결정 2026-11-18 `text-brand-500` + `font-medium`
-- 보내기: 바꿀 것 없음. 「답글쓰기」를 누른 댓글 번호를 이미 `prntCmntSn`으로 보낸다(추가-1, `handleCreate(comment.cmntSn)`). 242행 주석 「prntCmntSn은 항상 원 댓글」만 「보낼 때는 누른 댓글, 서버가 원 댓글로 바꿔 저장」으로 고친다
-- 1) 답글 앞 「@닉네임」: `CommentSection.jsx` `CommentRow` 본문 `<p>` 맨 앞에 `rplyTrgtMbrNcnm`이 있으면 `<span className="font-medium text-brand-500">@{닉네임}</span>` + 공백. 삭제된 댓글(「삭제된 댓글입니다」)과 찾았어요 자동 댓글에는 붙이지 않는다. 닉네임은 텍스트로만 넣는다(누를 수 없음)
-  - 화면: 펫이야기 상세에서 원 댓글 A의 답글 B에 「답글쓰기」로 답글 C를 달면 C 본문 앞에 「@B작성자닉네임」이 브랜드 초록·중간 굵기로 보이고 C는 A 스레드 맨 아래에 붙는다. A에 바로 단 답글에는 「@」가 없다. 새로고침 뒤에도 같다. 실종센터 상세에서도 같다. 375px에서 긴 본문은 「@닉네임」 뒤로 이어서 줄바꿈된다
-  - 화면: B를 삭제해도 C의 「@B닉네임」은 남는다(서버 결정)
-- 공통 완료 조건 — 명령: `yarn -s lint`, `yarn -s build` 종료 코드 0. 화면 확인은 `yarn dev` + 로그인 뒤 펫이야기·실종센터 상세를 1280px·375px에서 본다. 로컬 DB에 백엔드 v0.14 (24) `CMNT.RPLY_TRGT_CMNT_SN`이 없으면 댓글 목록이 실패하므로 먼저 확인한다(공용 DB는 실행됨). 확인용으로 단 댓글은 끝나면 삭제한다
-- 질문: 핸드오프에는 「대상 댓글이 삭제되면 「@」 숨김」으로 적어 두었는데, 서버는 「@닉네임」을 본문의 일부로 보고 삭제 뒤에도 준다. 서버대로 보여 줄까요? (추천: 서버대로 보여 준다. 대상이 사라지면 C가 누구에게 한 말인지 알 수 없어진다)
-  - 결정: 추천안대로
-- 새 의존성: 없음
-
-### 추가 요청
-
-| 번호 | 바꿀 파일 | 완료 조건 | 요청 |
-| --- | --- | --- | --- |
-| 추가-1 | `src/features/community/CommentSection.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 답글에 「답글쓰기」를 누르면 입력창에 「@그 답글 작성자 닉네임 」이 미리 들어 있고 커서는 그 뒤에 있다. 등록하면 본문에는 그 「@닉네임 」이 중복되지 않고(서버가 준 「@」만 한 번 보임) 원 댓글에 바로 「답글쓰기」를 누르면 비어 있다 | 요청 2026-11-18 "「@아이디」 답글 클릭한 해당 아이디는 답글 등록 시 입력창에 바로 입력되도록" |
-| 추가-2 | `src/features/community/missing/MissingDetail.jsx`, `src/features/community/care/CareDetail.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 두 상세의 정보 표(실종 정보·돌봄 정보)가 행마다 아래 선이 있는 라인 형태이고(맨 위 선 포함), 값이 두 줄이면 왼쪽 라벨이 그 행의 맨 위에 맞는다(가운데로 내려가지 않음) | 요청 2026-11-18 "펫돌봄·실종센터 상세 본문 영역 기존의 라인 형태로 변경, 내용이 두 줄이면 라벨 상단 정렬" |
-| 추가-3 | `src/features/chat/room/PhotoViewer.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: PC 브라우저를 760px 이하로 줄여도 채팅 사진 보기에 ‹ › 버튼이 보이고 눌러 넘어간다. 터치 기기에서는 버튼 없이 스와이프 | 요청 2026-11-18 "PC 화면을 모바일 크기로 줄였을 때 사진 확대에서 넘길 방법이 없음, 바로 고쳐" |
-| 추가-4 | `src/features/chat/room/AddressShareModal.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 채팅 [주소 공유] 모달의 장소 검색 단계에 제목 「주소 공유」가 보이고, 장소를 고른 단계(‹ 다시 검색)에서는 지금처럼 제목이 숨는다 | 요청 2026-11-18 "채팅창에서 장소 검색 모달 타이틀 추가" |
-| 추가-5 | `src/features/community/care/CareSideBox.jsx`, `src/features/chat/room/ChatRoomList.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 펫돌봄 상세 작성자 패널의 버튼이 모집 중·마감 모두 초록 기본 버튼 「채팅 목록 보기」(모집 중에는 「· N명」)이고, 눌러 열린 채팅 목록 맨 위에 그 글의 방들이 왼쪽 초록 띠와 옅은 초록 배경으로 구분된다(선택한 방은 기존 배경) | 요청 2026-11-18 "채팅 목록 보기로 통일, 버튼 컬러 기존 그린, 그 글의 방이 눈에 띄게" |
-| 추가-6 | `src/features/chat/room/ChatRoomList.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: PC 채팅 모달에서 왼쪽 「내 글·지원한 글」 탭 줄(편집 모드 줄 포함)의 높이가 오른쪽 상대방 이름 줄(60px)과 같고 아래 선이 이어진다 | 요청 2026-11-18 "내글 지원한글 영역과 오른쪽 냥멍테스터 상단 영역 높이를 동일하게" |
-| 추가-7 | `src/components/Modal.jsx`, `src/features/chat/room/AddressShareModal.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 주소 공유 모달 제목이 18px(확인 창 제목과 같은 크기)로 보이고, 다른 모달 제목(22px)은 그대로다 | 요청 2026-11-18 "모달 타이틀이 너무 크다, 가이드에 맞는 더 작은 타이틀로" |
-| 추가-8 | `src/features/chat/room/ChatRoomList.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 채팅 목록 하단 안내 문구(「거래는 채팅방 위 카드에서…」)가 12px이고, 그 줄(윗선 포함) 높이가 오른쪽 입력 영역과 같은 65px이다 | 요청 2026-11-18 "왼쪽 리스트 하단 안내 텍스트 12px, 오른쪽 채팅 영역 높이 동일하게" |
-| 추가-9 | `src/features/community/PostDetail.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 펫이야기 상세에서 내가 쓴 글에는 [신고] 버튼이 없고 남의 글에는 있다 | 요청 2026-11-19 "펫이야기 상세에서 내가 쓴 글에도 [신고] 버튼 삭제" |
-| 추가-10 | `src/features/community/care/CareForm.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 펫돌봄 글쓰기에서 빠진 항목이 있는 채 첫 [등록하기]를 누르면 그 첫 빠진 항목으로 포커스가 간다(제출 버튼에 남지 않음) | 요청 2026-11-19 "setErrors 반영 전에 aria-invalid를 찾아 첫 등록 뒤 포커스가 제출 버튼에 남음" |
-| 추가-11 | `src/features/community/StoryRail.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 오늘의 한마디 박스가 아래 카드와 같은 14px 라운딩이고 오른쪽 위 접힌 모서리가 없으며, 왼쪽 아이콘이 따옴표(quote)다 | 요청 2026-11-19 "오늘의 한마디 다른 박스와 같은 라운딩, 접힌 효과 삭제, 아이콘 quote" |
-| 추가-12 | `src/features/community/missing/MissingForm.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 실종센터 글쓰기에서 빠진 항목이 있는 채 첫 [등록하기]를 누르면 첫 빠진 항목으로 포커스가 간다 | 요청 2026-11-19 "MissingForm에도 같은 코드가 있는지 확인해줘"(CareForm과 같은 결함이라 같은 방식으로 고침) |
-| 추가-13 | `src/features/community/StoryRail.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 펫이야기 오른쪽 레일의 「오늘의 건강 이야기」가 흰 박스(배경·테두리·안쪽 여백) 없이 실종·돌봄 레일처럼 구역 제목과 목록으로만 보인다 | 요청 2026-11-19 "펫이야기 오른쪽 레일 박스 배경 없애줘, 다른 페이지 레일 참고" |
-| 추가-14 | `src/features/community/missing/CheckList.jsx`, `missing/MissingRail.jsx`, `care/CareGuideRail.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 「실종 체크 가이드」「돌봄 전, 꼭 확인해요」의 제목·선·글자 크기·간격이 「오늘의 건강 이야기」와 같고, 「자세한 대처 요령 보기」가 「내 펫 건강 체크하기」와 같은 전체 폭 연한 초록 버튼이다 | 요청 2026-11-19 "대처 요령 버튼과 두 가이드를 오늘의 건강 이야기와 같은 스타일·크기로" |
-| 추가-15 | `src/features/inquiry/InquiryForm.jsx`, `community/PostForm.jsx`, `care/CareForm.jsx`, `missing/MissingForm.jsx`·`BreedCombobox.jsx`, `components/ReportModal.jsx`, `src/features/community/CommentSection.jsx`, `src/utils/profanity.js` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 1:1 문의·글쓰기 폼(펫이야기·돌봄·실종)·품종 직접 입력·신고 사유가 한글 조합 중에도 최대 글자 수(50·2000)를 넘지 않고, 댓글 입력창이 한 줄처럼 보이는 입력칸(Enter로 등록, 길어지면 줄바꿈되어 높이가 늘어남)이며, 욕설이 있으면 등록되지 않고 안내 문구가 보인다 | 요청 2026-11-19 "고객센터 최대 글자 초과 입력 막기, 댓글 입력을 인풋으로, 댓글 욕설 필터링" |
+끝남: SCR-CMU-001 커뮤니티 정리 (2026-11-19, 사람 확인, `yarn -s lint` 0·`yarn -s build` 0). 추가-3~23: 채팅·상세 화면 보정, 글자 수 초과 입력 차단(한글 조합 중 포함), 댓글 입력창 자동 높이, 이미지 뷰어 스와이프, 서버 금칙어(`PROFANITY_DETECTED`) 안내(화면 쪽 단어 목록 삭제), 채팅 주소 메시지 지도 SDK 준비 판단(`StaticMap is not a constructor`). 근거는 `milestones/KSJ.md`와 PR #438·#439·#443·#446·#449
 
 ## 다음에 할 것
 
 ### 내가 할 것(프론트)
+- 서버 금칙어 안내 문구(「부적절한 표현이 포함되어 있어요.」)와 화면 문구를 맞출지 정한다. 이미지 뷰어 하단 썸네일 줄(생각해 보기로 함)과 터치 기기에서 화살표 버튼 숨길지도 정한다
 - SCR-CMU-001: 기능명세서 FN-CMU-001-11·002-07 「삭제된 댓글은 문구로 대체」를 새 삭제 정책으로 고친다(사람). `TC_커뮤니티.md`에서 TC-CMU-001-11-18 행이 11-17 위에 있다(순서만)
 - SCR-CMU-005: `src/hooks/useChatWindow.js` 33행 주석 「그 글의 채팅만 보여 주며」를 현재 동작(그 글의 채팅을 맨 위에 둠)에 맞게 고친다
 - 수집 기사로 펫뉴스 상세·목록 높이 기준을 운영 데이터에서 다시 확인한다(로컬은 수집 기사가 없고 시드 썸네일이 가짜 주소)

@@ -157,7 +157,8 @@ export default function InquiryDetail({ inquiry }) {
 
       {isDeleting && (
         <ConfirmModal
-          title="문의를 삭제할까요? 삭제한 문의는 되돌릴 수 없어요"
+          title="문의를 삭제할까요?"
+          description="삭제한 문의는 되돌릴 수 없어요."
           confirmLabel="삭제하기"
           isDanger
           isPending={remove.isPending}
@@ -165,7 +166,7 @@ export default function InquiryDetail({ inquiry }) {
           onConfirm={() =>
             remove.mutate(inquiry.otoInqrySn, {
               onSuccess: () => {
-                showToast('문의를 삭제했어요');
+                showToast('문의를 삭제했어요', { type: 'success' });
                 navigate(PATHS.INQUIRIES, { replace: true });
               },
             })

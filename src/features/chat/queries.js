@@ -185,7 +185,7 @@ export const useCreateChatRoom = () => {
     mutationFn: createChatRoom,
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: chatKeys.lists }),
-    onError: (error) => showToast(error.message),
+    onError: (error) => showToast(error.message, { type: 'error' }),
   });
 };
 
@@ -211,7 +211,7 @@ export const useSendChatMessage = (otoChatRoomSn) => {
     /** 화면은 열려 있는데 서버에서 방이 닫힌 경우: 방 정보를 다시 받아 입력을 막는다 */
     onError: (error) => {
       if (error.code !== CHAT_ROOM_CLOSED) return;
-      showToast(error.message);
+      showToast(error.message, { type: 'error' });
       queryClient.invalidateQueries({
         queryKey: chatKeys.detail(otoChatRoomSn),
       });
@@ -264,7 +264,7 @@ export const useDealAction = (room) => {
       queryClient.invalidateQueries({ queryKey: ['care-matches'] });
       queryClient.invalidateQueries({ queryKey: chatKeys.lists });
     },
-    onError: (error) => showToast(error.message),
+    onError: (error) => showToast(error.message, { type: 'error' }),
   });
 };
 
@@ -299,6 +299,6 @@ export const useLeaveChatRoom = (otoChatRoomSn) => {
   return useMutation({
     mutationFn: () => leaveChatRoom(otoChatRoomSn),
     onSuccess: () => invalidateSummaries(queryClient),
-    onError: (error) => showToast(error.message),
+    onError: (error) => showToast(error.message, { type: 'error' }),
   });
 };

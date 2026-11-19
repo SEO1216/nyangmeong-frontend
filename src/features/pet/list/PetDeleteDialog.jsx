@@ -22,18 +22,17 @@ export default function PetDeleteDialog({ pet, onClose }) {
     deletePet.mutate(pet.petSn, {
       onSuccess: () => {
         onClose();
-        showToast('반려동물을 삭제했어요');
+        showToast('반려동물을 삭제했어요', { type: 'success' });
       },
       onError: (error) => {
         if (error.code === 'PET_NOT_FOUND') onClose();
-        showToast(error.message);
+        showToast(error.message, { type: 'error' });
       },
     });
 
   return (
     <Modal
       isConfirm
-      isSpacious
       isPending={deletePet.isPending}
       title={`${withObjectParticle(pet.petNm)} 삭제하시겠습니까?`}
       description="삭제하면 건강기록·픽셀 캐릭터 등 연결된 데이터도 함께 사라지고 복구할 수 없어요"

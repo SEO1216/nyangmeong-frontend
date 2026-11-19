@@ -66,7 +66,9 @@ export default function AttachmentTab({ petSn, ckupRcdSn, attachments }) {
       link.click();
       URL.revokeObjectURL(url);
     } catch {
-      showToast('파일을 내려받지 못했어요. 잠시 뒤 다시 시도해 주세요');
+      showToast('파일을 내려받지 못했어요. 잠시 뒤 다시 시도해 주세요', {
+        type: 'error',
+      });
     }
   };
 
@@ -83,7 +85,9 @@ export default function AttachmentTab({ petSn, ckupRcdSn, attachments }) {
       setTimeout(() => URL.revokeObjectURL(url), PDF_URL_LIFETIME);
     } catch {
       win?.close();
-      showToast('파일을 열지 못했어요. 잠시 뒤 다시 시도해 주세요');
+      showToast('파일을 열지 못했어요. 잠시 뒤 다시 시도해 주세요', {
+        type: 'error',
+      });
     }
   };
 
@@ -93,7 +97,7 @@ export default function AttachmentTab({ petSn, ckupRcdSn, attachments }) {
     if (!file) return;
     const error = getFileError(file);
     if (error) {
-      showToast(error);
+      showToast(error, { type: 'error' });
       return;
     }
     replaceAttachment.mutate({
@@ -142,31 +146,27 @@ export default function AttachmentTab({ petSn, ckupRcdSn, attachments }) {
       { onSuccess: () => setDeleteSn(null) },
     );
 
-
   return (
     <Card title="첨부 자료" sub="여러 건 등록 가능">
       {attachments.length === 0 ? (
         <EmptyResult
-            isCompact
-            icon={
-              <Icon
-                name="description"
-                className="text-[28px] text-line-strong"
-              />
-            }
-            title="첨부한 자료가 없어요"
-            description="검사결과지 PDF를 올리면 수치를 자동으로 읽어요"
-          >
-            {
-              <button
-                type="button"
-                className={`${BTN_SECONDARY}`}
-                onClick={() => setIsAddOpen(true)}
-              >
-                ＋ 첨부 추가
-              </button>
-            }
-          </EmptyResult>
+          isCompact
+          icon={
+            <Icon name="description" className="text-[28px] text-line-strong" />
+          }
+          title="첨부한 자료가 없어요"
+          description="검사결과지 PDF를 올리면 수치를 자동으로 읽어요"
+        >
+          {
+            <button
+              type="button"
+              className={`${BTN_SECONDARY}`}
+              onClick={() => setIsAddOpen(true)}
+            >
+              ＋ 첨부 추가
+            </button>
+          }
+        </EmptyResult>
       ) : (
         <>
           <ul>
@@ -287,6 +287,7 @@ export default function AttachmentTab({ petSn, ckupRcdSn, attachments }) {
         <Modal
           isConfirm
           title="이 첨부 자료를 삭제할까요?"
+          description="삭제하면 되돌릴 수 없어요."
           isPending={deleteAttachment.isPending}
           onClose={() => setDeleteSn(null)}
           footer={

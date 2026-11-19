@@ -228,7 +228,7 @@ export default function MissingDetail({ post }) {
     markFound.mutate(post.lostTpofSn, {
       onSuccess: () => {
         closeModal();
-        showToast('찾았어요로 바꿨어요');
+        showToast('찾았어요로 바꿨어요', { type: 'success' });
       },
     });
 
@@ -238,6 +238,7 @@ export default function MissingDetail({ post }) {
         closeModal();
         showToast(
           `게시 기간이 ${formatDate(addDays(getYmdOf(post.expryCrtrDt), EXTEND_DAYS))}까지 연장됐어요.`,
+          { type: 'success' },
         );
       },
     });
@@ -432,7 +433,7 @@ export default function MissingDetail({ post }) {
                 <Flag
                   size={20}
                   aria-hidden="true"
-                  className="min-[761px]:hidden"
+                  className="min-[760px]:hidden"
                 />
                 <span className="max-[760px]:hidden">신고</span>
               </button>
@@ -464,7 +465,8 @@ export default function MissingDetail({ post }) {
 
       {modal === 'delete' && (
         <ConfirmModal
-          title="실종 게시글을 삭제할까요? 삭제한 글과 제보 댓글은 되돌릴 수 없어요. 찾으셨다면 삭제 대신 '찾았어요'를 눌러 주세요"
+          title="실종 게시글을 삭제할까요?"
+          description="삭제한 글과 제보 댓글은 되돌릴 수 없어요. 찾으셨다면 삭제 대신 '찾았어요'를 눌러 주세요."
           confirmLabel="삭제하기"
           isDanger
           isPending={remove.isPending}
@@ -472,7 +474,7 @@ export default function MissingDetail({ post }) {
           onConfirm={() =>
             remove.mutate(post.lostTpofSn, {
               onSuccess: () => {
-                showToast('게시글을 삭제했어요');
+                showToast('게시글을 삭제했어요', { type: 'success' });
                 navigate(listTo, { replace: true });
               },
             })
@@ -518,7 +520,7 @@ export default function MissingDetail({ post }) {
               { pstSn: post.pstSn, ...values },
               {
                 onSuccess: () => {
-                  showToast('신고가 접수되었어요');
+                  showToast('신고가 접수되었어요', { type: 'success' });
                   closeModal();
                 },
               },

@@ -9,6 +9,7 @@ import AiChatScreen from './AiChatScreen';
  * [AI 매니저 모달] (SCR-COM-007, 모든 폭: 사람 결정 2026-11-11 PC도 새 창 대신 모달)
  * - 헤더 아래 전체 화면, 본문은 `/ai` 새 창과 같은 AiChatScreen
  * - 대화 제목 줄 오른쪽 끝 [✕]·Esc·페이지 이동에 닫힘, 다시 열면 새 대화
+ *   페이지 이동(같은 주소로 다시 이동 포함)도 [✕]와 같은 연출로 닫힘. 돌아갈 자리가 없으면(검색창이 없는 화면) 바로 닫힘
  * - 여는 연출(useOpenMotion): 메인 검색창에서 열면 검색창이 대화창 입력 자리로 옮겨 가며 대화창으로 바뀌고,
  *   플로팅 버튼에서 열면 오른쪽 아래에서 커진다
  * - 닫는 연출(useCloseWithMotion): [✕]·Esc로 닫을 때 플로팅 버튼에서 연 모달은 오른쪽 아래로 작아지고,
@@ -271,6 +272,20 @@ function AiChatModalPanel({ backdropRef }) {
   useScrollLock();
   useOpenMotion(panelRef, backdropRef, origin);
   const close = useCloseWithMotion(panelRef, backdropRef, origin, closeNow);
+  const { key } = useLocation();
+  const lastKey = useRef(key);
+
+  /**
+   * 페이지 이동 시 닫기(같은 주소로 다시 이동 포함, location.key 기준): [✕]와 같은 연출
+   * - 플로팅에서 열었으면 뒤 화면이 바뀐 위에서 오른쪽 아래로 작아짐
+   * - 메인 검색창에서 열었는데 메인을 떠났으면 돌아갈 검색창이 없어 바로 닫힘
+   * - 모달 안에서 화면을 옮기는 경우(handleOpenMain)는 먼저 닫고 이동해 여기 오지 않는다
+   */
+  useEffect(() => {
+    if (lastKey.current === key) return;
+    lastKey.current = key;
+    close();
+  }, [key, close]);
 
   /** 열릴 때 모달로 포커스 */
   useEffect(() => {
@@ -313,6 +328,7 @@ function AiChatModalPanel({ backdropRef }) {
       ref={panelRef}
       role="dialog"
       aria-label="AI 매니저"
+      data-toast-above="form"
       tabIndex={-1}
       className="fixed inset-x-0 top-16 bottom-0 z-35 flex origin-bottom-right transform-gpu flex-col overflow-hidden bg-white pb-[env(safe-area-inset-bottom)] outline-none"
     >
@@ -331,17 +347,8 @@ function AiChatModalPanel({ backdropRef }) {
 }
 
 export default function AiChatModal() {
-  const { isOpen, close } = useAiModal();
-  const { pathname } = useLocation();
-  const previousPathname = useRef(pathname);
+  const { isOpen } = useAiModal();
   const backdropRef = useRef(null);
-
-  /** 페이지 이동 시 닫기 */
-  useEffect(() => {
-    if (previousPathname.current === pathname) return;
-    previousPathname.current = pathname;
-    if (isOpen) close();
-  }, [pathname, isOpen, close]);
 
   if (!isOpen) return null;
 

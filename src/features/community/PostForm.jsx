@@ -1,3 +1,5 @@
+import { flushSync } from 'react-dom';
+import useProfanityErrors from '@/hooks/useProfanityErrors';
 import { useEffect, useState } from 'react';
 import AutoTextarea from '@/components/AutoTextarea';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
@@ -28,12 +30,18 @@ const LABEL_CLASS = `${LABEL} text-base text-ink`;
  * - 고친 것이 있으면(처음 값과 다르면) onDirtyChange(true). 나갈 때 확인은 부모(페이지)가 한다: onLeave(to)
  * - 새로고침·창 닫기는 브라우저 확인창
  */
+const PROFANITY_FIELDS = {
+  pstTtl: { key: 'title', id: 'post-title' },
+  pstCn: { key: 'body', id: 'post-body' },
+};
+
 export default function PostForm({
   initial,
   mode,
   cancelTo,
   isPending,
   errorMessage,
+  profanityFields,
   onSubmit,
   onLeave,
   onDirtyChange,
@@ -44,6 +52,7 @@ export default function PostForm({
   const [initialImages] = useState(() => toImageItems(initial.imgs));
   const [images, setImages] = useState(initialImages);
   const [errors, setErrors] = useState({});
+  useProfanityErrors(profanityFields, PROFANITY_FIELDS, setErrors);
 
   const isEdit = mode === 'edit';
   const isDirty =
@@ -68,12 +77,21 @@ export default function PostForm({
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    const form = event.currentTarget;
     const nextErrors = {};
     if (!bbsCd) nextErrors.bbsCd = '카테고리를 골라 주세요';
     if (!title.trim()) nextErrors.title = '제목을 입력해 주세요';
     if (!body.trim()) nextErrors.body = '내용을 입력해 주세요';
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0 || isPending) return;
+    /** 오류 표시(aria-invalid)가 화면에 반영된 뒤에 첫 빠진 항목을 찾도록 바로 반영한다 */
+    flushSync(() => setErrors(nextErrors));
+    if (Object.keys(nextErrors).length > 0) {
+      /** 빠진 항목 중 첫 번째로 이동 */
+      form
+        .querySelector('[aria-invalid="true"], [data-invalid="true"]')
+        ?.focus();
+      return;
+    }
+    if (isPending) return;
     onSubmit({
       bbsCd,
       pstTtl: title.trim(),
@@ -100,7 +118,11 @@ export default function PostForm({
           noValidate
           className="flex flex-col gap-9"
         >
-          <fieldset className="flex flex-col gap-2">
+          <fieldset
+            tabIndex={-1}
+            data-invalid={Boolean(errors.bbsCd)}
+            className="flex flex-col gap-2"
+          >
             <legend className={`${LABEL_CLASS} mb-2`}>
               카테고리
               <Required />
@@ -197,7 +219,7 @@ export default function PostForm({
           </div>
         </form>
 
-        {errorMessage && (
+        {errorMessage && profanityFields.length === 0 && (
           <p role="alert" className="mt-4 text-sm text-danger">
             {errorMessage}
           </p>
