@@ -14,6 +14,7 @@ export default function ProfileImageField({ prflImgUrl, mbrNcnm, children }) {
       error.code === 'FILE_TYPE_NOT_ALLOWED' || error.code === 'FILE_TOO_LARGE'
         ? 'jpg·png·webp 이미지, 10MB 이하만 올릴 수 있어요'
         : '사진을 바꾸지 못했어요. 잠시 후 다시 시도해 주세요.',
+      { type: 'error' },
     );
 
   const handleFile = (event) => {

@@ -2,32 +2,14 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-004 알림 드롭다운 · 목록 더 불러오기 연결 (2026-11-19, B1·B2·추가-1·추가-2 검증 통과(1회차 B2 실패 → 끝 줄이 새로 보일 때만 부름), 사람 확인). 알림 목록을 5건씩 끝에서 더 불러오고, 탭 바꿀 때 이전 목록 없이, 로딩 중 스크롤 막음
-
-- 계기: "다음에 할 것"의 SCR-COM-004 연결(백엔드 LJS `b6d0f57`, PR #271은 이 연결 PR과 같이 병합). `GET /notifications` 응답이 배열 → `{ content, page, size, totalElements, totalPages, hasNext }`(`?tab=&page=&size=5`, 안 읽음 우선·같은 상태끼리 최신순). 계약은 백엔드 `docs/api/notification.md`
-- 기준: 공통레이아웃 기능명세서 v0.10 FN-COM-004-04·05·12·15, 화면설계서 v0.13 SCR-COM-004 ③. 기능 ID 추가 없음
-- 디자인: 없음(Figma 토큰 없음, `html/`에 해당 파일 없음). 지금 드롭다운 그대로, 목록 끝 상태 줄만 더한다(가계부 앱 무한 스크롤 `ExpenseLoadMore`와 같은 방식)
-
-| 번호 | 바꿀 파일 | 할 일 | 완료 조건 |
-| --- | --- | --- | --- |
-| B1 | `src/features/notification/api.js`·`queries.js` | `getNotifications({ tab, page })`가 `size: 5`로 부른다. `useNotifications`를 `useInfiniteQuery`로(`initialPageParam: 1`, `hasNext`면 `page + 1`, `select`로 쪽들의 `content`를 이어 붙이고 `inappNotiSn`으로 중복 제거, 탭 바꿀 때 `keepPreviousData`). `gcTime: 0`으로 패널을 닫거나 탭을 떠나면 캐시를 버려 다시 열기·탭 되돌아오기가 1쪽부터. 모두 읽음 성공 뒤 목록은 `resetQueries`(1쪽부터), 개별 읽음은 지금처럼 무효화 | 명령: `yarn -s lint`·`yarn -s build` 종료 0 · `rg -n "getNotifications" src` 결과가 `api.js`·`queries.js`만 |
-| B2 | `src/layouts/NotificationDropdown.jsx` | 목록 칸(264px 스크롤) 맨 아래에 끝 감지 줄을 두고 `@/hooks/useInView`로 보이면 `hasNextPage`·불러오는 중 아님일 때 `fetchNextPage`. 불러오는 중이면 그 줄에 `Skeleton` 한 행, 다음 쪽 실패면 "불러오지 못했어요" + [다시 시도](`fetchNextPage`), `hasNext` false면 줄 없음(문구 없음). 0건 '새 알림이 없어요', 첫 쪽 스켈레톤 5행은 그대로 | 화면(1280·390, 검증 백엔드 8081이 백엔드 LJS `b6d0f57` 이상): 드롭다운을 열면 `page=1&size=5` 한 번, 목록 끝까지 스크롤하면 `page=2`, `hasNext` false 쪽 뒤로는 더 부르지 않는다 · 탭을 바꾸면 그 탭 `page=1`, 닫고 다시 열면 `page=1`부터 · 0건 탭은 '새 알림이 없어요' · 두 쪽에 같은 `inappNotiSn`이 오면 한 번만 보인다 · 다음 쪽 실패 때 [다시 시도]로 다시 부른다 · [모두 읽음] 뒤 `page=1`부터 다시 · 알림 행 클릭 이동은 전과 같다(검증 계정 알림이 5건 이하이거나 겹침·실패를 만들 수 없으면 Playwright route로 응답을 가로채도 된다) |
-
-### 추가 요청
-
-| 번호 | 바꿀 파일 | 완료 조건 | 요청 |
-| --- | --- | --- | --- |
-| 추가-1 | `src/features/notification/queries.js`·`src/layouts/NotificationDropdown.jsx` | 명령: `yarn -s lint`·`yarn -s build` 종료 0 · 화면(1280·390): 알림 드롭다운에서 탭 칩을 바꾸면 이전 탭 목록이 보이지 않고 바로 첫 쪽 스켈레톤 5행 → 새 탭 목록(같은 탭으로 돌아와도 같음), 끝까지 스크롤 더 불러오기·다시 열기 1쪽부터는 전과 같다 | 요청 2026-11-19 15:10 "칩으로 다른 카테고리로 넘어갈 때 이전 탭 목록이 보이는 딜레이를 없앤다(혼란스러움)" |
-| 추가-2 | `src/layouts/NotificationDropdown.jsx` | 명령: `yarn -s lint`·`yarn -s build` 종료 0 · 화면(1280·390): 드롭다운을 열 때·탭 칩을 바꿀 때 첫 쪽 스켈레톤이 보이는 동안 목록 칸이 스크롤되지 않는다(휠·터치로 움직이지 않고 스크롤 막대 없음), 목록이 나오면 전처럼 스크롤·끝에서 더 불러오기 | 요청 2026-11-19 15:20 "로딩 때 목록이 잠깐 스크롤되는 것, 순서 확인해서 로딩 중에는 스크롤 안 되게" |
-
-- 백엔드 8081이 옛 코드(배열 응답)면 8081만 끄고 백엔드 LJS 브랜치로 다시 띄운다(8080은 건드리지 않음)
-- 알아 둘 것: `gcTime: 0`이라 열 때마다 첫 쪽 스켈레톤이 잠깐 보인다(지금은 5분 안에 다시 열면 캐시를 먼저 보여 줌). 행 클릭 읽음 뒤 무효화는 불러온 쪽 수만큼 다시 부른다(패널이 바로 닫히는 이동은 상관없음, 채팅 모달 알림만 해당)
-- 사람이 고치는 문서: 공통레이아웃 기능명세서 v0.10 FN-COM-004-05 "최대 5건을 미리보기로" → "5건씩, 목록 끝에서 다음 5건을 더 불러온다", 화면설계서 v0.13 SCR-COM-004 ③ "최대 5건 미리보기" 같은 문구
-- 범위 밖: 미읽음 개수·모두 읽음·개별 읽음 API는 그대로
-- 새 의존성: 없음
+끝남: SCR-COM-002 기본 레이아웃 · 공용 토스트 폭·쌓임·모바일 위치 (2026-11-19, T1~T7·추가-1 검증 통과(1·2회차 T4 실패 → 하단 막대 위 끝을 재서 올림), 사람 확인). 토스트 폭 최대 480px·가운데, 같은 문구 합침·최대 3개, 채팅 주소 보내기 이중 토스트 제거, 모바일 하단 막대(`data-toast-above`) 위로, `type` info·success·error(빨간 상자·5초), 등장·퇴장 애니메이션, 호출부 전체 type 지정, 두 문장은 문장마다 새 줄
 
 ## 다음에 할 것
 
+- SCR-COM-002 공용 토스트 팀 알림(PR 본문 + 팀 채널, 모두, 사람이 전달): `showToast(message, { type: 'success' | 'error' })` 생김(인자 없으면 info). JAJ·SJM·KSJ·YAY 폴더 호출부 약 70개 파일에 type을 붙임(문구·시점 그대로, 일부 Prettier 줄바꿈). 같은 문구 합침·최대 3개, 두 문장은 문장마다 새 줄. 760 미만에서 화면 아래 고정 막대를 새로 만들면 `data-toast-above`(안쪽 요소 기준이면 `="form"`처럼 선택자) 달기
+- SCR-COM-002 토스트 범위 밖(말만): 모바일 캐릭터 꾸미기 저장 줄(`CharacterDecorate.jsx`, SJM)·PC 장소 지도 팝업(`PlacePopup`, YAY)과 토스트 겹침, 닫기 버튼·hover 멈춤
+- SCR-COM-002 토스트 참고(검증 보고, 판정 밖): 기획 T4는 CSS `:has`로 적었으나 구현은 JS로 막대 위 끝을 재서 인라인 `bottom`. Vite HMR 뒤 콘솔에서 `import('/src/components/toastStore.js')`로 부르면 앱과 다른 모듈이라 안 뜸(`performance` 리소스 주소로 import)
+- 버그 후보(KSJ, 검증 중 발견): 390 채팅 모달에서 주소 메시지가 있는 방을 열면 화면이 비어 버림. `features/chat/room/AddressMessage.jsx:25` `kakao.maps.StaticMap is not a constructor`
 - SCR-COM-002 UI 통일 2-N 팀 알림(PR 본문 + 팀 채널, JAJ·SJM): ① 종합 건강기록 배너 캐릭터가 마이페이지 반려동물 카드와 같은 모양(회색 원에 꽉 참, 연한 청록 무대 원 없앰) ② 캐릭터 목록 조회가 `@/hooks/usePixelCharacters` 하나로(키 `pixelCharacterKeys.all`, 5분 `staleTime`). `features/pet`·`features/health`의 `usePixelCharacters`·`getPixelCharacters`·`healthKeys.pixelCharacters` 없어짐. 반려동물 등록·초대 수락 뒤에도 캐릭터 목록을 다시 읽음 ③ 캐릭터 상태가 바뀌는 새 기능을 만들면 `pixelCharacterKeys.all`을 무효화해야 함(안 하면 5분 동안 옛 값)
 - 2-N 사람이 정할 것: 마이페이지 반려동물 카드에도 캐릭터 없는 주양육 동물일 때 점선 [캐릭터 만들기]를 넣을지(배너와 같게, `features/pet/list/PetSlide.jsx`, SJM 화면). 2026-11-19 물었고 답 없이 마무리
 - 2-N 참고(검증 보고, 판정 밖): 캐릭터 없는 동물의 `GET /pets/{petSn}/character-image` 404(백엔드 기본 그림 교체 건, 백엔드 재시작 필요). 추가-1 초대 수락은 route로만 확인(다음 `/health` 진입 때 다시 읽음)

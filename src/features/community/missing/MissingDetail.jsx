@@ -228,7 +228,7 @@ export default function MissingDetail({ post }) {
     markFound.mutate(post.lostTpofSn, {
       onSuccess: () => {
         closeModal();
-        showToast('찾았어요로 바꿨어요');
+        showToast('찾았어요로 바꿨어요', { type: 'success' });
       },
     });
 
@@ -238,6 +238,7 @@ export default function MissingDetail({ post }) {
         closeModal();
         showToast(
           `게시 기간이 ${formatDate(addDays(getYmdOf(post.expryCrtrDt), EXTEND_DAYS))}까지 연장됐어요.`,
+          { type: 'success' },
         );
       },
     });
@@ -472,7 +473,7 @@ export default function MissingDetail({ post }) {
           onConfirm={() =>
             remove.mutate(post.lostTpofSn, {
               onSuccess: () => {
-                showToast('게시글을 삭제했어요');
+                showToast('게시글을 삭제했어요', { type: 'success' });
                 navigate(listTo, { replace: true });
               },
             })
@@ -518,7 +519,7 @@ export default function MissingDetail({ post }) {
               { pstSn: post.pstSn, ...values },
               {
                 onSuccess: () => {
-                  showToast('신고가 접수되었어요');
+                  showToast('신고가 접수되었어요', { type: 'success' });
                   closeModal();
                 },
               },

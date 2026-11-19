@@ -210,7 +210,7 @@ export default function CareManageModal({
       },
       {
         onSuccess: () => {
-          showToast('케어 항목을 저장했어요');
+          showToast('케어 항목을 저장했어요', { type: 'success' });
           onClose();
         },
       },

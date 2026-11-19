@@ -17,7 +17,7 @@ export default function CareWritePage() {
     mutate(values, {
       onSuccess: ({ petPrtcRcrtSn }) => {
         setDirty(false);
-        showToast('돌봄 요청을 등록했어요');
+        showToast('돌봄 요청을 등록했어요', { type: 'success' });
         navigate(
           generatePath(PATHS.COMMUNITY_PETCARE_DETAIL, { petPrtcRcrtSn }),
         );

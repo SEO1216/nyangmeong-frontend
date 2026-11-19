@@ -29,7 +29,7 @@ export default function PasswordConfirm({ onVerified, onSnsOnly }) {
         onError: (err) => {
           if (err.code === 'SNS_ONLY_MEMBER') onSnsOnly?.();
           else if (err.code !== 'CURRENT_PASSWORD_MISMATCH') {
-            showToast('잠시 후 다시 시도해 주세요');
+            showToast('잠시 후 다시 시도해 주세요', { type: 'error' });
           }
         },
       },

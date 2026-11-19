@@ -38,6 +38,7 @@ export default function PostStatusModal({ post, isRestore = false, onClose }) {
         onSuccess: () => {
           showToast(
             isRestore ? '게시글을 복구했어요' : '게시글을 블라인드했어요',
+            { type: 'success' },
           );
           onClose();
         },

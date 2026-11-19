@@ -12,7 +12,7 @@ export default function InvitationRejectDialog({ invitation, onClose }) {
       onSuccess: onClose,
       onError: (error) => {
         onClose();
-        showToast(error.message);
+        showToast(error.message, { type: 'error' });
       },
     });
 

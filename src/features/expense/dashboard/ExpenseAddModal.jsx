@@ -82,7 +82,9 @@ export default function ExpenseAddModal({ expndYmd, pets, onSaved, onClose }) {
   };
 
   const showSaveError = () =>
-    showToast('저장하지 못했어요. 잠시 후 다시 시도해 주세요');
+    showToast('저장하지 못했어요. 잠시 후 다시 시도해 주세요', {
+      type: 'error',
+    });
   const create = (request) =>
     createExpenses.mutate(request, {
       onSuccess: () => onSaved(request.expndYmd),

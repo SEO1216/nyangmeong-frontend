@@ -103,7 +103,9 @@ export default function ItemFormModal({ item, parts, onClose, onCreated }) {
   };
 
   const handleSaved = () => {
-    showToast(isEdit ? '아이템을 수정했어요' : '아이템을 등록했어요');
+    showToast(isEdit ? '아이템을 수정했어요' : '아이템을 등록했어요', {
+      type: 'success',
+    });
     onClose();
   };
 

@@ -109,7 +109,7 @@ export default function InquiryAnswerForm({ inquiry }) {
   const handleCreate = (ansCn) =>
     create.mutate(
       { otoInqrySn: inquiry.otoInqrySn, ansCn },
-      { onSuccess: () => showToast('답변을 등록했어요') },
+      { onSuccess: () => showToast('답변을 등록했어요', { type: 'success' }) },
     );
 
   const handleUpdate = (ansCn) =>
@@ -118,7 +118,7 @@ export default function InquiryAnswerForm({ inquiry }) {
       {
         onSuccess: () => {
           setIsEditing(false);
-          showToast('답변을 수정했어요');
+          showToast('답변을 수정했어요', { type: 'success' });
         },
       },
     );

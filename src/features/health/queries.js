@@ -138,7 +138,7 @@ export const healthKeys = {
   healthReport: (petSn) => ['health', 'health-report', petSn],
 };
 
-const showErrorToast = (error) => showToast(error.message);
+const showErrorToast = (error) => showToast(error.message, { type: 'error' });
 
 /** 내 반려동물 목록(GET /pets) */
 export const useMyPets = () =>

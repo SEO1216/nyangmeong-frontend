@@ -70,7 +70,7 @@ function ChatModalPanel() {
   /** 클릭 핸들러에서 바로 열기: 지연되면 팝업 차단 */
   const handlePopOut = () => {
     if (!openChatWindow({ otoChatRoomSn, pstSn, listPstSn })) {
-      showToast('팝업이 차단돼 새 창을 열지 못했어요');
+      showToast('팝업이 차단돼 새 창을 열지 못했어요', { type: 'error' });
       return;
     }
     close();
@@ -83,6 +83,7 @@ function ChatModalPanel() {
       ref={panelRef}
       role="dialog"
       aria-labelledby="chat-modal-title"
+      data-toast-above="footer"
       tabIndex={-1}
       className="fixed top-[calc(50%+32px)] left-1/2 z-35 flex h-[780px] max-h-[calc(100dvh-96px)] w-[1040px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[20px] bg-white shadow-depth-lg outline-none max-[760px]:inset-x-0 max-[760px]:top-16 max-[760px]:bottom-0 max-[760px]:h-auto max-[760px]:max-h-none max-[760px]:w-auto max-[760px]:max-w-none max-[760px]:translate-x-0 max-[760px]:translate-y-0 max-[760px]:rounded-none max-[760px]:pb-[env(safe-area-inset-bottom)]"
     >
