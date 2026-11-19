@@ -83,7 +83,7 @@ export default function CareDetail({ post }) {
   const closeModal = () => setModal('');
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-8 max-[1101px]:grid-cols-1 max-[1101px]:gap-10">
+    <div className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-8 max-[1100px]:grid-cols-1 max-[1100px]:gap-10">
       <article className={ARTICLE_CLASS} aria-labelledby="care-title">
         <div className="flex flex-wrap gap-2">
           {post.owner && (
@@ -235,7 +235,7 @@ export default function CareDetail({ post }) {
               <Flag
                 size={20}
                 aria-hidden="true"
-                className="min-[761px]:hidden"
+                className="min-[760px]:hidden"
               />
               <span className="max-[760px]:hidden">신고</span>
             </button>

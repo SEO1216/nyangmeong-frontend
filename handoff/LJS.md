@@ -2,9 +2,12 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 기본 레이아웃 · 공용 토스트 폭·쌓임·모바일 위치 (2026-11-19, T1~T7·추가-1 검증 통과(1·2회차 T4 실패 → 하단 막대 위 끝을 재서 올림), 사람 확인). 토스트 폭 최대 480px·가운데, 같은 문구 합침·최대 3개, 채팅 주소 보내기 이중 토스트 제거, 모바일 하단 막대(`data-toast-above`) 위로, `type` info·success·error(빨간 상자·5초), 등장·퇴장 애니메이션, 호출부 전체 type 지정, 두 문장은 문장마다 새 줄
+끝남: SCR-COM-002 UI 통일 2-M · 남은 옛 분기점·삭제 확인 정리 (2026-11-19, M1~M4 검증 1회차 통과, 사람 확인). 커뮤니티 10개 파일 `761`·`1101` → `760`·`1100`, 가계부 전체 내역 `(width < 760px)`, AI 대화·라우팅 매핑 삭제 확인 `isDanger`, `ui.md` 예시 분기점
 
 ## 다음에 할 것
+
+- SCR-COM-002 UI 통일 2-M 팀 알림(PR 본문 + 팀 채널, KSJ·SJM): 펫돌봄·실종센터·펫이야기 상세(`features/community`·`pages/community/CareListPage`) 분기점이 `min-[760px]`·`max-[1100px]`·`min-[1100px]`로 바뀌어 폭이 정확히 760·1100px일 때 PC 쪽 모양. 가계부 전체 내역(`ExpenseHistory`)도 760px부터 PC. AI 대화 삭제·관리자 라우팅 매핑 삭제 확인 버튼이 빨간색
+- 2-M 참고(검증 보고, 판정 밖): `care/CareFilters.jsx`·`missing/MissingFilters.jsx` 주석 "760px 미만는" 조사 오타(→ "미만은"). 다음에 이 파일을 고칠 때 같이. 2-M 범위 밖으로 남긴 옛 분기점: `components/Card` `sm:`, `adminTableStyles` `md:`, `AuthLayout`·`MyPageHomePage`, 랜딩 `LandingHeader` 768·`ProcessSection` 1280(랜딩 교체 SCR-MAN-002 때)
 
 - SCR-COM-002 공용 토스트 팀 알림(PR 본문 + 팀 채널, 모두, 사람이 전달): `showToast(message, { type: 'success' | 'error' })` 생김(인자 없으면 info). JAJ·SJM·KSJ·YAY 폴더 호출부 약 70개 파일에 type을 붙임(문구·시점 그대로, 일부 Prettier 줄바꿈). 같은 문구 합침·최대 3개, 두 문장은 문장마다 새 줄. 760 미만에서 화면 아래 고정 막대를 새로 만들면 `data-toast-above`(안쪽 요소 기준이면 `="form"`처럼 선택자) 달기
 - SCR-COM-002 토스트 범위 밖(말만): 모바일 캐릭터 꾸미기 저장 줄(`CharacterDecorate.jsx`, SJM)·PC 장소 지도 팝업(`PlacePopup`, YAY)과 토스트 겹침, 닫기 버튼·hover 멈춤
@@ -33,7 +36,6 @@
 - 사람이 고치는 문서: 공통레이아웃 기능명세서 FN-COM-002-27 "플로팅 반려동물 등록 버튼" 추가, 화면설계서 SCR-COM-002 ⑦ 플로팅 버튼 설명
 - 참고(검증 보고, 판정 밖): `/mypage/pets`에는 화면의 [반려동물 등록]과 플로팅 버튼이 같은 이름으로 둘 보인다(낭독기에서 헷갈릴 수 있음). 등록 성공 뒤 동작(토스트 후 그 자리)은 공용 DB라 코드로만 확인
 
-- SCR-COM-002 UI 통일 2-M(2026-11-19 두 번째 기획 M1~M4: KSJ 커뮤니티 8개 파일 `1101`·`761` → `1100`·`760`, SJM `ExpenseHistory` `MOBILE_QUERY`, AI 대화·라우팅 매핑 삭제 확인 `isDanger`, `ui.md` 예시 2곳. 범위 밖 `Card` `sm:`·`adminTableStyles` `md:`·`AuthLayout`·`MyPageHomePage`. 로고 버그 먼저(사람)) (남은 옛 분기점 KSJ 커뮤니티 7개 파일·SJM `ExpenseHistory` JS, AI 대화·라우팅 매핑 삭제 확인 `isDanger`, `ui.md` 예시 `min-[1101px]`): 2026-11-19 기획했다가 플로팅 등록 버튼 먼저(사람). 다음 `/start`에서 다시 기획
 
 ### SCR-COM-002 UI 통일 다음 단계(사람 결정 2026-11-18)
 

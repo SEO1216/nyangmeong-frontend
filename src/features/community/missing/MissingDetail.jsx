@@ -433,7 +433,7 @@ export default function MissingDetail({ post }) {
                 <Flag
                   size={20}
                   aria-hidden="true"
-                  className="min-[761px]:hidden"
+                  className="min-[760px]:hidden"
                 />
                 <span className="max-[760px]:hidden">신고</span>
               </button>

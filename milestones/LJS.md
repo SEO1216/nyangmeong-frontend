@@ -1445,7 +1445,7 @@
 - 결과(2026-11-19): N1~N4 검증 2회차 통과(1회차 실패: `/mypage/characters` → `/health` 이동 때 `/pixel-characters` 재요청 → 새 훅에 `staleTime` 5분), 추가-1(등록·초대 수락 뒤 캐릭터 목록 무효화, staleTime 부작용 Playwright 재현 뒤 사람 요청) 통과, 사람 확인. 기획과 달라진 것: 첫 기획(공용 `PetStage`, 배너 모양 기준)을 사람 결정으로 마이페이지 카드 기준·`usePixelCharacters` 통합으로 바꿈
 - 연결 남음: 없음
 
-## SCR-COM-002 UI 통일 2-M · 남은 옛 분기점·삭제 확인 정리 — 대기
+## SCR-COM-002 UI 통일 2-M · 남은 옛 분기점·삭제 확인 정리 — 끝
 - 기능: (2 마일스톤의 마지막 조각, 2026-11-19, 기준 `docs/convention/ui.md` "화면 폭 분기점"·`ConfirmModal isDanger`) 커뮤니티(KSJ)·가계부(SJM) 남은 옛 분기점, AI 대화·라우팅 매핑 삭제 확인 빨간 버튼, `ui.md` 예시 분기점
 - 기다리는 것: 없음
 - 완료 조건: 기획(핸드오프 "지금 하는 것")의 M1~M4 / `yarn -s lint`·`yarn -s build` 0

@@ -25,6 +25,7 @@ export default function DeleteConversationModal({
       title="이 대화를 삭제할까요?"
       description="삭제한 대화와 메시지는 되돌릴 수 없어요."
       confirmLabel="삭제하기"
+      isDanger
       errorMessage={
         deleteConversation.isError
           ? '삭제하지 못했어요. 잠시 뒤 다시 시도해 주세요'

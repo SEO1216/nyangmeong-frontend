@@ -460,6 +460,7 @@ export default function AiRouteFormModal({ route, onClose }) {
           title="매핑을 삭제할까요?"
           description={`'${route.trgtScrnNm}' 행이 매핑표에서 빠져요. 다음 요청부터 이 지시어로는 이동하지 않아요.`}
           confirmLabel="삭제하기"
+          isDanger
           isPending={remove.isPending}
           errorMessage={remove.isError ? remove.error.message : undefined}
           onConfirm={handleDelete}
