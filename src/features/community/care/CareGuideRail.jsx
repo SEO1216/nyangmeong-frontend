@@ -27,7 +27,7 @@ export default function CareGuideRail() {
   return (
     <aside
       aria-label="돌봄 전 확인 안내"
-      className="flex min-w-0 flex-col gap-8"
+      className="flex min-w-0 flex-col gap-10"
     >
       <CareCheckGuide />
       <div className="rounded-[14px] bg-brand-50 px-5 py-4 text-sm leading-[1.6] text-brand-600">

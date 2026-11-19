@@ -8,6 +8,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Icon from '@/components/Icon';
 import { showToast } from '@/components/toastStore';
+import { PROFANITY_MESSAGE, hasProfanity } from '@/utils/profanity';
 import { useSendChatMessage } from '../queries';
 import {
   CHAT_ROOM_CLOSED,
@@ -55,6 +56,7 @@ export default function ChatMessageInput({
   const [msgCn, setMsgCn] = useState('');
   const [photos, setPhotos] = useState([]);
   const [photoError, setPhotoError] = useState(null);
+  const [textError, setTextError] = useState(null);
   const [failed, setFailed] = useState(null);
   const [isAddressOpen, setIsAddressOpen] = useState(false);
   const textareaRef = useRef(null);
@@ -91,6 +93,10 @@ export default function ChatMessageInput({
     event.preventDefault();
     if (!canSend) return;
     const text = msgCn.trim();
+    if (hasProfanity(text)) {
+      setTextError(PROFANITY_MESSAGE);
+      return;
+    }
     const clearText = () => {
       setMsgCn('');
       textareaRef.current?.focus();
@@ -214,6 +220,11 @@ export default function ChatMessageInput({
           {photoError}
         </p>
       )}
+      {textError && (
+        <p role="alert" className="mb-2 text-sm text-danger">
+          {textError}
+        </p>
+      )}
       {failed && (
         <p
           role="alert"
@@ -274,7 +285,10 @@ export default function ChatMessageInput({
             disabled={isDisabled}
             className="h-10 max-h-[88px] min-w-0 flex-1 resize-none bg-transparent py-2 leading-6 text-ink outline-none placeholder:text-placeholder disabled:cursor-not-allowed disabled:placeholder:text-subtle"
             value={msgCn}
-            onChange={(event) => setMsgCn(event.target.value)}
+            onChange={(event) => {
+              setMsgCn(event.target.value);
+              setTextError(null);
+            }}
             onKeyDown={handleKeyDown}
           />
           <button
