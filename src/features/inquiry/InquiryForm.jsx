@@ -194,7 +194,12 @@ export default function InquiryForm({
               )}
               onChange={(event) => {
                 /** 제목은 줄을 나눌 수 없다: 붙여 넣은 줄바꿈은 공백으로 */
-                setTitle(event.target.value.replaceAll(/[\r\n]+/g, ' '));
+                /** 한글 조합 중에는 maxLength를 넘겨 들어오므로 직접 자른다 */
+                setTitle(
+                  event.target.value
+                    .replaceAll(/[\r\n]+/g, ' ')
+                    .slice(0, TITLE_MAX),
+                );
                 clearError('title');
               }}
               onKeyDown={(event) => {
@@ -229,7 +234,7 @@ export default function InquiryForm({
               aria-required="true"
               aria-invalid={Boolean(errors.body || serverFieldError('inqryCn'))}
               onChange={(event) => {
-                setBody(event.target.value);
+                setBody(event.target.value.slice(0, BODY_MAX));
                 clearError('body');
               }}
               className={`${INPUT} max-h-[600px] min-h-[200px] resize-y py-3 leading-[1.7]`}

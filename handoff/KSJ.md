@@ -30,6 +30,13 @@ SCR-CMU-001 커뮤니티 · 댓글 답글 「@닉네임」 (시작 2026-11-18) �
 | 추가-6 | `src/features/chat/room/ChatRoomList.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: PC 채팅 모달에서 왼쪽 「내 글·지원한 글」 탭 줄(편집 모드 줄 포함)의 높이가 오른쪽 상대방 이름 줄(60px)과 같고 아래 선이 이어진다 | 요청 2026-11-18 "내글 지원한글 영역과 오른쪽 냥멍테스터 상단 영역 높이를 동일하게" |
 | 추가-7 | `src/components/Modal.jsx`, `src/features/chat/room/AddressShareModal.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 주소 공유 모달 제목이 18px(확인 창 제목과 같은 크기)로 보이고, 다른 모달 제목(22px)은 그대로다 | 요청 2026-11-18 "모달 타이틀이 너무 크다, 가이드에 맞는 더 작은 타이틀로" |
 | 추가-8 | `src/features/chat/room/ChatRoomList.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 채팅 목록 하단 안내 문구(「거래는 채팅방 위 카드에서…」)가 12px이고, 그 줄(윗선 포함) 높이가 오른쪽 입력 영역과 같은 65px이다 | 요청 2026-11-18 "왼쪽 리스트 하단 안내 텍스트 12px, 오른쪽 채팅 영역 높이 동일하게" |
+| 추가-9 | `src/features/community/PostDetail.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 펫이야기 상세에서 내가 쓴 글에는 [신고] 버튼이 없고 남의 글에는 있다 | 요청 2026-11-19 "펫이야기 상세에서 내가 쓴 글에도 [신고] 버튼 삭제" |
+| 추가-10 | `src/features/community/care/CareForm.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 펫돌봄 글쓰기에서 빠진 항목이 있는 채 첫 [등록하기]를 누르면 그 첫 빠진 항목으로 포커스가 간다(제출 버튼에 남지 않음) | 요청 2026-11-19 "setErrors 반영 전에 aria-invalid를 찾아 첫 등록 뒤 포커스가 제출 버튼에 남음" |
+| 추가-11 | `src/features/community/StoryRail.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 오늘의 한마디 박스가 아래 카드와 같은 14px 라운딩이고 오른쪽 위 접힌 모서리가 없으며, 왼쪽 아이콘이 따옴표(quote)다 | 요청 2026-11-19 "오늘의 한마디 다른 박스와 같은 라운딩, 접힌 효과 삭제, 아이콘 quote" |
+| 추가-12 | `src/features/community/missing/MissingForm.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 실종센터 글쓰기에서 빠진 항목이 있는 채 첫 [등록하기]를 누르면 첫 빠진 항목으로 포커스가 간다 | 요청 2026-11-19 "MissingForm에도 같은 코드가 있는지 확인해줘"(CareForm과 같은 결함이라 같은 방식으로 고침) |
+| 추가-13 | `src/features/community/StoryRail.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 펫이야기 오른쪽 레일의 「오늘의 건강 이야기」가 흰 박스(배경·테두리·안쪽 여백) 없이 실종·돌봄 레일처럼 구역 제목과 목록으로만 보인다 | 요청 2026-11-19 "펫이야기 오른쪽 레일 박스 배경 없애줘, 다른 페이지 레일 참고" |
+| 추가-14 | `src/features/community/missing/CheckList.jsx`, `missing/MissingRail.jsx`, `care/CareGuideRail.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 「실종 체크 가이드」「돌봄 전, 꼭 확인해요」의 제목·선·글자 크기·간격이 「오늘의 건강 이야기」와 같고, 「자세한 대처 요령 보기」가 「내 펫 건강 체크하기」와 같은 전체 폭 연한 초록 버튼이다 | 요청 2026-11-19 "대처 요령 버튼과 두 가이드를 오늘의 건강 이야기와 같은 스타일·크기로" |
+| 추가-15 | `src/features/inquiry/InquiryForm.jsx`, `community/PostForm.jsx`, `care/CareForm.jsx`, `missing/MissingForm.jsx`·`BreedCombobox.jsx`, `components/ReportModal.jsx`, `src/features/community/CommentSection.jsx`, `src/utils/profanity.js` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 1:1 문의·글쓰기 폼(펫이야기·돌봄·실종)·품종 직접 입력·신고 사유가 한글 조합 중에도 최대 글자 수(50·2000)를 넘지 않고, 댓글 입력창이 한 줄처럼 보이는 입력칸(Enter로 등록, 길어지면 줄바꿈되어 높이가 늘어남)이며, 욕설이 있으면 등록되지 않고 안내 문구가 보인다 | 요청 2026-11-19 "고객센터 최대 글자 초과 입력 막기, 댓글 입력을 인풋으로, 댓글 욕설 필터링" |
 
 ## 다음에 할 것
 

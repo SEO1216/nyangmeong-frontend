@@ -1,5 +1,6 @@
 import { Info, MapPin, Navigation } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import DatePicker from '@/components/DatePicker';
 import TimeSelect from '@/components/TimeSelect';
 import AutoTextarea from '@/components/AutoTextarea';
@@ -148,7 +149,8 @@ export default function MissingForm({
   const handleSubmit = (event) => {
     event.preventDefault();
     const nextErrors = validate();
-    setErrors(nextErrors);
+    /** 오류 표시(aria-invalid)가 화면에 반영된 뒤에 첫 빠진 항목을 찾도록 바로 반영한다 */
+    flushSync(() => setErrors(nextErrors));
     if (Object.keys(nextErrors).length > 0) {
       /** 빠진 항목 중 첫 번째로 이동 */
       formRef.current
@@ -250,7 +252,9 @@ export default function MissingForm({
                   placeholder="예: 보리"
                   aria-invalid={Boolean(errors.petNm)}
                   onChange={(event) =>
-                    set({ petNm: event.target.value }, ['petNm'])
+                    set({ petNm: event.target.value.slice(0, NAME_MAX) }, [
+                      'petNm',
+                    ])
                   }
                   className={INPUT}
                 />
@@ -269,7 +273,9 @@ export default function MissingForm({
                   placeholder="예: 흰색, 갈색과 흰색"
                   aria-invalid={Boolean(errors.colrNm)}
                   onChange={(event) =>
-                    set({ colrNm: event.target.value }, ['colrNm'])
+                    set({ colrNm: event.target.value.slice(0, COLOR_MAX) }, [
+                      'colrNm',
+                    ])
                   }
                   className={INPUT}
                 />
@@ -301,7 +307,9 @@ export default function MissingForm({
                 maxLength={FEATURE_MAX}
                 value={values.chrcCn}
                 placeholder="예: 빨간 목줄, 왼쪽 눈가 갈색 점"
-                onChange={(event) => set({ chrcCn: event.target.value })}
+                onChange={(event) =>
+                  set({ chrcCn: event.target.value.slice(0, FEATURE_MAX) })
+                }
                 className={INPUT}
               />
               <p className="text-sm text-muted">
@@ -406,7 +414,9 @@ export default function MissingForm({
                   placeholder="예: 보리 (몰티즈)를 찾습니다"
                   aria-invalid={Boolean(errors.title)}
                   onChange={(event) =>
-                    set({ title: event.target.value }, ['title'])
+                    set({ title: event.target.value.slice(0, TITLE_MAX) }, [
+                      'title',
+                    ])
                   }
                   className={INPUT}
                 />
@@ -431,7 +441,9 @@ export default function MissingForm({
                   aria-required="true"
                   aria-invalid={Boolean(errors.body)}
                   onChange={(event) =>
-                    set({ body: event.target.value }, ['body'])
+                    set({ body: event.target.value.slice(0, BODY_MAX) }, [
+                      'body',
+                    ])
                   }
                   className={`${INPUT} max-h-[600px] min-h-[200px] resize-y py-3 leading-[1.7]`}
                 />
