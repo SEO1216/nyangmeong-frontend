@@ -2,11 +2,22 @@
 
 ## 지금 하는 것
 
-SCR-MYP-001 마이페이지 홈 · "+ 등록" 삭제 — 끝 (2026-11-18, 검증 `통과` 2회차, lint·build 0, 사람 확인 완료)
+SCR-MYP-010 픽셀 캐릭터 관리 · 목록 카드 기본 그림을 종별 기본 캐릭터로 — 끝 (2026-11-19, 검증 `통과` 1회차, lint·build 0, 사람 확인 완료)
 
-- 바꾼 것: `features/pet/home/MyPetsSection.jsx` 한 파일. 헤더 `+ 등록` 버튼 삭제, 0마리 홈 `PetEmpty`의 [반려동물 등록하기]는 이동 없이 홈에서 바로 등록 모달(`onRegister`만 바꿈, `PetEmpty`·`PetFormModal`은 그대로)
-- 추가 요청(사람이 요청한 것으로 확인): 추가-1 PC(761px 이상)에서 홈 반려동물 카드를 [더보기] 없이 전부 보이고, 모바일(760px 이하)은 처음 6마리와 [더보기]를 그대로 둔다
-- 정리: 저장하지 않고 모달만 열었다 닫아 DB를 바꾸지 않았다. 따로 복구할 것 없음
+- FN-MYP-010-02·03·07·23 카드 무대 그림: `src/features/pet/character/CharacterCard.jsx` 한 파일. lucide `Cat`/`Dog` 선 아이콘을 지우고 종별 기본 캐릭터 그림(결정: 전신 `@/assets/pets/default-character-dog-full.png`·`-cat-full.png`)을 `<img>`로 그린다. 크기는 무대 안 62% 자리(`size-full object-contain [image-rendering:pixelated]`), 장식이라 `alt=""`
+  - 만듦(DONE) + 이미지 받는 중: 지금처럼 로딩 자리(`FileImage` `pending`)
+  - 만듦 + 이미지 못 불러옴: `FileImage` `fallback`에 기본 캐릭터 그림(컬러)
+  - 안 만듦(NONE)·만드는 중(GENERATING): 기본 캐릭터 그림에 지금 클래스(`opacity-[0.12] brightness-0`) 그대로 실루엣, "?"(NONE)·[캐릭터 만들기](own+NONE)·"만드는 중" 배지 그대로
+  - 오류 확인 중: 지금 클래스(`opacity-55 grayscale`)와 "오류 확인 중" 배지 그대로. 서버가 기본 캐릭터를 주므로 이미지가 오면 그것, 못 오면 기본 그림이 흑백으로
+  - API: 그대로 `GET /pets/{petSn}/character-image?part=full`(DONE일 때만). 새 API 없음
+  - 완료 조건: `명령:` `yarn -s lint`, `yarn -s build` 종료 코드 0. `화면:` `/mypage/characters`를 375·1440에서 tester(mbrSn 1)로 확인 — 만든 카드는 캐릭터 이미지, 안 만든 카드는 검은 실루엣 + "?" + [캐릭터 만들기], 오류 확인 중 카드는 흑백·흐림 + 배지, 공동양육 탭(user0006 또는 tester의 공동양육)도 같은 규칙. 이미지 실패는 Playwright로 `character-image` 요청을 막아(route abort) 컬러 기본 그림이 보이는지 확인. 화면에 lucide 선 아이콘이 남지 않는다
+- 디자인: 없음(Figma 토큰 없음, `html/`에 SCR-MYP-010 파일 없음). 카드 모양은 그대로 두고 그림만 바꾼다
+- 질문: 카드는 전신(`part=full`) 자리인데 말씀하신 `default-character-dog/cat.png`는 얼굴 그림이다. 전신 기본 그림 `default-character-dog-full.png`·`-cat-full.png`(플로팅 AI 버튼이 쓰는 것)도 있다. 어느 것을 쓸까요? (추천: 전신 `-full.png`, 카드 무대가 전신 캐릭터 자리라서)
+  - 결정: 전신 기본 그림(`default-character-dog-full.png`·`-cat-full.png`)을 쓴다. 위 기획의 파일명은 이 결정으로 바꾼다
+- 질문: 디자인 파일이 없습니다. 카드 모양은 그대로 두고 그림만 바꿀까요? (추천: 그대로 두고 그림만)
+  - 결정: 카드 모양은 그대로 두고 그림만 바꾼다
+- 새 의존성: 없음
+- 정리: 데이터를 바꾸지 않았다. 따로 복구할 것 없음
 
 ## 다음에 할 것
 
@@ -41,6 +52,7 @@ SCR-MYP-001 마이페이지 홈 · "+ 등록" 삭제 — 끝 (2026-11-18, 검증
 
 ### 팀 답 기다림
 
+- 서버가 주는 기본 캐릭터 이미지(오류 확인 중 카드 등)를 프론트 기본 전신 그림과 같게 통일(LJS가 처리). 통일되면 오류 확인 중 카드 모양이 바뀌는지 화면 확인
 - 등록-삭제를 반복하면 같은 날 케어미션이 다시 출제될 수 있다(포인트 악용 여지). 막을지 백엔드와 정한다
 - SCR-MYP-010 털색을 "흰색"으로 등록했는데 생성 캐릭터가 검은 강아지였다. 서버가 털색을 반영하는지(LJS)
 - FN-MYP-010-12 첫 생성 실패 때 [캐릭터 만들기] 재노출과 실패 안내 문구(LJS)
