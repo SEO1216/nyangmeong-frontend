@@ -13,7 +13,7 @@ export const DETAIL_TABS = [
 ];
 
 /** 탭 id·패널 id 연결 */
-export const getTabId = (key) => `checkup-tab-${key}`;
+export const getTabId = (key) => `checkup-panel-${key}-tab`;
 export const getPanelId = (key) => `checkup-panel-${key}`;
 
 /** 검사 종류 칩 */

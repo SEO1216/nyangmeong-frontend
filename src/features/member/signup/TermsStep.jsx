@@ -1,6 +1,6 @@
 import { Check, ChevronRight } from 'lucide-react';
-import AuthCheckBox from '../shared/AuthCheckBox';
-import { PRIMARY_BTN } from '../shared/authStyles';
+import Checkbox from '@/components/Checkbox';
+import { BTN_PRIMARY } from '@/components/buttonStyles';
 import { hasTermsView } from '../shared/validate';
 import { SIGNUP_MESSAGES as MSG } from './signupMessages';
 
@@ -15,7 +15,11 @@ export function TermsChecklist({ form, lockedSn, isRoomy = false }) {
     return (
       <div className="flex flex-col items-start gap-3">
         <p className="text-danger">{MSG.termsFailed}</p>
-        <button type="button" onClick={form.retryTerms} className={PRIMARY_BTN}>
+        <button
+          type="button"
+          onClick={form.retryTerms}
+          className={`${BTN_PRIMARY} w-full`}
+        >
           다시 시도
         </button>
       </div>
@@ -24,11 +28,15 @@ export function TermsChecklist({ form, lockedSn, isRoomy = false }) {
   return (
     <>
       <div
-        className={`mb-2 flex min-h-[46px] items-center rounded-md border border-line px-4 font-semibold ${isRoomy ? 'max-md:mb-3' : ''}`}
+        className={`mb-2 flex min-h-[46px] items-center rounded-md border border-line px-4 font-semibold ${isRoomy ? 'max-[760px]:mb-3' : ''}`}
       >
-        <AuthCheckBox checked={form.isAllChecked} onChange={form.toggleAll}>
+        <Checkbox
+          checked={form.isAllChecked}
+          onChange={form.toggleAll}
+          className="flex-1"
+        >
           모두 동의
-        </AuthCheckBox>
+        </Checkbox>
       </div>
       {form.termsList.map(
         ({ trmsSn, trmsFixIdntfKey, trmsTtl, esntlAgreYn }) => {
@@ -47,7 +55,7 @@ export function TermsChecklist({ form, lockedSn, isRoomy = false }) {
           return (
             <div
               key={trmsSn}
-              className={`flex min-h-10 items-center px-4 text-ink-2 ${isRoomy ? 'max-md:min-h-11' : ''}`}
+              className={`flex min-h-10 items-center px-4 text-ink-2 ${isRoomy ? 'max-[760px]:min-h-11' : ''}`}
             >
               {trmsSn === lockedSn ? (
                 <div className="flex flex-1 items-center gap-3">
@@ -60,19 +68,20 @@ export function TermsChecklist({ form, lockedSn, isRoomy = false }) {
                   </span>
                 </div>
               ) : (
-                <AuthCheckBox
+                <Checkbox
                   checked={Boolean(form.terms[trmsSn])}
                   onChange={() => form.toggleTerm(trmsSn)}
+                  className="flex-1"
                 >
                   {label}
-                </AuthCheckBox>
+                </Checkbox>
               )}
               {hasTermsView(trmsFixIdntfKey) && (
                 <button
                   type="button"
                   onClick={() => form.openTerms(trmsSn)}
                   aria-label={`${trmsTtl} 내용보기`}
-                  className="grid place-items-center text-subtle hover:text-ink"
+                  className="-mr-1 grid size-6 shrink-0 place-items-center text-subtle hover:text-ink max-[760px]:-mr-3.5 max-[760px]:size-11"
                 >
                   <ChevronRight className="size-4" />
                 </button>
@@ -93,14 +102,14 @@ export default function TermsStep({ form }) {
   return (
     <>
       <TermsChecklist form={form} isRoomy />
-      <p className="mt-2 text-sm leading-5 text-muted max-md:mt-4">
+      <p className="mt-2 text-sm leading-5 text-muted max-[760px]:mt-4">
         필수 약관에 모두 동의하면 다음으로 넘어갈 수 있습니다.
       </p>
       <button
         type="button"
         disabled={!form.isTermsOk}
         onClick={() => form.goStep('email')}
-        className={`${PRIMARY_BTN} mt-5 max-md:mt-8`}
+        className={`${BTN_PRIMARY} w-full mt-5 max-[760px]:mt-8`}
       >
         다음
       </button>

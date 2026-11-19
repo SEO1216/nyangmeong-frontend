@@ -19,7 +19,7 @@ import {
   useObservationCycles,
   useObservationItems,
 } from '../queries';
-import EmptyBox from './EmptyBox';
+import EmptyResult from '@/components/EmptyResult';
 import ObservationDetail from './ObservationDetail';
 import {
   ObservationMobileDetail,
@@ -48,7 +48,7 @@ export default function ObservationCard({
   onCloseItem,
 }) {
   const { data, isPending } = useObservationItems(petSn);
-  const isPc = useMediaQuery('(min-width: 761px)');
+  const isPc = useMediaQuery('(width >= 760px)');
   const [selection, setSelection] = useState({
     obsrvArtclSn: null,
     obsrvCyclSn: null,
@@ -133,12 +133,14 @@ export default function ObservationCard({
   }
 
   const emptyBox = (
-    <EmptyBox
-      icon="favorite"
+    <EmptyResult
+      isCompact
+      icon={<Icon name="favorite" className="text-[28px] text-line-strong" />}
       title="관찰 중인 항목이 없어요"
       description="피부·눈·상처처럼 계속 지켜볼 곳을 사진으로 남기고 변화를 비교해요"
-      action={registerButton(`${BTN_SECONDARY} mt-2 h-8! px-3!`)}
-    />
+    >
+      {registerButton(`${BTN_SECONDARY} mt-2`)}
+    </EmptyResult>
   );
 
   /**
@@ -307,9 +309,7 @@ export default function ObservationCard({
       <Card
         title="지속 관찰"
         className="min-w-0"
-        action={
-          !openItem && registerButton(`${BTN_PRIMARY} h-8! px-3!`, '+ 추가')
-        }
+        action={!openItem && registerButton(`${BTN_PRIMARY}`, '+ 추가')}
       >
         {items.length === 0 ? (
           emptyBox
@@ -345,7 +345,7 @@ export default function ObservationCard({
         </span>
       }
       className="min-w-0"
-      action={registerButton(`${BTN_PRIMARY} h-8! px-3!`)}
+      action={registerButton(`${BTN_PRIMARY}`)}
     >
       {items.length === 0 ? (
         emptyBox
@@ -354,7 +354,7 @@ export default function ObservationCard({
           <p className="mb-4 text-placeholder">
             피부·눈·상처 등 지속적으로 확인할 항목을 기록하고 변화를 비교해요
           </p>
-          <div className="grid gap-5 min-[1101px]:grid-cols-[242px_minmax(0,1fr)]">
+          <div className="grid gap-5 min-[1100px]:grid-cols-[242px_minmax(0,1fr)]">
             <div
               role="group"
               aria-label="관찰 항목 목록"
@@ -374,7 +374,7 @@ export default function ObservationCard({
                 />
               ))}
             </div>
-            <div className="min-w-0 min-[1101px]:border-l min-[1101px]:border-line-soft min-[1101px]:pl-6">
+            <div className="min-w-0 min-[1100px]:border-l min-[1100px]:border-line-soft min-[1100px]:pl-6">
               {detailProps ? (
                 <ObservationDetail
                   key={selectedItem.obsrvArtclSn}

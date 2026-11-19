@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { generatePath, useNavigate } from 'react-router-dom';
+import Badge from '@/components/Badge';
 import Card from '@/components/Card';
 import Icon from '@/components/Icon';
 import Modal from '@/components/Modal';
@@ -7,23 +8,16 @@ import { BTN_DANGER, BTN_SECONDARY } from '@/components/buttonStyles';
 import { showToast } from '@/components/toastStore';
 import { PATHS } from '@/routes/paths';
 import { getAttachmentFile } from '../checkupApi';
-import EmptyBox from '../diary/EmptyBox';
+import EmptyResult from '@/components/EmptyResult';
 import { toAnalyzedItems } from '../labInput/labRows';
 import {
   useAnalyzeLabPdf,
   useDeleteAttachment,
   useReplaceAttachment,
 } from '../queries';
-import AttachmentForm from './AttachmentForm';
+import AttachmentModal from './AttachmentModal';
 import { getFileError } from './attachmentUtils';
-import {
-  ADD_ROW,
-  BTN_SM,
-  ROW_LINE,
-  TAG,
-  TEXT_BTN,
-  TEXT_BTN_DEL,
-} from './checkupStyles';
+import { ADD_ROW, ROW_LINE, TEXT_BTN, TEXT_BTN_DEL } from './checkupStyles';
 import {
   ATTACHMENT_IMAGE,
   ATTACHMENT_LAB,
@@ -45,15 +39,10 @@ const PDF_URL_LIFETIME = 60 * 1000;
  * - PDF 분석은 검사결과지 유형의 PDF 행마다. 성공하면 인식 항목을 들고 검사 수치 입력으로 이동
  * - 영수증 원본은 첨부 자료에 넣지 않음
  */
-export default function AttachmentTab({
-  petSn,
-  ckupRcdSn,
-  attachments,
-  isAddOpenInitially,
-}) {
+export default function AttachmentTab({ petSn, ckupRcdSn, attachments }) {
   const navigate = useNavigate();
   const replaceInputRef = useRef(null);
-  const [isAddOpen, setIsAddOpen] = useState(isAddOpenInitially);
+  const [isAddOpen, setIsAddOpen] = useState(false);
   const [replaceSn, setReplaceSn] = useState(null);
   const [deleteSn, setDeleteSn] = useState(null);
   const [analyzingSn, setAnalyzingSn] = useState(null);
@@ -153,34 +142,31 @@ export default function AttachmentTab({
       { onSuccess: () => setDeleteSn(null) },
     );
 
-  const addForm = isAddOpen && (
-    <AttachmentForm
-      petSn={petSn}
-      ckupRcdSn={ckupRcdSn}
-      onClose={() => setIsAddOpen(false)}
-    />
-  );
 
   return (
     <Card title="첨부 자료" sub="여러 건 등록 가능">
       {attachments.length === 0 ? (
-        <>
-          <EmptyBox
-            icon="description"
+        <EmptyResult
+            isCompact
+            icon={
+              <Icon
+                name="description"
+                className="text-[28px] text-line-strong"
+              />
+            }
             title="첨부한 자료가 없어요"
             description="검사결과지 PDF를 올리면 수치를 자동으로 읽어요"
-            action={
+          >
+            {
               <button
                 type="button"
-                className={`${BTN_SECONDARY} ${BTN_SM}`}
+                className={`${BTN_SECONDARY}`}
                 onClick={() => setIsAddOpen(true)}
               >
                 ＋ 첨부 추가
               </button>
             }
-          />
-          {addForm}
-        </>
+          </EmptyResult>
       ) : (
         <>
           <ul>
@@ -189,9 +175,9 @@ export default function AttachmentTab({
                 key={attachment.ckupRcdAtchSn}
                 className={`flex flex-wrap items-center gap-x-3 gap-y-2 py-3 ${ROW_LINE}`}
               >
-                <span className={TAG}>
+                <Badge>
                   {findName(ATTACHMENT_TYPES, attachment.atchTypeCd)}
-                </span>
+                </Badge>
                 <span className="inline-flex min-w-0 items-center gap-1">
                   <Icon
                     name={
@@ -209,7 +195,7 @@ export default function AttachmentTab({
                     {findName(IMAGING_PARTS, attachment.shtRegnCd)}
                   </span>
                 )}
-                <span className="flex items-center gap-3 max-sm:w-full sm:ml-auto">
+                <span className="flex items-center gap-3 max-[760px]:w-full min-[760px]:ml-auto">
                   {isLabPdf(attachment) && (
                     <button
                       type="button"
@@ -269,18 +255,23 @@ export default function AttachmentTab({
               먼저 검사결과지를 등록하세요
             </p>
           )}
-          {!isAddOpen && (
-            <button
-              type="button"
-              className={`${TEXT_BTN} ${ADD_ROW}`}
-              onClick={() => setIsAddOpen(true)}
-            >
-              <Icon name="add" className="text-lg" />
-              첨부 추가
-            </button>
-          )}
-          {addForm}
+          <button
+            type="button"
+            className={`${TEXT_BTN} ${ADD_ROW}`}
+            onClick={() => setIsAddOpen(true)}
+          >
+            <Icon name="add" className="text-lg" />
+            첨부 추가
+          </button>
         </>
+      )}
+
+      {isAddOpen && (
+        <AttachmentModal
+          petSn={petSn}
+          ckupRcdSn={ckupRcdSn}
+          onClose={() => setIsAddOpen(false)}
+        />
       )}
 
       <input

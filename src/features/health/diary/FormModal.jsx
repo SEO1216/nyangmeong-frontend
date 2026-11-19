@@ -1,43 +1,33 @@
-import { useEffect, useRef } from 'react';
-import useScrollLock from '@/hooks/useScrollLock';
-import Icon from '@/components/Icon';
+import { useId } from 'react';
+import Modal from '@/components/Modal';
+import { Required } from '@/components/FieldError';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 
 /**
- * [건강 일지 입력 모달 틀]
- * - 머리 아이콘·제목·✕, 본문, 하단 줄(필수 안내·취소·저장)
- * - ESC·✕·취소로 닫음. 저장 중에는 닫지 않음
+ * [건강 일지 입력 모달] 공용 Modal(isLarge·isAutoHeight) 위에 폼과 하단 줄을 얹는다(UI 체크리스트 58)
+ * - 본문은 안쪽 스크롤, 760px 이하는 화면 전체
+ * - ESC·✕·배경·취소로 닫음. 저장 중에는 닫지 않음
  * - cancelLabel·onCancel: 왼쪽 버튼을 닫기가 아닌 다른 일(예: 다시 촬영하기)로 바꿀 때
  * - hasRequiredNote: 하단 왼쪽 "* 표시는 필수 항목이에요", isSubmitDisabled: 저장 비활성
+ * - width: 가로 폭(px) 560·720, null이면 760
+ * - isFixedHeight: 내용과 상관없이 공용 Modal 고정 높이(660px, 화면이 작으면 화면 − 2rem)로 열고 폼 본문만 안에서 스크롤(처방·투약 모달)
  */
 export default function FormModal({
-  icon,
   title,
-  submitLabel = '저장',
+  submitLabel = '저장하기',
   cancelLabel = '취소',
   isPending = false,
   isSubmitDisabled = false,
   hasRequiredNote = true,
   hasFooter = true,
-  widthClassName = 'w-[min(720px,calc(100%-32px))]',
+  width = 720,
+  isFixedHeight = false,
   onSubmit,
   onCancel,
   onClose,
   children,
 }) {
-  const dialogRef = useRef(null);
-  useScrollLock();
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    dialog.showModal();
-    return () => dialog.close();
-  }, []);
-
-  const handleCancel = (event) => {
-    event.preventDefault();
-    if (!isPending) onClose();
-  };
+  const formId = useId();
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -45,65 +35,53 @@ export default function FormModal({
   };
 
   return (
-    <dialog
-      ref={dialogRef}
-      aria-label={title}
-      className={`m-auto max-h-[calc(100vh-32px)] ${widthClassName} flex-col rounded-[20px] bg-white p-0 shadow-[0_24px_64px_-12px_rgba(15,23,35,0.35)] backdrop:bg-[rgba(15,23,35,0.45)] open:flex`}
-      onCancel={handleCancel}
+    <Modal
+      title={title}
+      isLarge
+      isAutoHeight={!isFixedHeight}
+      width={width}
+      isPending={isPending}
+      onClose={onClose}
+      footer={
+        hasFooter && (
+          <>
+            {hasRequiredNote ? (
+              <p className="text-muted">
+                <Required /> 표시는 필수 항목이에요
+              </p>
+            ) : (
+              <span />
+            )}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={isPending}
+                className={`${BTN_SECONDARY} min-w-24`}
+                onClick={onCancel ?? onClose}
+              >
+                {cancelLabel}
+              </button>
+              <button
+                type="submit"
+                form={formId}
+                disabled={isPending || isSubmitDisabled}
+                className={`${BTN_PRIMARY} min-w-24`}
+              >
+                {submitLabel}
+              </button>
+            </div>
+          </>
+        )
+      }
     >
       <form
+        id={formId}
         noValidate
-        className="flex min-h-0 flex-1 flex-col"
+        className={`flex flex-col gap-5 px-6 py-5 ${isFixedHeight ? 'min-h-0 flex-1 overflow-y-auto' : ''}`}
         onSubmit={handleSubmit}
       >
-        <header className="flex items-start gap-3.5 border-b border-[#edf1f1] px-7 pt-6 pb-5">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#e9f2f2] text-[#285a5c]">
-            <Icon name={icon} />
-          </span>
-          <h2 className="flex-1 pt-1.5 text-xl leading-[1.35] font-bold text-[#1a3234]">
-            {title}
-          </h2>
-          <button
-            type="button"
-            aria-label="닫기"
-            disabled={isPending}
-            className="-mt-1 -mr-2 grid size-9 shrink-0 place-items-center rounded-[10px] text-[#566465] hover:bg-[#ebf0f0] hover:text-[#1a3234]"
-            onClick={onClose}
-          >
-            <Icon name="close" />
-          </button>
-        </header>
-
-        <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-7 pt-6 pb-7">
-          {children}
-        </div>
-
-        {hasFooter && (
-          <footer className="flex items-center justify-end gap-2 rounded-b-[20px] border-t border-[#e2e7e7] bg-[#fbfcfd] px-7 py-4">
-            {hasRequiredNote && (
-              <p className="mr-auto text-[#566465]">
-                <span className="font-bold text-[#b4473a]">*</span> 표시는 필수
-                항목이에요
-              </p>
-            )}
-            <button
-              type="button"
-              disabled={isPending}
-              className={`${BTN_SECONDARY} min-w-24 ${hasRequiredNote ? '' : 'mr-auto'}`}
-              onClick={onCancel ?? onClose}
-            >
-              {cancelLabel}
-            </button>
-            <button
-              type="submit"
-              disabled={isPending || isSubmitDisabled}
-              className={`${BTN_PRIMARY} min-w-24`}
-            >
-              {submitLabel}
-            </button>
-          </footer>
-        )}
+        {children}
       </form>
-    </dialog>
+    </Modal>
   );
 }

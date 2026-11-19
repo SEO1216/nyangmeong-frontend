@@ -2,7 +2,8 @@ import StepMotion from '@/components/StepMotion';
 import AuthCard from '../shared/AuthCard';
 import AuthHeading from '../shared/AuthHeading';
 import AuthNotice from '../shared/AuthNotice';
-import { PRIMARY_BTN, TEXT_LINK } from '../shared/authStyles';
+import { BTN_PRIMARY } from '@/components/buttonStyles';
+import { TEXT_LINK } from '../shared/authStyles';
 import TermsModal from '../shared/TermsModal';
 import EmailStep from './EmailStep';
 import NicknameModal from './NicknameModal';
@@ -67,9 +68,9 @@ export function SignupComplete({ form, onGoLogin }) {
         <button
           type="button"
           onClick={onGoLogin}
-          className={`${PRIMARY_BTN} mt-8`}
+          className={`${BTN_PRIMARY} w-full mt-8`}
         >
-          로그인 화면으로
+          로그인으로
         </button>
       </StepMotion>
       {form.isNicknameOpen && (

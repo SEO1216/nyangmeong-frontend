@@ -8,8 +8,11 @@ import {
   X,
 } from 'lucide-react';
 import { useLayoutEffect, useRef, useState } from 'react';
+import Badge from '@/components/Badge';
+import LoadError from '@/components/LoadError';
 import PetFace from '@/components/PetFace';
 import Skeleton from '@/components/Skeleton';
+import { BTN_PRIMARY } from '@/components/buttonStyles';
 import { BRUP_ROLE, PET_SE } from '@/utils/petCodes';
 import { useCaregiversOf } from '../queries';
 import FamilySection, { OwnerLine } from './FamilySection';
@@ -193,15 +196,19 @@ function SlideHeight({ children }) {
   );
 }
 
-/** 현재 위치 점. 맨 끝은 + (한도에 차면 일반 점) */
+/** 현재 위치 점. 맨 끝은 + (한도에 차면 일반 점). 점은 작아도 누르는 영역은 PC 24px·760 미만 44px(UI 체크리스트 37) */
+/** 760 미만: 높이 44, 폭은 nav 폭을 점 수로 나눠 최대 44(점이 많아도 줄을 넘지 않는다) */
+const DOT_HIT =
+  'grid h-6 min-w-6 place-items-center max-[760px]:h-11 max-[760px]:min-w-0 max-[760px]:max-w-11 max-[760px]:flex-1';
+
 function PetDots({ pets, index, isFull, onMove }) {
   const dotClass = (isCurrent) =>
-    `h-2 rounded-full transition-[width] duration-200 ${isCurrent ? 'w-[22px] bg-brand-600' : 'w-2 bg-line-strong'}`;
+    `block h-2 rounded-full transition-[width] duration-200 ${isCurrent ? 'w-6 bg-brand-600' : 'w-2 bg-line-strong'}`;
 
   return (
     <nav
       aria-label="반려동물 선택"
-      className="absolute inset-x-0 bottom-5 z-[1] flex items-center justify-center gap-2"
+      className="absolute inset-x-0 bottom-3 z-[1] flex items-center justify-center max-[760px]:bottom-1"
     >
       {pets.map((dotPet, dotIndex) => (
         <button
@@ -210,8 +217,10 @@ function PetDots({ pets, index, isFull, onMove }) {
           onClick={() => onMove(dotIndex)}
           aria-label={`${dotIndex + 1}번째 반려동물`}
           aria-current={dotIndex === index ? 'true' : undefined}
-          className={dotClass(dotIndex === index)}
-        />
+          className={DOT_HIT}
+        >
+          <span aria-hidden="true" className={dotClass(dotIndex === index)} />
+        </button>
       ))}
       {isFull !== false ? (
         <button
@@ -219,17 +228,27 @@ function PetDots({ pets, index, isFull, onMove }) {
           onClick={() => onMove(pets.length)}
           aria-label={isFull ? '등록 한도 안내' : '마지막 카드'}
           aria-current={index === pets.length ? 'true' : undefined}
-          className={dotClass(index === pets.length)}
-        />
+          className={DOT_HIT}
+        >
+          <span
+            aria-hidden="true"
+            className={dotClass(index === pets.length)}
+          />
+        </button>
       ) : (
         <button
           type="button"
           onClick={() => onMove(pets.length)}
           aria-label="반려동물 등록"
           aria-current={index === pets.length ? 'true' : undefined}
-          className={`group relative grid size-5 place-items-center rounded-full border-[1.5px] border-brand-500 ${index === pets.length ? 'bg-brand-500 text-white' : 'bg-white text-brand-600 hover:bg-brand-50'}`}
+          className={`group relative ${DOT_HIT}`}
         >
-          <Plus className="size-3" strokeWidth={3} />
+          <span
+            aria-hidden="true"
+            className={`grid size-5 place-items-center rounded-full border-[1.5px] border-brand-500 ${index === pets.length ? 'bg-brand-500 text-white' : 'bg-white text-brand-600 group-hover:bg-brand-50'}`}
+          >
+            <Plus className="size-3" strokeWidth={3} />
+          </span>
           <span
             aria-hidden="true"
             className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-md bg-ink px-2.5 py-1.5 text-xs font-medium whitespace-nowrap text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 max-[760px]:hidden"
@@ -258,25 +277,20 @@ function AddSlide({ limit, isFull, onAdd, children }) {
           <Skeleton className="h-5 w-72 max-w-full" />
         </>
       ) : limit.isError ? (
-        <p className="text-muted">
-          반려동물 등록 가능 수를 불러오지 못했어요{' '}
-          <button
-            type="button"
-            onClick={() => limit.refetch()}
-            className="font-semibold text-brand-600 underline"
-          >
-            다시 시도
-          </button>
-        </p>
+        <LoadError
+          message="반려동물 등록 가능 수를 불러오지 못했어요"
+          onRetry={() => limit.refetch()}
+          className="py-0"
+        />
       ) : (
         <>
           <span
             aria-hidden="true"
-            className={`mb-2 grid size-[72px] place-items-center rounded-full ${isFull ? 'bg-white text-[22px] font-bold' : 'bg-brand-50 text-brand-600'}`}
+            className={`mb-2 grid size-[72px] place-items-center rounded-full ${isFull ? 'bg-white text-2xl font-bold' : 'bg-brand-50 text-brand-600'}`}
           >
             {isFull ? petMaxCnt : <Plus className="size-9" />}
           </span>
-          <h2 id="pet-add-title" className="text-xl font-bold">
+          <h2 id="pet-add-title" className="text-lg font-bold">
             {isFull ? '반려동물을 모두 등록했어요' : '새 반려동물 등록'}
           </h2>
           <p className="break-keep text-subtle">
@@ -288,7 +302,7 @@ function AddSlide({ limit, isFull, onAdd, children }) {
             <button
               type="button"
               onClick={onAdd}
-              className="mt-2 inline-flex h-10 items-center justify-center rounded-md bg-brand-500 px-4 font-semibold text-white hover:bg-brand-600"
+              className={`mt-2 ${BTN_PRIMARY}`}
             >
               반려동물 등록하기
             </button>
@@ -309,7 +323,7 @@ function PetCard({ pet, onEdit, onDelete, onUnlink, onInvite, children }) {
   return (
     <article
       aria-labelledby="pet-name"
-      className="relative grid gap-5 rounded-modal border border-line bg-white p-5 pt-10 pb-16 shadow-depth-sm max-[760px]:grid-cols-[84px_minmax(0,1fr)] max-[760px]:gap-x-4 max-[760px]:gap-y-0 min-[761px]:grid-cols-[140px_minmax(0,1fr)] min-[761px]:gap-x-8 min-[761px]:gap-y-6 min-[761px]:px-8 min-[1281px]:grid-cols-[220px_minmax(0,1fr)] min-[1281px]:gap-x-14 min-[1281px]:px-12"
+      className="relative grid gap-5 rounded-modal border border-line bg-white p-5 pt-10 pb-16 shadow-depth-sm max-[760px]:grid-cols-[84px_minmax(0,1fr)] max-[760px]:gap-x-4 max-[760px]:gap-y-0 min-[760px]:grid-cols-[140px_minmax(0,1fr)] min-[760px]:gap-x-8 min-[760px]:gap-y-6 min-[760px]:px-8 min-[1100px]:grid-cols-[220px_minmax(0,1fr)] min-[1100px]:gap-x-14 min-[1100px]:px-12"
     >
       <div className="flex items-center justify-center max-[760px]:self-center">
         <PetFace
@@ -317,8 +331,8 @@ function PetCard({ pet, onEdit, onDelete, onUnlink, onInvite, children }) {
           petSeCd={pet.petSeCd}
           isError={pet.bscCharSbstYn}
           alt={`${pet.petNm} 캐릭터`}
-          className="size-[140px] shrink-0 rounded-full bg-surface-2 text-line-strong shadow-[inset_0_0_0_1px_var(--color-line-strong)] max-[760px]:size-[84px] min-[1281px]:size-40"
-          iconClassName="size-[70px] max-[760px]:size-9 min-[1281px]:size-20"
+          className="size-[140px] shrink-0 rounded-full bg-surface-2 text-line-strong shadow-[inset_0_0_0_1px_var(--color-line-strong)] max-[760px]:size-[84px] min-[1100px]:size-40"
+          iconClassName="size-[70px] max-[760px]:size-9 min-[1100px]:size-20"
         />
       </div>
       <div className="flex min-w-0 flex-col max-[760px]:contents">
@@ -326,24 +340,16 @@ function PetCard({ pet, onEdit, onDelete, onUnlink, onInvite, children }) {
           <div className="min-w-0 flex-1">
             <h2
               id="pet-name"
-              className="flex flex-wrap items-center gap-3 text-xl font-bold tracking-[-0.02em] min-[761px]:text-page"
+              className="flex flex-wrap items-center gap-3 text-lg font-bold tracking-[-0.02em] min-[760px]:text-page"
             >
               {pet.petNm}
               <span className="inline-flex flex-wrap gap-1 align-middle">
                 {isCoParent ? (
-                  <Badge className="bg-tone-gray-bg text-tone-gray-fg">
-                    공동양육
-                  </Badge>
+                  <Badge tone="gray">공동양육</Badge>
                 ) : (
-                  <Badge className="bg-tone-green-bg text-tone-green-fg">
-                    주양육
-                  </Badge>
+                  <Badge tone="green">주양육</Badge>
                 )}
-                {pet.bscCharSbstYn && (
-                  <Badge className="bg-tone-amber-bg text-tone-amber-fg">
-                    오류 확인 중
-                  </Badge>
-                )}
+                {pet.bscCharSbstYn && <Badge tone="amber">오류 확인 중</Badge>}
               </span>
               {birthText && (
                 <span className="text-base font-normal tracking-normal text-muted tabular-nums max-[760px]:hidden">
@@ -375,7 +381,7 @@ function PetCard({ pet, onEdit, onDelete, onUnlink, onInvite, children }) {
 /** PC 상세: 2열 × 4행 grid 하나. 같은 행끼리 높이가 같아 좌우 구분선이 맞는다 */
 function InfoGrid({ pet, vrtyName }) {
   return (
-    <dl className="m-0 grid grid-cols-2 gap-x-6 max-[760px]:hidden min-[1281px]:gap-x-12">
+    <dl className="m-0 grid grid-cols-2 gap-x-6 max-[760px]:hidden min-[1100px]:gap-x-12">
       <InfoRow label="품종">{vrtyName || getPetSeName(pet)}</InfoRow>
       <InfoRow label="인식 번호" valueClassName="tabular-nums">
         <ChipNo value={pet.chipNo} />
@@ -383,7 +389,7 @@ function InfoGrid({ pet, vrtyName }) {
       <InfoRow label="성별">
         <span className="truncate">{getGndrName(pet)}</span>
         {pet.nutrYn && (
-          <Badge className="shrink-0 bg-tone-blue-bg text-tone-blue-fg">
+          <Badge tone="blue" className="shrink-0">
             중성화
           </Badge>
         )}
@@ -462,7 +468,7 @@ function MobileInfo({ pet }) {
 
 function MobileRow({ label, empty, emptyText, children }) {
   return (
-    <div className="flex items-baseline gap-3 border-b border-line-soft px-0.5 py-[11px]">
+    <div className="flex items-baseline gap-3 border-b border-line-soft px-0.5 py-3">
       <dt className="w-[72px] shrink-0 text-subtle">{label}</dt>
       <dd
         className={`m-0 flex min-w-0 flex-1 items-baseline gap-1.5 break-keep ${empty ? 'text-muted' : 'font-semibold'}`}
@@ -498,21 +504,10 @@ function MobileList({ label, value, isOpen }) {
   );
 }
 
-function Badge({ className, children }) {
-  return (
-    <span
-      className={`inline-flex h-6 items-center rounded-full px-2.5 pt-[1.5px] text-badge leading-none font-semibold whitespace-nowrap ${className}`}
-    >
-      {children}
-    </span>
-  );
-}
-
 /** 한 줄 행. 위 두 칸은 위 선, 마지막 두 칸은 아래 선이 없다 */
 const ROW =
-  'flex h-14 min-w-0 items-center gap-6 min-[761px]:max-[1032px]:gap-3 min-[1101px]:max-[1108px]:gap-3 border-b border-line-soft [&:nth-child(-n+2)]:border-t [&:nth-child(-n+2)]:border-t-line-strong [&:nth-last-child(-n+2)]:border-b-0';
-const DT =
-  'w-20 shrink-0 text-subtle min-[761px]:max-[1032px]:w-16 min-[1101px]:max-[1108px]:w-16';
+  'flex h-14 min-w-0 items-center gap-6 min-[760px]:max-[1100px]:gap-3 border-b border-line-soft [&:nth-child(-n+2)]:border-t [&:nth-child(-n+2)]:border-t-line-strong [&:nth-last-child(-n+2)]:border-b-0';
+const DT = 'w-20 shrink-0 text-subtle min-[760px]:max-[1100px]:w-16';
 const DD = 'relative m-0 flex min-w-0 flex-1 items-center gap-2 font-semibold';
 
 /** 인식 번호: 띄어쓰기 없이 이어 쓴다. 15자리는 국가번호(앞 3자리) 뒤에서만 줄이 바뀔 수 있다 */
@@ -520,7 +515,7 @@ function ChipNo({ value }) {
   if (!value) return null;
   const digits = value.replace(/\s/g, '');
   return (
-    <span className="min-w-0 min-[761px]:max-[1032px]:text-[14px] min-[1101px]:max-[1108px]:text-[14px]">
+    <span className="min-w-0 min-[760px]:max-[1100px]:text-sm">
       {digits.length === 15 ? (
         <>
           {digits.slice(0, 3)}

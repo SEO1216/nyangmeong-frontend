@@ -15,7 +15,7 @@ const BOARD_OPTIONS = [
 ];
 
 /**
- * 펫이야기 필터: 첫 줄 왼쪽 게시판 칩(전체·펫정보·펫일상), 오른쪽 정렬 · 검색. 둘째 줄 왼쪽 「내 글만 보기」, 오른쪽 「총 N건」
+ * 펫이야기 필터: 첫 줄 왼쪽 게시판 칩(전체·펫정보·펫일상), 오른쪽 정렬 · 검색. 둘째 줄 왼쪽 「내 글만 보기」, 오른쪽 「전체 N 건」
  * - 초기화 버튼과 구분선은 없다. 760px 이하는 정렬·검색이 칩 아래 줄 전체 너비로 내려감
  * - search: { value, onChange, onSubmit } 검색창 입력값은 부모가 보관. totalElements가 숫자가 아니면 건수는 숨김
  */
@@ -62,7 +62,7 @@ export default function PostFilters({
         </CheckOption>
         {typeof totalElements === 'number' && (
           <p aria-live="polite" className="text-sm text-muted">
-            총 <b className="font-bold text-ink">{totalElements}</b>건
+            전체 <b className="font-bold text-ink">{totalElements}</b> 건
           </p>
         )}
       </div>

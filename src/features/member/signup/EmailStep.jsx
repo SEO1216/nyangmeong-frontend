@@ -1,5 +1,5 @@
 import { Mail, ShieldCheck } from 'lucide-react';
-import { OUTLINE_BTN, PRIMARY_BTN, SIDE_BTN } from '../shared/authStyles';
+import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import AuthField from '../shared/AuthField';
 import AuthNotice from '../shared/AuthNotice';
 import { resendLabel } from '../shared/emailCert';
@@ -28,9 +28,11 @@ export default function EmailStep({ form }) {
               disabled={
                 !form.email.trim() || form.isSending || form.resendSeconds > 0
               }
-              className={SIDE_BTN}
+              className={`${BTN_SECONDARY} min-w-22 shrink-0 whitespace-nowrap`}
             >
-              {form.isSent ? resendLabel(form.resendSeconds) : '인증번호 발송'}
+              {form.isSent
+                ? resendLabel(form.resendSeconds)
+                : '인증번호 보내기'}
             </button>
           }
         />
@@ -38,7 +40,7 @@ export default function EmailStep({ form }) {
           <button
             type="button"
             onClick={form.goLoginMethods}
-            className={OUTLINE_BTN}
+            className={`${BTN_SECONDARY} w-full`}
           >
             기존 가입 방법으로 로그인
           </button>
@@ -85,11 +87,9 @@ export default function EmailStep({ form }) {
                 type="button"
                 onClick={form.submitVerify}
                 disabled={
-                  !form.code ||
-                  form.isVerifying ||
-                  form.isEmailVerified
+                  !form.code || form.isVerifying || form.isEmailVerified
                 }
-                className={`${SIDE_BTN} !border-transparent !bg-brand-50 !text-brand-600 hover:enabled:!bg-brand-100 disabled:!bg-surface-3 disabled:!text-line-strong`}
+                className={`${BTN_SECONDARY} min-w-22 shrink-0 whitespace-nowrap !border-transparent !bg-brand-50 !text-brand-600 hover:enabled:!bg-brand-100 disabled:!bg-surface-3 disabled:!text-line-strong`}
               >
                 인증 확인
               </button>
@@ -106,7 +106,7 @@ export default function EmailStep({ form }) {
         type="button"
         disabled={!form.isEmailVerified}
         onClick={() => form.goStep('phone')}
-        className={`${PRIMARY_BTN} mt-8`}
+        className={`${BTN_PRIMARY} w-full mt-8`}
       >
         다음
       </button>

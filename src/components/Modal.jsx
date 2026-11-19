@@ -18,14 +18,16 @@ const WIDTH_CLASSES = {
  * isCloseIconHidden: 제목 줄 오른쪽 위 ✕를 숨긴다. 배경 클릭·ESC 닫기는 그대로
  * isSheet: 760px 이하에서만 아래에서 올라오는 시트(손잡이 막대 포함), 그 위 폭은 가운데 모달 그대로.
  *          isLarge와 함께 쓰면 760px 이하에서 화면 전체 대신 이 시트(높이는 화면 − 2rem까지, 넘치면 본문 안쪽 스크롤)
- * isWide: 가로 688px(본문 640px) 입력 모달. 제목 줄 위아래 8px, 푸터 버튼은 내용 너비로 오른쪽 정렬
+ * isWide: 가로 688px(본문 640px) 입력 모달. 푸터 버튼은 내용 너비로 오른쪽 정렬
  * width: 가로 폭(px) 560·688·720·1040, 없으면 440(isLarge는 760). isWide(688)보다 우선. 화면보다 좁으면 양옆 1rem을 남긴다
  * headerLead: 제목 줄 왼쪽에 제목 대신 둘 요소(예: 「‹ 다시 검색」). isTitleHidden와 함께 쓴다
  * isHeaderBorderHidden: 제목 줄 아래 구분선을 없앤다
  * isTitleHidden: 제목 글자를 화면에서 숨긴다(화면 읽기용 이름은 유지, ✕는 오른쪽에 그대로)
+ * isTitleSmall: 제목을 18px(확인 창 제목과 같은 크기)로 줄인다. 기본은 22px
  * isDismissDisabled: 배경 클릭·ESC로 닫지 않는다(입력 유실 방지). ✕·푸터 버튼으로만 닫힌다
  * isSpacious: isConfirm과 함께 쓴다. 본문 안쪽 여백을 넓혀(가로 40px, 위 40px) 좁은 문구 확인 창에 맞춘다
  * 열려 있는 동안 페이지 스크롤을 잠근다(useScrollLock, 창이 겹쳐도 마지막이 닫힐 때 풀린다)
+ * 길어지면(isLarge·isTop이 아닐 때) 제목 줄·푸터는 두고 본문만 안쪽에서 스크롤한다(막대가 모서리 밖으로 나가지 않게)
  * isTop: 가운데 대신 화면 위에서 80px 떨어져 고정. 내용 높이가 바뀌어도(검색 결과 등) 위치가 고정.
  *        dialog를 화면 전체 투명 스크롤 영역으로 두고 흰 판을 그 안에 놓아, 길어지면 모달 안이 아니라 화면 전체 스크롤
  */
@@ -43,6 +45,7 @@ export default function Modal({
   isSpacious = false,
   isTop = false,
   isTitleHidden = false,
+  isTitleSmall = false,
   headerLead = null,
   isHeaderBorderHidden = false,
   isDismissDisabled = false,
@@ -127,16 +130,20 @@ export default function Modal({
           {isSheet && (
             <span
               aria-hidden="true"
-              className="absolute top-2 left-1/2 h-1 w-9 -translate-x-1/2 rounded-xs bg-line-strong min-[761px]:hidden"
+              className="absolute top-2 left-1/2 h-1 w-9 -translate-x-1/2 rounded-xs bg-line-strong min-[760px]:hidden"
             />
           )}
           <header
-            className={`flex shrink-0 items-center justify-between gap-3 px-6 ${isHeaderBorderHidden ? '' : 'border-b border-line-soft'} ${isLarge ? 'py-2.5' : isWide ? 'py-2' : 'py-4'}`}
+            className={`flex shrink-0 items-center justify-between gap-3 px-6 ${isHeaderBorderHidden ? '' : 'border-b border-line-soft'} py-3`}
           >
             {headerLead}
             <h2
               id={titleId}
-              className={isTitleHidden ? 'sr-only' : 'text-lg font-bold'}
+              className={
+                isTitleHidden
+                  ? 'sr-only'
+                  : `font-bold ${isTitleSmall ? 'text-lg' : 'text-[22px]'}`
+              }
             >
               {title}
             </h2>
@@ -155,25 +162,28 @@ export default function Modal({
           <div
             className={
               isLarge
-                ? `flex min-h-0 flex-1 flex-col overflow-y-auto ${isAutoHeight ? '' : 'min-[761px]:overflow-hidden'}`
-                : 'px-6 py-5'
+                ? `flex min-h-0 flex-1 flex-col overflow-y-auto ${isAutoHeight ? '' : 'min-[760px]:overflow-hidden'}`
+                : 'min-h-0 overflow-y-auto px-6 py-5'
             }
           >
             {children}
           </div>
         </>
       )}
-      <footer
-        className={
-          isLarge
-            ? 'flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-line px-6 py-2.5'
-            : isWide
-              ? 'flex justify-end gap-2 px-6 pb-6'
-              : `flex gap-2 pb-6 *:min-w-0 *:flex-1 ${isConfirm && isSpacious ? 'px-10' : 'px-6'}`
-        }
-      >
-        {footer}
-      </footer>
+      {/* isLarge는 푸터가 없으면(false·null) 구분선 줄도 그리지 않는다 */}
+      {(!isLarge || footer) && (
+        <footer
+          className={
+            isLarge
+              ? 'flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-line px-6 py-2.5'
+              : isWide
+                ? 'flex justify-end gap-2 px-6 pb-6'
+                : `flex gap-2 pb-6 *:min-w-0 *:flex-1 ${isConfirm && isSpacious ? 'px-10' : 'px-6'}`
+          }
+        >
+          {footer}
+        </footer>
+      )}
     </>
   );
 
@@ -182,7 +192,7 @@ export default function Modal({
       <dialog
         ref={dialogRef}
         {...dialogProps}
-        className="m-0 size-full max-h-none max-w-none overflow-y-auto overscroll-contain bg-transparent p-0 backdrop:bg-[rgba(15,23,35,0.45)]"
+        className="m-0 size-full max-h-none max-w-none overflow-y-auto overscroll-contain bg-transparent p-0 backdrop:bg-dim/45"
         onCancel={handleCancel}
         onKeyDown={handleKeyDown}
         onMouseDown={handleMouseDown}
@@ -200,18 +210,18 @@ export default function Modal({
     <dialog
       ref={dialogRef}
       {...dialogProps}
-      className={`m-auto bg-white p-0 shadow-depth-lg backdrop:bg-[rgba(15,23,35,0.45)] ${
+      className={`m-auto bg-white p-0 shadow-depth-lg backdrop:bg-dim/45 ${
         isLarge
           ? `${
               isAutoHeight
-                ? 'max-h-[calc(100dvh-2rem)] min-[761px]:h-fit'
+                ? 'max-h-[calc(100dvh-2rem)] min-[760px]:h-fit'
                 : 'h-[min(660px,calc(100dvh-2rem))] max-h-none'
             } ${WIDTH_CLASSES[width] ?? 'w-[min(760px,calc(100vw-2rem))]'} max-w-none flex-col rounded-modal open:flex ${
               isSheet
                 ? ''
                 : 'max-[760px]:h-dvh max-[760px]:max-h-none max-[760px]:w-screen max-[760px]:rounded-none'
             }`
-          : `max-h-[calc(100vh-2rem)] rounded-modal ${widthClass}`
+          : `max-h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-modal open:flex ${widthClass}`
       } ${
         isSheet
           ? 'max-[760px]:fixed max-[760px]:m-0 max-[760px]:mt-auto max-[760px]:max-h-[calc(100dvh-2rem)] max-[760px]:w-full max-[760px]:max-w-none max-[760px]:rounded-b-none'

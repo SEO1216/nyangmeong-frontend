@@ -2,9 +2,63 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-004 알림 드롭다운 · 모두 읽음 서버 연결 (2026-11-17, 검증 1회차 통과, 사람 확인). 코드 변경 없음, 실제 `POST /api/notifications/read-all`로 성공 흐름·0건 비활성 확인
+끝남: SCR-COM-002 플로팅 반려동물 등록 버튼(발바닥+ 버튼, 그 자리에서 등록 모달) (2026-11-19, 검증 통과, 사람 확인)
 
 ## 다음에 할 것
+
+- 2026-11-19 사람 지시로 기획 없이 바로 되돌림(급함): 로그인 방법 선택 [이메일로 로그인하기]·이메일 로그인 [로그인] 버튼(`login/LoginMethodChoice`·`EmailLoginForm`)과 `shared/AuthField` 입력칸을 2-K 전 모양으로(버튼 50px·둥글기 12·15px 굵게, 입력칸 48px·둥글기 12·라벨 13px·`*`·오류 문구 mt-2). `AuthField`라 가입·비밀번호 찾기·재설정·재가입 복구 입력칸도 같이 돌아감. 2-K 공용 규격(`ui-checklist.csv`)과 다시 다름 → YAY 알림, 규격으로 다시 맞출지 사람이 정함. 화면 검증 안 함(lint·build만)
+
+### SCR-COM-002 플로팅 반려동물 등록 버튼 남은 것(2026-11-19)
+
+- 팀 알림(PR 본문 + 팀 채널, SJM): 플로팅 버튼 묶음(AI → 등록 → TOP)에 [반려동물 등록] 버튼 추가. `layouts/FloatingButtons.jsx`가 `features/pet/list/PetFormModal`(등록 모달)과 `features/pet/queries` `usePetLimit`을 그대로 쓴다. 모달 props·한도 응답(`remainingPetCount`)을 바꾸면 플로팅 버튼도 영향. 남은 자리가 0이거나 한도를 못 불러오면, 모바일 AI 접힘 때 숨김
+- 디자인: 최종은 발바닥 모양 버튼(사람). 지금은 [TOP]과 같은 상자 + `PawPrint` 20px + `Plus` 12px. 디자인이 오면 바꾼다
+- 사람이 고치는 문서: 공통레이아웃 기능명세서 FN-COM-002-27 "플로팅 반려동물 등록 버튼" 추가, 화면설계서 SCR-COM-002 ⑦ 플로팅 버튼 설명
+- 참고(검증 보고, 판정 밖): `/mypage/pets`에는 화면의 [반려동물 등록]과 플로팅 버튼이 같은 이름으로 둘 보인다(낭독기에서 헷갈릴 수 있음). 등록 성공 뒤 동작(토스트 후 그 자리)은 공용 DB라 코드로만 확인
+
+- SCR-COM-002 UI 통일 2-M(남은 옛 분기점 KSJ 커뮤니티 7개 파일·SJM `ExpenseHistory` JS, AI 대화·라우팅 매핑 삭제 확인 `isDanger`, `ui.md` 예시 `min-[1101px]`): 2026-11-19 기획했다가 플로팅 등록 버튼 먼저(사람). 다음 `/start`에서 다시 기획
+
+### SCR-COM-002 UI 통일 다음 단계(사람 결정 2026-11-18)
+
+- 2-L 팀 알림(PR 본문 + 팀 채널, YAY): ① 플레이스 분기점 768·1024 → 760·1100(760~767px이 PC 3칸 배치로, 1024~1099px은 레일 64·목록 340), JS `(width < 760px)` ② 검색창이 공용 `SearchInput`(높이 48 → 40, 둥글기 6, 오른쪽 돋보기 버튼), 모바일 지도 위 지역 표시·다시 검색 버튼이 8px 위로 ③ 팝업 [상세보기]·[길찾기] `BTN_PRIMARY`·`BTN_SECONDARY`, 조회 실패 `LoadError`, 로딩 `Skeleton` 3줄, 결과 없음 `EmptyResult isCompact` ④ "현재 지도 밖" 공용 `Badge tone="amber"` ⑤ 팝업 장소명 20 → 18px(H1 24px 그대로, 사람 결정) ⑥ 모바일 장소 종류 칩 흰 바탕+테두리·그림자 없음(미끄러지는 배경 유지) ⑦ 지도 위 요소 그림자 `shadow-depth-sm` 하나(바텀시트·핀은 그대로) ⑧ 4px 간격, 760 미만 팝업 ✕·즐겨찾기 ☆ 44px
+- 2-L 참고(판정 밖): 팝업 [상세보기]·[길찾기]는 `<a>`라 공용 버튼의 `hover:enabled:` hover 모양이 걸리지 않음(2-C 칩과 같은 현상). 1회차 검증은 로컬 `.env.local`에 카카오 지도 키가 없어 지도 확인 3건(L2·L5·L8)을 못 봐 실패, 키를 넣고 2회차 통과(코드 변경 없음)
+- 다음 2 조각 후보(2-L 뒤): 없음. 담당 폴더 조각(2-A~2-L)이 모두 끝나 `UI 통일 2 · 다른 담당 폴더 적용` 마일스톤을 끝낼지 사람이 정한다
+- 2-J 팀 알림(PR 본문 + 팀 채널, YAY): ① 회원정보 카드 그림자 삭제, 섹션 제목 20 → 18px, 줄 오른쪽 [수정]·[변경]·[연동하기]가 `BTN_SECONDARY`(높이 32 → 40) ② `shared/profileStyles.js`에서 `INPUT`·`LABEL`·`HELP`·`ROW_BTN` 없어짐(입력칸은 `components/formStyles`), `FieldMessage`의 `ErrorText` 없어지고 오류 문구는 공용 `FieldError`(위 여백 6px 생김), `OkText`는 남음 ③ 탈퇴 화면 버튼 `BTN_PRIMARY`·`BTN_SECONDARY`(높이 50 → 40, 둥글기 12 → 6), "안내 닫기" → "닫기", 확인 체크가 공용 `Checkbox` ④ 분기점 640·768 → 760 ⑤ 회원 정보 조회 실패 `LoadError`([다시 시도]) ⑥ 4px 간격, 편집 줄 라벨 `pt-[18px]` → `pt-4`
+- 2-J 참고(검증 보고, 판정 밖): 탈퇴 안내 체크 오류는 체크 전 [계속]이 비활성이라 화면에서 못 띄움(Playwright route로 400을 돌려 확인). `WithdrawResult`는 코드로만 확인. 탈퇴 버튼 반반 폭은 PC만(`min-[760px]:flex-1`)
+- 2-K 팀 알림(PR 본문 + 팀 채널, YAY): ① 로그인·가입·비밀번호 찾기·재설정·재가입 복구·탈퇴 완료 버튼이 `BTN_PRIMARY`·`BTN_SECONDARY` + `w-full`(높이 50 → 40, 둥글기 12 → 6, 15px 굵게 → 16px 600, 떠오르는 hover 없음), 입력칸 옆 버튼도 40px `BTN_SECONDARY` ② `shared/authStyles.js`에서 `PRIMARY_BTN`·`OUTLINE_BTN`·`SIDE_BTN` 없어지고 `TEXT_LINK`만 남음, `shared/AuthCheckBox.jsx` 삭제(공용 `Checkbox`) ③ `AuthField`·보안코드 칸 48px·둥글기 12 → 40px·6px(공용 `INPUT` 값), 라벨 13px → 공용 `LABEL`, `*` → `Required`, 오류 문구 → 공용 `FieldError`(아이콘, 위 여백 6px) ④ 제목 26px → 24px, `AuthNotice` 14px·여백 12 ⑤ 약관 › 누르는 영역 PC 24·모바일 44 ⑥ 문구 "로그인 화면으로"·"로그인 방법 선택으로" → "로그인으로", "인증번호 발송" → "인증번호 보내기", "중복 확인" → "중복확인", SNS 가입 "회원가입 완료" → "회원가입" ⑦ 분기점 768 → 760
+- 2-K 참고(검증 보고, 판정 밖): 기획 K2 grep이 `features/member` 전체라 2-J의 `profileStyles` `SIDE_BTN`(다른 상수) 5줄이 걸림, auth 쪽 0건으로 통과(사람 확인). 빈 값 제출은 [로그인] 비활성이라 오류 문구는 Playwright route로 확인. 보안코드 칸은 코드로만. SNS 로그인 버튼(`SnsLoginButtons`, 48px·둥글기 12)은 사람 결정으로 그대로. `AuthHeading` 모바일 여백 `calc(12vh-67px)`·`calc(12vh-43px)`는 칸·버튼 높이 변경 뒤 다시 계산하지 않음
+- 다음 2 조각 후보(2-K 뒤): 2-L YAY `place`
+- 2-I 팀 알림(PR 본문 + 팀 채널, KSJ): ① 실종 상태 배지가 공용 `Badge`(실종 `rose`·찾았어요 `green` + 테두리, 기간 만료 `gray`) ② 카드·필터 상자·글쓰기 카드·오른쪽 요약 상자·품종 목록 팝업 그림자 삭제, 찾았어요 상자 테두리 `#cfe3d6` → `border-tone-green-fg/12`, 4px 간격(안내 아이콘 `mt-0.5` → `mt-1`) ③ 상세 제목 24/모바일 18px, 찾았어요 상자 제목 18px ④ 글쓰기 "등록하기"·"저장하기", 글 삭제 확인 `isDanger` ⑤ 글쓰기 폼 `formStyles`·`FieldError`·`Required`·공용 `Checkbox`, 제목·본문 글자 수 칸 아래 오른쪽 ⑥ "총 N건" → "전체 N 건", 목록 조회 실패 `LoadError`([다시 시도]) ⑦ 펫돌봄도 같이 바뀜: `care/`가 가져다 쓰는 `missing/BreedCombobox`(공용 `LABEL`·`INPUT`·`FieldError`, 오류 문구 아이콘)·`PlaceSearchModal`·`MissingMap`(지도 위 칩 테두리 `ring`)·`CheckList`(간격)
+- 2-I 참고(검증 보고, 판정 밖): 기간 만료 배지는 화면 못 봄(만료 글은 작성자에게만, 코드로만 확인). 로컬 계정에 내 실종 글이 없어 삭제 확인은 Playwright route로 `owner`를 바꿔 확인, 수정 "저장하기"는 코드로만. 라벨 `leading-[1.4]`는 공용 `LABEL` 값이라 남음
+- 다음 2 조각 후보(2-I 뒤): YAY `member`·`place`(회원 `profileStyles` → `components/formStyles`)
+- 2-H 팀 알림(PR 본문 + 팀 채널, KSJ): ① 펫돌봄 상태 배지가 공용 `Badge`(모집중 `ok` 점+테두리, 매칭완료 `blue`+테두리, 거래완료 `gray` 바탕 `bg-surface-2`), 내 채팅 배지도 `Badge` ② 카드·필터 상자·글쓰기 카드·오른쪽 요약 상자 그림자 삭제, 4px 간격 ③ 상세 제목 24/모바일 18px ④ 글쓰기 "등록하기"·"저장하기", 글 삭제 확인 `isDanger` ⑤ 글쓰기 폼 `formStyles`·`FieldError`·`Required`·공용 `Checkbox`, `careFormStyles.js` 삭제, `CareFormParts`에는 `Counter`·`Section`만, 제목 글자 수 칸 아래 오른쪽 ⑥ "총 N건" → "전체 N 건", 목록 조회 실패 `LoadError`([다시 시도])
+- 2-H 버그 후보(KSJ, 판정 밖): `CareForm` 빠진 항목으로 이동이 `setErrors` 반영 전에 `[aria-invalid]`를 찾아 첫 [등록하기] 뒤 포커스가 제출 버튼에 남음(2-H 전에도 같음). 품종 오류 문구(`missing/BreedCombobox`)는 아이콘 없음 → 2-I에서 볼 것
+- 2-H 참고: 빈 결과 [필터 초기화] 버튼은 자체 36px 클래스 그대로(기획 밖). 동의 체크박스는 공용 `Checkbox`가 `aria-invalid`를 받지 않아 바깥 칸 `data-invalid`로 둠
+- 다음 2 조각 후보(2-H 뒤): KSJ 실종센터(`missing/`) 2-I, YAY `member`·`place`
+- 2-G 팀 알림(PR 본문 + 팀 채널, KSJ): ① 커뮤니티 공용 `ListFilterParts` 칩이 `FILTER_CHIP`·`FILTER_CHIP_ON`(40 → 36, 고른 칩 연한 청록), [내 글만 보기] 등 체크가 공용 `Checkbox`, [상세 필터]가 `BTN_SECONDARY`라 펫돌봄·실종센터 목록도 같이 바뀜 ② `CommentSection`: 댓글·답글 제출 "등록하기", 삭제 확인 "삭제하기" + `isDanger`, ⋮ 메뉴 그림자 없음, 입력칸 `formStyles`, 모바일 답글 연결선 -25px·21px ③ 펫이야기 카드·레일·글쓰기 카드 그림자 삭제, 썸네일 높이 150px, "총 N건" → "전체 N 건", 목록-페이지 이동 48/32px, [인기] 공용 `Badge tone="rose"`, 조회 실패 `LoadError` ④ 글쓰기 "등록하기"·"저장하기", 폼 `formStyles`·`FieldError`·`Required`, 제목 글자 수 칸 아래 오른쪽 ⑤ 글 상세 제목 24/모바일 18px, 오른쪽 최신글 박스 없음
+- 2-G 참고(판정 밖): 행 78 펫이야기 내 글에도 [신고] 보이는 것은 그대로(KSJ 버그 후보). 캡처는 목록만(화면 ID가 SCR-COM-002 하나라 상세·글쓰기 캡처 이름이 겹침). `.playwright-mcp/`가 eslint 검사 대상이라 그 폴더에 `require` 쓰는 임시 스크립트를 두면 lint가 깨짐(`eslint.config.js` ignores 추가는 사람 결정)
+- 다음 2 조각 후보(2-G 뒤): KSJ 펫돌봄(`care/`) 2-H·실종센터(`missing/`) 2-I, YAY `member`·`place`
+- 2-F 팀 알림(PR 본문 + 팀 채널, KSJ): ① 문의·FAQ 탭이 공용 `UnderlineTabs`(PC 높이 72 → 48, 탭 패널 id는 고른 탭 id `inquiry-status-*`·`faq-category-*`), FAQ 검색창 줄 아래 여백 16 → 4, 검색창 좁힘 1280 → 1100 ② 펫뉴스 카테고리 칩 `FILTER_CHIP`·`FILTER_CHIP_ON`(40 → 36, 고른 칩 연한 청록) ③ 문의 상태·뉴스 카테고리·공지 고정 배지가 공용 `Badge` tone ④ 버튼 `BTN_PRIMARY`·`BTN_SECONDARY`(빈 안내 버튼 36 → 40, 원문 기사 보기 44 → 40), 문구 "문의 제출" → "등록하기", "저장" → "저장하기", 삭제 확인 "삭제하기" + `isDanger` ⑤ 문의 폼 `formStyles`·`FieldError`·`Required`, 제목 글자 수가 칸 아래 오른쪽, 문의 유형 칸 오류 빨간 테두리 ⑥ 조회 실패 `LoadError`([다시 시도]), 문의 수정 화면 조회 실패는 [목록으로] 링크 없어짐, 뉴스 빈 결과 `EmptyResult` ⑦ 공지 상세 "최신 공지" 박스 없앰, 상세 제목 모바일 20 → 18px, 카드 그림자 삭제, 4px 간격
+- 2-F 참고(검증 보고, 판정 밖): 문의 작성 제목 칸이 42px라 문의 유형 칸(40px)보다 2px 높음(`py-2`+`leading-6`+테두리). 커뮤니티 필터 칩(`ListFilterParts` `Chips`)과 "총 N건"은 csv 15·80행으로 커뮤니티 조각에서
+- 다음 2 조각 후보(2-F 뒤): KSJ `community`(펫이야기·펫돌봄·실종센터), YAY `member`·`place`
+- 2-E 팀 알림(PR 본문 + 팀 채널, SJM): ① 포인트 숫자 30·32px → 28px, 20px → 18px ② 분기점 `md:`(768)·`sm:`·`lg:`(1024) → 760·1100(요약 3칸이 760부터 항상 가로 한 줄, 1024~1099px에서 케어미션·내역 1열) ③ 케어미션 반려동물 칩 `FILTER_CHIP`·`FILTER_CHIP_ON`(높이 40 → 36, 고른 칩은 연한 청록 바탕) ④ 진행 막대 공용 `ProgressBar`(홈 칸 8 → 10px, 바탕 회색) ⑤ 완료·미완료·"오늘" 공용 `Badge`(미완료 바탕 `bg-surface-2`) ⑥ 요약·내역·미션 조회 실패 때 `LoadError`([다시 시도]), 빈 안내 셋 `EmptyResult isCompact` ⑦ 공용 `StatLink`(가계부 홈 칸도) 숫자 30 → 28px, 분기점 768 → 760
+- 2-E 참고(검증 보고, 판정 밖): 1100px 폭에서 요약 칸 적립·사용 숫자("+627P")가 칸보다 6~7px 넓음(1280·390은 문제없음). `StatLink`의 `gap-0.5`(2px)는 범위 밖이라 남음. 주양육 동물 없음 안내는 검증 계정 데이터가 없어 코드로만 확인
+- 2-D 팀 알림(PR 본문 + 팀 채널, SJM): ① 반려동물 화면 분기점 600 → 760(600~759는 모바일 배치), 1281 → 1100(넓은 PC 모양이 1100부터), 761·1101 → 760·1100, 1032·1108 좁힘 범위 → 760~1100 ② 확인 창 5개 버튼 `BTN_SECONDARY`·`BTN_DANGER`(높이 44 → 40), 문구 "저장하기"·"삭제하기"·"해제하기"·"거절하기"("초대 취소"는 그대로) ③ `PetSlide`·`SentInvitations` 안 배지 복사본 지우고 공용 `Badge` tone, "대표" `tone="solid"` ④ 캐릭터 탭 `UnderlineTabs`(패널 id `char-own`·`char-shared`), 부위 칩 `CHIP`(PC 32 → 36) ⑤ 폼 `formStyles`·`FieldError`·`Required`·`Checkbox`(초대 수락 카드는 공용 체크박스를 카드 위에 덮음), 안내 `NoticeBox`, 조회 실패 `LoadError` ⑥ 전환 점 누르는 영역 PC 24·모바일 높이 44(폭은 줄을 나눠 최대 44), 가족 해제 ✕ 모바일 44, "N명 더보기" → "더보기 +N" ⑦ 제목 20·22px → 18px
+- 2-D 참고(판정 밖): 초대 수락 "나중에 하기"는 맞는 공용 버튼 상수가 없어 그대로. 오류 문구가 공용 `FieldError`의 위 여백으로 칸과 6px 더 떨어짐. 초대 모달에서 고를 수 없는 줄이 반투명(공용 `Checkbox` 비활성). "선택" 표시(`Optional`)는 공용에 없어 남김. 가족 "더보기 +N"·공동양육 배지는 검증 계정 데이터가 없어 코드로만 확인
+- 2-C 팀 알림(PR 본문 + 팀 채널, SJM): ① 가계부 버튼 문구: 지출 등록 "등록하기"·수정 "저장하기", 영수증 "등록하기", 중복 "그래도 등록하기", 한도 "저장하기", 삭제 확인 "삭제하기"(⋮ 메뉴·편집 막대 [삭제]는 그대로) ② 폼이 `components/formStyles`(`LABEL`·`INPUT`)·`components/FieldError`(`Required`·`FieldError`)를 씀, `shared/ExpenseRequired`에는 `MissingNotice`만 남음 ③ 카테고리 칩 `CHIP`·`CHIP_ON`, 줄·전체 선택 체크박스 공용 `Checkbox`(전체 선택의 일부 선택 − 표시 없앰, 사람 결정), 영수증 안내 `NoticeBox` ④ 분기점 `lg:`(1024) → 1100이라 1024~1099px에서 대시보드 1열 ⑤ 카드 여백 22·18px → 24·20px, 색 막대 들여쓰기 14 → 16px
+- 2-C 참고(검증 보고, 판정 밖): 카테고리 칩 hover 표시가 없어짐(공용 `CHIP`의 `hover:enabled:`가 `<span>`에는 안 걸림). 같은 병원비 안내가 지출 입력 모달은 `FieldError`, 영수증 확인은 `NoticeBox`(기획대로). 채팅 목록 편집 [전체 선택](`chat/room/ChatRoomList.jsx`)은 아직 기본 체크박스
+- 다음 /start: `UI 통일 2 · 다른 담당 폴더 적용`의 다음 조각(SJM·KSJ·YAY 도메인 하나씩). 기준은 `docs/ui-checklist.csv`의 "결정된 기준"만. 회원 `profileStyles.js`는 `components/formStyles.js`로, 다른 도메인 삭제 확인 창 9개 파일(AI 대화 삭제·커뮤니티 글·댓글·문의·관리자 라우팅 등)은 `ConfirmModal isDanger`로
+- 2-B 팀 알림(PR 본문 + 팀 채널): ① 전체: 공용 `Modal` 입력 모달 제목 22px·제목 줄 위아래 12px, 확인 창 제목 18px, isLarge가 아닌 모달은 본문만 안쪽 스크롤(제목 줄·푸터 고정) ② 전체: 공용 차트가 건강 일지 차트로 바뀜(`components/BarChart` props `points`·`formatValue`·`ariaLabel`, `CurveChart` → `LineChart`), 새 `components/formStyles.js`(INPUT·LABEL·TEXTAREA·HELP), `UnderlineTabs` `isLineHidden`·`isScrollable`, `Checkbox` `ariaLabel`, `NoticeBox` `role`, `EmptyResult` `isCompact`, `ConfirmModal` `isDanger`(삭제 등은 빨간 확인 버튼), `Badge` 톤 7개 추가 ③ JAJ: 지운 파일 `diary/BarChart`·`LineChart`·`useElementWidth`·`DiaryTabs`·`FieldError`·`formStyles`·`EmptyBox`, `checkupStyles` `TAG`, 입력 모달 머리 아이콘 없어짐, 760 이하 입력 모달은 화면 전체 ④ `docs/ui-checklist.csv`가 UI 통일 기준
+- 2-B 사람이 정할 것: 모달 제목 22px는 체크리스트 글자 단계(12·13·14·15·16·18·24·28px) 밖이라 단계에 넣을지 팀이 정한다
+- 2-B 참고(검증 보고, 판정 밖): `/health` 체중 위젯 차트 위 빈 공간이 큼. `/admin` 막대 그래프는 최소 상한 60이라 값 0~2면 막대가 거의 안 보임(옛 차트도 같음). 일정 모달 입력칸은 `aria-invalid`가 없어 서버 오류 때 빨간 테두리가 안 생김
+- 2-A 팀 알림(PR 본문 + 팀 채널, JAJ): ① 건강기록 640~759px 폭이 모바일 배치로 바뀜(`sm:`·`lg:` → 760·1100) ② 칩이 공용 `CHIP`·`FILTER_CHIP`, 작은 버튼이 높이 40px ③ 버튼 문구 등록하기·저장하기·삭제하기 ④ 버그 후보 82 `ZONES` 순서는 그대로 둠
+- 2-A 사람이 정할 것(검증 보고, 판정 밖): 줄 안 글자형 [삭제] 6곳(`diary/CheckupListCard`·`DayRecordEditModal`, `checkup/PrescriptionForm`·`AttachmentTab`·`EtcResultList`, ⋮ 메뉴 `CareItemMenu`)은 "삭제" 그대로. 확인 창 버튼은 "삭제하기". 규칙에 넣을지 정한다
+- 2-A 참고(판정 밖): `ui.md` "로딩 표시" 예시 코드에 옛 분기점 `min-[1101px]`이 남음. 콘솔의 `GET /api/pets/1/character-image?part=face` 404는 `PetFace` 데이터 문제(/main에서도 남)
+- 이전 메모: `UI 통일 2 · 다른 담당 폴더 적용`(마일스톤 대기, 도메인 하나씩, 담당자 알림). 분기점은 `ui.md` "화면 폭 분기점"대로 `min-[761px]`→`min-[760px]`, `min-[1101px]`→`min-[1100px]`, JS `(width < 760px)`. 결정: 글자 단계는 체크리스트 V1(12·13·14·15·16·18·24·28px, 짝수 규칙보다 우선), 분기점 390·760·1100, 칩은 항목 선택 `CHIP`(1번 채움)·필터 `FILTER_CHIP`(2번 연한 바탕+연한 테두리, 건강기록·케어미션), 랜딩 항목(17px·굵기 800·색·H1·PAWEVER·푸터 대비)은 랜딩 교체(SCR-MAN-002) 때
+- 팀 알림(PR 본문 + 팀 채널): ① `ConfirmModal`이 공용 `Modal isConfirm` 모양(440px·[취소][확인] 꽉 참)으로 바뀌어 커뮤니티·건강기록·가계부·고객센터·회원 확인 창이 파일 수정 없이 같이 바뀜 ② 토큰 값 변경: `--color-subtle` #5f6b6c, `--color-cat-hosp-fg` #496f97, `--color-tone-gray-bg` #f4f6f6, 알림 배지 #d4411c ③ 새 공용 부품·칩 규격을 2단계에서 쓴다 ④ SJM: `routes/paths.js` `MYPAGE_CAREGIVERS`(화면 없음, `docs/routes.md` MYP-004)는 그대로 두고 AI 바로가기만 `/mypage/pets`로 보냄. 상수·문서·AI 서버 매핑 정리 여부는 SJM이 정함
+- 버그 후보 알림: KSJ `community/PostDetail.jsx` 내 글에도 신고 버튼(체크리스트 78), JAJ `health/CareChipPicker.jsx`·`CareItemFields.jsx` `ZONES` 순서 반대(82)
+- 1-B 팀 알림(PR 본문 + 팀 채널): ① components·layouts의 `min-[761px]`·`min-[1101px]`이 `760`·`1100`으로, JS 조건이 `(width < 760px)`·`(width >= 1100px)`로 바뀌어 폭이 정확히 760·1100px일 때 PC 모양이 나옴 ② 분기점 규칙이 `docs/convention/ui.md`에 들어감 ③ 메인 검색창 [AI 매니저] 버튼은 760 미만에서 아이콘만(전에는 480 이하)
+- 1-B 참고(판정 밖): 알림 설정 H1 행간은 `text-page` 토큰 1.35배라 37.8px(기획 문장의 36px와 다름). `rgba(...)` 직접 값(LJS 폴더 34곳)·관리자 H1 24px는 그대로
+- 참고(검증 보고, 판정 밖): `components/`의 `rgba(...)` 직접 값(그림자·포커스 링·딤) 몇 곳은 이번 hex 대상 밖이라 남음
 
 ### SCR-COM-004 모두 읽음 남은 문서 일
 

@@ -2,7 +2,8 @@ import { ArrowDown, ArrowUp } from 'lucide-react';
 import { useState } from 'react';
 import DropdownSelect from '@/components/DropdownSelect';
 import BarChart from '@/components/BarChart';
-import CurveChart from '@/components/CurveChart';
+import LineChart from '@/components/LineChart';
+import Badge from '@/components/Badge';
 import Icon from '@/components/Icon';
 import {
   diffDays,
@@ -13,7 +14,6 @@ import {
   getYmdOf,
 } from '@/utils/formatDate';
 import { showToast } from '@/components/toastStore';
-import { CARE_ZONE } from '../careDue';
 import { DOSING, FILE_EXT_PDF } from '../checkup/checkupTypes';
 import { getAttachmentFile } from '../checkupApi';
 import ObservationPhoto from '../diary/ObservationPhoto';
@@ -33,7 +33,7 @@ import { MOBILE_HIDDEN_IDS } from './widgetItems';
 
 /**
  * [대시보드 고른 항목 카드] (※신규 정책)
- * - 항목마다 본문 { period, body, tile } 계산. 기록이 없으면 null(빈 상태). tile은 640px 미만 요약 타일 값
+ * - 항목마다 본문 { period, body, tile } 계산. 기록이 없으면 null(빈 상태). tile은 760px 미만 요약 타일 값
  * - 문구·배치는 프로토타입 원문, 값은 실제 API
  */
 
@@ -61,41 +61,15 @@ const deltaChip = (delta, unit) => {
   };
 };
 
-/** 케어리스트 카드 최대 줄 수 */
-const CARE_ROW_COUNT = 4;
 /** 처방·투약 카드 최대 줄 수 */
 const PRESCRIPTION_ROW_COUNT = 3;
-
-function Delta({ label, delta, unit }) {
-  if (delta == null) return null;
-  const Arrow = delta > 0 ? ArrowUp : ArrowDown;
-  const amount = Math.abs(round2(delta));
-
-  return (
-    <p className="flex items-center gap-2 text-sm">
-      <span className="text-subtle">{label}</span>
-      <b className="inline-flex h-[26px] items-center gap-0.5 rounded-full bg-surface-2 px-2.5 font-semibold text-ink-2">
-        {amount === 0 ? (
-          '변화 없음'
-        ) : (
-          <>
-            <Arrow className="size-4" aria-hidden="true" />
-            <span className="sr-only">{delta > 0 ? '증가 ' : '감소 '}</span>
-            {amount}
-            {unit}
-          </>
-        )}
-      </b>
-    </p>
-  );
-}
 
 function BigValue({ value, unit }) {
   return (
     <p className="flex max-w-full min-w-0 items-baseline gap-1">
       <b
         className={`leading-none font-bold tracking-[-0.02em] text-ink ${
-          typeof value === 'number' ? 'text-[34px]' : 'truncate text-[22px]'
+          typeof value === 'number' ? 'text-[28px]' : 'truncate text-2xl'
         }`}
         title={typeof value === 'string' ? value : undefined}
       >
@@ -103,15 +77,6 @@ function BigValue({ value, unit }) {
       </b>
       {unit && <span className="text-muted">{unit}</span>}
     </p>
-  );
-}
-
-function ValueRow({ value, unit, children }) {
-  return (
-    <div className="flex flex-wrap items-end justify-between gap-x-3 gap-y-1">
-      <BigValue value={value} unit={unit} />
-      {children}
-    </div>
   );
 }
 
@@ -131,14 +96,25 @@ function Row({ children }) {
   );
 }
 
-function KeyValue({ label, value }) {
+/**
+ * 마우스를 올리면 전체 값(title)
+ * - isTruncate: 값을 한 줄 말줄임(예방·정기검진)
+ * - isTwoLine: 값을 최대 2줄, 글자 단위 줄바꿈 후 말줄임(알레르기·기저질환, 추가-5)
+ */
+function KeyValue({ label, value, isTruncate = false, isTwoLine = false }) {
+  const clampClass = isTruncate
+    ? 'truncate'
+    : isTwoLine
+      ? 'line-clamp-2 break-all'
+      : '';
   return (
     <Row>
       <span className="shrink-0 text-ink-2">{label}</span>
       <b
         className={`ml-auto min-w-0 text-right font-semibold ${
           value ? 'text-ink' : 'font-normal text-muted'
-        }`}
+        } ${clampClass}`}
+        title={(isTruncate || isTwoLine) && value ? value : undefined}
       >
         {value || '등록된 내용 없음'}
       </b>
@@ -146,15 +122,9 @@ function KeyValue({ label, value }) {
   );
 }
 
-function Chip({ className, children }) {
-  return (
-    <span
-      className={`inline-flex h-6 shrink-0 items-center rounded-full px-2.5 text-[13px] font-semibold whitespace-nowrap ${className}`}
-    >
-      {children}
-    </span>
-  );
-}
+/** 공용 차트 입력: 값·날짜 배열 → [{ label, value }] */
+const toPoints = (values, labels) =>
+  values.map((value, i) => ({ label: labels[i], value }));
 
 const weightBody = ({ indicators }) => {
   const weight = indicators?.weight;
@@ -173,20 +143,14 @@ const weightBody = ({ indicators }) => {
     period: '최근 5건',
     body: (
       <>
-        <ValueRow value={toNumber(weight.latestNvl)} unit="kg">
-          <Delta
-            label="직전 기록 대비"
-            delta={toNumber(weight.prevDiff)}
-            unit="kg"
-          />
-        </ValueRow>
+        {/* 최근 체중은 말풍선(마지막 점)으로만 보임 */}
         {values.length > 0 && (
-          <div className="mt-auto pt-3">
-            <CurveChart
-              values={values}
-              labels={labels}
+          <div className="mt-auto pt-2">
+            <LineChart
+              points={toPoints(values, labels)}
               formatValue={(v) => `${v}kg`}
-              label={`체중 꺾은선 그래프 · ${joinSeries(values, labels, 'kg')}`}
+              ariaLabel={`체중 꺾은선 그래프 · ${joinSeries(values, labels, 'kg')}`}
+              height={146}
             />
           </div>
         )}
@@ -195,48 +159,73 @@ const weightBody = ({ indicators }) => {
   };
 };
 
+/**
+ * 식사량·음수량·산책 카드: points는 기록이 있는 최근 5일의 하루 합계(날짜 오름차순)
+ * - 오늘 기록이 있으면 오늘 합계와 직전 기록일 대비(prevDiff, 서버 값)
+ * - 오늘 기록이 없으면 마지막 기록일 합계와 그 앞 기록일과의 차이(서버 prevDiff가 null이라 화면에서 계산, 점 1개면 없음)
+ */
 const dailySumBody =
   (id) =>
   ({ indicators }) => {
     const { key, unit, chartName } = DAILY_SUM[id];
     const indicator = indicators?.[key];
-    if (!indicator) return null;
+    if (!indicator || indicator.points.length === 0) return null;
     const todaySum = toNumber(indicator.todaySum);
     const values = indicator.points.map((point) => toNumber(point.sumNvl));
     const labels = indicator.points.map((point) =>
       formatMonthDayDot(point.rcdYmd),
     );
     const sums = values.filter((value) => value != null);
+    const isToday = todaySum != null;
+    const shownSum = isToday ? todaySum : values.at(-1);
+    const prevSum = values.length > 1 ? values.at(-2) : null;
+    const delta = isToday
+      ? toNumber(indicator.prevDiff)
+      : shownSum != null && prevSum != null
+        ? round2(shownSum - prevSum)
+        : null;
+    const average =
+      sums.length > 0
+        ? round2(sums.reduce((a, b) => a + b, 0) / sums.length)
+        : null;
     return {
       tile: {
-        value: todaySum == null ? '기록이 없어요' : `${todaySum}${unit}`,
-        chip: deltaChip(toNumber(indicator.prevDiff), unit),
-        sub:
-          sums.length > 0
-            ? `최근 5일 평균 ${round2(sums.reduce((a, b) => a + b, 0) / sums.length)}${unit}`
-            : '',
+        value: `${shownSum}${unit}`,
+        chip: deltaChip(delta, unit),
+        sub: average != null ? `최근 5개 기록 평균 ${average}${unit}` : '',
       },
-      period: '최근 5일',
+      period: '최근 5개 기록',
+      periodAside: (
+        <p className="flex shrink-0 items-baseline gap-1 text-sm text-subtle">
+          {isToday ? '오늘' : labels.at(-1)} 합계
+          <b className="text-2xl leading-none font-bold text-ink">{shownSum}</b>
+          {unit}
+        </p>
+      ),
       body: (
         <>
-          <ValueRow
-            value={todaySum ?? '오늘 기록이 없어요'}
-            unit={todaySum == null ? null : `${unit} / 오늘 합계`}
-          >
-            <Delta
-              label="직전 기록일 대비"
-              delta={toNumber(indicator.prevDiff)}
-              unit={unit}
-            />
-          </ValueRow>
+          {average != null && (
+            <p className="flex items-center gap-1.5 text-sm text-ink-2">
+              <svg width="16" height="2" aria-hidden="true">
+                <path
+                  d="M0 1H16"
+                  stroke="var(--color-brand-500)"
+                  strokeWidth="1.5"
+                  strokeDasharray="4 3"
+                />
+              </svg>
+              평균 {average}
+              {unit}
+            </p>
+          )}
           {values.length > 0 && (
-            <div className="mt-auto pt-3">
+            <div className="mt-auto pt-2">
               <BarChart
-                values={values}
-                labels={labels}
-                label={`${chartName} 일 합계 막대그래프 · ${joinSeries(values, labels, unit)} · 점선은 평균`}
+                points={toPoints(values, labels)}
+                formatValue={(v) => `${v}${unit}`}
+                ariaLabel={`${chartName} 일 합계 막대그래프 · ${joinSeries(values, labels, unit)} · 점선은 평균`}
+                showAverageLabel={false}
               />
-              <Note>점선은 평균</Note>
             </div>
           )}
         </>
@@ -267,8 +256,6 @@ function InspectionTrend({ trends, initialInspection }) {
   const low = toNumber(trend.refLlmtNvl);
   const high = toNumber(trend.refUplmtNvl);
   const band = low != null && high != null ? [low, high] : undefined;
-  const latest = values[values.length - 1];
-  const delta = values.length >= 2 ? latest - values[values.length - 2] : null;
 
   return (
     <>
@@ -285,23 +272,18 @@ function InspectionTrend({ trends, initialInspection }) {
           onChange={setSelectedNm}
         />
       </div>
-      <ValueRow value={latest} unit={unitNm}>
-        <Delta label="지난 검사 대비" delta={delta} unit="" />
-      </ValueRow>
-      {values.length >= 2 && (
-        <div className="mt-auto pt-3">
-          <CurveChart
+      {/* 최근 값은 말풍선(마지막 점)으로만 보임. 기록 1회면 점 하나 + 말풍선(추가-4) */}
+      {values.length >= 1 && (
+        <div className="mt-auto pt-2">
+          <LineChart
             key={trend.inspNm}
-            values={values}
-            labels={labels}
+            points={toPoints(values, labels)}
             band={band}
-            label={`${trend.inspNm} 수치 꺾은선 그래프 · ${joinSeries(values, labels, '')} ${unitNm}`}
+            formatValue={(v) => `${v}${unitNm}`}
+            ariaLabel={`${trend.inspNm} 수치 꺾은선 그래프 · ${joinSeries(values, labels, '')} ${unitNm}`}
+            height={126}
+            labelEvery={values.length >= 5 ? 2 : 1}
           />
-          {band && (
-            <Note>
-              점선은 참고범위 {low}~{high}
-            </Note>
-          )}
         </div>
       )}
     </>
@@ -321,7 +303,7 @@ const inspectionBody = ({ summary, initialInspection }) => {
 };
 
 /** 첨부 자료 한 줄 수 */
-const ATTACHMENT_ROW_COUNT = 4;
+const ATTACHMENT_ROW_COUNT = 3;
 
 const isImageAttachment = (attachment) =>
   attachment.fileExtnCd !== FILE_EXT_PDF;
@@ -367,9 +349,7 @@ function AttachmentRows({ petSn, attachments }) {
                 className="flex min-w-0 flex-1 items-center gap-2 text-left hover:text-brand-600"
                 onClick={() => handleOpen(attachment)}
               >
-                <Chip className="bg-surface-3 text-muted">
-                  {isImage ? 'IMG' : 'PDF'}
-                </Chip>
+                <Badge tone="muted">{isImage ? 'IMG' : 'PDF'}</Badge>
                 <b className="min-w-0 truncate font-semibold">
                   {attachment.orgnlFileNm}
                 </b>
@@ -402,7 +382,7 @@ const attachmentBody = ({ summary, petSn }) => {
       value: latest.orgnlFileNm,
       sub: formatDate(getYmdOf(latest.regDt)),
     },
-    period: '최근 4건',
+    period: '최근 3건',
     body: <AttachmentRows petSn={petSn} attachments={summary.attachments} />,
   };
 };
@@ -422,9 +402,15 @@ const stoolBody = ({ stools }) => {
   return {
     tile: { value: latestName, sub: latestTime },
     period: `최근 ${stools.length}건`,
+    /** 기록 시간은 기간 줄 오른쪽 끝(「기록하기 ›」 아래 줄), 값 옆에는 두지 않음 */
+    periodAside: (
+      <p className="shrink-0 text-sm whitespace-nowrap text-subtle">
+        {latestTime}
+      </p>
+    ),
     body: (
       <>
-        <BigValue value={latestName} unit={latestTime} />
+        <BigValue value={latestName} />
         <ul
           aria-label="배변 상태별 횟수"
           className="mt-auto grid grid-cols-5 gap-2 pt-4 text-center"
@@ -450,15 +436,18 @@ const stoolBody = ({ stools }) => {
   };
 };
 
+/** 검진기록 카드 줄 수(조회 개수 CHECKUP_COUNT와 따로) */
+const CHECKUP_ROW_COUNT = 3;
+
 const checkupBody = ({ checkups }) => {
   const today = getTodayYmd();
   const past = (checkups ?? []).filter((checkup) => checkup.ckupYmd <= today);
   if (past.length === 0) return null;
   return {
-    period: '최근 5건',
+    period: '최근 3건',
     body: (
       <Rows>
-        {past.map((checkup) => {
+        {past.slice(0, CHECKUP_ROW_COUNT).map((checkup) => {
           const type = getCheckupType(checkup.ckupTypeCd);
           const detail = [checkup.hsptlNm, checkup.ckupCn?.split('\n')[0]]
             .filter(Boolean)
@@ -468,7 +457,9 @@ const checkupBody = ({ checkups }) => {
               <b className="shrink-0 font-semibold text-ink tabular-nums">
                 {formatDate(checkup.ckupYmd)}
               </b>
-              <Chip className={type.tone.chip}>{type.nm}</Chip>
+              <Badge tone={type.toneKey} className="shrink-0">
+                {type.nm}
+              </Badge>
               <span className="min-w-0 truncate text-muted">{detail}</span>
             </Row>
           );
@@ -483,7 +474,7 @@ const prescriptionBody = ({ summary }) => {
     (a, b) => Number(b.prscSttsCd === DOSING) - Number(a.prscSttsCd === DOSING),
   );
   if (prescriptions.length === 0) return null;
-  /** [더보기]: 맨 위 처방의 검진상세 처방·투약 탭. 검진기록 번호가 없으면 item.moveTo(건강 일지 검진기록 탭) */
+  /** 「처방 보기 ›」: 맨 위 처방의 검진상세 처방·투약 탭. 검진기록 번호가 없으면 item.moveTo(건강 일지 검진기록 탭) */
   const top = prescriptions[0];
   return {
     tile: { value: top.mdcnNm, sub: `복용 중 ${summary.dosingCount}건` },
@@ -498,15 +489,9 @@ const prescriptionBody = ({ summary }) => {
           const isDosing = prescription.prscSttsCd === DOSING;
           return (
             <Row key={prescription.prscSn}>
-              <Chip
-                className={
-                  isDosing
-                    ? 'bg-brand-50 text-brand-600'
-                    : 'bg-surface-3 text-muted'
-                }
-              >
+              <Badge tone={isDosing ? 'brand' : 'muted'} className="shrink-0">
                 {isDosing ? '복용 중' : '복용 종료'}
-              </Chip>
+              </Badge>
               <b className="min-w-0 truncate font-semibold text-ink">
                 {prescription.mdcnNm}
               </b>
@@ -526,12 +511,12 @@ const prescriptionBody = ({ summary }) => {
 function ObservationFigure({ petSn, label, cycle, cycleNo, diffText }) {
   return (
     <figure className="min-w-0">
-      <div className="grid h-24 place-items-center overflow-hidden rounded-[10px] border border-dashed border-line-strong bg-surface-2 text-subtle">
+      <div className="grid h-16 place-items-center overflow-hidden rounded-[10px] border border-dashed border-line-strong bg-surface-2 text-subtle">
         <ObservationPhoto
           petSn={petSn}
           obsrvCyclSn={cycle.obsrvCyclSn}
           className="size-full object-cover"
-          fallback={<Icon name="photo_camera" className="text-[32px]" />}
+          fallback={<Icon name="photo_camera" className="text-[28px]" />}
         />
       </div>
       <figcaption className="mt-1.5 text-center text-xs/[1.5] text-subtle">
@@ -585,7 +570,6 @@ const observationBody = ({ summary, petSn }) => {
         ? `${item.obsrvArtclNm} · ${days}일 동안`
         : item.obsrvArtclNm,
     },
-    period: `관찰 중 ${summary.observations.length}건`,
     body: (
       <>
         <p className="font-semibold text-ink">
@@ -625,8 +609,8 @@ const allergyBody = ({ summary }) => {
     body: (
       <>
         <Rows>
-          <KeyValue label="알레르기" value={algyCn?.trim()} />
-          <KeyValue label="기저질환" value={dssCn?.trim()} />
+          <KeyValue isTwoLine label="알레르기" value={algyCn?.trim()} />
+          <KeyValue isTwoLine label="기저질환" value={dssCn?.trim()} />
         </Rows>
       </>
     ),
@@ -644,15 +628,6 @@ const preventionBody = ({ summary }) => {
     !nextRegularYmd
   )
     return null;
-  const vaccinationText =
-    latestVaccination &&
-    [
-      formatDate(latestVaccination.ckupYmd),
-      latestVaccination.ckupCn?.split('\n')[0],
-      '(완료)',
-    ]
-      .filter(Boolean)
-      .join(' ');
   const tileYmd = latestVaccination?.ckupYmd ?? nextVaccinationYmd;
   return {
     tile: {
@@ -661,80 +636,37 @@ const preventionBody = ({ summary }) => {
         ? `다음 접종 ${formatMonthDayDot(nextVaccinationYmd)} 예정`
         : '예정 없음',
     },
-    period: '예방 · 정기검진',
     body: (
       <Rows>
-        <KeyValue label="예방접종" value={vaccinationText} />
+        {/* 값은 날짜만(추가-7) */}
         <KeyValue
+          isTruncate
+          label="예방접종"
+          value={latestVaccination && formatDate(latestVaccination.ckupYmd)}
+        />
+        <KeyValue
+          isTruncate
           label="다음 접종 예정"
           value={
             nextVaccinationYmd
-              ? `${formatDate(nextVaccinationYmd)} (예정)`
+              ? formatDate(nextVaccinationYmd)
               : '등록된 예정 일정 없음'
           }
         />
         <KeyValue
+          isTruncate
           label="최근 검진"
-          value={
-            latestRegularYmd &&
-            `${formatDate(latestRegularYmd)} 정기검진 (완료)`
-          }
+          value={latestRegularYmd && formatDate(latestRegularYmd)}
         />
         <KeyValue
+          isTruncate
           label="다음 검진 예정"
           value={
             nextRegularYmd
-              ? `${formatDate(nextRegularYmd)} (예정)`
+              ? formatDate(nextRegularYmd)
               : '등록된 예정 일정 없음'
           }
         />
-      </Rows>
-    ),
-  };
-};
-
-const careBody = ({ care }) => {
-  if (!care) return null;
-  const { careItems, careRecords } = care;
-  const todayYmd = getTodayYmd();
-  /** 케어리스트에 보이는 항목(indctYn)만 (※신규 정책) */
-  const dailyItems = careItems.filter(
-    (item) => item.indctYn && item.careZoneCd === CARE_ZONE.DAILY,
-  );
-  if (dailyItems.length === 0) return null;
-  /** 케어 캘린더 케어리스트와 같은 오늘 완료 기준 */
-  const isDoneToday = (item) =>
-    item.prscSn != null
-      ? item.todayCmptnCnt >= item.dayMdcnNmtm
-      : careRecords.some(
-          (record) =>
-            record.careArtclSn === item.careArtclSn &&
-            record.cmptnYmd === todayYmd,
-        );
-  const leftItems = dailyItems.filter((item) => !isDoneToday(item));
-  return {
-    tile: {
-      value: leftItems.length > 0 ? `${leftItems.length}개 남음` : '모두 완료',
-      chip:
-        leftItems.length > 0 ? { tone: 'amber', text: '오늘 미완료' } : null,
-      sub: leftItems[0]?.careArtclNm ?? '',
-    },
-    body: (
-      <Rows>
-        {dailyItems.slice(0, CARE_ROW_COUNT).map((item) => {
-          const isDone = isDoneToday(item);
-          /** 보기 전용이라 체크 칸처럼 보이는 동그라미를 두지 않음(추가-1). 글자는 카드 머리와 같은 왼쪽 선 */
-          return (
-            <Row key={item.careArtclSn}>
-              <b className="min-w-0 truncate font-semibold text-ink">
-                {item.careArtclNm}
-              </b>
-              <span className="ml-auto shrink-0 text-muted">
-                {isDone ? '오늘 완료' : '오늘 미완료'}
-              </span>
-            </Row>
-          );
-        })}
       </Rows>
     ),
   };
@@ -754,10 +686,9 @@ const WIDGET_BODIES = {
   obsv: observationBody,
   allergy: allergyBody,
   vacc: preventionBody,
-  care: careBody,
 };
 
-/** 고른 항목 카드 한 장(640px 이상)과 요약 타일(640px 미만) */
+/** 고른 항목 카드 한 장(760px 이상)과 요약 타일(760px 미만) */
 export default function WidgetCard({ item, sources }) {
   const content = WIDGET_BODIES[item.id](sources);
   return (
@@ -767,7 +698,7 @@ export default function WidgetCard({ item, sources }) {
         content={content}
         petSn={sources.petSn}
         petNm={sources.petNm}
-        className="max-sm:hidden"
+        className="max-[760px]:hidden"
       />
       {!MOBILE_HIDDEN_IDS.includes(item.id) && (
         <WidgetTile

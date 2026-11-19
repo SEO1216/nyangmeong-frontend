@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Star } from 'lucide-react';
+import Badge from '@/components/Badge';
 import { formatDistance } from './placeFormat';
 
 // letter가 없으면 상단 고정된 즐겨찾기 줄이다
@@ -19,7 +20,7 @@ export default function PlaceListItem({
 
   // 지도 핀으로 고른 장소를 목록에서도 보이게 한다. 모바일은 바텀시트가 가려 건너뛴다
   useEffect(() => {
-    if (shouldScroll && !window.matchMedia('(max-width: 767px)').matches) {
+    if (shouldScroll && !window.matchMedia('(width < 760px)').matches) {
       itemRef.current.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
   }, [shouldScroll]);
@@ -39,7 +40,7 @@ export default function PlaceListItem({
       aria-label={`${place.plcConm} — 지도에서 보기`}
       onClick={() => onSelect(place.plcSn)}
       onKeyDown={handleKeyDown}
-      className={`relative cursor-pointer border-b border-line-soft px-4 py-4 hover:bg-surface-2 md:px-5 ${
+      className={`relative cursor-pointer border-b border-line-soft px-4 py-4 hover:bg-surface-2 min-[760px]:px-5 ${
         isSelected
           ? 'bg-brand-50 shadow-[inset_3px_0_0_var(--color-brand-500)] hover:bg-brand-50'
           : ''
@@ -63,7 +64,7 @@ export default function PlaceListItem({
           </span>
         </div>
         {(place.distance != null || place.rprsTelno) && (
-          <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-muted">
+          <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
             {place.distance != null && (
               <span className="font-semibold text-ink">
                 {formatDistance(place.distance)}
@@ -77,10 +78,8 @@ export default function PlaceListItem({
         )}
         <p className="mt-1 truncate text-sm text-muted">{place.plcAddr}</p>
         {isFavorite && isOutside && (
-          <div className="mt-2.5 flex flex-wrap gap-1">
-            <span className="inline-flex h-6 items-center rounded bg-[#fdf3d8] px-2 text-badge font-semibold text-[#8a5a00]">
-              현재 지도 밖
-            </span>
+          <div className="mt-3 flex flex-wrap gap-1">
+            <Badge tone="amber">현재 지도 밖</Badge>
           </div>
         )}
       </div>
@@ -92,7 +91,7 @@ export default function PlaceListItem({
           event.stopPropagation();
           onToggleFavorite(place);
         }}
-        className={`absolute right-3 top-2 grid size-10 place-items-center ${
+        className={`absolute right-3 top-2 grid size-10 place-items-center max-[760px]:right-2 max-[760px]:size-11 ${
           isStarred ? 'text-[#f5c518]' : 'text-placeholder hover:text-muted'
         }`}
       >

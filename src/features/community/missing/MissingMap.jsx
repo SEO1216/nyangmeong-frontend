@@ -115,13 +115,13 @@ export default function MissingMap({
       {moveNotice && (
         <p
           role="status"
-          className="absolute top-3 left-1/2 -translate-x-1/2 rounded-full bg-ink/85 px-3 py-1.5 text-sm whitespace-nowrap text-white"
+          className="absolute top-3 left-1/2 -translate-x-1/2 rounded-full bg-ink/85 px-3 py-2 text-sm whitespace-nowrap text-white"
         >
           {moveNotice}
         </p>
       )}
       {place && (
-        <span className="absolute bottom-3 left-3 inline-flex h-7 items-center gap-1 rounded-full bg-white px-2.5 text-sm text-ink-2 shadow-[inset_0_0_0_1px_var(--color-line)]">
+        <span className="absolute bottom-3 left-3 inline-flex h-7 items-center gap-1 rounded-full bg-white px-3 text-sm text-ink-2 ring-1 ring-line ring-inset">
           <MapPin size={14} aria-hidden="true" className="text-brand-500" />
           {place.wtnsPlcNm}
         </span>
@@ -131,7 +131,7 @@ export default function MissingMap({
           href={`https://map.kakao.com/link/to/${encodeURIComponent(place.wtnsPlcNm)},${place.wtnsPlcLat},${place.wtnsPlcLot}`}
           target="_blank"
           rel="noreferrer"
-          className="absolute right-3 bottom-3 inline-flex h-7 items-center gap-1 rounded-full bg-white px-2.5 text-sm font-medium text-brand-600 shadow-[inset_0_0_0_1px_var(--color-line)] hover:bg-brand-50"
+          className="absolute right-3 bottom-3 inline-flex h-7 items-center gap-1 rounded-full bg-white px-3 text-sm font-medium text-brand-600 ring-1 ring-line ring-inset hover:bg-brand-50"
         >
           길찾기
           <ExternalLink size={13} aria-hidden="true" />

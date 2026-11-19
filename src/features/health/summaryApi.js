@@ -3,13 +3,14 @@ import { getTodayYmd, getYmdOf } from '@/utils/formatDate';
 import { DOSING } from './checkup/checkupTypes';
 import { getCheckupAttachments } from './checkupApi';
 import { getCheckups, getObservationItems } from './diaryApi';
-import { OBSERVATION_ONGOING, WEIGHT } from './diaryTypes';
+import { OBSERVATION_ONGOING } from './diaryTypes';
 import { findBloodItem } from './labInput/bloodItems';
 import { HOSPITAL } from './scheduleTypes';
 
 /**
  * [종합 건강기록 API]
- * - 반려동물 한 마리의 프로필·일상 기록·검진기록·검사 수치·처방약·첨부·지속 관찰·병원 일정을 한꺼번에 받아 히어로·대시보드 카드 묶음으로 합침
+ * - 반려동물 한 마리의 검진기록·검사 수치·처방약·첨부·지속 관찰·병원 일정을 한꺼번에 받아 히어로·대시보드 카드 묶음으로 합침(요청 9개)
+ * - 프로필(pet)은 받지 않음: 반려동물 목록(GET /pets)에 다 있어 화면이 목록 값을 붙임. 체중 카드는 health-indicators를 씀
  * - 검사 수치·처방약·첨부는 ckupRcdSn을 빼고 불러 반려동물 전체를 받음
  * - 서버 필드 이름은 바꾸지 않음. 합치기·정렬·자르기만 화면 몫
  */
@@ -25,16 +26,6 @@ const REGULAR = 'HLTC0001';
 /** 검사 항목 이름: 직접입력이면 입력한 이름 */
 export const getInspectionName = (item) =>
   item.inspArtclDrctInptNm ?? item.inspArtclCdNm;
-
-const getPet = (petSn) => api.get(`/pets/${petSn}`);
-
-/** 최신 체중 일상 기록 1건의 값. 없으면 null */
-const getLatestWeight = async (petSn) => {
-  const records = await api.get(`/pets/${petSn}/daily-health-records`, {
-    params: { dailyRcdIdctCd: WEIGHT, size: 1 },
-  });
-  return records.length > 0 ? records[records.length - 1].rcdNvl : null;
-};
 
 const getCheckupList = (petSn, params) =>
   getCheckups({ petSn, ...params }).then((page) => page.content);
@@ -93,8 +84,6 @@ const buildLab = (petSn, values) => {
 export const getHealthSummary = async (petSn) => {
   const today = getTodayYmd();
   const [
-    pet,
-    latestWeight,
     recentCheckups,
     vaccinationCheckups,
     regularCheckups,
@@ -105,8 +94,6 @@ export const getHealthSummary = async (petSn) => {
     attachments,
     observationItems,
   ] = await Promise.all([
-    getPet(petSn),
-    getLatestWeight(petSn),
     getCheckupList(petSn, { size: RECENT_CHECKUP_COUNT }),
     getCheckupList(petSn, { ckupTypeCd: VACCINATION, size: 2 }),
     getCheckupList(petSn, { ckupTypeCd: REGULAR, size: 1 }),
@@ -125,9 +112,6 @@ export const getHealthSummary = async (petSn) => {
 
   return {
     baseYmd: today,
-    pet,
-    /** 요약 바 몸무게: 일상 기록의 최신 체중, 없으면 프로필 체중 */
-    weight: latestWeight ?? pet.petBdwg,
     latestCheckup: pastCheckups[0] ?? null,
     prevention: {
       vaccinations: vaccinationCheckups.filter(isPast),

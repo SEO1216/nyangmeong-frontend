@@ -29,7 +29,7 @@ export default function ExpenseTopList({ expenses }) {
               <li
                 key={expense.expndSn}
                 style={{ '--cat': EXPND_CLSF[expense.expndClsfCd].color }}
-                className='relative flex items-center gap-3 border-t border-line-soft py-3 first:border-t-0 max-[760px]:grid max-[760px]:grid-cols-[auto_minmax(0,1fr)_auto] max-[760px]:gap-x-0 max-[760px]:gap-y-0.5 max-[760px]:pl-[14px] max-[760px]:before:absolute max-[760px]:before:top-3 max-[760px]:before:bottom-3 max-[760px]:before:left-0 max-[760px]:before:w-1 max-[760px]:before:rounded-xs max-[760px]:before:bg-[var(--cat)] max-[760px]:before:content-[""]'
+                className='relative flex items-center gap-3 border-t border-line-soft py-3 first:border-t-0 max-[760px]:grid max-[760px]:grid-cols-[auto_minmax(0,1fr)_auto] max-[760px]:gap-x-0 max-[760px]:gap-y-0.5 max-[760px]:pl-4 max-[760px]:before:absolute max-[760px]:before:top-3 max-[760px]:before:bottom-3 max-[760px]:before:left-0 max-[760px]:before:w-1 max-[760px]:before:rounded-xs max-[760px]:before:bg-[var(--cat)] max-[760px]:before:content-[""]'
               >
                 <span className="w-12 text-sm text-subtle max-[760px]:col-start-1 max-[760px]:row-start-2 max-[760px]:w-auto">
                   {formatMonthDay(expense.expndYmd)}

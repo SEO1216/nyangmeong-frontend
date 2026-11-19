@@ -28,7 +28,7 @@ export default function MissingList({
   };
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 border-t border-line-strong pt-6 max-[1100px]:grid-cols-1">
+    <div className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 max-[1100px]:grid-cols-1">
       <div className="flex min-w-0 flex-col gap-5">
         <MissingFilters
           filters={filters}
@@ -41,9 +41,9 @@ export default function MissingList({
           onReset={handleReset}
         />
 
-        <div className="flex items-center justify-between gap-3 border-t border-line pt-4">
+        <div className="flex items-center justify-between gap-3">
           <p aria-live="polite" className="text-sm text-muted">
-            총 <b className="font-bold text-ink">{totalElements}</b>건
+            전체 <b className="font-bold text-ink">{totalElements}</b> 건
           </p>
         </div>
 
@@ -71,7 +71,7 @@ export default function MissingList({
           </ul>
         )}
 
-        <div className="mt-5">
+        <div className="mt-7 max-[760px]:mt-3">
           <BoardPagination
             page={page}
             totalPages={totalPages}

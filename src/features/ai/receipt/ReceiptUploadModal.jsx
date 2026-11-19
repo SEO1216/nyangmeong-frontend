@@ -200,7 +200,7 @@ export default function ReceiptUploadModal({
   if (isAnalyzing) {
     return (
       <Modal
-        title="영수증으로 추가하기"
+        title="영수증으로 등록하기"
         isPending
         onClose={onClose}
         footer={
@@ -232,7 +232,7 @@ export default function ReceiptUploadModal({
 
   return (
     <Modal
-      title="영수증으로 추가하기"
+      title="영수증으로 등록하기"
       onClose={onClose}
       footer={
         <div className="flex flex-col gap-3">

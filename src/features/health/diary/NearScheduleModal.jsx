@@ -87,7 +87,7 @@ export default function NearScheduleModal({
             disabled={isPending}
             onClick={() => onConfirm(moveByKey)}
           >
-            저장
+            저장하기
           </button>
         )
       }
@@ -103,9 +103,7 @@ export default function NearScheduleModal({
               key={row.key}
               className="rounded-[8px] border border-line px-3 py-3"
             >
-              <p className="text-ink-2 tabular-nums">
-                {renderSchedule(row)}
-              </p>
+              <p className="text-ink-2 tabular-nums">{renderSchedule(row)}</p>
               <div
                 role="group"
                 aria-label={`${row.petNm} 일정 연결 방법`}

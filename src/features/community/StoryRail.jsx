@@ -1,15 +1,17 @@
 import { ChevronRight, Heart, MessageCircleHeart } from 'lucide-react';
 import { generatePath, Link } from 'react-router-dom';
+import FileImage from '@/components/FileImage';
 import { PATHS } from '@/routes/paths';
 import { publicFileUrl } from '@/utils/fileUrl';
+import ImagePlaceholder from './ImagePlaceholder';
 import { useHealthTips, usePopularPhoto, useTodayStory } from './queries';
 
 const CARD_CLASS =
-  'rounded-[14px] border border-[#e2e7e7] bg-white px-5 py-5 shadow-[0_1px_2px_rgba(26,50,52,0.06)] max-[1100px]:mt-10 max-[760px]:[&+section]:mt-4';
+  'rounded-[14px] border border-line bg-white px-5 py-5 max-[1100px]:mt-10 max-[760px]:[&+section]:mt-4';
 
-/** 접힌 모서리: 2px 칸 12×12개를 계단으로 자르고(clipPath), 접힌 면과 선을 같은 칸으로 그린다 */
-const CELL = 2;
-const STEPS = 12;
+/** 접힌 모서리: 1px 칸 24×24개를 계단으로 자르고(clipPath), 접힌 면과 선을 같은 칸으로 그린다 */
+const CELL = 1;
+const STEPS = 24;
 const NOTCH = CELL * STEPS;
 const FOLD_CLIP = `polygon(0 0, ${Array.from(
   { length: STEPS },
@@ -21,7 +23,7 @@ const FOLD_CLIP = `polygon(0 0, ${Array.from(
   })
   .join(', ')}, 100% 100%, 0 100%)`;
 
-/** 칸 (row, col): 대각선·왼쪽·아래는 선(fab-line), 그 안쪽은 접힌 면(fab). 대각선 위쪽은 잘려 나간 칸 */
+/** 칸 (row, col): 대각선·왼쪽·아래는 선(brand-100), 그 안쪽은 접힌 면(white). 대각선 위쪽은 잘려 나간 칸 */
 function FoldCorner() {
   const cells = [];
   for (let row = 0; row < STEPS; row += 1) {
@@ -34,7 +36,7 @@ function FoldCorner() {
           y={row}
           width="1"
           height="1"
-          className={isLine ? 'fill-fab-line' : 'fill-fab'}
+          className={isLine ? 'fill-brand-100' : 'fill-white'}
         />,
       );
     }
@@ -45,7 +47,7 @@ function FoldCorner() {
       viewBox={`0 0 ${STEPS} ${STEPS}`}
       shapeRendering="crispEdges"
       style={{ width: NOTCH, height: NOTCH }}
-      className="absolute -top-0.5 -right-0.5"
+      className="absolute -top-px -right-px"
     >
       {cells}
     </svg>
@@ -74,14 +76,14 @@ export default function StoryRail({ action }) {
       {story && (
         <div
           style={{ clipPath: FOLD_CLIP }}
-          className="relative rounded-md border-2 border-fab-line bg-fab-soft px-5 py-4 max-[1100px]:order-first max-[1100px]:col-span-full max-[1100px]:mb-6"
+          className="relative rounded-md border border-brand-100 bg-brand-50 px-5 py-4 max-[1100px]:order-first max-[1100px]:col-span-full max-[1100px]:mb-6"
         >
           <FoldCorner />
-          <p className="flex items-center gap-1.5 text-sm font-medium text-brand-500">
+          <p className="flex items-center gap-2 text-sm font-medium text-brand-500">
             <MessageCircleHeart size={16} aria-hidden="true" />
             오늘의 한마디
           </p>
-          <q className="mt-1.5 block text-[17px] leading-[1.6] font-medium text-[#1a3234] [quotes:none]">
+          <q className="mt-2 block text-base leading-[1.6] font-medium text-ink [quotes:none]">
             “{story.cmtryCn}”
           </q>
         </div>
@@ -90,13 +92,13 @@ export default function StoryRail({ action }) {
       {photo?.imgs.length > 0 && (
         <section
           aria-labelledby="post-photo-title"
-          className="relative overflow-hidden rounded-[14px] bg-[#f4f6f6] shadow-[0_1px_2px_rgba(26,50,52,0.06)] max-[1100px]:mt-10 max-[760px]:[&+section]:mt-4"
+          className="relative overflow-hidden rounded-[14px] bg-surface-2 max-[1100px]:mt-10 max-[760px]:[&+section]:mt-4"
         >
           <Link to={detailPath(photo.pstSn)} className="group block">
-            <img
+            <FileImage
               src={publicFileUrl(photo.imgs[0].atchFileSn)}
-              alt=""
               className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+              fallback={<ImagePlaceholder className="aspect-square w-full" />}
             />
             <span
               aria-hidden="true"
@@ -104,7 +106,7 @@ export default function StoryRail({ action }) {
             />
             <h2
               id="post-photo-title"
-              className="absolute top-3 left-3 inline-flex h-6 items-center rounded-full bg-black/40 px-2.5 pt-[1.5px] text-[13px] leading-none font-semibold text-white backdrop-blur-sm"
+              className="absolute top-3 left-3 inline-flex h-6 items-center rounded-full bg-black/40 px-3 pt-[1.5px] text-badge leading-none font-semibold text-white backdrop-blur-sm"
             >
               인기 포토
             </h2>
@@ -126,20 +128,23 @@ export default function StoryRail({ action }) {
       )}
 
       <section aria-labelledby="post-tip-title" className={CARD_CLASS}>
-        <h2 id="post-tip-title" className="text-lg font-bold text-[#1a3234]">
+        <h2
+          id="post-tip-title"
+          className="text-lg font-bold tracking-[-0.01em] text-ink"
+        >
           오늘의 건강 이야기
         </h2>
         <ul className="mt-2">
           {tips?.map((tip) => (
             <li
               key={tip.pstSn}
-              className="border-t border-[#e2e7e7] first:border-t-0"
+              className="border-t border-line first:border-t-0"
             >
               <Link to={detailPath(tip.pstSn)} className="group block py-3">
-                <span className="block truncate text-base font-semibold text-[#1a3234] group-hover:text-[#285a5c]">
+                <span className="block truncate text-base font-semibold text-ink group-hover:text-brand-500">
                   {tip.pstTtl}
                 </span>
-                <span className="mt-0.5 line-clamp-2 text-sm leading-normal text-[#566465]">
+                <span className="mt-1 line-clamp-2 text-sm leading-normal text-muted">
                   {tip.pstCn.split('\n')[0]}
                 </span>
               </Link>
@@ -148,7 +153,7 @@ export default function StoryRail({ action }) {
         </ul>
         <Link
           to={PATHS.HEALTH}
-          className="mt-3 flex h-10 items-center justify-center gap-1 rounded-md bg-[#e9f2f2] text-base font-semibold text-[#1e4a4c] hover:bg-[#dcebeb]"
+          className="mt-3 flex h-10 items-center justify-center gap-1 rounded-md bg-brand-50 text-base font-semibold text-brand-600 hover:bg-brand-100"
         >
           내 펫 건강 체크하기
           <ChevronRight size={16} aria-hidden="true" />

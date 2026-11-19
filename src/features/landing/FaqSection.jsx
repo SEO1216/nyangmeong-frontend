@@ -51,7 +51,7 @@ export default function FaqSection() {
     <section
       id="features"
       ref={sectionRef}
-      className="relative flex w-full scroll-mt-20 flex-col items-center justify-center overflow-hidden bg-[#f7f7f4] py-24 lg:min-h-[640px] lg:py-32"
+      className="relative flex w-full scroll-mt-20 flex-col items-center justify-center overflow-hidden bg-[#f7f7f4] min-h-[calc(100dvh-5rem)] py-24 lg:min-h-[max(640px,calc(100dvh-5rem))] lg:py-32"
     >
       <div className="flex w-full max-w-[800px] flex-col gap-4 px-4 lg:px-0">
         {FAQS.map((faq, index) => {

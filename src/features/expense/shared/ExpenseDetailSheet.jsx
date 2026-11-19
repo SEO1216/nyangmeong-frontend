@@ -60,7 +60,7 @@ export default function ExpenseDetailSheet({
       aria-labelledby="expense-detail-title"
       onCancel={handleCancel}
       onMouseDown={handleMouseDown}
-      className="m-0 mt-auto hidden w-full max-w-none rounded-t-modal bg-white p-0 shadow-depth-lg backdrop:bg-[rgba(15,23,35,0.45)] open:max-[760px]:block"
+      className="m-0 mt-auto hidden w-full max-w-none rounded-t-modal bg-white p-0 shadow-depth-lg backdrop:bg-dim/45 open:max-[760px]:block"
     >
       <div className="relative">
         <span
@@ -91,7 +91,7 @@ export default function ExpenseDetailSheet({
             />
             {clsf.name}
           </p>
-          <p className="mt-1 text-[26px] font-bold tabular-nums">
+          <p className="mt-1 text-2xl font-bold tabular-nums">
             {formatWon(expense.expndAmt)}
           </p>
           <dl className="mt-4 border-t border-line-soft">
@@ -105,7 +105,7 @@ export default function ExpenseDetailSheet({
           <button
             type="button"
             onClick={onDelete}
-            className="h-11 w-full rounded-md bg-[#fbeeec] font-semibold text-danger hover:bg-[#f7e0dc]"
+            className="h-11 w-full rounded-md bg-danger-soft font-semibold text-danger hover:bg-danger/15"
           >
             지출 삭제
           </button>

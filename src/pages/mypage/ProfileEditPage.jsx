@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BTN_PRIMARY } from '@/components/buttonStyles';
-import EmptyResult from '@/components/EmptyResult';
+import LoadError from '@/components/LoadError';
 import SkeletonCard from '@/components/SkeletonCard';
 import PasswordConfirm from '@/features/member/profile/PasswordConfirm';
 import ProfileEditForm from '@/features/member/profile/ProfileEditForm';
@@ -31,15 +30,10 @@ export default function ProfileEditPage() {
       description="프로필 사진, 닉네임, 연락처 등 내 계정 정보를 관리해요"
     >
       {isError && !profile && (
-        <EmptyResult title="회원 정보를 불러오지 못했어요">
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className={BTN_PRIMARY}
-          >
-            다시 시도
-          </button>
-        </EmptyResult>
+        <LoadError
+          message="회원 정보를 불러오지 못했어요"
+          onRetry={() => refetch()}
+        />
       )}
       {/* 가입 경로를 모르는 동안은 본인 확인 카드 크기로 자리를 잡는다 */}
       {!profile && !isError && (

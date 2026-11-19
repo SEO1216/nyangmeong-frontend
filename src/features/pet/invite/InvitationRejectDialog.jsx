@@ -39,7 +39,7 @@ export default function InvitationRejectDialog({ invitation, onClose }) {
             disabled={rejectInvitation.isPending}
             className={BTN_DANGER}
           >
-            거절
+            거절하기
           </button>
         </>
       }

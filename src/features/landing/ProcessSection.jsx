@@ -100,7 +100,7 @@ export default function ProcessSection() {
     <section
       id="process"
       ref={sectionRef}
-      className="relative flex w-full scroll-mt-20 flex-col items-center justify-center overflow-hidden bg-white py-24 lg:min-h-screen"
+      className="relative flex w-full scroll-mt-20 flex-col items-center justify-center overflow-hidden bg-white min-h-[calc(100dvh-5rem)] py-24"
     >
       <div className="mx-auto w-full max-w-[1440px]">
         <FadeIn
@@ -111,7 +111,7 @@ export default function ProcessSection() {
             SERVICE PROCESS
           </span>
           <h2 className="text-[28px] leading-tight font-normal break-keep text-black md:text-[40px] lg:text-[48px]">
-            냥멍케어 서비스 과정
+            pawever 서비스 과정
           </h2>
           <p className="text-[14px] leading-relaxed break-keep text-black md:text-[18px] lg:text-[20px]">
             가입부터 기록, 미션, 커뮤니티까지

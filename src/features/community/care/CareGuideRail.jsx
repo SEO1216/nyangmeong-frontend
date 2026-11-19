@@ -11,10 +11,7 @@ const CHECK_ITEMS = [
 export function CareCheckGuide() {
   return (
     <section aria-labelledby="care-check-title">
-      <h2
-        id="care-check-title"
-        className="pb-3 text-lg leading-[1.4] font-bold text-ink"
-      >
+      <h2 id="care-check-title" className="pb-3 text-lg font-bold text-ink">
         돌봄 전, 꼭 확인해요
       </h2>
       <CheckList items={CHECK_ITEMS} />

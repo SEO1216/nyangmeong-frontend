@@ -15,7 +15,7 @@ const INITIAL_LEVEL = 6;
 const SINGLE_LEVEL = 4;
 const BOUNDS_PADDING = 80;
 
-const floatCard = 'bg-white shadow-depth-md';
+const floatCard = 'bg-white shadow-depth-sm';
 const toolButton =
   'grid size-11 place-items-center text-ink-2 hover:bg-surface-2 hover:text-ink';
 
@@ -157,7 +157,7 @@ export default function PlaceMap({
   };
 
   return (
-    <div className="relative min-w-0 overflow-hidden bg-[#f1f2ed] max-md:absolute max-md:inset-0">
+    <div className="relative min-w-0 overflow-hidden bg-[#f1f2ed] max-[760px]:absolute max-[760px]:inset-0">
       <div ref={containerRef} className="absolute inset-0 isolate" />
       {!map && (
         <p className="absolute inset-0 grid place-items-center text-sm text-muted">
@@ -202,7 +202,7 @@ export default function PlaceMap({
         type="button"
         onClick={onToggleCollapse}
         aria-label={isCollapsed ? '목록 펼치기' : '목록 접기'}
-        className="absolute left-0 top-1/2 z-[4] -mt-7 hidden h-14 w-6 place-items-center rounded-r-md border border-l-0 border-line bg-white text-muted shadow-sm hover:text-ink md:grid"
+        className="absolute left-0 top-1/2 z-[4] -mt-7 hidden h-14 w-6 place-items-center rounded-r-md border border-l-0 border-line bg-white text-muted shadow-depth-sm hover:text-ink min-[760px]:grid"
       >
         <ChevronLeft
           className={`size-5 transition-transform ${isCollapsed ? 'rotate-180' : ''}`}
@@ -211,9 +211,9 @@ export default function PlaceMap({
 
       {children}
 
-      <div className="pointer-events-none absolute inset-x-4 top-4 z-[2] flex items-start justify-between gap-3 max-md:top-[116px]">
+      <div className="pointer-events-none absolute inset-x-4 top-4 z-[2] flex items-start justify-between gap-3 max-[760px]:top-[108px]">
         <span
-          className={`pointer-events-auto inline-flex h-10 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold text-ink ${floatCard}`}
+          className={`pointer-events-auto inline-flex h-10 items-center gap-2 rounded-full px-3.5 text-sm font-semibold text-ink ${floatCard}`}
         >
           <MapPin className="size-[18px] text-brand-500" />
           {regionText}
@@ -221,7 +221,7 @@ export default function PlaceMap({
         <div
           role="group"
           aria-label="지도 종류"
-          className={`pointer-events-auto relative grid grid-cols-2 rounded-md p-[3px] max-md:hidden ${floatCard}`}
+          className={`pointer-events-auto relative grid grid-cols-2 rounded-md p-[3px] max-[760px]:hidden ${floatCard}`}
         >
           {/* 고른 쪽 밑에 깔리는 배경. 지도 종류를 바꾸면 좌우로 미끄러져 간다 */}
           <span
@@ -255,15 +255,15 @@ export default function PlaceMap({
         <button
           type="button"
           onClick={handleResearch}
-          className={`absolute left-1/2 top-[72px] z-[2] inline-flex h-11 -translate-x-1/2 items-center gap-1.5 rounded-md px-5 font-semibold text-brand-600 max-md:top-[164px] ${floatCard}`}
+          className={`absolute left-1/2 top-[72px] z-[2] inline-flex h-11 -translate-x-1/2 items-center gap-2 rounded-md px-5 font-semibold break-keep text-brand-600 max-[760px]:top-[156px] ${floatCard}`}
         >
           <RefreshCw className="size-5" />이 지도 영역에서 다시 검색
         </button>
       )}
 
       <div
-        className={`absolute right-4 top-1/2 z-[2] flex -translate-y-1/2 flex-col gap-2 max-md:bottom-[calc(var(--sheet-peek)+16px)] max-md:top-auto max-md:translate-y-0 ${
-          isSheetFull ? 'max-md:hidden' : ''
+        className={`absolute right-4 top-1/2 z-[2] flex -translate-y-1/2 flex-col gap-2 max-[760px]:bottom-[calc(var(--sheet-peek)+16px)] max-[760px]:top-auto max-[760px]:translate-y-0 ${
+          isSheetFull ? 'max-[760px]:hidden' : ''
         }`}
       >
         <div className={`overflow-hidden rounded-card ${floatCard}`}>
@@ -277,7 +277,7 @@ export default function PlaceMap({
           </button>
         </div>
         <div
-          className={`flex flex-col divide-y divide-line-soft overflow-hidden rounded-card max-md:hidden ${floatCard}`}
+          className={`flex flex-col divide-y divide-line-soft overflow-hidden rounded-card max-[760px]:hidden ${floatCard}`}
         >
           <button
             type="button"
@@ -299,7 +299,7 @@ export default function PlaceMap({
       </div>
 
       {selectedPlace && (
-        <div className={isSheetFull ? 'max-md:hidden' : ''}>
+        <div className={isSheetFull ? 'max-[760px]:hidden' : ''}>
           <PlacePopup place={selectedPlace} onClose={onClosePopup} />
         </div>
       )}

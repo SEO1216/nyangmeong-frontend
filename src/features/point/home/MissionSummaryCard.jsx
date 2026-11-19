@@ -1,3 +1,4 @@
+import ProgressBar from '@/components/ProgressBar';
 import StatLink from '@/components/StatLink';
 import { PATHS } from '@/routes/paths';
 import { usePointBalance } from '../queries';
@@ -23,19 +24,7 @@ export default function MissionSummaryCard() {
       emphasis
       note={isError ? '불러오지 못했어요' : undefined}
       footer={
-        <span
-          role="progressbar"
-          aria-valuenow={percent ?? 0}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label="오늘의 케어미션 달성률"
-          className="block h-2 overflow-hidden rounded-full bg-brand-50"
-        >
-          <i
-            className="block h-full rounded-full bg-brand-500"
-            style={{ width: `${percent ?? 0}%` }}
-          />
-        </span>
+        <ProgressBar value={percent ?? 0} label="오늘의 케어미션 달성률" />
       }
     />
   );

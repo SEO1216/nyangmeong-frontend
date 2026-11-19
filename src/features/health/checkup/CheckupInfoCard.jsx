@@ -5,10 +5,10 @@ import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import { formatDate } from '@/utils/formatDate';
 import { useUpdateCheckup } from '../queries';
 import CheckupModal from '../diary/CheckupModal';
-import { INPUT_CLASS, TEXTAREA_CLASS } from '../diary/formStyles';
+import { INPUT, TEXTAREA } from '@/components/formStyles';
 import { CHECKUP_TYPES } from '../scheduleTypes';
 import CharCount from '../shared/CharCount';
-import { BTN_SM, TEXT_BTN } from './checkupStyles';
+import { TEXT_BTN } from './checkupStyles';
 import { findName } from './checkupTypes';
 
 const MAX_CONTENT_LENGTH = 500;
@@ -54,7 +54,7 @@ export default function CheckupInfoCard({ checkup, pets }) {
         !isEditing && (
           <button
             type="button"
-            className={`${BTN_SECONDARY} ${BTN_SM}`}
+            className={`${BTN_SECONDARY}`}
             onClick={startEdit}
           >
             <Icon name="edit" className="text-lg" />
@@ -71,7 +71,7 @@ export default function CheckupInfoCard({ checkup, pets }) {
                 id="info-ckup-ymd"
                 value={formatDate(checkup.ckupYmd)}
                 disabled
-                className={`${INPUT_CLASS} tabular-nums`}
+                className={`${INPUT} tabular-nums`}
               />
             </Row>
             <Row label="동물병원명" htmlFor="info-hosp-nm">
@@ -79,7 +79,7 @@ export default function CheckupInfoCard({ checkup, pets }) {
                 id="info-hosp-nm"
                 value={checkup.hsptlNm}
                 disabled
-                className={INPUT_CLASS}
+                className={INPUT}
               />
             </Row>
             <Row label="검진 종류" htmlFor="info-ckup-type">
@@ -88,7 +88,7 @@ export default function CheckupInfoCard({ checkup, pets }) {
                   id="info-ckup-type"
                   value={typeNm}
                   disabled
-                  className={`${INPUT_CLASS} max-w-60`}
+                  className={`${INPUT} max-w-60`}
                 />
                 <button
                   type="button"
@@ -106,7 +106,7 @@ export default function CheckupInfoCard({ checkup, pets }) {
                   id="info-ckup-cn"
                   value={ckupCn}
                   maxLength={MAX_CONTENT_LENGTH}
-                  className={TEXTAREA_CLASS}
+                  className={TEXTAREA}
                   onChange={(event) => setCkupCn(event.target.value)}
                 />
                 <CharCount value={ckupCn} max={MAX_CONTENT_LENGTH} />
@@ -118,7 +118,7 @@ export default function CheckupInfoCard({ checkup, pets }) {
                   id="info-ckup-memo"
                   value={ckupMemoCn}
                   maxLength={MAX_MEMO_LENGTH}
-                  className={INPUT_CLASS}
+                  className={INPUT}
                   onChange={(event) => setCkupMemoCn(event.target.value)}
                 />
                 <CharCount value={ckupMemoCn} max={MAX_MEMO_LENGTH} />
@@ -173,7 +173,7 @@ export default function CheckupInfoCard({ checkup, pets }) {
 /** 라벨·값 한 줄 */
 function Row({ label, htmlFor, children }) {
   return (
-    <div className="flex items-start gap-3 border-t border-dashed border-line py-2.5 first:border-t-0 max-sm:flex-col max-sm:gap-1">
+    <div className="flex items-start gap-3 border-t border-dashed border-line py-2.5 first:border-t-0 max-[760px]:flex-col max-[760px]:gap-1">
       <dt className="w-[104px] shrink-0 text-subtle">
         {htmlFor ? <label htmlFor={htmlFor}>{label}</label> : label}
       </dt>

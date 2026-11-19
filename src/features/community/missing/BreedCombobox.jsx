@@ -1,5 +1,7 @@
 import { Check, ChevronDown, Pencil, Search } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
+import FieldError, { Required } from '@/components/FieldError';
+import { HELP, INPUT, LABEL } from '@/components/formStyles';
 
 const SELF = '__self';
 const norm = (text) => text.replace(/\s/g, '').toLowerCase();
@@ -97,13 +99,11 @@ export default function BreedCombobox({
   const listId = `${id}-list`;
 
   return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={inputId} className="text-base font-semibold text-ink">
+    <div className="flex flex-col gap-2">
+      <label htmlFor={inputId} className={LABEL}>
         {label}
         {required ? (
-          <span aria-hidden="true" className="ml-0.5 font-bold text-danger">
-            *
-          </span>
+          <Required />
         ) : (
           <span className="ml-1 text-sm font-medium text-muted">선택</span>
         )}
@@ -133,7 +133,7 @@ export default function BreedCombobox({
           onClick={() => setIsOpen(true)}
           onChange={handleInput}
           onKeyDown={handleKeyDown}
-          className={`block h-10 w-full rounded-md border bg-white pr-11 pl-10 text-base placeholder:text-placeholder hover:border-line-strong focus:border-brand-500 focus:ring-focus focus:outline-none ${error ? 'border-danger' : 'border-input-line'}`}
+          className={`${INPUT} pr-11 pl-10`}
         />
         <button
           type="button"
@@ -157,10 +157,10 @@ export default function BreedCombobox({
             id={listId}
             role="listbox"
             aria-label={`${label} 목록`}
-            className="absolute top-[calc(100%+6px)] z-20 max-h-60 w-full overflow-y-auto rounded-md border border-line bg-white py-1 shadow-md"
+            className="absolute top-[calc(100%+4px)] z-20 max-h-60 w-full overflow-y-auto rounded-md border border-line bg-white py-1"
           >
             {filtered.length === 0 && (
-              <li className="px-3 py-2.5 text-muted">검색 결과가 없어요</li>
+              <li className="px-3 py-2 text-muted">검색 결과가 없어요</li>
             )}
             {options.map((option, index) => {
               const isSelfOption = option === SELF;
@@ -193,15 +193,10 @@ export default function BreedCombobox({
         )}
       </div>
       {isSelf && (
-        <div className="flex max-w-[420px] flex-col gap-1.5">
-          <label
-            htmlFor={`${id}-self`}
-            className="text-base font-semibold text-ink"
-          >
+        <div className="flex max-w-[420px] flex-col gap-2">
+          <label htmlFor={`${id}-self`} className={LABEL}>
             품종 직접 입력
-            <span aria-hidden="true" className="ml-0.5 font-bold text-danger">
-              *
-            </span>
+            <Required />
           </label>
           <input
             id={`${id}-self`}
@@ -217,19 +212,15 @@ export default function BreedCombobox({
                 typed: '',
               })
             }
-            className={`block h-10 w-full rounded-md border bg-white px-3 text-base placeholder:text-placeholder hover:border-line-strong focus:border-brand-500 focus:ring-focus focus:outline-none ${error ? 'border-danger' : 'border-input-line'}`}
+            className={INPUT}
           />
         </div>
       )}
-      <p className="text-sm text-muted">
+      <p className={HELP}>
         공공데이터 품종코드 기준 목록이에요. 목록에 없으면 맨 아래 [직접 입력]을
         골라 주세요
       </p>
-      {error && (
-        <p role="alert" className="text-sm text-danger">
-          {error}
-        </p>
-      )}
+      <FieldError>{error}</FieldError>
     </div>
   );
 }

@@ -1,8 +1,10 @@
 import { useId, useState } from 'react';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import FieldError from '@/components/FieldError';
 import { showToast } from '@/components/toastStore';
 import { useCheckPhoneAvailability, useUpdatePhone } from '../queries';
-import { ACT_BTN, INPUT, SIDE_BTN } from '../shared/profileStyles';
+import { INPUT } from '@/components/formStyles';
+import { ACT_BTN, SIDE_BTN } from '../shared/profileStyles';
 import {
   formatPhone,
   isValidPhone,
@@ -10,7 +12,7 @@ import {
   sanitizePhoneInput,
 } from '../shared/validate';
 import AccountRow from './AccountRow';
-import { ErrorText, OkText } from './FieldMessage';
+import { OkText } from './FieldMessage';
 
 const MSG = {
   invalid: '휴대전화번호 형식을 확인해 주세요.',
@@ -115,7 +117,7 @@ function PhoneEdit({ mblTelno, onClose }) {
           중복확인
         </button>
       </div>
-      {hasError && <ErrorText>{MSG[status]}</ErrorText>}
+      {hasError && <FieldError>{MSG[status]}</FieldError>}
       {status === 'available' && <OkText>{MSG.available}</OkText>}
       <div className="flex justify-end gap-2">
         <button

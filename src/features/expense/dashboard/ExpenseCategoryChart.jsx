@@ -17,7 +17,7 @@ const buildGradient = (stats) => {
     const from = (acc / total) * 100;
     acc += stat.totalAmt;
     const to = (acc / total) * 100;
-    return `#fff ${from}% ${from + GAP}%, ${stat.color} ${from + GAP}% ${to}%`;
+    return `var(--color-white) ${from}% ${from + GAP}%, ${stat.color} ${from + GAP}% ${to}%`;
   });
   return `conic-gradient(${stops.join(', ')})`;
 };

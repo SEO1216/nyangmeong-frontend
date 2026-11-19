@@ -15,9 +15,9 @@ export default function BoardPagination({ page, totalPages, onChange }) {
     window.scrollTo(0, 0);
   };
   const buttonClass =
-    'flex size-9 items-center justify-center rounded-full text-base font-medium text-[#3d4a4b] max-[760px]:size-8';
+    'flex size-9 items-center justify-center rounded-full text-base font-medium text-ink-2 max-[760px]:size-8';
   /** hover 배경은 선택되지 않은 버튼에만: 선택된 쪽(진한 배경·흰 글자)에 겹치면 글자가 안 보인다 */
-  const hoverClass = 'hover:bg-[#e9f2f2]';
+  const hoverClass = 'hover:bg-brand-50';
 
   return (
     <nav
@@ -40,7 +40,7 @@ export default function BoardPagination({ page, totalPages, onChange }) {
           type="button"
           aria-current={number === page ? 'page' : undefined}
           onClick={() => selectPage(number)}
-          className={`${buttonClass} ${number === page ? 'bg-[#285a5c] font-bold text-white' : hoverClass}`}
+          className={`${buttonClass} ${number === page ? 'bg-brand-500 font-bold text-white' : hoverClass}`}
         >
           {number}
         </button>

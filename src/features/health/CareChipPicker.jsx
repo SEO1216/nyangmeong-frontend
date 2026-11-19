@@ -1,4 +1,5 @@
 import Icon from '@/components/Icon';
+import { CHIP, CHIP_ON } from '@/components/buttonStyles';
 import { CARE_ZONE, isLinkedCareItem } from './careDue';
 import { toCareIcon } from './careIcons';
 
@@ -7,17 +8,13 @@ const ZONES = [
   { cd: CARE_ZONE.DAILY, nm: '일상관리' },
 ];
 
-const CHIP_ON = 'border-brand-500 bg-brand-50 text-brand-600';
-const CHIP_OFF =
-  'border-line bg-white text-muted hover:border-line-strong hover:text-ink';
 const HINT_CLASS = 'text-sm text-subtle';
 
 /** 칩 식별값: 저장 전 새 항목은 chipKey, 나머지는 항목 번호 */
 const getChipKey = (item) => item.chipKey ?? item.careArtclSn;
 
-/** 수정 상태에서 고칠 수 없는 칩의 이유. 고칠 수 있으면 null (직접 만든 항목·기본 정기관리만 고침) */
+/** 수정 상태에서 누를 수 없는 칩의 이유. 누를 수 있으면 null (연동 항목은 눌러서 검진상세 이동 안내를 띄움) */
 const getLockReason = (item) => {
-  if (isLinkedCareItem(item)) return '처방·반복 예방에서 관리해요';
   if (item.bscArtclYn && item.careZoneCd !== CARE_ZONE.REGULAR)
     return '기본 일상관리는 고칠 내용이 없어요';
   return null;
@@ -27,7 +24,7 @@ const getLockReason = (item) => {
  * [케어 고르기 칩] (※신규 정책)
  * - 튜토리얼 3단계와 「케어 항목 관리」 모달 왼쪽이 같이 사용
  * - 처방·반복 예방 연동 항목은 켜진 상태로 고정 + 「항상 표시」 핀
- * - isEditMode(모달의 「수정」 상태): 칩을 눌러도 켜고 끄지 않고 onEdit. 고칠 수 없는 칩은 흐리게 + 이유
+ * - isEditMode(모달의 「수정」 상태): 칩을 눌러도 켜고 끄지 않고 onEdit. 고칠 수 없는 칩은 흐리게 + 이유. 연동 칩도 눌러 오른쪽에 검진상세 이동 안내를 띄움
  */
 export default function CareChipPicker({
   items,
@@ -103,15 +100,15 @@ function CareChip({ item, isOn, isEditing, isEditMode, onToggle, onEdit }) {
           aria-label={`${item.careArtclNm} 수정`}
           aria-description={lockReason ?? undefined}
           disabled={lockReason != null}
-          className={`inline-flex h-full min-w-0 items-center gap-1.5 rounded-full border px-3.5 disabled:pointer-events-none ${
-            isOn ? CHIP_ON : CHIP_OFF
-          } ${isEditing ? 'border-brand-500 ring-2 ring-brand-500' : ''}`}
+          className={`${isOn ? CHIP_ON : CHIP} h-full min-w-0 gap-1.5 disabled:pointer-events-none ${
+            isEditing ? 'ring-2 ring-brand-500 ring-offset-2' : ''
+          }`}
           onClick={() => onEdit(item)}
         >
           <Icon name={isOn ? 'check' : 'add'} className="text-lg" />
           <Icon name={toCareIcon(item.rprsIconId)} className="text-lg" />
           <span className="truncate">{item.careArtclNm}</span>
-          {isLinked && <Icon name="push_pin" className="text-lg text-subtle" />}
+          {isLinked && <Icon name="push_pin" className="text-lg" />}
         </button>
       </li>
     );
@@ -119,9 +116,7 @@ function CareChip({ item, isOn, isEditing, isEditMode, onToggle, onEdit }) {
 
   if (isLinked) {
     return (
-      <li
-        className={`inline-flex h-9 max-w-full items-center gap-1.5 rounded-full border px-3.5 ${CHIP_ON}`}
-      >
+      <li className={`${CHIP_ON} max-w-full gap-1.5`}>
         <Icon name="check" className="text-lg" />
         <Icon name={toCareIcon(item.rprsIconId)} className="text-lg" />
         <span className="truncate">{item.careArtclNm}</span>
@@ -131,16 +126,14 @@ function CareChip({ item, isOn, isEditing, isEditMode, onToggle, onEdit }) {
           aria-label="항상 표시"
           className="inline-flex shrink-0"
         >
-          <Icon name="push_pin" className="text-lg text-subtle" />
+          <Icon name="push_pin" className="text-lg" />
         </span>
       </li>
     );
   }
 
   return (
-    <li
-      className={`inline-flex h-9 max-w-full items-center rounded-full border ${isOn ? CHIP_ON : CHIP_OFF}`}
-    >
+    <li className={`${isOn ? CHIP_ON : CHIP} max-w-full px-0`}>
       <button
         type="button"
         aria-pressed={isOn}

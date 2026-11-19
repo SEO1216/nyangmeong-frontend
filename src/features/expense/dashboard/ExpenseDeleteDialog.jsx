@@ -43,7 +43,7 @@ export default function ExpenseDeleteDialog({ expense, onDeleted, onClose }) {
             disabled={deleteExpense.isPending}
             className={BTN_DANGER}
           >
-            삭제
+            삭제하기
           </button>
         </>
       }

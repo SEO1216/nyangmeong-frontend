@@ -3,7 +3,8 @@ import AuthCard from '../shared/AuthCard';
 import AuthField from '../shared/AuthField';
 import AuthHeading from '../shared/AuthHeading';
 import AuthNotice from '../shared/AuthNotice';
-import { OUTLINE_BTN, PRIMARY_BTN, TEXT_LINK } from '../shared/authStyles';
+import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import { TEXT_LINK } from '../shared/authStyles';
 import { PASSWORD_MESSAGES as MSG } from './passwordMessages';
 import usePasswordReset from './usePasswordReset';
 
@@ -29,9 +30,9 @@ export default function PasswordResetForm({
         <button
           type="button"
           onClick={onGoLogin}
-          className={`${PRIMARY_BTN} mt-8`}
+          className={`${BTN_PRIMARY} w-full mt-8`}
         >
-          로그인 화면으로
+          로그인으로
         </button>
       </AuthCard>
     );
@@ -46,10 +47,18 @@ export default function PasswordResetForm({
         />
         <AuthNotice type="error" message={MSG.needVerify} hasGuide />
         <div className="flex flex-col gap-3">
-          <button type="button" onClick={onRetryAuth} className={PRIMARY_BTN}>
+          <button
+            type="button"
+            onClick={onRetryAuth}
+            className={`${BTN_PRIMARY} w-full`}
+          >
             이메일 인증 다시 하기
           </button>
-          <button type="button" onClick={onGoLogin} className={OUTLINE_BTN}>
+          <button
+            type="button"
+            onClick={onGoLogin}
+            className={`${BTN_SECONDARY} w-full`}
+          >
             로그인으로
           </button>
         </div>
@@ -106,7 +115,7 @@ export default function PasswordResetForm({
         <button
           type="submit"
           disabled={!form.canSubmit || form.isPending}
-          className={`${PRIMARY_BTN} mt-3`}
+          className={`${BTN_PRIMARY} w-full mt-3`}
         >
           비밀번호 재설정
         </button>

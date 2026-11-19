@@ -53,19 +53,16 @@ function NotificationPanel({ unreadCount, onClose, onDismiss }) {
   };
 
   return (
-    <div className="absolute right-0 top-[61px] z-40 w-[380px] overflow-hidden rounded-[14px] border border-[#e2e7e7] bg-white shadow-lg max-[760px]:fixed max-[760px]:inset-x-3 max-[760px]:top-[72px] max-[760px]:w-auto">
+    <div className="absolute right-0 top-[61px] z-40 w-[380px] overflow-hidden rounded-card border border-line bg-white shadow-depth-md max-[760px]:fixed max-[760px]:inset-x-3 max-[760px]:top-[72px] max-[760px]:w-auto">
       <div className="flex items-center justify-between px-[18px] pb-2 pt-3.5">
-        <h2 className="text-base font-bold leading-[26px] text-[#1a3234]">
-          알림
-        </h2>
+        <h2 className="text-base font-bold leading-[26px] text-ink">알림</h2>
         <div className="flex items-center gap-1">
-          <p className="text-base font-medium leading-[26px] text-[#566465]">
-            미읽음{' '}
-            <span className="font-bold text-[#f44b21]">{unreadCount}</span>
+          <p className="text-base font-medium leading-[26px] text-muted">
+            미읽음 <span className="font-bold text-alert">{unreadCount}</span>
           </p>
           <button
             type="button"
-            className="ml-1 h-8 rounded-full px-2 text-sm font-semibold leading-[18px] tracking-[-0.03em] text-[#285a5c] hover:bg-[#f4f6f6] disabled:text-[#a3adae] disabled:hover:bg-transparent"
+            className="ml-1 h-8 rounded-full px-2 text-sm font-semibold leading-[18px] tracking-[-0.03em] text-brand-500 hover:bg-surface-2 disabled:text-line-strong disabled:hover:bg-transparent"
             disabled={unreadCount === 0 || readAll.isPending}
             onClick={() => readAll.mutate()}
           >
@@ -73,7 +70,7 @@ function NotificationPanel({ unreadCount, onClose, onDismiss }) {
           </button>
           <button
             type="button"
-            className="-my-[3px] -mr-2 flex h-8 w-8 items-center justify-center rounded-full text-[#566465] hover:bg-[#f4f6f6]"
+            className="-my-[3px] -mr-2 flex size-8 items-center justify-center rounded-full text-muted hover:bg-surface-2"
             aria-label="알림 닫기"
             onClick={onDismiss}
           >
@@ -81,7 +78,7 @@ function NotificationPanel({ unreadCount, onClose, onDismiss }) {
           </button>
         </div>
       </div>
-      <div className="flex gap-1.5 border-b border-[#edf1f1] px-[18px] pb-3">
+      <div className="flex gap-1.5 border-b border-line-soft px-[18px] pb-3">
         {NOTI_TABS.map((item) => (
           <button
             key={item.key}
@@ -89,8 +86,8 @@ function NotificationPanel({ unreadCount, onClose, onDismiss }) {
             aria-pressed={item.key === tab.key}
             className={`h-[30px] rounded-full border px-3 text-sm ${
               item.key === tab.key
-                ? 'border-[#285a5c] bg-[#285a5c] text-white'
-                : 'border-[#e2e7e7] bg-white text-[#3d4a4b] hover:bg-[#f4f6f6]'
+                ? 'border-brand-500 bg-brand-500 text-white'
+                : 'border-line bg-white text-ink-2 hover:bg-surface-2'
             }`}
             onClick={() => setTab(item)}
           >
@@ -105,7 +102,7 @@ function NotificationPanel({ unreadCount, onClose, onDismiss }) {
             {Array.from({ length: 5 }, (_, index) => (
               <div
                 key={index}
-                className="border-b border-[#edf1f1] px-[18px] py-4 last:border-b-0"
+                className="border-b border-line-soft px-[18px] py-4 last:border-b-0"
               >
                 <Skeleton className="my-[5px] h-4 w-4/5" />
               </div>
@@ -113,7 +110,7 @@ function NotificationPanel({ unreadCount, onClose, onDismiss }) {
           </div>
         )}
         {data?.length === 0 && (
-          <p className="flex h-full items-center justify-center px-[18px] text-base text-[#667374]">
+          <p className="flex h-full items-center justify-center px-[18px] text-base text-subtle">
             새 알림이 없어요
           </p>
         )}
@@ -175,7 +172,7 @@ export default function NotificationDropdown({
       <button
         ref={buttonRef}
         type="button"
-        className={`${buttonClassName} ${isOpen ? 'bg-[#ebf0f0]' : ''}`}
+        className={`${buttonClassName} ${isOpen ? 'bg-surface-3' : ''}`}
         aria-label="알림"
         aria-expanded={isOpen}
         onClick={onToggle}

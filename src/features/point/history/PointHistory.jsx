@@ -1,5 +1,7 @@
 import { ChevronDown, Receipt } from 'lucide-react';
 import { useState } from 'react';
+import EmptyResult from '@/components/EmptyResult';
+import LoadError from '@/components/LoadError';
 import MonthNav from '@/components/MonthNav';
 import SkeletonCard from '@/components/SkeletonCard';
 import { formatYm, getCurrentYm, shiftYm } from '@/utils/yearMonth';
@@ -26,7 +28,7 @@ export default function PointHistory() {
   const maxYm = getCurrentYm();
   const [ym, setYm] = useState(maxYm);
   const [isOpen, setIsOpen] = useState(false);
-  const { data, isPending } = usePointHistory(ym);
+  const { data, isPending, isError, refetch } = usePointHistory(ym);
 
   const moveYm = (step) => {
     setYm(shiftYm(ym, step));
@@ -36,8 +38,16 @@ export default function PointHistory() {
   if (isPending)
     return (
       <div aria-busy="true">
-        <SkeletonCard className="h-[476px] lg:h-[839px]" />
+        <SkeletonCard className="h-[476px] min-[1100px]:h-[839px]" />
       </div>
+    );
+  if (isError && !data)
+    return (
+      <LoadError
+        message="포인트 내역을 불러오지 못했어요"
+        onRetry={refetch}
+        className="rounded-card border border-line bg-white py-16"
+      />
     );
   if (!data) return null;
 
@@ -83,8 +93,8 @@ export default function PointHistory() {
         className="min-h-80 flex-1 basis-0 overflow-y-auto px-6 pt-1 max-[760px]:h-auto max-[760px]:min-h-0 max-[760px]:flex-none max-[760px]:overflow-visible"
       >
         {data.length === 0 && (
-          <li className="py-10 text-center text-subtle">
-            이 달의 내역이 없어요
+          <li className="py-5">
+            <EmptyResult title="이 달의 내역이 없어요" isCompact />
           </li>
         )}
         {data.map((item, index) => {

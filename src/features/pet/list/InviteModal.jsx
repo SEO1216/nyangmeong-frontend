@@ -1,6 +1,9 @@
-import { CircleAlert } from 'lucide-react';
 import { useState } from 'react';
+import Checkbox from '@/components/Checkbox';
+import FieldError from '@/components/FieldError';
 import Modal from '@/components/Modal';
+import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import { INPUT, LABEL } from '@/components/formStyles';
 import { showToast } from '@/components/toastStore';
 import { getYmdOf } from '@/utils/formatDate';
 import { useCaregiversOf, useCreateInvitation } from '../queries';
@@ -14,10 +17,6 @@ import { BRUP_ROLE, MAX_CAREGIVERS } from '@/utils/petCodes';
  */
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const INPUT =
-  'block h-10 w-full min-w-0 rounded-md border border-input-line bg-white px-3 placeholder:text-placeholder hover:border-line-strong focus:border-brand-500 focus:ring-focus focus:outline-none aria-invalid:border-danger aria-invalid:focus:ring-error';
-const LABEL = 'leading-[1.4] font-semibold';
 
 /** 'YYYY-MM-DDTHH:mm:ss' → 'MM-DD' */
 const toMonthDay = (dateTime) => getYmdOf(dateTime).slice(5);
@@ -157,7 +156,7 @@ export default function InviteModal({ pets, initialPetSn, onClose }) {
           <button
             type="button"
             onClick={close}
-            className="inline-flex h-10 min-w-24 items-center justify-center rounded-md border border-line bg-white px-4 font-semibold hover:border-line-strong hover:bg-surface-2"
+            className={`${BTN_SECONDARY} min-w-24`}
           >
             취소
           </button>
@@ -165,7 +164,7 @@ export default function InviteModal({ pets, initialPetSn, onClose }) {
             type="submit"
             form="invite-form"
             disabled={!canSend}
-            className="inline-flex h-10 min-w-24 items-center justify-center rounded-md bg-brand-500 px-4 font-semibold text-white hover:enabled:bg-brand-600 disabled:cursor-not-allowed disabled:bg-surface-3 disabled:text-line-strong"
+            className={`${BTN_PRIMARY} min-w-24`}
           >
             초대 보내기
           </button>
@@ -197,25 +196,17 @@ export default function InviteModal({ pets, initialPetSn, onClose }) {
                 ? 'invite-email-h invite-email-e'
                 : 'invite-email-h'
             }
-            className={INPUT}
+            className={`${INPUT} min-w-0`}
           />
           <p id="invite-email-h" className="text-sm text-subtle">
             가입한 회원에게는 알림으로, 아직 가입하지 않았다면 이메일로 초대가
             가요
           </p>
-          {(isEmailInvalid || serverEmailError) && (
-            <p
-              id="invite-email-e"
-              className="flex items-center gap-1 text-sm text-danger"
-            >
-              <CircleAlert className="size-4 shrink-0" />
-              <span>
-                {isEmailInvalid
-                  ? '이메일 형식이 올바르지 않아요'
-                  : serverEmailError}
-              </span>
-            </p>
-          )}
+          <FieldError id="invite-email-e">
+            {isEmailInvalid
+              ? '이메일 형식이 올바르지 않아요'
+              : serverEmailError}
+          </FieldError>
         </div>
 
         <fieldset className="m-0 flex min-w-0 flex-col gap-1.5 border-0 p-0">
@@ -228,23 +219,19 @@ export default function InviteModal({ pets, initialPetSn, onClose }) {
                 count == null || isFull(pet.petSn) || conflictLabel != null;
               const checked = !disabled && selectedPetSns.includes(pet.petSn);
               return (
-                <label
+                <Checkbox
                   key={pet.petSn}
-                  className={`flex min-h-12 items-center gap-3 border-t border-line-soft px-4 first:border-t-0 ${
+                  checked={checked}
+                  disabled={disabled}
+                  onChange={() => handleTogglePet(pet.petSn)}
+                  className={`min-h-12 border-t border-line-soft px-4 first:border-t-0 ${
                     disabled
-                      ? 'cursor-not-allowed bg-surface-2 text-subtle'
+                      ? 'bg-surface-2 text-subtle'
                       : checked
-                        ? 'cursor-pointer bg-brand-50'
-                        : 'cursor-pointer'
+                        ? 'bg-brand-50'
+                        : ''
                   }`}
                 >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    disabled={disabled}
-                    onChange={() => handleTogglePet(pet.petSn)}
-                    className="size-5 cursor-pointer accent-brand-500 disabled:cursor-not-allowed"
-                  />
                   {pet.petNm}
                   {count != null && (
                     <span className="ml-auto text-sm text-subtle">
@@ -253,20 +240,13 @@ export default function InviteModal({ pets, initialPetSn, onClose }) {
                       {conflictLabel && ` · ${conflictLabel}`}
                     </span>
                   )}
-                </label>
+                </Checkbox>
               );
             })}
           </div>
           {conflict &&
             conflictMessages(conflict).map((message) => (
-              <p
-                key={message}
-                role="alert"
-                className="flex items-center gap-1 text-sm text-danger"
-              >
-                <CircleAlert className="size-4 shrink-0" />
-                <span>{message}</span>
-              </p>
+              <FieldError key={message}>{message}</FieldError>
             ))}
         </fieldset>
       </form>

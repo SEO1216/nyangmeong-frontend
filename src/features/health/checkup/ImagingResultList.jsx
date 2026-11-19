@@ -5,21 +5,25 @@ import Modal from '@/components/Modal';
 import { BTN_SECONDARY } from '@/components/buttonStyles';
 import { useFileImage } from '@/hooks/useFileImage';
 import { healthKeys } from '../queries';
+import AttachmentModal from './AttachmentModal';
 import { ROW_LINE, TEXT_BTN } from './checkupStyles';
-import { IMAGING_KINDS, IMAGING_PARTS, findName } from './checkupTypes';
+import {
+  ATTACHMENT_IMAGE,
+  IMAGING_KINDS,
+  IMAGING_PARTS,
+  findName,
+} from './checkupTypes';
 
 /**
  * [영상검사 목록]
  * - 첨부 자료 중 "영상 사진" 유형만 영상 종류·촬영 부위·썸네일로 보여 주는 조회 영역 (FN-HLT-005-02)
- * - 썸네일 클릭 → 원본 미리보기, 등록·교체·삭제는 첨부 자료 탭에서
+ * - 썸네일 클릭 → 원본 미리보기, 교체·삭제는 첨부 자료 탭에서
+ * - [첨부 자료 추가하기] → 파일 유형이 "영상 사진"으로 골라진 첨부 추가 모달
  * - 비공개 파일이라 첨부 파일 API를 blob으로 받아 그린다
  */
-export default function ImagingResultList({
-  petSn,
-  attachments,
-  onGoAttachments,
-}) {
+export default function ImagingResultList({ petSn, ckupRcdSn, attachments }) {
   const [previewAttachment, setPreviewAttachment] = useState(null);
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
   return (
     <div>
@@ -58,11 +62,20 @@ export default function ImagingResultList({
       <button
         type="button"
         className={`${TEXT_BTN} mt-4`}
-        onClick={onGoAttachments}
+        onClick={() => setIsAddOpen(true)}
       >
-        첨부 자료 탭에서 추가하기
+        첨부 자료 추가하기
         <Icon name="chevron_right" className="text-lg" />
       </button>
+
+      {isAddOpen && (
+        <AttachmentModal
+          petSn={petSn}
+          ckupRcdSn={ckupRcdSn}
+          initialType={ATTACHMENT_IMAGE}
+          onClose={() => setIsAddOpen(false)}
+        />
+      )}
 
       {previewAttachment && (
         <Modal

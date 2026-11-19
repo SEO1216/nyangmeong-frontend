@@ -5,7 +5,7 @@ import { BTN_PRIMARY } from '@/components/buttonStyles';
 import Select from '@/components/Select';
 
 const INPUT_CLASS =
-  'block h-10 w-full rounded-[6px] border border-[#d3dae2] bg-white px-3 text-base leading-[1.4] text-[#1a3234] outline-none hover:border-[#b9c4c4] focus:border-[#285a5c] focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)]';
+  'block h-10 w-full rounded-[6px] border border-input-line bg-white px-3 text-base leading-[1.4] text-ink outline-none hover:border-line-strong focus:border-brand-500 focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)]';
 
 /** 공통코드를 셀렉트 항목으로, 첫 항목은 전체 */
 const toOptions = (codes = []) => [
@@ -68,7 +68,7 @@ export default function PointLedgerFilter({
             aria-label="회원 닉네임"
             placeholder="회원 닉네임"
             value={draft.mbrNcnm}
-            className={`${INPUT_CLASS} min-[761px]:w-48`}
+            className={`${INPUT_CLASS} min-[760px]:w-48`}
             onChange={(event) => setField('mbrNcnm', event.target.value)}
           />
         )}
@@ -85,14 +85,14 @@ export default function PointLedgerFilter({
             label="기간 시작일"
             value={draft.fromDt}
             onChange={(value) => setField('fromDt', value)}
-            className="min-[761px]:w-40"
+            className="min-[760px]:w-40"
           />
           <span className="text-subtle">~</span>
           <DatePicker
             label="기간 종료일"
             value={draft.toDt}
             onChange={(value) => setField('toDt', value)}
-            className="min-[761px]:w-40"
+            className="min-[760px]:w-40"
           />
         </div>
         <button type="submit" className={`${BTN_PRIMARY} max-[760px]:w-full`}>

@@ -4,18 +4,18 @@ import { CATEGORIES } from './placeData';
 // indicator는 고른 탭 밑에 깔리는 배경이다. 탭을 바꾸면 이전 탭에서 새 탭으로 미끄러져 간다
 const STYLES = {
   rail: {
-    button: 'w-[54px] flex-col gap-1 rounded-card py-2.5 text-sm lg:w-[60px]',
+    button: 'w-[54px] flex-col gap-1 rounded-card py-3 text-sm min-[1100px]:w-[60px]',
     icon: 'size-6',
     indicator: 'rounded-card bg-brand-50',
     pressed: 'font-bold text-brand-600',
     normal: 'font-medium text-muted hover:bg-surface-2 hover:text-ink',
   },
   chips: {
-    button: 'h-9 shrink-0 flex-row gap-1 rounded-full px-3.5 text-sm shadow-sm',
+    button: 'h-9 shrink-0 flex-row gap-1 rounded-full border px-3.5 text-sm whitespace-nowrap',
     icon: 'size-[18px]',
     indicator: 'rounded-full bg-brand-500',
-    pressed: 'font-semibold text-white',
-    normal: 'bg-white font-medium text-muted',
+    pressed: 'border-transparent font-semibold text-white',
+    normal: 'border-line bg-white text-ink hover:bg-surface-2',
   },
 };
 

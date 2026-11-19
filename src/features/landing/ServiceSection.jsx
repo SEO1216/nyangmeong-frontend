@@ -18,16 +18,16 @@ export default function ServiceSection() {
     <section
       id="service"
       ref={sectionRef}
-      className="relative w-full scroll-mt-20 overflow-hidden bg-white"
+      className="relative flex min-h-[calc(100dvh-5rem)] w-full scroll-mt-20 flex-col overflow-hidden bg-white"
     >
-      <div className="flex min-h-[700px] w-full flex-col lg:h-[800px] lg:flex-row">
+      <div className="flex min-h-[700px] w-full flex-1 flex-col lg:min-h-[800px] lg:flex-row">
         <div className="relative z-30 flex w-full justify-start bg-white pt-24 pb-20 lg:w-[45%] lg:items-center lg:justify-end lg:py-0 xl:w-[42%]">
           <div className="flex w-full max-w-[540px] flex-col items-start bg-white px-6 text-left lg:px-0 lg:pr-20">
             <FadeIn delay={100} className="mb-10">
               <h2 className="text-[28px] leading-tight font-semibold break-keep text-black md:text-[38px] lg:text-[40px] xl:text-[48px]">
                 건강기록과 AI 비서
                 <br />
-                냥멍케어 서비스
+                pawever 서비스
               </h2>
             </FadeIn>
 
@@ -54,7 +54,7 @@ export default function ServiceSection() {
                 }
                 className="rounded-[50px] bg-brand-600 px-10 py-4 text-[14px] font-medium text-white transition-[background-color,transform] duration-300 hover:scale-[0.96] hover:bg-brand-900 active:scale-100 md:px-12 md:py-5 md:text-[20px]"
               >
-                냥멍케어 자세히 알아보기
+                pawever 자세히 알아보기
               </button>
             </FadeIn>
           </div>
@@ -64,7 +64,7 @@ export default function ServiceSection() {
           <div className="pointer-events-none absolute top-0 left-0 z-20 h-full w-16 bg-linear-to-r from-white to-transparent lg:w-40" />
           <div className="relative w-full">
             <ul
-              aria-label="냥멍케어 서비스"
+              aria-label="pawever 서비스"
               className="flex w-max animate-[landing-marquee_65s_linear_infinite] gap-6 pt-10 pb-32 motion-reduce:animate-none lg:gap-8 lg:pt-40"
               style={{ animationPlayState: isInView ? 'running' : 'paused' }}
             >

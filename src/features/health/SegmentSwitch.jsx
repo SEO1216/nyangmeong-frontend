@@ -12,7 +12,7 @@ export default function SegmentSwitch({
 }) {
   return (
     <div
-      className={`flex h-10 rounded-[6px] border border-[#e6eaeb] bg-[#f1f3f4] p-[3px] ${className}`}
+      className={`flex h-10 rounded-[6px] border border-line bg-surface-3 p-1 ${className}`}
     >
       {options.map((option) => {
         const isSelected = selected === option.cd;
@@ -24,8 +24,8 @@ export default function SegmentSwitch({
             disabled={isLocked}
             className={`flex flex-1 items-center justify-center rounded-[4px] whitespace-nowrap ${
               isSelected
-                ? 'bg-white font-semibold text-[#1e4a4c] shadow-[0_1px_2px_rgba(26,50,52,0.08),0_0_0_1px_rgba(40,90,92,0.18)]'
-                : 'font-medium text-[#566465] hover:text-[#1a3234]'
+                ? 'bg-white font-semibold text-brand-600 shadow-[0_1px_2px_rgba(26,50,52,0.08),0_0_0_1px_rgba(40,90,92,0.18)]'
+                : 'font-medium text-muted hover:text-ink'
             }`}
             onClick={() => onSelect(option.cd)}
           >

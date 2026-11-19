@@ -16,19 +16,19 @@ export default function NoticeDetail({ notice }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <article className="rounded-[14px] border border-[#e2e7e7] bg-white px-9 pt-8 pb-10 max-[760px]:px-5 max-[760px]:pt-6 max-[760px]:pb-8">
-        <h2 className="text-2xl leading-[1.35] font-bold tracking-[-0.24px] text-[#1a3234] max-[760px]:text-xl">
+      <article className="rounded-[14px] border border-line bg-white px-9 pt-8 pb-10 max-[760px]:px-5 max-[760px]:pt-6 max-[760px]:pb-8">
+        <h2 className="text-2xl leading-[1.35] font-bold tracking-[-0.01em] text-ink max-[760px]:text-lg">
           {notice.ntcMttrTtl}
         </h2>
-        <div className="mt-4 flex flex-wrap items-center gap-2 border-b border-[#e2e7e7] pb-6">
-          <span className="flex size-8 items-center justify-center rounded-full bg-[#e9f2f2] text-[#285a5c]">
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-b border-line pb-6">
+          <span className="flex size-8 items-center justify-center rounded-full bg-brand-50 text-brand-500">
             <Megaphone size={18} />
           </span>
-          <b className="text-base leading-normal font-medium text-[#1a3234]">
+          <b className="text-base leading-normal font-medium text-ink">
             관리자
           </b>
-          <i className="text-sm text-[#b9c4c4] not-italic">·</i>
-          <time className="text-sm text-[#667374]">
+          <i className="text-sm text-line-strong not-italic">·</i>
+          <time className="text-sm text-subtle">
             {formatDate(notice.regDt)}
           </time>
         </div>
@@ -36,26 +36,27 @@ export default function NoticeDetail({ notice }) {
         <PostBody content={notice.ntcMttrCn} fileImages />
       </article>
 
-      <section className="rounded-[14px] border border-[#e2e7e7] bg-white px-9 py-8 max-[760px]:px-5 max-[760px]:py-6">
-        <h3 className="text-lg leading-[1.4] font-bold tracking-[-0.18px] text-[#1a3234]">
+      {/** 최신 목록은 박스 없이 목록만(펫뉴스 상세의 최신 기사와 같은 모양) */}
+      <section className="mt-4">
+        <h3 className="pb-3 text-lg leading-[1.4] font-bold tracking-[-0.01em] text-ink">
           최신 공지
         </h3>
-        <ul className="mt-5">
+        <ul>
           {latest?.content.map((item) => (
             <li
               key={item.ntcMttrSn}
-              className="border-t border-[#e2e7e7] py-[13px] first:border-t-0 first:pt-0 last:pb-0"
+              className="border-t border-line first:border-t-0"
             >
               <Link
                 to={generatePath(PATHS.NOTICE_DETAIL, {
                   ntcMttrSn: item.ntcMttrSn,
                 })}
-                className="flex items-center justify-between gap-4"
+                className="group flex items-center justify-between gap-4 py-3"
               >
-                <span className="truncate text-base leading-[1.6] text-[#3d4a4b]">
+                <span className="truncate text-base leading-[1.6] text-ink-2 group-hover:text-brand-500">
                   {item.ntcMttrTtl}
                 </span>
-                <span className="shrink-0 text-sm text-[#667374]">
+                <span className="shrink-0 text-sm text-subtle">
                   {formatDate(item.regDt)}
                 </span>
               </Link>

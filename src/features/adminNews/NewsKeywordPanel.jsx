@@ -9,7 +9,7 @@ import {
 } from './queries';
 
 const INPUT_CLASS =
-  'block h-10 min-w-0 flex-1 rounded-[6px] border border-[#d3dae2] bg-white px-3 text-base leading-[1.4] text-[#1a3234] outline-none hover:border-[#b9c4c4] focus:border-[#285a5c] focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)] aria-invalid:border-danger';
+  'block h-10 min-w-0 flex-1 rounded-[6px] border border-input-line bg-white px-3 text-base leading-[1.4] text-ink outline-none hover:border-line-strong focus:border-brand-500 focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)] aria-invalid:border-danger';
 
 /** 키워드 최대 글자 수 */
 const MAX_KWRD_LENGTH = 50;
@@ -122,7 +122,7 @@ function KeywordCategoryCard({ category, keywords }) {
             className={`${BTN_PRIMARY} shrink-0`}
             disabled={create.isPending}
           >
-            추가
+            등록하기
           </button>
         </div>
         {inputError && (
@@ -147,7 +147,7 @@ export default function NewsKeywordPanel({ keywords }) {
         수집한 기사 제목에 키워드가 있으면 그 카테고리로 분류해요. 여러 개면
         정렬 순서가 앞선 키워드를, 없으면 생활을 따라요.
       </p>
-      <div className="grid gap-4 min-[761px]:grid-cols-2">
+      <div className="grid gap-4 min-[760px]:grid-cols-2">
         {NEWS_CATEGORIES.map((category) => (
           <KeywordCategoryCard
             key={category.code}

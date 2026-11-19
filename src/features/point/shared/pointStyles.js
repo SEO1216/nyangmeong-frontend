@@ -1,9 +1,9 @@
 export const CARD =
   'min-w-0 rounded-card border border-line bg-white shadow-depth-sm';
 export const CARD_HEAD =
-  'flex flex-wrap items-center justify-between gap-3 border-b border-line-soft px-[22px] py-[18px]';
+  'flex flex-wrap items-center justify-between gap-3 border-b border-line-soft px-6 py-5';
 export const CARD_TITLE =
-  'flex items-center gap-2 text-lg font-bold tracking-[-0.01em]';
+  'flex items-center gap-2 text-lg font-semibold tracking-[-0.01em]';
 
 /** ◀ ▶ 이동 버튼 */
 export const NAV_BUTTON =

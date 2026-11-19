@@ -28,7 +28,7 @@ export default function AuthNotice({ type, message, hasGuide }) {
   return (
     <div
       role="alert"
-      className={`relative mb-6 flex flex-wrap gap-2.5 rounded-box px-4 py-3.5 leading-6 text-ink-2 transition-[opacity,translate] duration-300 ease-out starting:translate-y-1 starting:opacity-0 motion-reduce:transition-none ${style.box}`}
+      className={`relative mb-6 flex flex-wrap gap-2.5 rounded-box px-4 py-3 text-sm leading-[1.6] text-ink-2 transition-[opacity,translate] duration-300 ease-out starting:translate-y-1 starting:opacity-0 motion-reduce:transition-none ${style.box}`}
     >
       <Icon className={`mt-0.5 size-5 shrink-0 ${style.icon}`} />
       <span className="min-w-0 flex-1">{message}</span>

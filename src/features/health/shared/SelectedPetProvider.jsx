@@ -15,7 +15,7 @@ export default function SelectedPetProvider({ mbrSn, children }) {
   const navigate = useNavigate();
   const { pathname, hash } = useLocation();
   const [searchParams] = useSearchParams();
-  const { data: pets, isPending, isError } = useMyPets();
+  const { data: pets, isPending, isError, refetch } = useMyPets();
   /** 화면 안에서 직접 고른 아이 */
   const [chosenSn, setChosenSn] = useState(null);
   /** 주소로 들어온 아이. 처음 한 번만 읽는다 */
@@ -58,6 +58,7 @@ export default function SelectedPetProvider({ mbrSn, children }) {
         selectPet: setChosenSn,
         isPending,
         isError,
+        refetch,
       }}
     >
       {children}

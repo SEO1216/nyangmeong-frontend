@@ -1,6 +1,7 @@
 import { useId, useState } from 'react';
 import { ChevronRight, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import LoadError from '@/components/LoadError';
 import { BTN_SECONDARY } from '@/components/buttonStyles';
 import Card from '@/components/Card';
 import Icon from '@/components/Icon';
@@ -9,17 +10,17 @@ import { formatDate } from '@/utils/formatDate';
 import { pickJosa } from '@/utils/josa';
 import { useHealthReport, useRefreshHealthReport } from '../queries';
 import { CardTitle } from '../summary/SummaryParts';
-import { getMoveState } from './widgetItems';
+import { getMovePath, getMoveState } from './widgetItems';
 
 /** 빈 상태 문구가 길면 작은 글자 */
 const LONG_EMPTY_TEXT = 12;
 
 /**
  * [대시보드 카드 한 장] (※신규 정책)
- * - content가 null이면 빈 상태: 프로토타입 원문 문구 + 링크([더보기]와 다른 곳으로 갈 때만)
- * - 오른쪽 위 [더보기]만 이동 링크. 카드 빈 곳을 눌러도 이동하지 않음(사람 결정 2026-11-08)
- * - content.moveTo가 있으면 item.moveTo 대신 그 주소로(처방·투약)
- * - item.titleNote가 있으면 제목 바로 오른쪽에 작은 회색 글자(케어리스트 「보기 전용」)
+ * - content가 null이면 빈 상태: 프로토타입 원문 문구
+ * - 오른쪽 위 이동 링크(item.moveText, 「기록하기 ›」·「검진 기록 보기 ›」 등). 카드 빈 곳을 눌러도 이동하지 않음(사람 결정 2026-11-08)
+ * - 가는 곳은 getMovePath: content.moveTo(처방·투약) → item.moveTo(함수면 petSn으로 만듦, 알레르기·기저질환 「수정하기 ›」)
+ * - 매일 기록 5개(item.typeCd)의 「기록하기 ›」는 건강 일지 「오늘 기록하기」 모달을 그 항목으로 엶 (※신규 정책)
  */
 export default function DashboardCard({
   item,
@@ -31,57 +32,48 @@ export default function DashboardCard({
   return (
     <Card
       as="h3"
-      title={
-        <CardTitle icon={item.icon}>
-          {item.nm}
-          {item.titleNote && (
-            <span className="text-sm font-normal text-subtle">
-              {item.titleNote}
-            </span>
-          )}
-        </CardTitle>
-      }
+      title={<CardTitle icon={item.icon}>{item.nm}</CardTitle>}
       action={
         <Link
-          to={content?.moveTo ?? item.moveTo}
-          state={getMoveState(item, petSn)}
-          aria-label={`${petNm}의 ${item.nm} 기록 화면으로 이동`}
+          to={getMovePath(item, content, petSn)}
+          state={getMoveState(item)}
+          aria-label={`${petNm}의 ${item.nm} ${item.moveText}`}
           className="inline-flex shrink-0 items-center rounded-sm text-sm font-semibold whitespace-nowrap text-brand-600 hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
         >
-          더보기
+          {item.moveText}
           <ChevronRight className="size-4.5" aria-hidden="true" />
         </Link>
       }
-      className={`min-h-[260px] ${className}`}
+      className={`h-[300px] ${className}`}
       bodyClassName="flex flex-col"
     >
       {content ? (
         <>
-          {content.period && (
-            <p className="mb-3 text-sm text-subtle">{content.period}</p>
-          )}
+          {content.period &&
+            (content.periodAside ? (
+              <div className="mb-3 flex items-end justify-between gap-2">
+                <p className="text-sm whitespace-nowrap text-subtle">
+                  {content.period}
+                </p>
+                {content.periodAside}
+              </div>
+            ) : (
+              <p className="mb-3 text-sm text-subtle">{content.period}</p>
+            ))}
           <div className="flex grow flex-col">{content.body}</div>
         </>
       ) : (
-        /** 빈 상태 글자·링크 묶음은 본문 가로·세로 가운데, 줄바꿈돼도 줄마다 가운데(추가-2) */
+        /** 빈 상태 글자는 본문 가로·세로 가운데, 줄바꿈돼도 줄마다 가운데(추가-2) */
         <div className="flex grow flex-col items-center justify-center gap-2 text-center">
           <p
             className={
               item.emptyText.length > LONG_EMPTY_TEXT
                 ? 'leading-[1.6] font-semibold text-ink-2'
-                : 'text-[22px] leading-tight font-bold text-ink'
+                : 'text-2xl leading-tight font-bold text-ink'
             }
           >
             {item.emptyText}
           </p>
-          {item.linkText && (
-            <Link
-              to={item.to}
-              className="text-sm font-semibold text-brand-600 underline underline-offset-3"
-            >
-              {item.linkText}
-            </Link>
-          )}
         </div>
       )}
     </Card>
@@ -101,8 +93,8 @@ const toCreatedAt = (crtDt) =>
 
 /**
  * [AI 건강분석 리포트] 항상 맨 앞(D9)
- * - 640px 이상 격자 한 줄 전체 폭 띠(왼쪽 메인 색 세로 막대), 640px 미만 두 칸 폭 한 줄 띠(핀 없음) (※신규 정책)
- * - 내용은 AI 계약(ai docs/api/healthreport.md): 제목 줄 · 팁 1~3개(" · "로 이어 한 줄) · 고정 안내 · 만든 시각
+ * - 760px 이상 격자 한 줄 전체 폭 띠(민트 배경 띠, 팁마다 세로 막대), 760px 미만 두 칸 폭 한 줄 띠(민트 배경, 핀 없음) (※신규 정책)
+ * - 내용은 AI 계약(ai docs/api/healthreport.md): 제목 줄 · 팁 1~3개(팁마다 앞에 세로 막대, 한 줄에 이어 놓고 넘치면 줄바꿈). 760px 이상은 제목·팁을 흰 상자 하나에 · 고정 안내 · 만든 시각
  * - 고정 안내(notice)는 ⓘ에 마우스를 올리거나 ⓘ를 누르면 보임
  * - 14일 기록이 없으면(dataLackYn) 제목 줄 없이 고정 안내 팁만
  * - [새로고침]은 하루 1회(rfrshPsblYn). 못 하면(rfrshPsblYn false·409) 버튼 대신 안내 문구, 실패 문구는 띠 안에
@@ -121,12 +113,8 @@ export function AiReportCard({ pet }) {
       <AiReportBand pet={pet} report={report} />
       <section
         aria-labelledby="hlt011-ai-report"
-        className="relative col-span-full flex min-w-0 flex-col gap-2 rounded-card border border-line bg-white py-4 pr-5 pl-7 max-sm:hidden"
+        className="relative col-span-full flex min-w-0 flex-col gap-2 rounded-card border border-brand-50 bg-brand-50 px-5 py-4 max-[760px]:hidden"
       >
-        <span
-          aria-hidden="true"
-          className="absolute inset-y-0 left-0 w-1.5 rounded-l-card bg-brand-500"
-        />
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
           <div className="flex min-w-0 items-center gap-2">
             <h3 id="hlt011-ai-report" className="text-lg font-bold text-ink">
@@ -146,7 +134,7 @@ export function AiReportCard({ pet }) {
             {data &&
               (isRefreshBlocked ? (
                 <span className="whitespace-nowrap text-subtle">
-                  새로고침은 내일 돼요
+                  내일 다시 새로고침할 수 있어요
                 </span>
               ) : (
                 <button
@@ -222,7 +210,7 @@ function NoticeInfo({ notice }) {
   );
 }
 
-/** 640px 이상 띠 본문: 불러오는 중 · 실패 · 데이터 부족 · 리포트 */
+/** 760px 이상 띠 본문: 불러오는 중 · 실패 · 데이터 부족 · 리포트 */
 function AiReportBody({ pet, report, isRefreshing }) {
   if (report.isPending || isRefreshing) {
     return (
@@ -235,18 +223,11 @@ function AiReportBody({ pet, report, isRefreshing }) {
 
   if (report.isError) {
     return (
-      <div className="flex flex-wrap items-center gap-3">
-        <p role="alert" className="leading-[1.6] font-semibold text-ink-2">
-          {report.error.message}
-        </p>
-        <button
-          type="button"
-          onClick={() => report.refetch()}
-          className={BTN_SECONDARY}
-        >
-          다시 시도
-        </button>
-      </div>
+      <LoadError
+        message={report.error.message}
+        onRetry={() => report.refetch()}
+        className="py-2"
+      />
     );
   }
 
@@ -254,12 +235,25 @@ function AiReportBody({ pet, report, isRefreshing }) {
 
   return (
     <div className="flex flex-col gap-1">
-      {!dataLackYn && (
-        <p className="text-xl leading-tight font-bold text-ink">
-          {toReportTitle(pet.petNm, rptTtl)}
-        </p>
-      )}
-      <p className="leading-[1.6] text-ink-2">{tips.join(' · ')}</p>
+      {/** 리포트 제목·팁은 흰 상자 하나에: 카드 제목(h3)과 크기·굵기를 달리해 구별 */}
+      <div className="flex flex-col gap-1 rounded-box bg-white px-4 py-3">
+        {!dataLackYn && (
+          <p className="text-base font-semibold text-ink">
+            {toReportTitle(pet.petNm, rptTtl)}
+          </p>
+        )}
+        <ul className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-ink-2">
+          {tips.map((tip, index) => (
+            <li key={index} className="inline-flex items-center gap-1.5">
+              <span
+                aria-hidden="true"
+                className="h-3.5 w-1 shrink-0 rounded-full bg-brand-500"
+              />
+              {tip}
+            </li>
+          ))}
+        </ul>
+      </div>
       {staleYn && (
         <p className="text-sm text-muted">최근 기록이 아직 반영되지 않았어요</p>
       )}
@@ -267,7 +261,7 @@ function AiReportBody({ pet, report, isRefreshing }) {
   );
 }
 
-/** 640px 미만 AI 건강분석 리포트 띠: 제목 줄 한 줄(말줄임) */
+/** 760px 미만 AI 건강분석 리포트 띠: 제목 줄 한 줄(말줄임) */
 function AiReportBand({ pet, report }) {
   const data = report.data;
   let text = '건강 코멘트를 준비하고 있어요';
@@ -283,7 +277,7 @@ function AiReportBand({ pet, report }) {
     <section
       aria-labelledby="hlt011-ai-band"
       aria-busy={report.isPending}
-      className="col-span-2 flex items-center gap-3 rounded-card border border-line bg-white px-4 py-3 sm:hidden"
+      className="col-span-2 flex items-center gap-3 rounded-card border border-brand-50 bg-brand-50 px-4 py-3 min-[760px]:hidden"
     >
       <Icon name="auto_awesome" className="shrink-0 text-brand-500" />
       <div className="min-w-0 grow">

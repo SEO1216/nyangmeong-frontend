@@ -1,4 +1,5 @@
 import Card from '@/components/Card';
+import EmptyResult from '@/components/EmptyResult';
 import Icon from '@/components/Icon';
 import {
   WEEKDAYS,
@@ -19,8 +20,12 @@ const MAX_UPCOMING = 3;
 const formatShortDay = (ymd) =>
   `${formatMonthDayDot(ymd)} ${WEEKDAYS[getWeekdayIndex(ymd)]}`;
 
-// 다가오는 케어 일정 카드(FN-HLT-003-40). 캘린더에 등록한 일정만 쓰고 케어리스트 정기관리 예정일은 넣지 않는다
-// className은 오른쪽 열에서 이 카드를 내용 높이로 두는 데 쓴다
+/**
+ * [다가오는 케어 일정 카드] (FN-HLT-003-40)
+ * - 캘린더에 등록한 일정만. 케어리스트 정기관리 예정일은 넣지 않음
+ * - 줄을 누르면(onSelectSchedule) 그 날짜가 선택되고 날짜 상세에 보임. 수정 모달은 날짜 상세에서만 엶 (※신규 정책)
+ * - className: 오른쪽 열에서 이 카드를 내용 높이로 둘 때 씀
+ */
 export default function UpcomingSchedules({
   schedules,
   onSelectSchedule,
@@ -41,19 +46,21 @@ export default function UpcomingSchedules({
       bodyClassName={bodyClassName}
     >
       {upcoming.length === 0 ? (
-        <div className="rounded-[10px] border border-dashed border-[#b9c4c4]">
-          <div className="flex flex-col items-center gap-2 px-4 py-6 text-center">
-            <span className="grid size-10 place-items-center rounded-full bg-[#f4f6f6] text-[#667374]">
-              <Icon name="event_upcoming" />
-            </span>
-            <p className="text-sm text-[#566465]">다가오는 일정이 없어요</p>
-          </div>
-        </div>
+        <EmptyResult
+          isCompact
+          icon={
+            <Icon
+              name="event_upcoming"
+              className="text-[28px] text-line-strong"
+            />
+          }
+          title="다가오는 일정이 없어요"
+        />
       ) : (
         <ul>
           {upcoming.map((schedule) => (
             <li key={schedule.schdlSn}>
-              {/* 한 줄: 「11.12 목 · 이름 · 반려동물」. 이름만 길면 말줄임 */}
+              {/** 한 줄: 「11.12 목 · 이름 · 반려동물」. 이름만 길면 말줄임 */}
               <button
                 type="button"
                 className="group flex w-full items-center gap-1.5 border-b border-line-soft py-2 text-left last:border-b-0"

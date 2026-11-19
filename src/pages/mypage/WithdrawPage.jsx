@@ -16,15 +16,15 @@ function WithdrawSkeleton() {
   return (
     <PageSkeleton>
       <div className="flex flex-col gap-4">
-        <SkeletonCard className="h-[176px] max-md:h-[248px]" />
-        <SkeletonCard className="h-[153px] max-md:h-[201px]" />
-        <SkeletonCard className="h-[60px] max-md:h-[85px]" />
+        <SkeletonCard className="h-[176px] max-[760px]:h-[248px]" />
+        <SkeletonCard className="h-[153px] max-[760px]:h-[201px]" />
+        <SkeletonCard className="h-[60px] max-[760px]:h-[85px]" />
         <div
           aria-hidden="true"
-          className="mt-2 flex gap-2 max-md:flex-col-reverse"
+          className="mt-2 flex gap-2 max-[760px]:flex-col-reverse"
         >
-          <Skeleton className="h-[50px] rounded-full md:flex-1" />
-          <Skeleton className="h-[50px] rounded-full md:flex-1" />
+          <Skeleton className="h-10 rounded-md min-[760px]:flex-1" />
+          <Skeleton className="h-10 rounded-md min-[760px]:flex-1" />
         </div>
       </div>
     </PageSkeleton>

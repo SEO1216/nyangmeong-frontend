@@ -6,7 +6,7 @@ import useMediaQuery from '@/hooks/useMediaQuery';
 import { formatDate, getYmdOf } from '@/utils/formatDate';
 import { RECORD_TYPES, STOOL, WEIGHT } from '../diaryTypes';
 import DayRecordEditModal from './DayRecordEditModal';
-import EmptyBox from './EmptyBox';
+import EmptyResult from '@/components/EmptyResult';
 import {
   formatAmount,
   formatRecordValue,
@@ -30,7 +30,7 @@ const formatDayCell = (summary, typeCd) => {
 /** 값이 최신 한 건인 종류(체중·배변 상태). 나머지는 합계와 횟수 */
 const LATEST_ONLY_TYPES = [WEIGHT, STOOL];
 
-/** 640px 미만 목록의 한 줄 요약: 기록이 있는 종류만 "체중 3.8kg · 식사량 709g"처럼 연결 (※신규 정책) */
+/** 760px 미만 목록의 한 줄 요약: 기록이 있는 종류만 "체중 3.8kg · 식사량 709g"처럼 연결 (※신규 정책) */
 const formatDaySummary = (dayRecords) => {
   const parts = RECORD_TYPES.map((type) => {
     const summary = summarizeType(dayRecords, type.cd);
@@ -47,7 +47,7 @@ const formatDaySummary = (dayRecords) => {
  * [최근 건강기록 날짜별 표]
  * - 하루치를 종류별 합계(횟수)로 한 줄 (FN-HLT-002-13)
  * - 행을 누르면 그날 기록 수정 모달(오늘의 기록 카드 [오늘 기록 수정하기]와 같은 모달). 상세 표 모달 대신 (※신규 정책)
- * - 640px 미만: 표 대신 "날짜 줄 + 한 줄 요약" 목록 (※신규 정책)
+ * - 760px 미만: 표 대신 "날짜 줄 + 한 줄 요약" 목록 (※신규 정책)
  */
 export default function RecentRecordTable({
   petSn,
@@ -57,7 +57,7 @@ export default function RecentRecordTable({
 }) {
   const [periodDays, setPeriodDays] = useState(DEFAULT_PERIOD);
   const [detailYmd, setDetailYmd] = useState(null);
-  const isPc = useMediaQuery('(min-width: 640px)');
+  const isPc = useMediaQuery('(width >= 760px)');
 
   const ymds = getRecordedYmds(records, todayYmd, periodDays);
 
@@ -79,8 +79,11 @@ export default function RecentRecordTable({
       }
     >
       {ymds.length === 0 ? (
-        <EmptyBox
-          icon="edit_note"
+        <EmptyResult
+          isCompact
+          icon={
+            <Icon name="edit_note" className="text-[28px] text-line-strong" />
+          }
           title={`최근 ${periodDays}일 동안 기록이 없어요`}
           description="위의 [오늘 기록 추가]로 첫 기록을 남겨 보세요"
         />
@@ -152,7 +155,7 @@ export default function RecentRecordTable({
   );
 }
 
-/** 640px 미만 목록의 하루: 날짜 줄 + 한 줄 요약 (※신규 정책) */
+/** 760px 미만 목록의 하루: 날짜 줄 + 한 줄 요약 (※신규 정책) */
 function DayListRow({ ymd, isToday, dayRecords, onOpen }) {
   const dateText = formatDate(ymd, { hasYear: false, weekday: true });
 
@@ -186,7 +189,7 @@ function DayRows({ ymd, isToday, dayRecords, onOpen }) {
 
   return (
     <tr
-      className={`cursor-pointer ${isToday ? '' : 'hover:[&>td]:bg-[#fbfcfc]'}`}
+      className={`cursor-pointer ${isToday ? '' : 'hover:[&>td]:bg-surface-2'}`}
       onClick={onOpen}
     >
       <td className={cellClass}>{isToday ? `오늘 ${dateText}` : dateText}</td>

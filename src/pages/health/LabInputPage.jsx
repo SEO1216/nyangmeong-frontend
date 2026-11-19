@@ -5,6 +5,7 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom';
+import LoadError from '@/components/LoadError';
 import PageSkeleton from '@/components/PageSkeleton';
 import SkeletonCard from '@/components/SkeletonCard';
 import LabInput from '@/features/health/labInput/LabInput';
@@ -34,6 +35,7 @@ export default function LabInputPage() {
     isPending,
     isError,
     error,
+    refetch,
   } = useCheckupDetail({
     petSn,
     ckupRcdSn: sn,
@@ -64,11 +66,16 @@ export default function LabInputPage() {
   if (isError) {
     return (
       <SubPageLayout {...layoutProps}>
-        <p role="alert" className="text-muted">
-          {NOT_FOUND_CODES.includes(error?.code)
-            ? '검진기록을 찾을 수 없어요'
-            : '검진기록을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요'}
-        </p>
+        {NOT_FOUND_CODES.includes(error?.code) ? (
+          <p role="alert" className="text-muted">
+            검진기록을 찾을 수 없어요
+          </p>
+        ) : (
+          <LoadError
+            message="검진기록을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요"
+            onRetry={() => refetch()}
+          />
+        )}
       </SubPageLayout>
     );
   }

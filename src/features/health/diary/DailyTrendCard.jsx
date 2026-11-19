@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
+import LoadError from '@/components/LoadError';
+import Skeleton from '@/components/Skeleton';
 import Card from '@/components/Card';
-import { BTN_SECONDARY } from '@/components/buttonStyles';
+import {
+  BTN_SECONDARY,
+  FILTER_CHIP,
+  FILTER_CHIP_ON,
+} from '@/components/buttonStyles';
 import useMediaQuery from '@/hooks/useMediaQuery';
 import { formatMonthDayDot, getYmdOf } from '@/utils/formatDate';
 import {
@@ -14,10 +20,11 @@ import {
 import { DAILY_ITEMS, keepWidgetOrder } from '../dashboard/widgetItems';
 import { useDailyTrend, usePetDetail } from '../queries';
 import { round2 } from '../numberFormat';
-import BarChart from './BarChart';
+import BarChart from '@/components/BarChart';
 import CountBars from './CountBars';
-import EmptyBox from './EmptyBox';
-import LineChart from './LineChart';
+import EmptyResult from '@/components/EmptyResult';
+import Icon from '@/components/Icon';
+import LineChart from '@/components/LineChart';
 import {
   RECENT_RECORD_COUNT,
   formatAmount,
@@ -26,13 +33,16 @@ import {
   pickType,
 } from './recordUtils';
 
+/** 산책 막대 그래프 높이: 꺾은선 그래프(LineChart 기본값)와 같게 그래프 폭 600 미만 230, 이상 260 */
+const getLineChartHeight = (width) => (width < 600 ? 230 : 260);
+
 /**
  * [건강기록 변화 카드]
  * - 지표 탭 5종 단일 선택, 최근 5건 기준 그래프 (FN-HLT-002-09·10)
  * - 0건·1건은 그래프 대신 안내
  * - 760px 이하: 지표 탭이 한 줄 가로 밀기이고 줄 끝에 걸쳐 잘린 탭은 반투명, 체중 그래프의 최대·목표·최소은 왼쪽 한 열
- * - initialTypeCd: 처음 고를 지표(대시보드 카드 [더보기], ※신규 정책). 5종이 아니거나 없으면 체중
- * - 지표 탭은 기록 항목 편집에서 켠 매일 기록만, 대시보드 카드 순서로. widgetIds가 null(고른 적 없음)이면 5종 모두 (※신규 정책, 2026-11-14)
+ * - initialTypeCd: 처음 고를 지표(대시보드 카드 「기록하기 ›」, ※신규 정책). 5종이 아니거나 없으면 체중
+ * - 지표 탭은 [대시보드 편집]·[항목 편집]에서 켠 매일 기록만, 대시보드 카드 순서로. widgetIds가 null(고른 적 없음)이면 5종 모두 (※신규 정책, 2026-11-14)
  *   고른 탭이 꺼지면(또는 처음 고를 지표가 꺼져 있으면) 첫 탭을 고름
  */
 export default function DailyTrendCard({
@@ -61,7 +71,7 @@ export default function DailyTrendCard({
   const trend = useDailyTrend(pet.petSn, typeCd);
   /** 목표체중은 목록(GET /pets)에 없어 상세로 받는다. 실패하거나 오기 전이면 목표선 없이 그린다 */
   const { data: petDetail } = usePetDetail(pet.petSn, typeCd === WEIGHT);
-  const isPc = useMediaQuery('(min-width: 761px)');
+  const isPc = useMediaQuery('(width >= 760px)');
   const rowRef = useRef(null);
   /** 줄 끝에 걸쳐 일부만 보이는 탭(모바일 가로 밀기) */
   const [clipped, setClipped] = useState([]);
@@ -101,7 +111,7 @@ export default function DailyTrendCard({
         ref={rowRef}
         role="radiogroup"
         aria-label="지표 선택"
-        className="mb-4 flex gap-2 overflow-x-auto [scrollbar-width:none] min-[761px]:flex-wrap min-[761px]:overflow-visible [&::-webkit-scrollbar]:hidden"
+        className="mb-4 flex gap-2 overflow-x-auto [scrollbar-width:none] min-[760px]:flex-wrap min-[760px]:overflow-visible [&::-webkit-scrollbar]:hidden"
       >
         {shownTypes.map((item, index) => {
           const isSelected = item.cd === typeCd;
@@ -111,12 +121,8 @@ export default function DailyTrendCard({
               type="button"
               role="radio"
               aria-checked={isSelected}
-              className={`inline-flex h-9 shrink-0 items-center rounded-full border px-3.5 transition-opacity ${
+              className={`${isSelected ? FILTER_CHIP_ON : FILTER_CHIP} transition-opacity ${
                 clipped[index] ? 'opacity-50' : ''
-              } ${
-                isSelected
-                  ? 'border-transparent bg-brand-50 text-brand-500'
-                  : 'border-line bg-white text-ink-2 hover:border-line-strong hover:text-ink'
               }`}
               onClick={() => setTypeCd(item.cd)}
             >
@@ -140,34 +146,38 @@ export default function DailyTrendCard({
 
 function TrendBody({ pet, goalBdwg, trend, type, isPc, onAddRecord }) {
   const emptyBox = (
-    <EmptyBox
-      icon="monitoring"
+    <EmptyResult
+      isCompact
+      icon={<Icon name="monitoring" className="text-[28px] text-line-strong" />}
       title={`아직 ${type.nm} 기록이 없어요`}
       description="오늘 기록을 남기면 변화가 그래프로 보여요"
-      action={
+    >
+      {
         <button
           type="button"
-          className={`${BTN_SECONDARY} mt-2 h-8! px-3!`}
+          className={`${BTN_SECONDARY} mt-2`}
           onClick={() => onAddRecord(type.cd)}
         >
           오늘 기록 추가
         </button>
       }
-    />
+    </EmptyResult>
   );
 
   if (trend.isPending) {
     return (
-      <p className="py-16 text-center text-sm text-muted" aria-busy="true">
-        기록을 불러오는 중이에요
-      </p>
+      <div aria-busy="true">
+        {/* 산책 막대·꺾은선 그래프 높이(폭 600 이상 260, 미만 230)에 맞춤 */}
+        <Skeleton className="h-[260px] max-[600px]:h-[230px]" />
+      </div>
     );
   }
   if (trend.isError) {
     return (
-      <p role="alert" className="py-16 text-center text-sm text-muted">
-        기록을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요
-      </p>
+      <LoadError
+        message="기록을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요"
+        onRetry={() => trend.refetch()}
+      />
     );
   }
   const records = trend.data;
@@ -212,6 +222,7 @@ function TrendBody({ pet, goalBdwg, trend, type, isPc, onAddRecord }) {
         points={chartPoints}
         formatValue={(value) => formatAmount(WALK, value)}
         ariaLabel={`산책 시간 막대그래프 · ${summary} · 점선은 하루 평균`}
+        height={getLineChartHeight}
       />
     );
   }
@@ -240,9 +251,7 @@ function OneRecord({ ymd, value }) {
       <span className="text-sm/[1.6] text-subtle tabular-nums">
         {formatMonthDayDot(ymd)} 기록
       </span>
-      <span className="text-lg/[1.6] font-bold text-ink tabular-nums">
-        {value}
-      </span>
+      <span className="text-lg font-bold text-ink tabular-nums">{value}</span>
       <span className="text-sm/[1.6] text-subtle">
         기록이 2개 이상 쌓이면 그래프로 보여요
       </span>

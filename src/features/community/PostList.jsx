@@ -3,17 +3,20 @@ import { useState } from 'react';
 import { generatePath, Link, useLocation } from 'react-router-dom';
 import Avatar from '@/components/Avatar';
 import BoardPagination from '@/components/BoardPagination';
+import { BTN_SECONDARY } from '@/components/buttonStyles';
 import EmptyResult from '@/components/EmptyResult';
+import FileImage from '@/components/FileImage';
 import { PATHS } from '@/routes/paths';
 import { formatRelativeTime } from '@/utils/formatDate';
 import { publicFileUrl } from '@/utils/fileUrl';
+import ImagePlaceholder from './ImagePlaceholder';
 import PostBadges from './PostBadges';
 import PostFilters from './PostFilters';
 import StoryRail from './StoryRail';
 
-/** 머리 아래 진한 선 + 왼쪽(필터·목록)과 오른쪽 레일. 로딩 자리도 같은 배치를 쓴다 */
+/** 왼쪽(필터·목록)과 오른쪽 레일. 로딩 자리도 같은 배치를 쓴다 */
 export const POST_LIST_GRID =
-  'grid grid-cols-[minmax(0,1fr)_300px] items-start gap-x-8 gap-y-10 border-t border-line-strong pt-6 max-[1100px]:grid-cols-2 max-[1100px]:gap-x-5 max-[760px]:grid-cols-1';
+  'grid grid-cols-[minmax(0,1fr)_300px] items-start gap-x-8 gap-y-10 max-[1100px]:grid-cols-2 max-[1100px]:gap-x-5 max-[760px]:grid-cols-1';
 
 export default function PostList({
   posts,
@@ -64,13 +67,13 @@ export default function PostList({
             <button
               type="button"
               onClick={handleReset}
-              className="h-9 cursor-pointer rounded-md border border-[#e2e7e7] bg-white px-3 text-sm font-medium text-[#1a3234] hover:bg-[#f4f6f6]"
+              className={`${BTN_SECONDARY} cursor-pointer`}
             >
               펫이야기 목록으로
             </button>
           </EmptyResult>
         ) : (
-          <ul className="flex flex-col gap-3 max-[760px]:gap-2.5">
+          <ul className="flex flex-col gap-3 max-[760px]:gap-2">
             {content.map((item) => (
               <li key={item.pstSn}>
                 <Link
@@ -78,15 +81,15 @@ export default function PostList({
                     pstSn: item.pstSn,
                   })}
                   state={{ listSearch: search }}
-                  className={`group grid gap-x-8 gap-y-3.5 rounded-[14px] border border-[#e2e7e7] bg-white px-7 py-6 shadow-[0_1px_2px_rgba(26,50,52,0.06)] transition hover:border-[#cfe2e2] hover:shadow-[0_4px_12px_rgba(26,50,52,0.1)] max-[760px]:grid-cols-1 max-[760px]:gap-3 max-[760px]:px-4 max-[760px]:pt-4 max-[760px]:pb-[18px] ${item.thumbAtchFileSn ? 'grid-cols-[minmax(0,1fr)_200px]' : 'grid-cols-1'}`}
+                  className={`group grid gap-x-8 gap-y-4 rounded-[14px] border border-line bg-white px-7 py-6 transition hover:border-brand-100 max-[760px]:grid-cols-1 max-[760px]:gap-3 max-[760px]:px-4 max-[760px]:pt-4 max-[760px]:pb-5 ${item.thumbAtchFileSn ? 'grid-cols-[minmax(0,1fr)_200px]' : 'grid-cols-1'}`}
                 >
                   <div className="min-w-0 max-[760px]:order-2">
                     <PostBadges post={item} showPopular={sort !== 'hot'} />
-                    <h3 className="mt-2.5 truncate text-lg leading-[1.4] font-semibold tracking-[-0.18px] text-[#1a3234] group-hover:text-[#285a5c]">
+                    <h3 className="mt-3 truncate text-lg leading-[1.4] font-semibold tracking-[-0.01em] text-ink group-hover:text-brand-500">
                       {item.pstTtl}
                     </h3>
                     <p
-                      className={`mt-2.5 line-clamp-2 text-base leading-[1.6] text-[#3d4a4b] max-[760px]:text-sm ${item.thumbAtchFileSn ? 'min-h-[3.2em]' : ''}`}
+                      className={`mt-3 line-clamp-2 text-base leading-[1.6] text-ink-2 max-[760px]:text-sm ${item.thumbAtchFileSn ? 'min-h-[3.2em]' : ''}`}
                     >
                       {item.pstCn}
                     </p>
@@ -94,27 +97,28 @@ export default function PostList({
                   {item.thumbAtchFileSn && (
                     <span
                       aria-hidden="true"
-                      className="relative col-start-2 row-span-2 row-start-1 min-h-[124px] self-stretch overflow-hidden rounded-[10px] bg-[#f4f6f6] max-[760px]:order-1 max-[760px]:col-start-1 max-[760px]:row-span-1 max-[760px]:row-start-auto max-[760px]:aspect-[16/9] max-[760px]:min-h-0"
+                      className="relative col-start-2 row-span-2 row-start-1 h-[150px] self-start overflow-hidden rounded-[10px] bg-surface-2 max-[760px]:order-1 max-[760px]:h-auto max-[760px]:col-start-1 max-[760px]:row-span-1 max-[760px]:row-start-auto max-[760px]:aspect-[16/9] max-[760px]:min-h-0"
                     >
-                      <img
+                      <FileImage
                         src={publicFileUrl(item.thumbAtchFileSn)}
-                        alt=""
-                        loading="lazy"
                         className="absolute inset-0 size-full object-cover"
+                        fallback={
+                          <ImagePlaceholder className="absolute inset-0" />
+                        }
                       />
                     </span>
                   )}
-                  <div className="col-start-1 flex items-center justify-between gap-3 text-sm text-[#667374] max-[760px]:order-3">
-                    <span className="inline-flex min-w-0 items-center gap-1.5">
+                  <div className="col-start-1 flex items-center justify-between gap-3 text-sm text-subtle max-[760px]:order-3">
+                    <span className="inline-flex min-w-0 items-center gap-2">
                       <Avatar
                         src={publicFileUrl(item.mbrAtchFileSn)}
                         className="size-6"
                         iconSize={14}
                       />
-                      <span className="truncate font-medium text-[#3d4a4b]">
+                      <span className="truncate font-medium text-ink-2">
                         {item.mbrNcnm}
                       </span>
-                      <i className="text-[#b9c4c4] not-italic">·</i>
+                      <i className="text-line-strong not-italic">·</i>
                       <time className="shrink-0">
                         {formatRelativeTime(item.regDt)}
                       </time>
@@ -138,7 +142,7 @@ export default function PostList({
           </ul>
         )}
 
-        <div className="mt-5">
+        <div className="mt-7 max-[760px]:mt-3">
           <BoardPagination
             page={page}
             totalPages={totalPages}

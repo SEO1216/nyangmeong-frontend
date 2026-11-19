@@ -3,7 +3,7 @@ import AuthCard from '../shared/AuthCard';
 import AuthField from '../shared/AuthField';
 import AuthHeading from '../shared/AuthHeading';
 import AuthNotice from '../shared/AuthNotice';
-import { PRIMARY_BTN, SIDE_BTN } from '../shared/authStyles';
+import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import { normalizePhone } from '../shared/validate';
 import { SNS_NAME } from '../shared/snsCodes';
 import TermsModal from '../shared/TermsModal';
@@ -74,7 +74,7 @@ export default function SnsSignupForm({ snsSignup, onCancel, onGoLogin }) {
                   type="button"
                   onClick={form.submitPhoneCheck}
                   disabled={!normalizePhone(form.phone) || form.isPhoneChecking}
-                  className={SIDE_BTN}
+                  className={`${BTN_SECONDARY} min-w-22 shrink-0 whitespace-nowrap`}
                 >
                   중복확인
                 </button>
@@ -93,17 +93,17 @@ export default function SnsSignupForm({ snsSignup, onCancel, onGoLogin }) {
           <button
             type="button"
             onClick={onCancel}
-            className={`${PRIMARY_BTN} mt-5`}
+            className={`${BTN_PRIMARY} w-full mt-5`}
           >
-            로그인 방법 선택으로
+            로그인으로
           </button>
         ) : (
           <button
             type="submit"
             disabled={!form.canJoin || form.isJoining}
-            className={`${PRIMARY_BTN} mt-5`}
+            className={`${BTN_PRIMARY} w-full mt-5`}
           >
-            회원가입 완료
+            회원가입
           </button>
         )}
       </form>

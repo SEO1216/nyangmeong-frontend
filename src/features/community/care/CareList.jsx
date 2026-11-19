@@ -21,13 +21,13 @@ export default function CareList({
   const { content, page, totalPages, totalElements } = posts;
 
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 border-t border-line-strong pt-6 max-[1101px]:grid-cols-1">
+    <div className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 max-[1101px]:grid-cols-1">
       <div className="flex min-w-0 flex-col gap-5">
         <CareFilters filters={filters} onChange={onChange} onReset={onReset} />
 
-        <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-1 border-t border-line pt-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-1">
           <p aria-live="polite" className="text-sm text-muted">
-            총 <b className="font-bold text-ink">{totalElements}</b>건
+            전체 <b className="font-bold text-ink">{totalElements}</b> 건
           </p>
         </div>
 
@@ -55,7 +55,7 @@ export default function CareList({
           </ul>
         )}
 
-        <div className="mt-5">
+        <div className="mt-7 max-[760px]:mt-3">
           <BoardPagination
             page={page}
             totalPages={totalPages}

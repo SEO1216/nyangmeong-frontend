@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import Badge from '@/components/Badge';
 import DropdownSelect from '@/components/DropdownSelect';
+import { Required } from '@/components/FieldError';
 import PetFace from '@/components/PetFace';
 import { SKIP } from './receiptUtils';
 
@@ -61,7 +62,7 @@ export default function ReceiptPetLink({
       <div className="flex items-center justify-between gap-3 rounded-t-box bg-surface-2 px-4 py-2.5">
         <h3 id={titleId} className="font-semibold text-ink-2">
           반려동물 연결
-          <span className="ml-0.5 font-bold text-danger">*</span>
+          <Required />
         </h3>
         <span className="text-sm text-subtle tabular-nums">
           {linkedCount} / {tabs.length} 연결됨
@@ -92,7 +93,7 @@ export default function ReceiptPetLink({
                 options={options}
                 placeholder="반려동물 선택"
                 label={`영수증 '${tab.sectionNm}' 반려동물 선택`}
-                className={`w-48 max-sm:w-full ${
+                className={`w-48 max-[760px]:w-full ${
                   isError
                     ? '[&>button]:border-danger [&>button]:ring-error'
                     : isLinked

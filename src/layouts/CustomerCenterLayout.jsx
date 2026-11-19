@@ -56,7 +56,6 @@ export default function CustomerCenterLayout() {
       )}
       description={DESCRIPTIONS[menu]}
       onLeave={onLeave}
-      contentClassName="min-[1101px]:pt-4"
     >
       <Outlet context={outletContext} />
     </SubPageLayout>
