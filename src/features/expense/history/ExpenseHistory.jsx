@@ -46,7 +46,7 @@ const EXCLUDE_LIMIT_MESSAGE =
   '한 번에 1,000건까지 해제할 수 있어요. 개별 선택으로 골라 주세요';
 
 /** 앱(≤760px)은 페이지 번호 대신 무한 스크롤 */
-const MOBILE_QUERY = '(max-width: 760px)';
+const MOBILE_QUERY = '(width < 760px)';
 
 /** 기간 순서 보정 */
 const getSortedPeriod = (range) =>

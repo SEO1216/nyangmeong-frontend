@@ -126,7 +126,7 @@ export default function InvitationAccept({
             },
           }),
         onError: (error) => {
-          showToast(error.message);
+          showToast(error.message, { type: 'error' });
           const remaining = error.data?.remainingPetCount;
           if (error.code === 'PET_LIMIT_EXCEEDED' && remaining != null) {
             setLimitOverride(remaining);

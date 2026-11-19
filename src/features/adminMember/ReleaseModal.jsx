@@ -26,7 +26,7 @@ export default function ReleaseModal({ member, onClose }) {
       { mbrSn: member.mbrSn, rlsRsn: trimmedRsn },
       {
         onSuccess: () => {
-          showToast('정지를 해제했어요');
+          showToast('정지를 해제했어요', { type: 'success' });
           onClose();
         },
       },

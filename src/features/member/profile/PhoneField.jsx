@@ -82,7 +82,7 @@ function PhoneEdit({ mblTelno, onClose }) {
       { mblTelno: next },
       {
         onSuccess: () => {
-          showToast('휴대폰 번호를 저장했어요');
+          showToast('휴대폰 번호를 저장했어요', { type: 'success' });
           onClose();
         },
         onError: (error) =>

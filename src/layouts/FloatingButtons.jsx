@@ -1,9 +1,14 @@
+import { PawPrint, Plus } from 'lucide-react';
+import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import arrow from '@/assets/arrow.svg';
 import defaultCatCharacter from '@/assets/pets/default-character-cat-full.png';
 import defaultDogCharacter from '@/assets/pets/default-character-dog-full.png';
 import FileImage from '@/components/FileImage';
 import { useMyPets } from '@/features/health/queries';
+import { useMe } from '@/features/member/queries';
+import PetFormModal from '@/features/pet/list/PetFormModal';
+import { usePetLimit } from '@/features/pet/queries';
 import useAiDock from '@/hooks/useAiDock';
 import useAiWindow from '@/hooks/useAiWindow';
 import { characterImageOptions } from '@/hooks/useCharacterImage';
@@ -14,10 +19,16 @@ import { PET_SE } from '@/utils/petCodes';
 export default function FloatingButtons({ hasBottomNav = false }) {
   const openAiWindow = useAiWindow();
   const isMain = useLocation().pathname === PATHS.MAIN;
-  const dock = useAiDock();
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const { data: me } = useMe();
+  /** 메인은 버튼을 안 그리므로 말풍선도 본 것으로 치지 않음 */
+  const dock = useAiDock({ mbrSn: me?.mbrSn, shown: !isMain });
   /** AI 버튼 캐릭터: 대표 반려동물만. 대표가 없으면 강아지 기본 캐릭터 */
   const { data: pets } = useMyPets();
   const facePet = pets?.find((pet) => pet.rprsPetYn) ?? null;
+  /** 등록 버튼: 한도를 못 불러왔거나(불러오는 중·실패) 남은 자리가 없으면 숨김. AI 접힘 때도 숨김 */
+  const { data: limit } = usePetLimit();
+  const canRegister = limit?.remainingPetCount > 0 && !dock.folded;
 
   const handleAiClick = () => {
     if (!dock.consumeClick()) return;
@@ -84,6 +95,19 @@ export default function FloatingButtons({ hasBottomNav = false }) {
           </button>
         )}
       </div>
+      {canRegister && (
+        <button
+          type="button"
+          className="flex size-[52px] items-center justify-center gap-0.5 rounded-2xl border border-line bg-white text-ink-2 max-[760px]:size-11"
+          aria-label="반려동물 등록"
+          title="반려동물 등록"
+          onClick={() => setIsRegisterOpen(true)}
+        >
+          {/** 발바닥 + 작은 더하기를 한 묶음으로 가운데 */}
+          <PawPrint className="size-5" aria-hidden="true" />
+          <Plus className="size-3" strokeWidth={3} aria-hidden="true" />
+        </button>
+      )}
       <button
         type="button"
         className="h-[52px] w-[52px] rounded-2xl border border-line bg-white text-base font-bold text-ink-2 max-[760px]:hidden"
@@ -91,6 +115,10 @@ export default function FloatingButtons({ hasBottomNav = false }) {
       >
         TOP
       </button>
+      {/** 이동 없이 지금 화면에서 마이페이지와 같은 등록 모달을 연다. 등록하면 모달이 토스트를 띄우고 닫힌다 */}
+      {isRegisterOpen && (
+        <PetFormModal onClose={() => setIsRegisterOpen(false)} />
+      )}
     </div>
   );
 }

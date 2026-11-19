@@ -22,11 +22,11 @@ export default function PetDeleteDialog({ pet, onClose }) {
     deletePet.mutate(pet.petSn, {
       onSuccess: () => {
         onClose();
-        showToast('반려동물을 삭제했어요');
+        showToast('반려동물을 삭제했어요', { type: 'success' });
       },
       onError: (error) => {
         if (error.code === 'PET_NOT_FOUND') onClose();
-        showToast(error.message);
+        showToast(error.message, { type: 'error' });
       },
     });
 

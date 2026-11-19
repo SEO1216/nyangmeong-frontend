@@ -30,7 +30,7 @@ export default function ReportRejectModal({ dclrSn, onClose }) {
       { dclrSn, rjctRsn: trimmedRsn },
       {
         onSuccess: () => {
-          showToast('신고를 반려했어요');
+          showToast('신고를 반려했어요', { type: 'success' });
           onClose();
         },
       },

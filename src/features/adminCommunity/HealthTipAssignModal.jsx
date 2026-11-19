@@ -53,7 +53,7 @@ export default function HealthTipAssignModal({ onClose }) {
       },
       {
         onSuccess: () => {
-          showToast('건강팁을 지정했어요');
+          showToast('건강팁을 지정했어요', { type: 'success' });
           onClose();
         },
       },

@@ -103,7 +103,9 @@ function FaqEditor({ faq, categories, onClose }) {
     SORT_SEQ_PATTERN.test(sortSeq);
 
   const handleSaved = () => {
-    showToast(isEdit ? 'FAQ를 수정했어요' : 'FAQ를 등록했어요');
+    showToast(isEdit ? 'FAQ를 수정했어요' : 'FAQ를 등록했어요', {
+      type: 'success',
+    });
     onClose();
   };
 

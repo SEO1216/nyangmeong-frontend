@@ -63,7 +63,7 @@ export default function MissingEditPage() {
       {
         onSuccess: () => {
           setDirty(false);
-          showToast('수정한 내용을 저장했어요');
+          showToast('수정한 내용을 저장했어요', { type: 'success' });
           navigate(detailPath);
         },
       },

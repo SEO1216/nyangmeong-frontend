@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import {
   keepPreviousData,
   useMutation,
@@ -6,10 +5,12 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { healthKeys } from '@/features/health/queries';
 import { pointKeys } from '@/features/point/queries';
+import {
+  pixelCharacterKeys,
+  usePixelCharacters,
+} from '@/hooks/usePixelCharacters';
 import { getCharState } from './shared/charState';
-import { CRT_JOB_STTS } from '@/utils/petCodes';
 import {
   acceptInvitation,
   cancelInvitation,
@@ -27,7 +28,6 @@ import {
   getLatestWeightRecord,
   getPets,
   getPixelCharacter,
-  getPixelCharacters,
   getShopItems,
   getSentInvitations,
   getVarieties,
@@ -76,44 +76,9 @@ export const usePets = () =>
 export const usePetLimit = () =>
   useQuery({ queryKey: petKeys.limit(), queryFn: getPetLimit });
 
-const CHAR_POLL_MS = 4000;
-const CHAR_POLL_LIMIT_MS = 12 * 60 * 1000;
-
-/**
- * 캐릭터 목록(GET /pixel-characters)
- * - 건강기록 히어로와 같은 키라 캐시가 하나다
- * - isPolling이면 생성 중인 동물이 있는 동안 4초마다 다시 읽는다(처음 본 때부터 12분이 지나면 멈춤)
- */
-export const usePixelCharacters = ({ isPolling = false } = {}) => {
-  const startedAtRef = useRef(null);
-  return useQuery({
-    queryKey: healthKeys.pixelCharacters,
-    queryFn: getPixelCharacters,
-    refetchInterval: isPolling
-      ? ({ state }) => {
-          const isCreating = state.data?.some(
-            (item) =>
-              item.crtJobSttsCd === CRT_JOB_STTS.REQUESTED ||
-              item.crtJobSttsCd === CRT_JOB_STTS.GENERATING,
-          );
-          if (!isCreating) {
-            startedAtRef.current = null;
-            return false;
-          }
-          startedAtRef.current ??= Date.now();
-          return Date.now() - startedAtRef.current < CHAR_POLL_LIMIT_MS
-            ? CHAR_POLL_MS
-            : false;
-        }
-      : false,
-  });
-};
-
 /** 동물 한 마리의 캐릭터 상태 { status, isError }, 목록 로딩 중에는 undefined */
 export const useCharState = (petSn) =>
-  useQuery({
-    queryKey: healthKeys.pixelCharacters,
-    queryFn: getPixelCharacters,
+  usePixelCharacters({
     select: (list) => getCharState(list.find((item) => item.petSn === petSn)),
   }).data;
 
@@ -147,7 +112,11 @@ export const useCreatePet = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: createPet,
-    onSuccess: () => qc.invalidateQueries({ queryKey: petKeys.all }),
+    /** 새 동물은 캐릭터 목록에도 줄이 생기므로 같이 다시 읽는다(배너의 [캐릭터 만들기] 판정) */
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: petKeys.all });
+      qc.invalidateQueries({ queryKey: pixelCharacterKeys.all });
+    },
   });
 };
 
@@ -253,14 +222,14 @@ export const useCreateCharacter = () => {
     mutationFn: createCharacter,
     /** 목록을 다시 읽은 뒤 끝내 모달이 바로 "생성 중"으로 바뀌게 한다 */
     onSuccess: () =>
-      qc.invalidateQueries({ queryKey: healthKeys.pixelCharacters }),
+      qc.invalidateQueries({ queryKey: pixelCharacterKeys.all }),
     /** 409(이미 있음·생성 중)는 상태가 달라졌을 수 있어 다시 읽는다 */
     onError: (error) => {
       if (
         error.code === 'PIXEL_CHARACTER_CREATING' ||
         error.code === 'PIXEL_CHARACTER_ALREADY_EXISTS'
       )
-        qc.invalidateQueries({ queryKey: healthKeys.pixelCharacters });
+        qc.invalidateQueries({ queryKey: pixelCharacterKeys.all });
     },
   });
 };
@@ -268,7 +237,7 @@ export const useCreateCharacter = () => {
 /** 저장·구매 응답이 꾸미기 상세라 그대로 캐시에 넣는다 */
 const applyCharacter = (qc, pixelCharSn, character) => {
   qc.setQueryData(characterKeys.detail(pixelCharSn), character);
-  qc.invalidateQueries({ queryKey: healthKeys.pixelCharacters });
+  qc.invalidateQueries({ queryKey: pixelCharacterKeys.all });
 };
 
 /**
@@ -296,7 +265,7 @@ export const useSaveEquippedItems = () => {
     /** 오류 확인 중으로 바뀐 캐릭터는 목록 상태를 다시 읽는다 */
     onError: (error) => {
       if (error.code === 'PIXEL_CHARACTER_UNDER_REVIEW')
-        qc.invalidateQueries({ queryKey: healthKeys.pixelCharacters });
+        qc.invalidateQueries({ queryKey: pixelCharacterKeys.all });
     },
   });
 };
@@ -396,6 +365,8 @@ export const useAcceptInvitation = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: invitationKeys.all });
       qc.invalidateQueries({ queryKey: petKeys.all });
+      /** 연동된 동물이 캐릭터 목록에도 생기므로 같이 다시 읽는다 */
+      qc.invalidateQueries({ queryKey: pixelCharacterKeys.all });
     },
     onError: (error) => refreshIfClosed(qc, error),
   });

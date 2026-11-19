@@ -49,10 +49,14 @@ export default function ExpenseBulkDeleteDialog({
       onError: (error) => {
         if (bulkCond && error.code === BULK_DELETE_CHANGED) {
           onChanged();
-          showToast('그 사이 지출 내역이 바뀌었어요. 다시 선택해 주세요');
+          showToast('그 사이 지출 내역이 바뀌었어요. 다시 선택해 주세요', {
+            type: 'error',
+          });
           return;
         }
-        showToast('삭제하지 못했어요. 잠시 후 다시 시도해 주세요');
+        showToast('삭제하지 못했어요. 잠시 후 다시 시도해 주세요', {
+          type: 'error',
+        });
       },
     };
     if (bulkCond) {

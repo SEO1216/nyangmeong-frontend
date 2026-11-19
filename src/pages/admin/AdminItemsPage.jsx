@@ -85,7 +85,7 @@ export default function AdminItemsPage() {
       },
       {
         onSuccess: () => {
-          showToast('순서를 저장했어요');
+          showToast('순서를 저장했어요', { type: 'success' });
           setOrderedItems(null);
         },
       },

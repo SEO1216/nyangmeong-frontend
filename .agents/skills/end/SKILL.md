@@ -39,7 +39,9 @@ disable-model-invocation: true
    - 푸시한 뒤 PR: `gh pr list --head <이름> --state open`으로 열린 PR이 있으면 "이 커밋은 열린 PR #N에 들어갑니다"라고만 알린다. 없고 이번 마일스톤이 `끝`이면 "PR을 만들려면 `PR`이라고 답해 주세요"라고 묻는다(`진행`이면 묻지 않는다).
    - `PR`이라고 답하면: `git fetch` 후 `origin/develop`을 merge한다(rebase 하지 않는다. 충돌이 나면 `git merge --abort` 하지 않고 충돌 상태 그대로 충돌 파일을 보여 주며 멈춘다) → 검증 명령을 다시 돌린다 → 푸시 → `gh pr create --base develop --head <이름>`. 제목은 커밋 형식이다. AI 도구 문구는 넣지 않는다. `gh`가 없으면 `https://github.com/<저장소>/compare/develop...<이름>` 주소와 본문을 보여 준다.
    - 본문은 `.github/pull_request_template.md`를 읽어 섹션 제목·순서를 그대로 두고 채운다(`docs/convention/git.md` PR 절). 해당 없는 섹션은 지우지 않고 `없음`, 더 적을 것이 있으면 섹션을 추가한다. Summary에 화면 ID·기능 ID·추가 요청(`추가-<번호>`)과 한 일, Changes에 파일·모듈 단위 변경(추가 요청으로 바꾼 것도), Test Plan에 검증 명령 체크와 `Result:`(검증 판정, 사람 확인), Design Decisions에 기획과 달라진 것·다른 담당에 영향 가는 선택, Breaking Changes에 커밋 본문의 "영향:"을 쓴다.
-   - Screenshots(프론트): 검증 보고의 `캡처:` 파일을 `gh release upload pr-assets <파일> --clobber`로 올리고 표의 After 줄에 `![](https://github.com/<저장소>/releases/download/pr-assets/<파일>)`로 넣는다. 캡처가 없으면 `없음`. `gh release view pr-assets`가 실패하면(릴리스 없음) 만들지 말고 멈춰서 사람에게 묻는다. 답하면 `gh release create pr-assets --prerelease --title pr-assets --notes "PR 스크린샷 보관"` 후 이어 간다.
+   - Screenshots(프론트): 올릴 릴리스(`<릴리스>`)는 `gh release list`에서 이름이 `pr-assets`로 시작하는 것 중 번호가 가장 큰 것이다(`pr-assets` < `pr-assets-2` < `pr-assets-3` …). 검증 보고의 `캡처:` 파일을 `gh release upload <릴리스> <파일> --clobber`로 올리고 표의 After 줄에 `![](https://github.com/<저장소>/releases/download/<릴리스>/<파일>)`로 넣는다. 캡처가 없으면 `없음`.
+     - `pr-assets`로 시작하는 릴리스가 없으면 만들지 말고 멈춰서 사람에게 묻는다. 답하면 `gh release create pr-assets --prerelease --title pr-assets --notes "PR 스크린샷 보관"` 후 이어 간다.
+     - 업로드가 `file_count limited to 1000 assets per release`로 실패하면(릴리스 첨부 1000개 한도) 옛 첨부를 지우지 않는다(다른 PR의 이미지가 깨진다). 만들지 말고 멈춰서 사람에게 묻는다. 답하면 다음 번호 `pr-assets-<N+1>`를 같은 옵션(`--prerelease --title pr-assets-<N+1> --notes "PR 스크린샷 보관"`)으로 만들고 거기에 올린다.
    - 병합은 하지 않는다. 사람이 GitHub에서 한다.
 8. 보고: 검증 명령별 종료 코드, 사람 확인 결과, 바뀐 절, 동기화 결과, 확인 못 한 것. 마지막 줄:
    - 끝났으면 "다음 작업은 `/clear` 한 뒤 `/start`로 시작하세요"

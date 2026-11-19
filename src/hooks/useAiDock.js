@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 const DOCK_KEY = 'nyangmeong-ai-dock';
-const BUBBLE_SEEN_KEY = 'nyangmeong-ai-bubble-seen';
+/** 말풍선 본 기록: 회원별 */
+const bubbleSeenKey = (mbrSn) => `nyangmeong-ai-bubble-seen.${mbrSn}`;
 const MOBILE_QUERY = '(width < 760px)';
 /** 이 거리(px)보다 오른쪽으로 끌고 놓으면 접힘 */
 const FOLD_DISTANCE = 40;
@@ -26,16 +27,20 @@ function writeStorage(key, value) {
 }
 
 /** 저장소를 못 읽으면 본 것으로 처리해 말풍선 매번 표시 방지 */
-function hasSeenBubble() {
+function hasSeenBubble(key) {
   try {
-    return localStorage.getItem(BUBBLE_SEEN_KEY) !== null;
+    return localStorage.getItem(key) !== null;
   } catch {
     return true;
   }
 }
 
-/** 모바일에서 AI 버튼을 우측 가장자리로 접고 펴는 상태 + 첫 방문 말풍선 */
-export default function useAiDock() {
+/**
+ * 모바일에서 AI 버튼을 우측 가장자리로 접고 펴는 상태 + 회원별 첫 말풍선
+ * - mbrSn: 로그인한 회원 번호. 없으면(비로그인) 말풍선 없음, 기록 안 함
+ * - shown: 버튼이 실제로 그려지는지. 메인처럼 안 그려지는 동안은 본 것으로 치지 않음
+ */
+export default function useAiDock({ mbrSn = null, shown = true } = {}) {
   const [isMobile, setIsMobile] = useState(
     () => window.matchMedia(MOBILE_QUERY).matches,
   );
@@ -45,7 +50,8 @@ export default function useAiDock() {
   );
   const [offset, setOffset] = useState(0);
   const [dragging, setDragging] = useState(false);
-  const [bubbleVisible, setBubbleVisible] = useState(() => !hasSeenBubble());
+  /** 말풍선을 정한 회원 키와 표시 여부. 회원이 바뀌면(다른 계정 로그인) 다시 정함 */
+  const [bubble, setBubble] = useState({ key: null, visible: false });
   const drag = useRef({ startX: 0, moved: false, active: false });
   const suppressClick = useRef(false);
 
@@ -56,21 +62,31 @@ export default function useAiDock() {
     return () => media.removeEventListener('change', onChange);
   }, []);
 
+  const memberKey = mbrSn == null ? null : bubbleSeenKey(mbrSn);
+  /** 버튼이 그려지는 화면에 처음 왔을 때 그 회원 기록으로 표시 여부를 정함 */
+  if (shown && memberKey !== null && bubble.key !== memberKey) {
+    setBubble({ key: memberKey, visible: !hasSeenBubble(memberKey) });
+  }
+  const bubbleVisible = shown && bubble.key === memberKey && bubble.visible;
+
   /** 말풍선은 한 번 뜬 것으로 기록한다. 펼치거나 닫을 때까지 유지 */
   useEffect(() => {
-    if (bubbleVisible) writeStorage(BUBBLE_SEEN_KEY, '1');
-  }, [bubbleVisible]);
+    if (bubbleVisible) writeStorage(bubble.key, '1');
+  }, [bubbleVisible, bubble.key]);
 
   const updateCollapsed = useCallback((next) => {
     setCollapsed(next);
     writeStorage(DOCK_KEY, next ? 'closed' : 'open');
   }, []);
 
-  const closeBubble = useCallback(() => setBubbleVisible(false), []);
+  const closeBubble = useCallback(
+    () => setBubble((prev) => ({ ...prev, visible: false })),
+    [],
+  );
   const expand = useCallback(() => {
     updateCollapsed(false);
-    setBubbleVisible(false);
-  }, [updateCollapsed]);
+    closeBubble();
+  }, [updateCollapsed, closeBubble]);
 
   const onPointerDown = (event) => {
     if (!isMobile) return;

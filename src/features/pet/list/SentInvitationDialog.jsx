@@ -45,11 +45,11 @@ export default function SentInvitationDialog({
     mutation.mutate(invitation.jntBrupInvtnSn, {
       onSuccess: () => {
         onClose();
-        showToast(text.done);
+        showToast(text.done, { type: 'success' });
       },
       onError: (error) => {
         onClose();
-        showToast(error.message);
+        showToast(error.message, { type: 'error' });
       },
     });
 

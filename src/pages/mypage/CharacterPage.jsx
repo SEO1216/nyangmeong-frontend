@@ -15,11 +15,11 @@ import CharacterTabs from '@/features/pet/character/CharacterTabs';
 import {
   petKeys,
   usePets,
-  usePixelCharacters,
   useSetRepresentativePet,
 } from '@/features/pet/queries';
 import { getCharState } from '@/features/pet/shared/charState';
 import { BRUP_ROLE, CHRC_STTS } from '@/features/pet/shared/petCodes';
+import { usePixelCharacters } from '@/hooks/usePixelCharacters';
 import SubPageLayout from '@/layouts/SubPageLayout';
 import { PATHS } from '@/routes/paths';
 

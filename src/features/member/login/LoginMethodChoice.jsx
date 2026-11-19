@@ -1,5 +1,4 @@
 import { Mail } from 'lucide-react';
-import { BTN_PRIMARY } from '@/components/buttonStyles';
 import AuthCard from '../shared/AuthCard';
 import AuthHeading from '../shared/AuthHeading';
 import AuthNotice from '../shared/AuthNotice';
@@ -42,7 +41,7 @@ export default function LoginMethodChoice({
       <button
         type="button"
         onClick={onSelectEmail}
-        className={`${BTN_PRIMARY} w-full`}
+        className="inline-flex h-[50px] w-full items-center justify-center gap-1.5 rounded-xl bg-brand-500 text-[15px] font-bold text-white transition hover:-translate-y-px hover:bg-brand-600"
       >
         <Mail className="size-5" />
         이메일로 로그인하기

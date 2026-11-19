@@ -333,7 +333,7 @@ export default function CommentSection({
         onError: (error) =>
           isProfanityError(error)
             ? fail(PROFANITY_MESSAGE)
-            : showToast('댓글을 등록하지 못했어요'),
+            : showToast('댓글을 등록하지 못했어요', { type: 'error' }),
       },
     );
 
@@ -429,7 +429,8 @@ export default function CommentSection({
               {
                 onSuccess: () => {
                   setDeleteTarget(null);
-                  if (vanishes) showToast('댓글이 삭제되었습니다');
+                  if (vanishes)
+                    showToast('댓글이 삭제되었습니다', { type: 'success' });
                 },
               },
             );
@@ -451,7 +452,7 @@ export default function CommentSection({
               { cmntSn: reportTarget.cmntSn, ...values },
               {
                 onSuccess: () => {
-                  showToast('신고가 접수되었어요');
+                  showToast('신고가 접수되었어요', { type: 'success' });
                   setReportTarget(null);
                 },
               },
