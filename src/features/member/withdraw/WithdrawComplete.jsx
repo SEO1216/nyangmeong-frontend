@@ -1,6 +1,6 @@
 import { CircleCheck } from 'lucide-react';
 import AuthHeading from '../shared/AuthHeading';
-import { PRIMARY_BTN } from '../shared/authStyles';
+import { BTN_PRIMARY } from '@/components/buttonStyles';
 
 /** 회원탈퇴 완료 1~2 */
 export default function WithdrawComplete({ onGoLanding }) {
@@ -18,7 +18,11 @@ export default function WithdrawComplete({ onGoLanding }) {
         </li>
         <li>네이버·카카오·구글 자체 계정은 삭제되지 않습니다.</li>
       </ul>
-      <button type="button" onClick={onGoLanding} className={PRIMARY_BTN}>
+      <button
+        type="button"
+        onClick={onGoLanding}
+        className={`${BTN_PRIMARY} w-full`}
+      >
         랜딩페이지로
       </button>
     </section>

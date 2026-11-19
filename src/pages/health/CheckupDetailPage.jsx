@@ -32,9 +32,9 @@ const LAYOUT_PROPS = {
   section: 'health',
   menu: PATHS.HEALTH_DIARY,
   title: '검진상세',
-  back: false,
+  back: true,
+  backTo: `${PATHS.HEALTH_DIARY}#hlt002-exam`,
   description: '병원에서 받은 검사 결과와 처방을 한곳에서 확인해요',
-  contentClassName: 'gap-7 tabular-nums antialiased min-[1100px]:pt-6',
 };
 
 const DEFAULT_TAB = 'result';
@@ -67,8 +67,6 @@ function CheckupDetail({ petSn, ckupRcdSn }) {
       ? requestedTab
       : DEFAULT_TAB,
   );
-  /** 영상검사 칩의 [첨부 자료 탭에서 추가하기]로 들어오면 첨부 추가 영역을 펼친 채 열림 */
-  const [isAddOpenOnEnter, setIsAddOpenOnEnter] = useState(false);
   const {
     data: detail,
     isPending,
@@ -123,76 +121,72 @@ function CheckupDetail({ petSn, ckupRcdSn }) {
   );
   const recordPet = pets?.find((item) => item.petSn === petSn);
 
-  const selectTab = (key) => {
-    setIsAddOpenOnEnter(false);
-    setTabKey(key);
-  };
-
-  const goAttachments = () => {
-    setIsAddOpenOnEnter(true);
-    setTabKey('attachments');
-  };
-
   return (
     <SubPageLayout
       {...LAYOUT_PROPS}
       sideBottom={<PetBadge pet={recordPet} variant="card" />}
     >
-      <PetBadge pet={recordPet} variant="pill" />
-      {otherSavedCheckups.length > 0 && (
-        <p role="status" className="flex flex-wrap gap-x-4 gap-y-1">
-          {otherSavedCheckups.map((saved) => (
-            <Link
-              key={saved.ckupRcdSn}
-              to={generatePath(PATHS.HEALTH_CHECKUP_DETAIL, {
-                petSn: saved.petSn,
-                ckupRcdSn: saved.ckupRcdSn,
-              })}
-              state={state}
-              className="font-semibold text-brand-600 hover:underline hover:underline-offset-3"
-            >
-              {saved.petNm} 기록 보기
-            </Link>
-          ))}
-        </p>
-      )}
+      {/** 카드 간격·숫자 정렬은 본문에만. 공용 「‹ 목록으로」는 커뮤니티 상세와 같은 모양으로 둔다 */}
+      <div className="flex flex-col gap-7 tabular-nums antialiased">
+        <PetBadge pet={recordPet} variant="pill" />
+        {otherSavedCheckups.length > 0 && (
+          <p role="status" className="flex flex-wrap gap-x-4 gap-y-1">
+            {otherSavedCheckups.map((saved) => (
+              <Link
+                key={saved.ckupRcdSn}
+                to={generatePath(PATHS.HEALTH_CHECKUP_DETAIL, {
+                  petSn: saved.petSn,
+                  ckupRcdSn: saved.ckupRcdSn,
+                })}
+                state={state}
+                className="font-semibold text-brand-600 hover:underline hover:underline-offset-3"
+              >
+                {saved.petNm} 기록 보기
+              </Link>
+            ))}
+          </p>
+        )}
 
-      <CheckupInfoCard checkup={checkup} pets={pets} />
+        <CheckupInfoCard checkup={checkup} pets={pets} />
 
-      <div className="flex flex-col gap-5">
-        <DetailTabs selectedKey={tabKey} counts={counts} onSelect={selectTab} />
-        <div
-          role="tabpanel"
-          id={getPanelId(tabKey)}
-          aria-labelledby={getTabId(tabKey)}
-        >
-          {tabKey === 'result' && (
-            <div className={PANEL}>
-              <ResultsTab detail={detail} onGoAttachments={goAttachments} />
-            </div>
-          )}
-          {tabKey === 'attachments' && (
-            <AttachmentTab
-              petSn={petSn}
-              ckupRcdSn={ckupRcdSn}
-              attachments={detail.attachments}
-              isAddOpenInitially={isAddOpenOnEnter}
-            />
-          )}
-          {tabKey === 'prescription' && (
-            <PrescriptionTab
-              petSn={petSn}
-              ckupRcdSn={ckupRcdSn}
-              prescriptions={detail.prescriptions}
-            />
-          )}
-          {tabKey === 'prevention' && (
-            <PreventionTab
-              petSn={petSn}
-              ckupRcdSn={ckupRcdSn}
-              preventions={detail.preventions}
-            />
-          )}
+        <div className="flex flex-col gap-5">
+          <DetailTabs
+            selectedKey={tabKey}
+            counts={counts}
+            onSelect={setTabKey}
+          />
+          <div
+            role="tabpanel"
+            id={getPanelId(tabKey)}
+            aria-labelledby={getTabId(tabKey)}
+          >
+            {tabKey === 'result' && (
+              <div className={PANEL}>
+                <ResultsTab detail={detail} />
+              </div>
+            )}
+            {tabKey === 'attachments' && (
+              <AttachmentTab
+                petSn={petSn}
+                ckupRcdSn={ckupRcdSn}
+                attachments={detail.attachments}
+              />
+            )}
+            {tabKey === 'prescription' && (
+              <PrescriptionTab
+                petSn={petSn}
+                ckupRcdSn={ckupRcdSn}
+                prescriptions={detail.prescriptions}
+              />
+            )}
+            {tabKey === 'prevention' && (
+              <PreventionTab
+                petSn={petSn}
+                ckupRcdSn={ckupRcdSn}
+                preventions={detail.preventions}
+              />
+            )}
+          </div>
         </div>
       </div>
     </SubPageLayout>

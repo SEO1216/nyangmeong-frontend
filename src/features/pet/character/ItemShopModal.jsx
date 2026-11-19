@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import { useState } from 'react';
 import Badge from '@/components/Badge';
+import LoadError from '@/components/LoadError';
 import Modal from '@/components/Modal';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import { showToast } from '@/components/toastStore';
@@ -157,9 +158,9 @@ export default function ItemShopModal({ pet, worn, onClose }) {
         </>
       }
     >
-      <div className="grid gap-6 px-6 py-5 min-[761px]:min-h-0 min-[761px]:flex-1 min-[761px]:grid-cols-[260px_minmax(0,1fr)] min-[761px]:gap-0 min-[761px]:py-0">
-        <div className="flex flex-col gap-3 min-[761px]:min-h-0 min-[761px]:overflow-y-auto min-[761px]:border-r min-[761px]:border-line-soft min-[761px]:p-4">
-          <div className="mx-auto w-40 min-[761px]:w-[180px]">
+      <div className="grid gap-6 px-6 py-5 min-[760px]:min-h-0 min-[760px]:flex-1 min-[760px]:grid-cols-[260px_minmax(0,1fr)] min-[760px]:gap-0 min-[760px]:py-0">
+        <div className="flex flex-col gap-3 min-[760px]:min-h-0 min-[760px]:overflow-y-auto min-[760px]:border-r min-[760px]:border-line-soft min-[760px]:p-4">
+          <div className="mx-auto w-40 min-[760px]:w-[180px]">
             <WearPreview pet={pet} itemSns={previewSns} onFail={revertTo} />
           </div>
           <button
@@ -203,20 +204,15 @@ export default function ItemShopModal({ pet, worn, onClose }) {
             </ul>
           )}
         </div>
-        <div className="flex min-w-0 flex-col gap-4 min-[761px]:min-h-0 min-[761px]:gap-2 min-[761px]:px-5 min-[761px]:pt-2 min-[761px]:pb-0">
+        <div className="flex min-w-0 flex-col gap-4 min-[760px]:min-h-0 min-[760px]:gap-2 min-[760px]:px-5 min-[760px]:pt-2 min-[760px]:pb-0">
           <PartTabs value={part} onChange={setPart} />
-          <div className="grid grid-cols-3 content-start gap-2 p-[3px] min-[761px]:min-h-0 min-[761px]:flex-1 min-[761px]:grid-cols-4 min-[761px]:overflow-y-auto">
+          <div className="grid grid-cols-3 content-start gap-2 p-1 min-[760px]:min-h-0 min-[760px]:flex-1 min-[760px]:grid-cols-4 min-[760px]:overflow-y-auto">
             {isShopError && (
-              <p className="col-span-full py-6 text-center text-muted">
-                상점을 불러오지 못했어요{' '}
-                <button
-                  type="button"
-                  onClick={() => refetch()}
-                  className="font-semibold text-brand-600 underline"
-                >
-                  다시 시도
-                </button>
-              </p>
+              <LoadError
+                message="상점을 불러오지 못했어요"
+                onRetry={() => refetch()}
+                className="col-span-full py-6"
+              />
             )}
             {visibleItems.map((item) => {
               const isOwned = item.hldYn;

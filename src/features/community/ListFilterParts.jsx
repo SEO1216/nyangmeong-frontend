@@ -1,4 +1,10 @@
 import { RotateCcw, SlidersHorizontal } from 'lucide-react';
+import {
+  BTN_SECONDARY,
+  FILTER_CHIP,
+  FILTER_CHIP_ON,
+} from '@/components/buttonStyles';
+import Checkbox from '@/components/Checkbox';
 
 /** 라벨을 위에 두고 아래에 입력을 놓는 한 칸. 펫돌봄·실종센터 목록 필터가 같이 쓴다 */
 export function FilterField({ label, className = '', children }) {
@@ -14,7 +20,7 @@ export function Chips({ name, label, options, value, onChange }) {
     <div
       role="radiogroup"
       aria-label={label}
-      className="flex min-w-0 flex-wrap gap-1.5"
+      className="flex min-w-0 flex-wrap gap-2"
     >
       {options.map((option) => (
         <label key={option.value}>
@@ -26,7 +32,10 @@ export function Chips({ name, label, options, value, onChange }) {
             onChange={() => onChange(option.value)}
             className="peer sr-only"
           />
-          <span className="inline-flex h-10 cursor-pointer items-center rounded-full border border-input-line bg-white px-3.5 text-sm font-medium text-ink-2 peer-checked:border-brand-500 peer-checked:bg-brand-500 peer-checked:font-semibold peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500/30 hover:border-line-strong peer-disabled:cursor-not-allowed peer-disabled:opacity-45">
+          {/** 고른 칩은 필터 칩 선택 모양(연한 청록). 안 고른 칩 hover는 바탕을 옅게 */}
+          <span
+            className={`${value === option.value ? FILTER_CHIP_ON : `${FILTER_CHIP} hover:bg-surface-2`} cursor-pointer peer-focus-visible:ring-focus`}
+          >
             {option.label}
           </span>
         </label>
@@ -43,14 +52,14 @@ export function FilterToggle({ controls, isOpen, onToggle, activeCount }) {
       aria-expanded={isOpen}
       aria-controls={controls}
       onClick={onToggle}
-      className="col-span-full inline-flex h-10 w-fit items-center gap-1.5 rounded-md border border-line bg-white px-4 font-semibold hover:border-line-strong hover:bg-surface-2 min-[761px]:hidden"
+      className={`${BTN_SECONDARY} col-span-full w-fit min-[761px]:hidden`}
     >
       <SlidersHorizontal size={16} aria-hidden="true" />
       상세 필터
       {activeCount > 0 && (
         <span
           aria-label={`적용된 필터 ${activeCount}개`}
-          className="min-w-5 rounded-full bg-brand-500 px-1.5 text-xs leading-5 text-white"
+          className="min-w-5 rounded-full bg-brand-500 px-1 text-xs leading-5 text-white"
         >
           {activeCount}
         </span>
@@ -69,7 +78,7 @@ export function FilterActions({ onReset, className = '', children }) {
       <button
         type="button"
         onClick={onReset}
-        className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-md px-0 text-sm font-semibold text-muted hover:text-ink"
+        className="ml-auto inline-flex h-8 items-center gap-2 rounded-md px-0 text-sm font-semibold text-muted hover:text-ink"
       >
         <RotateCcw size={14} aria-hidden="true" />
         초기화
@@ -81,14 +90,12 @@ export function FilterActions({ onReset, className = '', children }) {
 /** 체크 옵션(내 글만 보기 등) */
 export function CheckOption({ checked, onChange, children }) {
   return (
-    <label className="flex min-h-9 cursor-pointer items-center gap-2 text-sm font-medium text-ink-2">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-        className="size-4 accent-brand-500"
-      />
+    <Checkbox
+      checked={checked}
+      onChange={(event) => onChange(event.target.checked)}
+      className="min-h-9 text-sm font-medium text-ink-2"
+    >
       {children}
-    </label>
+    </Checkbox>
   );
 }

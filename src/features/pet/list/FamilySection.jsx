@@ -2,6 +2,7 @@ import { ChevronDown, Plus, User, X } from 'lucide-react';
 import { useState } from 'react';
 import Badge from '@/components/Badge';
 import Modal from '@/components/Modal';
+import { BTN_DANGER, BTN_SECONDARY } from '@/components/buttonStyles';
 import Skeleton from '@/components/Skeleton';
 import { showToast } from '@/components/toastStore';
 import { useCaregivers, useDeleteCaregiver } from '../queries';
@@ -43,20 +44,16 @@ function CaregiverDeleteDialog({ pet, caregiver, onClose }) {
       onClose={onClose}
       footer={
         <>
-          <button
-            type="button"
-            onClick={onClose}
-            className="h-11 min-w-0 flex-1 rounded-md border border-line bg-white font-semibold hover:border-line-strong hover:bg-surface-2"
-          >
+          <button type="button" onClick={onClose} className={BTN_SECONDARY}>
             취소
           </button>
           <button
             type="button"
             onClick={handleDelete}
             disabled={deleteCaregiver.isPending}
-            className="h-11 min-w-0 flex-1 rounded-md bg-danger font-semibold text-white hover:bg-[#983a2f] disabled:bg-surface-3 disabled:text-line-strong"
+            className={BTN_DANGER}
           >
-            해제
+            해제하기
           </button>
         </>
       }
@@ -71,9 +68,7 @@ const MEMBER_CARD =
 const MOBILE_CARD =
   'relative flex min-w-0 items-center gap-1.5 rounded-card border border-line bg-white py-2.5 pr-2 pl-3 text-left';
 
-const CO_PARENT_BADGE = (
-  <Badge className="bg-tone-gray-bg text-tone-gray-fg">공동양육</Badge>
-);
+const CO_PARENT_BADGE = <Badge tone="gray">공동양육</Badge>;
 
 function Avatar({ className = 'size-9' }) {
   return (
@@ -88,7 +83,7 @@ function Avatar({ className = 'size-9' }) {
 const REMOVE_BUTTON =
   'grid size-7 place-items-center rounded-full text-subtle hover:bg-surface-2 hover:text-ink';
 
-/** 761px 이상: 이름·배지·연동일을 세로로 쌓은 카드. 이름은 한 줄 말줄임, [✕]는 오른쪽 위 */
+/** 760px 이상: 이름·배지·연동일을 세로로 쌓은 카드. 이름은 한 줄 말줄임, [✕]는 오른쪽 위 */
 function MemberCard({ caregiver, onRemove }) {
   return (
     <li className={MEMBER_CARD}>
@@ -143,7 +138,7 @@ function MobileCaregiverList({ caregivers, onRemove }) {
               type="button"
               onClick={() => onRemove(caregiver)}
               aria-label={`${caregiver.mbrNcnm} 가족에서 삭제`}
-              className={`${REMOVE_BUTTON} relative shrink-0 before:absolute before:-inset-y-2 before:-right-2 before:-left-1 before:content-['']`}
+              className={`${REMOVE_BUTTON} relative shrink-0 before:absolute before:-inset-2 before:content-['']`}
             >
               <X className="size-4" aria-hidden="true" />
             </button>
@@ -159,7 +154,7 @@ function MobileCaregiverList({ caregivers, onRemove }) {
         >
           {isExpanded
             ? '접기'
-            : `${caregivers.length - MOBILE_COLLAPSED_COUNT}명 더보기`}
+            : `더보기 +${caregivers.length - MOBILE_COLLAPSED_COUNT}`}
           <ChevronDown
             className={`size-4 ${isExpanded ? 'rotate-180' : ''}`}
             aria-hidden="true"
@@ -171,9 +166,9 @@ function MobileCaregiverList({ caregivers, onRemove }) {
 }
 
 const GRID =
-  'grid grid-cols-2 gap-3 min-[761px]:grid-cols-3 min-[1101px]:grid-cols-5';
+  'grid grid-cols-2 gap-3 min-[760px]:grid-cols-3 min-[1100px]:grid-cols-5';
 
-/** 공동양육자 시점, 761px 이상: 이름·배지 줄 아래에 주양육자 닉네임 한 줄 (가족 섹션 대신) */
+/** 공동양육자 시점, 760px 이상: 이름·배지 줄 아래에 주양육자 닉네임 한 줄 (가족 섹션 대신) */
 export function OwnerLine({ pet }) {
   const { data: caregivers = [], isPending } = useCaregivers(pet.petSn);
   const owner = caregivers.find(
@@ -221,7 +216,7 @@ export default function FamilySection({ pet, onInvite }) {
     );
   }
 
-  /** 공동양육자 시점: 761px 이상은 이름 줄 아래 한 줄(OwnerLine)이라 섹션이 없고, 모바일만 한 줄 항목. 삭제·초대 없음 */
+  /** 공동양육자 시점: 760px 이상은 이름 줄 아래 한 줄(OwnerLine)이라 섹션이 없고, 모바일만 한 줄 항목. 삭제·초대 없음 */
   if (isCoParent) {
     const owner = caregivers.find(
       (caregiver) => caregiver.brupRoleCd === BRUP_ROLE.PRIMARY,
@@ -250,7 +245,7 @@ export default function FamilySection({ pet, onInvite }) {
     );
   }
 
-  /** 주양육자 시점: 연동된 공동양육자 전원, 상한 5명. 761px 이상은 점선 초대 카드, 모바일은 제목 옆 [+ 초대] */
+  /** 주양육자 시점: 연동된 공동양육자 전원, 상한 5명. 760px 이상은 점선 초대 카드, 모바일은 제목 옆 [+ 초대] */
   const coParents = caregivers.filter(
     (caregiver) => caregiver.brupRoleCd === BRUP_ROLE.CO_PARENT,
   );
@@ -289,7 +284,7 @@ export default function FamilySection({ pet, onInvite }) {
           type="button"
           onClick={handleMobileInvite}
           aria-disabled={isFull}
-          className={`relative hidden h-8 items-center gap-1 rounded-full px-3 text-[13px] font-semibold before:absolute before:-inset-y-1.5 before:inset-x-0 before:content-[''] max-[760px]:inline-flex ${isFull ? 'bg-surface-3 text-subtle' : 'bg-brand-50 text-brand-600'}`}
+          className={`relative hidden h-8 items-center gap-1 rounded-full px-3 text-badge font-semibold before:absolute before:-inset-y-1.5 before:inset-x-0 before:content-[''] max-[760px]:inline-flex ${isFull ? 'bg-surface-3 text-subtle' : 'bg-brand-50 text-brand-600'}`}
         >
           <Plus className="size-3.5" aria-hidden="true" />
           초대

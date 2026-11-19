@@ -11,6 +11,7 @@ import { useCareList } from '@/features/community/careQueries';
 import CareList from '@/features/community/care/CareList';
 import SubPageLayout from '@/layouts/SubPageLayout';
 import { PATHS } from '@/routes/paths';
+import LoadError from '@/components/LoadError';
 import Skeleton from '@/components/Skeleton';
 
 const PAGE_SIZE = 10;
@@ -28,16 +29,16 @@ function CareCardSkeleton({ hasThumbOnMobile }) {
   return (
     <div
       aria-hidden="true"
-      className="grid h-[255px] grid-cols-[minmax(0,1fr)_200px] gap-x-8 gap-y-3.5 rounded-[14px] border border-[#e2e7e7] bg-white px-7 py-6 max-[760px]:h-auto max-[760px]:grid-cols-1 max-[760px]:gap-3 max-[760px]:px-4 max-[760px]:pt-4 max-[760px]:pb-[18px]"
+      className="grid h-[255px] grid-cols-[minmax(0,1fr)_200px] gap-x-8 gap-y-4 rounded-[14px] border border-line bg-white px-7 py-6 max-[760px]:h-auto max-[760px]:grid-cols-1 max-[760px]:gap-3 max-[760px]:px-4 max-[760px]:pt-4 max-[760px]:pb-5"
     >
       <div className="min-w-0 max-[760px]:order-2">
         <div className="flex gap-2">
-          <Skeleton className="h-[22px] w-14 rounded-full" />
-          <Skeleton className="h-[22px] w-14 rounded-full" />
-          <Skeleton className="h-[22px] w-[72px] rounded-full" />
+          <Skeleton className="h-6 w-14 rounded-full" />
+          <Skeleton className="h-6 w-14 rounded-full" />
+          <Skeleton className="h-6 w-[72px] rounded-full" />
         </div>
         <Skeleton className="mt-3 h-[22px] w-2/3" />
-        <Skeleton className="mt-3.5 h-3.5 w-full" />
+        <Skeleton className="mt-4 h-3.5 w-full" />
         <Skeleton className="mt-2 h-3.5 w-1/2" />
         <div className="mt-4 flex gap-4">
           <Skeleton className="h-3.5 w-24" />
@@ -48,7 +49,7 @@ function CareCardSkeleton({ hasThumbOnMobile }) {
       <Skeleton
         className={`col-start-2 row-span-2 row-start-1 min-h-[132px] self-stretch rounded-[10px] ${hasThumbOnMobile ? '' : 'max-[760px]:hidden'} max-[760px]:order-1 max-[760px]:col-start-1 max-[760px]:row-span-1 max-[760px]:row-start-auto max-[760px]:aspect-[16/9] max-[760px]:min-h-0`}
       />
-      <div className="flex items-center gap-2 border-t border-[#e2e7e7] pt-3.5 max-[760px]:order-3">
+      <div className="flex items-center gap-2 border-t border-line pt-4 max-[760px]:order-3">
         <Skeleton className="size-6 rounded-full" />
         <Skeleton className="h-3.5 w-20" />
         <Skeleton className="h-3.5 w-28" />
@@ -62,12 +63,12 @@ function CareListSkeleton() {
   return (
     <div
       aria-busy="true"
-      className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 border-t border-line pt-6 max-[1101px]:grid-cols-1"
+      className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 max-[1101px]:grid-cols-1"
     >
       <div className="flex min-w-0 flex-col gap-5">
         <div
           aria-hidden="true"
-          className="grid grid-cols-2 gap-x-9 gap-y-5 max-[760px]:grid-cols-1 max-[760px]:gap-y-4"
+          className="rounded-card border border-line bg-white p-5 grid grid-cols-2 gap-x-9 gap-y-5 max-[760px]:grid-cols-1 max-[760px]:gap-y-4"
         >
           <Skeleton className="hidden h-10 max-[760px]:block" />
           <Skeleton className="h-16 max-[760px]:hidden" />
@@ -75,7 +76,7 @@ function CareListSkeleton() {
           <Skeleton className="h-16 max-[760px]:hidden" />
           <Skeleton className="h-16 max-[760px]:hidden" />
         </div>
-        <div className="border-t border-line pt-4">
+        <div>
           <Skeleton className="h-9 w-full" />
         </div>
         <div className="flex flex-col gap-3">
@@ -87,7 +88,7 @@ function CareListSkeleton() {
       </div>
       <div
         aria-hidden="true"
-        className="flex h-[500px] flex-col gap-4 rounded-[14px] border border-[#e2e7e7] bg-white p-[22px] max-[1101px]:h-[477px]"
+        className="flex h-[500px] flex-col gap-4 rounded-[14px] border border-line bg-white p-6 max-[1101px]:h-[477px]"
       >
         <Skeleton className="h-5 w-32" />
         <Skeleton className="h-3.5 w-full" />
@@ -133,6 +134,7 @@ export default function CareListPage() {
     data: posts,
     isPending,
     isError,
+    refetch,
   } = useCareList({
     page,
     size: PAGE_SIZE,
@@ -168,9 +170,10 @@ export default function CareListPage() {
     body = <CareListSkeleton />;
   } else if (isError) {
     body = (
-      <p role="alert" className="text-muted">
-        게시글을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요
-      </p>
+      <LoadError
+        message="게시글을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요"
+        onRetry={() => refetch()}
+      />
     );
   } else {
     body = (
@@ -190,7 +193,6 @@ export default function CareListPage() {
       section="community"
       menu={PATHS.COMMUNITY_PETCARE}
       description={DESCRIPTION}
-      contentClassName="min-[1101px]:pt-[7px]"
     >
       {body}
     </SubPageLayout>

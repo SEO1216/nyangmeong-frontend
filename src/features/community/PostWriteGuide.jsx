@@ -2,10 +2,10 @@ import PostBadges from './PostBadges';
 import { BBS_DAILY, BBS_INFO } from './postCodes';
 
 const ITEM_CLASS =
-  'flex flex-col gap-1 border-t border-[#e2e7e7] py-3.5 first:border-t-0 first:pt-1.5';
+  'flex flex-col gap-1 border-t border-line py-4 first:border-t-0 first:pt-2';
 const TITLE_CLASS =
-  'flex flex-wrap items-center gap-x-1 text-base font-semibold text-[#1a3234]';
-const DESC_CLASS = 'text-sm leading-[1.6] text-[#566465]';
+  'flex flex-wrap items-center gap-x-1 text-base font-semibold text-ink';
+const DESC_CLASS = 'text-sm leading-[1.6] text-muted';
 
 /** 글쓰기·글수정 오른쪽 「이렇게 써 주세요」: 박스 없이 구분선으로 나뉜 안내(디자인 .wr-rail) */
 export default function PostWriteGuide() {
@@ -14,7 +14,7 @@ export default function PostWriteGuide() {
       <section aria-labelledby="post-guide-title">
         <h2
           id="post-guide-title"
-          className="pb-2 text-lg leading-[1.4] font-bold text-[#1a3234]"
+          className="pb-2 text-lg font-bold tracking-[-0.01em] text-ink"
         >
           이렇게 써 주세요
         </h2>

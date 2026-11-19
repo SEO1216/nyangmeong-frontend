@@ -9,9 +9,6 @@ const MAX_UNIT_LENGTH = 20;
 const MAX_MEMO_LENGTH = 200;
 
 const REQUIRED = <Required />;
-const OPTIONAL = (
-  <span className="ml-1 text-[13px] font-medium text-subtle">선택</span>
-);
 
 /**
  * [검사 종류 · 검사 항목 입력칸] (FN-HLT-007-01·02)
@@ -104,7 +101,7 @@ export default function LabItemForm({ form, errors, isEdit, onChange }) {
       <div className="flex flex-col gap-1.5">
         <div className="grid grid-cols-2 gap-x-8 gap-y-6 max-[760px]:grid-cols-1">
           <label className="flex flex-col gap-1.5">
-            <span className={LABEL}>참고범위 최소값{OPTIONAL}</span>
+            <span className={LABEL}>참고범위 최소값</span>
             <input
               value={form.rangeMin}
               inputMode="decimal"
@@ -115,7 +112,7 @@ export default function LabItemForm({ form, errors, isEdit, onChange }) {
             />
           </label>
           <label className="flex flex-col gap-1.5">
-            <span className={LABEL}>참고범위 최대값{OPTIONAL}</span>
+            <span className={LABEL}>참고범위 최대값</span>
             <input
               value={form.rangeMax}
               inputMode="decimal"
@@ -130,7 +127,7 @@ export default function LabItemForm({ form, errors, isEdit, onChange }) {
       </div>
 
       <label className="flex flex-col gap-1.5">
-        <span className={LABEL}>메모{OPTIONAL}</span>
+        <span className={LABEL}>메모</span>
         <input
           value={form.memo}
           maxLength={MAX_MEMO_LENGTH}

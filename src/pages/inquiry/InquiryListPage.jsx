@@ -2,6 +2,7 @@ import { Navigate, useSearchParams } from 'react-router-dom';
 import PageSkeleton from '@/components/PageSkeleton';
 import Skeleton from '@/components/Skeleton';
 import SkeletonCard from '@/components/SkeletonCard';
+import LoadError from '@/components/LoadError';
 import { INQUIRY_STATUS } from '@/features/inquiry/api';
 import InquiryList from '@/features/inquiry/InquiryList';
 import { useInquiries } from '@/features/inquiry/queries';
@@ -20,12 +21,14 @@ export default function InquiryListPage() {
     isPending,
     isFetching,
     isError,
+    refetch,
   } = useInquiries({ page, size: PAGE_SIZE, status });
   /** 서버 목록은 필터와 관계없는 전체 건수를 주지 않음: 필터가 켜졌을 때만 필터 없이 1건을 따로 물어 전체 건수(totalElements) 확보 */
   const {
     data: allInquiries,
     isFetching: isAllFetching,
     isError: isAllError,
+    refetch: refetchAll,
   } = useInquiries(
     { page: 1, size: 1, status: '' },
     { enabled: status !== '' },
@@ -41,9 +44,13 @@ export default function InquiryListPage() {
   if (isPending) return <InquiryListSkeleton />;
   if (isError || isAllError) {
     return (
-      <p role="alert" className="text-[#566465]">
-        문의를 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요
-      </p>
+      <LoadError
+        message="문의를 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요"
+        onRetry={() => {
+          refetch();
+          if (isAllError) refetchAll();
+        }}
+      />
     );
   }
 
@@ -71,7 +78,7 @@ function InquiryListSkeleton() {
     <PageSkeleton>
       <div
         aria-hidden="true"
-        className="flex min-h-[72px] items-center justify-between gap-3"
+        className="flex min-h-12 items-center justify-between gap-3"
       >
         <div className="flex gap-6">
           {[0, 1, 2].map((index) => (

@@ -33,13 +33,16 @@ import {
   pickType,
 } from './recordUtils';
 
+/** 산책 막대 그래프 높이: 꺾은선 그래프(LineChart 기본값)와 같게 그래프 폭 600 미만 230, 이상 260 */
+const getLineChartHeight = (width) => (width < 600 ? 230 : 260);
+
 /**
  * [건강기록 변화 카드]
  * - 지표 탭 5종 단일 선택, 최근 5건 기준 그래프 (FN-HLT-002-09·10)
  * - 0건·1건은 그래프 대신 안내
  * - 760px 이하: 지표 탭이 한 줄 가로 밀기이고 줄 끝에 걸쳐 잘린 탭은 반투명, 체중 그래프의 최대·목표·최소은 왼쪽 한 열
- * - initialTypeCd: 처음 고를 지표(대시보드 카드 [더보기], ※신규 정책). 5종이 아니거나 없으면 체중
- * - 지표 탭은 기록 항목 편집에서 켠 매일 기록만, 대시보드 카드 순서로. widgetIds가 null(고른 적 없음)이면 5종 모두 (※신규 정책, 2026-11-14)
+ * - initialTypeCd: 처음 고를 지표(대시보드 카드 「기록하기 ›」, ※신규 정책). 5종이 아니거나 없으면 체중
+ * - 지표 탭은 [대시보드 편집]·[항목 편집]에서 켠 매일 기록만, 대시보드 카드 순서로. widgetIds가 null(고른 적 없음)이면 5종 모두 (※신규 정책, 2026-11-14)
  *   고른 탭이 꺼지면(또는 처음 고를 지표가 꺼져 있으면) 첫 탭을 고름
  */
 export default function DailyTrendCard({
@@ -164,7 +167,8 @@ function TrendBody({ pet, goalBdwg, trend, type, isPc, onAddRecord }) {
   if (trend.isPending) {
     return (
       <div aria-busy="true">
-        <Skeleton className="h-[260px] max-[600px]:h-[220px]" />
+        {/* 산책 막대·꺾은선 그래프 높이(폭 600 이상 260, 미만 230)에 맞춤 */}
+        <Skeleton className="h-[260px] max-[600px]:h-[230px]" />
       </div>
     );
   }
@@ -218,6 +222,7 @@ function TrendBody({ pet, goalBdwg, trend, type, isPc, onAddRecord }) {
         points={chartPoints}
         formatValue={(value) => formatAmount(WALK, value)}
         ariaLabel={`산책 시간 막대그래프 · ${summary} · 점선은 하루 평균`}
+        height={getLineChartHeight}
       />
     );
   }

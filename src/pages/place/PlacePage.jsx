@@ -44,15 +44,15 @@ export default function PlacePage() {
     <div
       ref={attachContainer}
       style={{ '--sheet-peek': `${sheet.peekY}px` }}
-      className={`relative h-full border-t border-line bg-white md:grid ${
+      className={`relative h-full border-t border-line bg-white min-[760px]:grid ${
         isCollapsed
-          ? 'md:grid-cols-[64px_0_minmax(0,1fr)] lg:grid-cols-[72px_0_minmax(0,1fr)]'
-          : 'md:grid-cols-[64px_340px_minmax(0,1fr)] lg:grid-cols-[72px_400px_minmax(0,1fr)]'
+          ? 'min-[760px]:grid-cols-[64px_0_minmax(0,1fr)] min-[1100px]:grid-cols-[72px_0_minmax(0,1fr)]'
+          : 'min-[760px]:grid-cols-[64px_340px_minmax(0,1fr)] min-[1100px]:grid-cols-[72px_400px_minmax(0,1fr)]'
       }`}
     >
       <nav
         aria-label="장소 종류"
-        className="relative z-[3] hidden flex-col items-center gap-1 border-r border-line bg-white py-3 md:flex"
+        className="relative z-[3] hidden flex-col items-center gap-1 border-r border-line bg-white py-3 min-[760px]:flex"
       >
         <PlaceCategoryNav
           variant="rail"
@@ -97,19 +97,18 @@ export default function PlacePage() {
         onResearch={place.researchHere}
         onToggleCollapse={() => setIsCollapsed((prev) => !prev)}
       >
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-[5] flex flex-col gap-2 px-4 pt-3 md:hidden">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-[5] flex flex-col gap-2 px-4 pt-3 min-[760px]:hidden">
           <PlaceSearchForm
-            id="place-mq"
             q={search.q}
             category={search.category}
             onSearch={place.submitSearch}
             onType={place.typeSearch}
-            className="pointer-events-auto shadow-depth-md"
+            className="pointer-events-auto rounded-md shadow-depth-sm"
           />
           <div
             role="group"
             aria-label="장소 종류"
-            className="pointer-events-auto relative -mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none]"
+            className="pointer-events-auto relative -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]"
           >
             <PlaceCategoryNav
               variant="chips"

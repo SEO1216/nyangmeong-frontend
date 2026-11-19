@@ -42,9 +42,9 @@ const getCareDetail = (item, isDone, isShort = false) => {
 /**
  * [케어 항목 한 줄] (FN-HLT-003-12)
  * - 760px 미만은 항목마다 테두리 있는 둥근 칸(완료하면 칸 전체 초록). 투약 항목은 760px 미만 두 줄, 760px 이상은 [마지막 1회 취소]를 줄 오른쪽 끝에 둔 한 줄
- * - isMission: 오늘의 미션 묶음 줄. 줄 왼쪽 가장자리에 3px 세로 막대를 덧그림(들여쓰지 않음). 760px 이상은 줄이 붙어 있어 묶음 처음부터 끝까지 이어지고, 760px 미만은 칸마다 붙고 완료한 칸만 막대가 진한 색(warn) (※신규 정책)
  * - 줄에는 ⋮ 메뉴가 없음. 수정·삭제는 「케어 항목 관리」 모달에서만 (※신규 정책)
- * - 본문 클릭 = 완료 체크. 완료한 줄은 취소선 없이 줄 배경색과 이름·아이콘 색으로 표시 (※신규 정책)
+ * - 본문 클릭 = 완료 체크. 체크 동그라미 없이 완료한 줄은 줄 배경색과 이름·아이콘 색으로만 표시, 완료 여부는 aria-pressed로 알림 (※신규 정책)
+ * - 줄에는 검진상세 이동 링크가 없음. 연동 항목의 검진상세 이동은 「케어 항목 관리」 모달의 [검진상세에서 관리 ›]에서만 (※신규 정책)
  * - 모든 줄은 둘째 줄에 「케어리스트 연동」 배지가 있는 줄과 같은 최소 높이(74px). 둘째 줄이 없으면 이름이 세로 가운데. 760px 미만은 문구를 자르지 않아 둘째 줄이 감기면 그만큼 늘어남 (※신규 정책)
  * - isDone: 오늘 완료 여부(목록 응답에 없어 CareList가 완료 기록으로 계산)
  * - 케어미션 안 한 배지 아이콘은 마이페이지 케어미션과 같은 발바닥 (※신규 정책)
@@ -53,13 +53,14 @@ const getCareDetail = (item, isDone, isShort = false) => {
 export default function CareTile({
   item,
   isDone,
-  isMission = false,
   onCheck,
   onCancelLastDose,
   className = '',
 }) {
   const isDose = item.prscSn != null;
   const isLinked = isLinkedCareItem(item);
+  /** 줄 버튼 밖 칸은 투약 줄에만(복용 종료일·[마지막 1회 취소]) */
+  const hasSideArea = isDose;
   const isRegular = item.careZoneCd === CARE_ZONE.REGULAR;
   const dueBadge =
     isRegular && item.nxtmPrnmntYmd ? getDueBadge(item.nxtmPrnmntYmd) : null;
@@ -70,19 +71,13 @@ export default function CareTile({
   return (
     <div
       className={`grid grid-cols-[minmax(0,1fr)] content-start items-center border-b [grid-template-areas:'b'_'a'] max-[760px]:rounded-[10px] max-[760px]:border ${
-        isDose
+        hasSideArea
           ? "min-[760px]:grid-cols-[minmax(0,1fr)_auto] min-[760px]:[grid-template-areas:'b_a']"
           : ''
       } ${
         isDone
           ? 'border-brand-100 bg-brand-50 max-[760px]:border-brand-500 max-[760px]:bg-brand-100'
           : 'border-line-soft max-[760px]:border-line max-[760px]:bg-white'
-      } ${
-        isMission
-          ? `relative before:absolute before:top-0 before:-bottom-px before:left-0 before:w-[3px] before:bg-warn-line before:content-[''] max-[760px]:overflow-hidden ${
-              isDone ? 'max-[760px]:before:bg-warn' : ''
-            }`
-          : ''
       } ${className}`}
     >
       <button
@@ -91,11 +86,6 @@ export default function CareTile({
         className="flex min-h-[74px] min-w-0 items-center gap-2.5 px-2 py-3 text-left [grid-area:b]"
         onClick={() => onCheck(item)}
       >
-        <Icon
-          name={isDone ? 'check_circle' : 'radio_button_unchecked'}
-          filled={isDone}
-          className={isDone ? 'text-brand-500' : 'text-line-strong'}
-        />
         <span aria-hidden="true" className="grid place-items-center">
           <Icon
             name={toCareIcon(item.rprsIconId)}
@@ -178,9 +168,9 @@ export default function CareTile({
         )}
       </button>
 
-      {/** 투약 항목: 760px 미만은 둘째 줄에 복용 종료일·마지막 1회 취소, 760px 이상은 종료일은 이름 줄에 두고 취소만 줄 오른쪽 끝 */}
-      {isDose && (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pr-2 pb-3 pl-[76px] [grid-area:a] min-[760px]:p-0 min-[760px]:pr-3">
+      {/** 줄 버튼 밖 칸: 760px 미만은 둘째 줄(투약 복용 종료일·마지막 1회 취소), 760px 이상은 종료일은 이름 줄에 두고 [마지막 1회 취소]만 줄 오른쪽 끝 */}
+      {hasSideArea && (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pr-2 pb-3 pl-10.5 [grid-area:a] min-[760px]:p-0 min-[760px]:pr-3">
           {item.mdcnEndYmd && (
             <span className="text-sm text-subtle tabular-nums min-[760px]:hidden">
               ~{formatMonthDayDot(item.mdcnEndYmd)}

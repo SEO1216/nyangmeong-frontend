@@ -10,6 +10,7 @@ import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
  * - cancelLabel·onCancel: 왼쪽 버튼을 닫기가 아닌 다른 일(예: 다시 촬영하기)로 바꿀 때
  * - hasRequiredNote: 하단 왼쪽 "* 표시는 필수 항목이에요", isSubmitDisabled: 저장 비활성
  * - width: 가로 폭(px) 560·720, null이면 760
+ * - isFixedHeight: 내용과 상관없이 공용 Modal 고정 높이(660px, 화면이 작으면 화면 − 2rem)로 열고 폼 본문만 안에서 스크롤(처방·투약 모달)
  */
 export default function FormModal({
   title,
@@ -20,6 +21,7 @@ export default function FormModal({
   hasRequiredNote = true,
   hasFooter = true,
   width = 720,
+  isFixedHeight = false,
   onSubmit,
   onCancel,
   onClose,
@@ -36,7 +38,7 @@ export default function FormModal({
     <Modal
       title={title}
       isLarge
-      isAutoHeight
+      isAutoHeight={!isFixedHeight}
       width={width}
       isPending={isPending}
       onClose={onClose}
@@ -75,7 +77,7 @@ export default function FormModal({
       <form
         id={formId}
         noValidate
-        className="flex flex-col gap-5 px-6 py-5"
+        className={`flex flex-col gap-5 px-6 py-5 ${isFixedHeight ? 'min-h-0 flex-1 overflow-y-auto' : ''}`}
         onSubmit={handleSubmit}
       >
         {children}

@@ -1348,8 +1348,76 @@
 - 결과(2026-11-18): P1~P10 검증 통과(1회차), 추가-1~6 재검증 통과(3회차), 사람 확인. 기획과 달라진 것: 추가-1(28px)·추가-2(py-4)는 추가-3(입력 모달 제목 22px·제목 줄 py-3)·추가-5(확인 창 제목 18px)로 바뀜, 추가-4 isLarge가 아닌 모달 본문 안쪽 스크롤, 추가-6 `ConfirmModal` `isDanger`(일정 삭제만). P10은 `SelectedPetProvider`에 `refetch`, P1은 `summaryUtils` `toneKey`·`ItemSelect`도 고침
 - 연결 남음: 없음
 
+## SCR-COM-002 UI 통일 2-C · 가계부(SJM) 값·부품 정리 — 끝
+- 기능: (2 마일스톤의 세 번째 조각, 2026-11-18, 기준 `docs/ui-checklist.csv`) `features/expense`·`pages/mypage/Expense*`에 체크리스트 2·6·11·15·16·18·29·37·42·71·72·73·83·93·98 적용
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 C1~C10 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): C1~C10 검증 1회차 통과, 사람 확인. 기획과 달라진 것: `ExpenseDashboard` `lg:` → `min-[1100px]:`(C3 grep), 전체 선택(`ExpenseHistory`)도 `Checkbox`로 바꾸며 일부 선택 − 표시 없앰(사람 결정)
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 2-D · 반려동물(SJM) 값·부품 정리 — 끝
+- 기능: (2 마일스톤의 네 번째 조각, 2026-11-18, 기준 `docs/ui-checklist.csv`) `features/pet`·`pages/mypage/PetListPage`·`CharacterPage`·`InvitationPage`에 체크리스트 2·6·11·15·27·29·31·37·42·56·62·69·71·72·73·83·93·98 적용
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 D1~D10 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): D1~D10 검증 2회차 통과(1회차 실패: 390px에서 전환 점 11개 × 44px가 화면을 넘음 → 760 미만은 폭을 나눠 최대 44), 사람 확인. 기획과 달라진 것: `PetSlide`·`SentInvitations` 안 배지 복사본도 공용 `Badge`로, `PetFormModal` 라디오 직접 색 2개도 토큰으로, 확인 창 문구 "해제하기"·"거절하기"(사람 결정)
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 2-E · 포인트(SJM) 값·부품 정리 — 끝
+- 기능: (2 마일스톤의 다섯 번째 조각, 2026-11-18, 기준 `docs/ui-checklist.csv`) `features/point`·`pages/mypage/PointPage`·`components/StatLink`에 체크리스트 2·11·15·18·27·42·56·84·98 적용
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 E1~E9 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): E1~E8 검증 1회차 통과(E9는 확인만), 사람 확인. 기획과 달라진 것: 요약 3칸 경계 클래스 정리(모양 같음), 미완료 배지 바탕 `bg-tone-gray-bg` → 공용 회색 `bg-surface-2`
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 2-F · 고객센터·펫뉴스(KSJ) 값·부품 정리 — 끝
+- 기능: (2 마일스톤의 여섯 번째 조각, 2026-11-18, 기준 `docs/ui-checklist.csv`) `features`·`pages`의 `inquiry`·`notice`·`faq`·`news`에 체크리스트 2·9·11·12·13·15·16·27·29·56·62·69·71·72·74·76·93·98 적용
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 F1~F10 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): F1~F9 검증 2회차 통과(1회차: F7 문의 유형 칸 빨간 테두리, F8 수정 화면 `LoadError`), F10 확인만, 사람 확인. 기획과 달라진 것: 탭 패널 id가 고른 탭 id(공용 `UnderlineTabs` 방식), FAQ 검색창 아래 여백 16 → 4, 공지 고정 배지도 `Badge`, 문의 상세 [1:1 문의 목록으로]도 `BTN_SECONDARY`
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 2-G · 펫이야기·커뮤니티 공용 부품(KSJ) 값·부품 정리 — 끝
+- 기능: (2 마일스톤의 일곱 번째 조각, 2026-11-18, 기준 `docs/ui-checklist.csv`) `features/community`의 펫이야기·공용 파일과 `pages/community/Post*Page`에 체크리스트 2·6·9·11·12·13·15·16·18·27·29·56·62·71·72·73·74·76·79·80·93·98 적용
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 G1~G10 / `yarn -s lint`·`yarn -s build` 0
+
+## SCR-COM-002 UI 통일 2-H · 펫돌봄(KSJ) 값·부품 정리 — 끝
+- 기능: (2 마일스톤의 여덟 번째 조각, 2026-11-18, 기준 `docs/ui-checklist.csv`) `features/community/care`와 `pages/community/Care*Page`에 체크리스트 2·6·9·11·12·13·16·18·27·29·56·62·71·72·74·79·80·93·98 적용
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 H1~H8 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): H1~H8 검증 1회차 통과, 사람 확인. 기획과 달라진 것: H7 페이지 이동 간격은 이미 48/32px라 그대로, 동의 체크박스 `aria-invalid` 대신 바깥 칸 `data-invalid`
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 2-I · 실종센터(KSJ) 값·부품 정리 — 끝
+- 기능: (2 마일스톤의 아홉 번째 조각, 2026-11-18, 기준 `docs/ui-checklist.csv`) `features/community/missing`과 `pages/community/Missing*Page`에 체크리스트 2·6·9·11·12·13·16·18·27·29·56·62·71·72·74·79·80·93·98 적용
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 I1~I8 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): I1~I8 검증 1회차 통과, 사람 확인. 기획과 달라진 것: 페이지 이동 간격은 이미 48/32px라 그대로, 찾았어요 테두리는 초록 토큰이 없어 `border-tone-green-fg/12`, `missing/` 공용 부품 4개 변경이 펫돌봄 화면에도 반영
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 2-J · 회원정보·탈퇴(YAY) 값·부품 정리 — 끝
+- 기능: (2 마일스톤의 열 번째 조각, 2026-11-18, 기준 `docs/ui-checklist.csv`) `features/member`의 `profile/`·`withdraw/`(완료 화면 `WithdrawComplete` 제외)·`shared/profileStyles.js`와 `pages/mypage/ProfileEditPage`·`WithdrawPage`에 체크리스트 2·6·9·27·62·71·72·73·88·92·98 적용. 로그인·가입 계열(`login`·`signup`·`password`·`recovery`·`shared/auth*`·`WithdrawComplete`)은 2-K, `place`는 2-L
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 J1~J8 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): J1~J8 검증 1회차 통과, 사람 확인. 기획과 달라진 것: 탈퇴 버튼 반반 폭은 PC만(`min-[760px]:flex-1`, 모바일은 세로로 쌓여 꽉 참), `SnsLinkCard` [연동하기]의 `disabled:opacity-50` 빼고 `BTN_SECONDARY` 비활성 모양
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 2-K · 로그인·가입 계열(YAY) 값·부품 정리 — 끝
+- 기능: (2 마일스톤의 열한 번째 조각, 2026-11-18, 기준 `docs/ui-checklist.csv`) `features/member`의 `login/`·`signup/`·`password/`·`recovery/`·`shared/Auth*`·`authStyles.js`·`TermsModal.jsx`·`withdraw/WithdrawComplete.jsx`와 `pages/auth/*`에 체크리스트 2·12·37·71·72·73·83·94와 분기점 규칙 적용. `place`는 2-L
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 K1~K9 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): K1~K9 검증 1회차 통과, 사람 확인. 기획과 달라진 것: 94 나머지 세 쌍은 사람 결정(인증번호 보내기·중복확인·회원가입), SNS 로그인 버튼 그대로, K2 grep은 2-J `profileStyles` `SIDE_BTN` 5줄이 걸려 auth 쪽 0건으로 판단
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 2-L · 플레이스(YAY) 값·부품 정리 — 끝
+- 기능: (2 마일스톤의 열두 번째 조각, 2026-11-18, 기준 `docs/ui-checklist.csv`) `features/place`와 `pages/place/PlacePage`에 체크리스트 2·5·9·12·15·16·26·27·37·56·62·66·98과 분기점 규칙 적용
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 L1~L9 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-18): L1~L9 검증 2회차 통과(1회차는 로컬 카카오 지도 키 없음으로 L2·L5·L8 화면 확인 못 함, 코드 변경 없이 키를 넣고 통과), 사람 확인. 기획과 달라진 것: H1은 28px 대신 24px 유지(사람 결정, 체크리스트 5행과 다름)
+- 연결 남음: 없음
+
 ## SCR-COM-002 UI 통일 2 · 다른 담당 폴더 적용 — 대기
-- 남은 것(2026-11-18): 건강기록은 2-A·2-B로 끝. 아래 다른 도메인(기준 `docs/ui-checklist.csv`), 회원 `profileStyles` → `components/formStyles`, 삭제 확인 창 `isDanger`
+- 남은 것(2026-11-18): 건강기록은 2-A·2-B, 가계부는 2-C, 반려동물(`pet`)은 2-D, 포인트(`point`)는 2-E, 고객센터·펫뉴스(`inquiry`·`notice`·`faq`·`news`)는 2-F, 펫이야기·커뮤니티 공용 부품은 2-G, 펫돌봄(`care/`)은 2-H, 실종센터(`missing/`)는 2-I, 회원정보·탈퇴(`member/profile`·`withdraw`)는 2-J, 로그인·가입 계열은 2-K, 플레이스(`place`)는 2-L로 끝. 담당 폴더 조각은 모두 끝남(이 마일스톤을 끝낼지는 사람이 정함). 아래 다른 도메인(기준 `docs/ui-checklist.csv`), 회원 `profileStyles` → `components/formStyles`, 삭제 확인 창 `isDanger`
 - 기능: 같은 기준을 `features/health`(JAJ), `pet`·`point`·`expense`(SJM), `community`·`inquiry`·`notice`·`faq`·`news`(KSJ), `member`·`place`(YAY)에 적용. 도메인 하나씩 나눠 진행하고 PR 본문·팀 채널로 담당자에게 알린다. 체크리스트 6·12·15·16·18·26·27·31·37·56·58·62·66·68·69·71~74·76·79·80·83·84·94·96·98
 - 버그 후보(담당자에게 먼저 알림): 78 펫이야기 상세 내 글에도 신고 버튼(`community/PostDetail.jsx`, KSJ), 82 `ZONES` 순서 반대(`health/CareChipPicker.jsx`·`CareItemFields.jsx`, JAJ)
 - 이번엔 안 함: 기준 미정 18행(55·57·61·63·64·65·67·70·77·81·85·88~91), 메모 "변경없음"·"잠시 패스"·"정하지 않음" 행(8·17·19·21·25·30·35·75·86·97)

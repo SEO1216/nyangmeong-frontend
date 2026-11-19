@@ -1,10 +1,12 @@
 import {
   keepPreviousData,
+  queryOptions,
   useMutation,
   useQueries,
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { showToast } from '@/components/toastStore';
 import { expenseKeys } from '@/features/expense/queries';
 import { notificationKeys } from '@/features/notification/queries';
@@ -31,6 +33,7 @@ import {
 } from './api';
 import {
   analyzeLabPdf,
+  bulkSavePrescriptions,
   cancelPrevention,
   createAttachment,
   createEtcInspection,
@@ -512,7 +515,7 @@ export const useCheckupDetail = ({ petSn, ckupRcdSn }) =>
 /** 검진상세 변경: 변수의 ckupRcdSn 상세를 다시 읽고, 케어 항목이 바뀌는 변경은 케어리스트도 재조회 */
 const useCheckupDetailMutation = (
   mutationFn,
-  { hasCareItems = false } = {},
+  { hasCareItems = false, onError = showErrorToast } = {},
 ) => {
   const queryClient = useQueryClient();
 
@@ -526,7 +529,7 @@ const useCheckupDetailMutation = (
         queryClient.invalidateQueries({ queryKey: healthKeys.careItems });
       }
     },
-    onError: showErrorToast,
+    onError,
   });
 };
 
@@ -567,6 +570,15 @@ export const useCreatePrescription = () =>
 export const useUpdatePrescription = () =>
   useCheckupDetailMutation(updatePrescription, { hasCareItems: true });
 
+/** 처방약 일괄 저장: 칸별 400 오류는 모달이 약마다 보여 주므로 토스트를 띄우지 않음 */
+export const useBulkSavePrescriptions = () =>
+  useCheckupDetailMutation(bulkSavePrescriptions, {
+    hasCareItems: true,
+    onError: (error) => {
+      if (!error.fields) showErrorToast(error);
+    },
+  });
+
 export const useDeletePrescription = () =>
   useCheckupDetailMutation(deletePrescription, { hasCareItems: true });
 
@@ -588,14 +600,54 @@ export const useHealthSummary = (petSn) =>
     enabled: petSn != null,
   });
 
-/** 대시보드 고른 항목 id 배열(저장 순서). 저장한 적이 없으면 data가 null. 예전 브라우저 저장값은 이때 지움 */
-export const useHealthWidgets = (mbrSn) =>
-  useQuery({
+/**
+ * 미리 요청한 결과를 카드가 다시 부르지 않는 시간: 기본(staleTime 0)이면 카드가 나중에 그려질 때 같은 요청이 또 나감.
+ * 새로고침·저장은 setQueryData로 바로 바뀜
+ */
+const DASHBOARD_STALE_TIME = 5 * 60 * 1000;
+
+/** 대시보드 고른 항목 조회 옵션: useHealthWidgets와 미리 요청이 같이 씀 */
+const healthWidgetsQuery = (mbrSn) =>
+  queryOptions({
     queryKey: healthKeys.widgets(mbrSn),
     queryFn: () => {
       removeOldHealthWidgets(mbrSn);
       return getHealthWidgets();
     },
+    staleTime: DASHBOARD_STALE_TIME,
+  });
+
+/** AI 건강분석 리포트 조회 옵션: useHealthReport와 미리 요청이 같이 씀 */
+const healthReportQuery = (petSn) =>
+  queryOptions({
+    queryKey: healthKeys.healthReport(petSn),
+    queryFn: () => getHealthReport(petSn),
+    staleTime: DASHBOARD_STALE_TIME,
+    retry: false,
+  });
+
+/**
+ * 종합 건강기록: 반려동물이 정해지면 AI 리포트·대시보드 고른 항목을 건강 요약과 함께 미리 요청
+ * - 카드는 건강 요약·고른 항목이 끝난 뒤 그려져 요청이 맨 마지막에 나가던 것을 앞당김. 같은 키라 카드가 이 결과를 씀
+ */
+export const usePrefetchHealthDashboard = ({ petSn, mbrSn }) => {
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    if (petSn != null) queryClient.prefetchQuery(healthReportQuery(petSn));
+  }, [queryClient, petSn]);
+  /** 0마리면 대시보드를 그리지 않으므로 부르지 않음 */
+  const hasPet = petSn != null;
+  useEffect(() => {
+    if (hasPet && mbrSn != null) {
+      queryClient.prefetchQuery(healthWidgetsQuery(mbrSn));
+    }
+  }, [queryClient, hasPet, mbrSn]);
+};
+
+/** 대시보드 고른 항목 id 배열(저장 순서). 저장한 적이 없으면 data가 null. 예전 브라우저 저장값은 이때 지움 */
+export const useHealthWidgets = (mbrSn) =>
+  useQuery({
+    ...healthWidgetsQuery(mbrSn),
     enabled: mbrSn != null,
   });
 
@@ -625,10 +677,8 @@ export const useHealthIndicators = (petSn) =>
  */
 export const useHealthReport = (petSn) =>
   useQuery({
-    queryKey: healthKeys.healthReport(petSn),
-    queryFn: () => getHealthReport(petSn),
+    ...healthReportQuery(petSn),
     enabled: petSn != null,
-    retry: false,
   });
 
 /** AI 건강분석 리포트 새로고침. 성공하면 받은 리포트로 바꾸고, 실패 안내는 카드 안에서 */

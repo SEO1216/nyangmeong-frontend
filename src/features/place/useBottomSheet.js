@@ -7,7 +7,7 @@ const DRAG_THRESHOLD = 6;
 const SHEETS = ['peek', 'half', 'full'];
 const NEXT_SHEET = { peek: 'half', half: 'full', full: 'peek' };
 
-const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
+const isMobile = () => window.matchMedia('(width < 760px)').matches;
 
 // 모바일 바텀시트. peek(목록 머리만) → half → full 세 단계이고 손잡이를 끌거나 눌러 바꾼다
 export default function useBottomSheet() {

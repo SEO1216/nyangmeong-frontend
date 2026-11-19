@@ -2,7 +2,7 @@ import { User } from 'lucide-react';
 import { useState } from 'react';
 import Modal from '@/components/Modal';
 import { useCheckNicknameAvailability, useSetupNickname } from '../queries';
-import { PRIMARY_BTN, SIDE_BTN } from '../shared/authStyles';
+import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import AuthField from '../shared/AuthField';
 import { NICKNAME_MAX, isValidNickname } from '../shared/validate';
 import { SIGNUP_MESSAGES as MSG } from './signupMessages';
@@ -20,7 +20,7 @@ export default function NicknameModal({ savedNickname, onSaved, onClose }) {
   // 입력을 자르거나 지우지 않고 그대로 두고, 길이·문자 오류를 문구로 알린다
   const isTooLong = value.length > NICKNAME_MAX;
   const isValid = !isTooLong && isValidNickname(value);
-  // 빈 칸이면 오류를 띄우지 않는다. [중복 확인]·[설정 완료]가 isValid로 막힌다(추가-1)
+  // 빈 칸이면 오류를 띄우지 않는다. [중복확인]·[설정 완료]가 isValid로 막힌다(추가-1)
   const error = isTooLong
     ? MSG.nickTooLong
     : value && !isValid
@@ -75,7 +75,7 @@ export default function NicknameModal({ savedNickname, onSaved, onClose }) {
           type="button"
           disabled={!canSave}
           onClick={handleSave}
-          className={PRIMARY_BTN}
+          className={`${BTN_PRIMARY} w-full`}
         >
           닉네임 설정 완료
         </button>
@@ -111,9 +111,9 @@ export default function NicknameModal({ savedNickname, onSaved, onClose }) {
               type="button"
               onClick={handleCheck}
               disabled={!isValid || isSame || isBusy}
-              className={SIDE_BTN}
+              className={`${BTN_SECONDARY} min-w-22 shrink-0 whitespace-nowrap`}
             >
-              중복 확인
+              중복확인
             </button>
           }
         />

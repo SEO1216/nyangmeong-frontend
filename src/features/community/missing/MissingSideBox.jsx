@@ -10,8 +10,7 @@ import {
   MISSING_COMMENT_INPUT_ID,
 } from './missingUtils';
 
-const BOX_CLASS =
-  'rounded-[14px] border border-line bg-white px-[22px] pt-[22px] pb-5 shadow-sm';
+const BOX_CLASS = 'rounded-[14px] border border-line bg-white px-6 pt-6 pb-5';
 
 const GUIDE_OWNER = [
   ['반경 500m 먼저 찾기', '놀란 아이는 대부분 멀리 못 가고 근처에 숨어 있어요'],
@@ -35,7 +34,7 @@ const GUIDE_VISITOR = [
 function Guide({ title, items }) {
   return (
     <section aria-label={title}>
-      <h2 className="pb-3 text-lg leading-[1.4] font-bold text-ink">{title}</h2>
+      <h2 className="pb-3 text-lg font-bold text-ink">{title}</h2>
       <CheckList items={items} />
     </section>
   );
@@ -53,10 +52,8 @@ export function VisitorSide({ post }) {
     <>
       <aside aria-label="연락하기" className={BOX_CLASS}>
         <p className="text-sm text-muted">{post.petNm}를 보셨나요?</p>
-        <p className="mt-0.5 text-2xl font-bold tracking-[0.01em]">
-          {post.cnpl}
-        </p>
-        <ul className="mt-3.5 border-t border-line pt-3.5 text-sm text-ink-2">
+        <p className="mt-1 text-2xl font-bold tracking-[0.01em]">{post.cnpl}</p>
+        <ul className="mt-4 border-t border-line pt-4 text-sm text-ink-2">
           <li className="flex items-start gap-2 py-1">
             <CalendarDays
               size={18}
@@ -80,12 +77,12 @@ export function VisitorSide({ post }) {
         <button
           type="button"
           onClick={goComment}
-          className={`${BTN_PRIMARY} mt-[18px] w-full`}
+          className={`${BTN_PRIMARY} mt-4 w-full`}
         >
           <MessageCircle size={16} aria-hidden="true" />
           댓글로 제보하기
         </button>
-        <p className="mt-2.5 text-center text-sm leading-[1.6] text-muted">
+        <p className="mt-3 text-center text-sm leading-[1.6] text-muted">
           본 장소와 시간을 함께 알려 주세요
         </p>
       </aside>
@@ -108,10 +105,10 @@ export function OwnerSide({ post, onFound, onExtend }) {
     <>
       <aside
         aria-label="찾았어요 처리"
-        className={`${BOX_CLASS} ${found ? 'border-[#cfe3d6] bg-tone-green-bg' : ''}`}
+        className={`${BOX_CLASS} ${found ? 'border-tone-green-fg/12 bg-tone-green-bg' : ''}`}
       >
         {found ? (
-          <div className="flex flex-col items-center gap-1.5 py-2 text-center font-semibold">
+          <div className="flex flex-col items-center gap-2 py-2 text-center font-semibold">
             <PartyPopper
               size={36}
               aria-hidden="true"
@@ -123,7 +120,7 @@ export function OwnerSide({ post, onFound, onExtend }) {
             </p>
           </div>
         ) : expired ? (
-          <div className="flex flex-col items-center gap-1.5 py-2 text-center font-semibold">
+          <div className="flex flex-col items-center gap-2 py-2 text-center font-semibold">
             게시 기간이 끝났어요
             <p className="text-sm font-normal text-ink-2">
               다른 사용자에게는 이 글이 보이지 않아요
@@ -139,7 +136,7 @@ export function OwnerSide({ post, onFound, onExtend }) {
             <button
               type="button"
               onClick={onFound}
-              className={`${BTN_PRIMARY} mt-[18px] w-full`}
+              className={`${BTN_PRIMARY} mt-4 w-full`}
             >
               <PartyPopper size={16} aria-hidden="true" />
               찾았어요
@@ -153,7 +150,7 @@ export function OwnerSide({ post, onFound, onExtend }) {
                 30일 더 게시하기
               </button>
             )}
-            <p className="mt-2.5 text-center text-sm leading-[1.6] text-muted">
+            <p className="mt-3 text-center text-sm leading-[1.6] text-muted">
               &apos;찾았어요&apos;를 누르면 본문 · 사진 · 연락처 · 위치 · 댓글이
               다른 사용자에게 공개되지 않아요
             </p>

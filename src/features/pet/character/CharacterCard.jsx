@@ -73,18 +73,14 @@ export default function CharacterCard({
       {isNone && (
         <span
           aria-hidden="true"
-          className="absolute top-[34%] left-1/2 z-[3] -translate-x-1/2 text-xl font-bold text-subtle"
+          className="absolute top-[34%] left-1/2 z-[3] -translate-x-1/2 text-lg font-bold text-subtle"
         >
           ?
         </span>
       )}
       {(isRep || isError || isGenerating) && (
         <span className="absolute top-3 left-3 z-[4] flex flex-col items-start gap-1">
-          {isRep && (
-            <Badge tone="brand" className="bg-brand-500! text-white!">
-              대표
-            </Badge>
-          )}
+          {isRep && <Badge tone="solid">대표</Badge>}
           {isError && <Badge tone="amber">오류 확인 중</Badge>}
           {isGenerating && <Badge tone="amber">만드는 중</Badge>}
         </span>

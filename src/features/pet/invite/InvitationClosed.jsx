@@ -69,7 +69,7 @@ export default function InvitationClosed({ invtnSttsCd }) {
           {descriptions[1]}
         </p>
       </div>
-      <div className="flex items-center justify-end border-t border-line bg-[#fbfcfd] px-7 py-4 max-[760px]:px-5">
+      <div className="flex items-center justify-end border-t border-line bg-white px-7 py-4 max-[760px]:px-5">
         <Link
           to={PATHS.MYPAGE}
           className={`${BTN_PRIMARY} max-[760px]:h-11 max-[760px]:w-full`}

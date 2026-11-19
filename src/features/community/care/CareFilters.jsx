@@ -45,7 +45,7 @@ export default function CareFilters({ filters, onChange, onReset }) {
       id="care-filter"
       role="group"
       aria-label="필터"
-      className="grid grid-cols-2 gap-x-9 gap-y-5 max-[760px]:grid-cols-1 max-[760px]:gap-y-4"
+      className="rounded-card border border-line bg-white p-5 grid grid-cols-2 gap-x-9 gap-y-5 max-[760px]:grid-cols-1 max-[760px]:gap-y-4"
     >
       <FilterToggle
         controls="care-filter"

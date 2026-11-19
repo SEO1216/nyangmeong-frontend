@@ -1,6 +1,7 @@
 import { Pencil } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { BTN_PRIMARY } from '@/components/buttonStyles';
+import LoadError from '@/components/LoadError';
 import {
   PET_SE_BY_FILTER,
   PET_FILTERS,
@@ -26,13 +27,13 @@ function MissingCardSkeleton() {
   return (
     <div
       aria-hidden="true"
-      className="overflow-hidden rounded-[14px] border border-[#e2e7e7] bg-white"
+      className="overflow-hidden rounded-[14px] border border-line bg-white"
     >
       <Skeleton className="aspect-[4/3] w-full rounded-none" />
-      <div className="px-[18px] pt-4 pb-[18px]">
+      <div className="px-4 pt-4 pb-4">
         <Skeleton className="h-5 w-14 rounded-full" />
         <Skeleton className="mt-3 h-5 w-4/5" />
-        <Skeleton className="mt-3.5 h-3.5 w-full" />
+        <Skeleton className="mt-4 h-3.5 w-full" />
         <Skeleton className="mt-2 h-3.5 w-3/5" />
       </div>
     </div>
@@ -44,12 +45,12 @@ function MissingListSkeleton() {
   return (
     <div
       aria-busy="true"
-      className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 border-t border-line pt-6 max-[1100px]:grid-cols-1"
+      className="grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 max-[1100px]:grid-cols-1"
     >
       <div className="flex min-w-0 flex-col gap-5">
         <div
           aria-hidden="true"
-          className="grid grid-cols-2 gap-x-9 gap-y-5 max-[760px]:grid-cols-1 max-[760px]:gap-y-4"
+          className="rounded-card border border-line bg-white p-5 grid grid-cols-2 gap-x-9 gap-y-5 max-[760px]:grid-cols-1 max-[760px]:gap-y-4"
         >
           <Skeleton className="h-16" />
           <Skeleton className="h-16 max-[760px]:hidden" />
@@ -57,7 +58,7 @@ function MissingListSkeleton() {
           <Skeleton className="h-16 max-[760px]:hidden" />
           <Skeleton className="hidden h-10 max-[760px]:block" />
         </div>
-        <div className="border-t border-line pt-4">
+        <div>
           <Skeleton className="h-9 w-full" />
         </div>
         <ul className="grid grid-cols-3 gap-4 max-[1100px]:grid-cols-2 max-[560px]:grid-cols-1">
@@ -71,7 +72,7 @@ function MissingListSkeleton() {
       </div>
       <div
         aria-hidden="true"
-        className="flex h-[420px] flex-col gap-4 rounded-[14px] border border-[#e2e7e7] bg-white p-[22px] max-[1100px]:h-[600px]"
+        className="flex h-[420px] flex-col gap-4 rounded-[14px] border border-line bg-white p-6 max-[1100px]:h-[600px]"
       >
         <Skeleton className="h-5 w-32" />
         <Skeleton className="h-3.5 w-full" />
@@ -86,7 +87,7 @@ function MissingListSkeleton() {
 const writeAction = (
   <Link
     to={PATHS.COMMUNITY_MISSING_NEW}
-    className={`${BTN_PRIMARY} h-10! w-full text-base`}
+    className={`${BTN_PRIMARY} w-full text-base`}
   >
     <Pencil size={16} aria-hidden="true" />
     실종 신고 등록
@@ -114,6 +115,7 @@ export default function MissingListPage() {
     data: posts,
     isPending,
     isError,
+    refetch,
   } = useMissingList({
     page,
     size: PAGE_SIZE,
@@ -147,9 +149,10 @@ export default function MissingListPage() {
     body = <MissingListSkeleton />;
   } else if (isError) {
     body = (
-      <p role="alert" className="text-muted">
-        게시글을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요
-      </p>
+      <LoadError
+        message="게시글을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요"
+        onRetry={() => refetch()}
+      />
     );
   } else {
     body = (
@@ -170,7 +173,6 @@ export default function MissingListPage() {
       section="community"
       menu={PATHS.COMMUNITY_MISSING}
       description={DESCRIPTION}
-      contentClassName="min-[1101px]:pt-[7px]"
     >
       {body}
     </SubPageLayout>

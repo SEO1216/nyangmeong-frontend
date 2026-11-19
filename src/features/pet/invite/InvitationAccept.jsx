@@ -1,6 +1,7 @@
-import { Info } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Checkbox from '@/components/Checkbox';
+import NoticeBox from '@/components/NoticeBox';
 import SkeletonCard from '@/components/SkeletonCard';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import { showToast } from '@/components/toastStore';
@@ -28,16 +29,16 @@ function InvitePetCard({ pet, checked, disabled, onToggle }) {
   const desc = pet.vrtyDrctInptNm || pet.vrtyNm;
   return (
     <li>
-      <label
-        className={`relative flex flex-col items-center gap-1 rounded-box bg-surface-2 px-5 pt-[22px] pb-4 text-center shadow-[inset_0_0_0_1.5px_var(--color-line)] has-checked:bg-brand-50 has-checked:shadow-[inset_0_0_0_2px_var(--color-brand-500)] ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+      <div
+        className={`relative flex flex-col items-center gap-1 rounded-box bg-surface-2 px-5 pt-6 pb-4 text-center shadow-[inset_0_0_0_1.5px_var(--color-line)] has-checked:bg-brand-50 has-checked:shadow-[inset_0_0_0_2px_var(--color-brand-500)] ${disabled ? 'opacity-50' : ''}`}
       >
-        <input
-          type="checkbox"
+        {/* 카드 전체가 누르는 영역: 공용 체크박스 라벨을 카드 위에 덮고 네모는 왼쪽 위 */}
+        <Checkbox
           checked={checked}
           disabled={disabled}
           onChange={onToggle}
-          aria-label={`${pet.petNm} 수락`}
-          className="absolute top-3 left-3 size-5 cursor-[inherit] accent-brand-500"
+          ariaLabel={`${pet.petNm} 수락`}
+          className="absolute inset-0 z-[1] items-start! p-3"
         />
         <PetFace
           petSn={pet.petSn}
@@ -48,7 +49,7 @@ function InvitePetCard({ pet, checked, disabled, onToggle }) {
         />
         <b>{pet.petNm}</b>
         {desc && <span className="text-sm text-subtle">{desc}</span>}
-      </label>
+      </div>
     </li>
   );
 }
@@ -148,21 +149,15 @@ export default function InvitationAccept({
           {invitation.sndrMbrNcnm}님이 초대했어요
         </p>
       </div>
-      <div className="flex flex-col gap-5 px-[22px] pt-5 pb-[22px]">
+      <div className="flex flex-col gap-5 px-6 pt-5 pb-6">
         {isLimited && (
-          <p
-            role="status"
-            className="flex items-start gap-2.5 rounded-lg bg-warn-soft px-3.5 py-3 text-warn"
-          >
-            <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-            <span>
-              {petMaxCnt != null &&
-                `반려동물은 공동양육을 포함해 ${petMaxCnt}마리까지예요. `}
-              {limit === 0
-                ? '지금은 더 받을 자리가 없어 수락할 수 없어요'
-                : `${limit}마리 더 받을 수 있어요`}
-            </span>
-          </p>
+          <NoticeBox tone="warn" role="status">
+            {petMaxCnt != null &&
+              `반려동물은 공동양육을 포함해 ${petMaxCnt}마리까지예요. `}
+            {limit === 0
+              ? '지금은 더 받을 자리가 없어 수락할 수 없어요'
+              : `${limit}마리 더 받을 수 있어요`}
+          </NoticeBox>
         )}
         <ul className="grid grid-cols-2 gap-3">
           {invitation.pets.map((pet) => (
@@ -179,18 +174,12 @@ export default function InvitationAccept({
           ))}
         </ul>
         {limit > 0 && (
-          <p className="flex items-start gap-2.5 rounded-lg bg-surface-2 px-3.5 py-3 text-muted">
-            <Info
-              className="mt-0.5 size-4 shrink-0 text-subtle"
-              aria-hidden="true"
-            />
-            <span>
-              함께 돌볼 반려동물을 골라 주세요. 빼면 그 반려동물만 거절돼요
-            </span>
-          </p>
+          <NoticeBox>
+            함께 돌볼 반려동물을 골라 주세요. 빼면 그 반려동물만 거절돼요
+          </NoticeBox>
         )}
       </div>
-      <div className="flex items-center justify-end gap-2 border-t border-line bg-[#fbfcfd] px-7 py-4">
+      <div className="flex items-center justify-end gap-2 border-t border-line bg-white px-7 py-4">
         <Link
           to={PATHS.MYPAGE}
           className="inline-flex h-10 items-center justify-center rounded-md px-4 font-semibold text-ink-2 hover:bg-surface-2"

@@ -5,7 +5,8 @@ import {
   MessagesSquare,
   User,
 } from 'lucide-react';
-import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import Badge from '@/components/Badge';
+import { BTN_PRIMARY } from '@/components/buttonStyles';
 import {
   RCRT_STTS,
   getRcrtSttsLabel,
@@ -15,8 +16,7 @@ import {
 import CareStatusBadge from './CareStatusBadge';
 import { formatArea, formatScheduleShort, unitText } from './careUtils';
 
-const BOX_CLASS =
-  'rounded-[14px] border border-line bg-white px-[22px] pt-[22px] pb-5 shadow-sm';
+const BOX_CLASS = 'rounded-[14px] border border-line bg-white px-6 pt-6 pb-5';
 
 const AUTO_HELP = {
   [RCRT_STTS.OPEN]: '채팅에서 매칭이 끝나면 자동으로 매칭완료로 바뀌어요',
@@ -28,13 +28,13 @@ function Summary({ post }) {
   return (
     <>
       <p className="text-sm text-muted">비용</p>
-      <p className="mt-0.5 text-2xl font-bold tracking-[-0.01em] tabular-nums">
+      <p className="mt-1 text-2xl font-bold tracking-[-0.01em] tabular-nums">
         {post.cstAmt.toLocaleString()}원
         <small className="ml-1 text-sm font-medium text-muted">
           {unitText(post)}
         </small>
       </p>
-      <ul className="mt-3.5 border-t border-line pt-3.5 text-sm text-ink-2">
+      <ul className="mt-4 border-t border-line pt-4 text-sm text-ink-2">
         <li className="flex items-start gap-2 py-1">
           <CalendarDays
             size={18}
@@ -60,16 +60,16 @@ function Summary({ post }) {
 function OwnerPanel({ post, onOpenList }) {
   return (
     <>
-      <div className="mt-4 rounded-lg bg-surface-2 px-3.5 py-3">
+      <div className="mt-4 rounded-lg bg-surface-2 px-4 py-3">
         <CareStatusBadge post={post} />
-        <p className="mt-1.5 text-sm leading-[1.6] text-muted">
+        <p className="mt-2 text-sm leading-[1.6] text-muted">
           {isClosedWithoutMatch(post)
             ? '모집이 마감된 글이에요'
             : AUTO_HELP[post.rcrtSttsCd]}
         </p>
       </div>
       {!isOpen(post) && post.mtchSitterNcnm && (
-        <p className="mt-3 flex items-center gap-2.5 rounded-lg border border-line px-3.5 py-3">
+        <p className="mt-3 flex items-center gap-2 rounded-lg border border-line px-4 py-3">
           <span
             aria-hidden="true"
             className="grid size-8 place-items-center rounded-full bg-brand-50 text-brand-500"
@@ -90,16 +90,12 @@ function OwnerPanel({ post, onOpenList }) {
             ? `채팅 목록 보기, 지금 ${post.aplcntCnt}명이 채팅 중`
             : undefined
         }
-        className={`${isOpen(post) ? BTN_PRIMARY : BTN_SECONDARY} mt-4 w-full`}
+        className={`${BTN_PRIMARY} mt-4 w-full`}
       >
         <MessageCircle size={16} aria-hidden="true" />
-        {isOpen(post) ? (
-          <>
-            채팅 목록 보기
-            <span className="text-sm font-normal">· {post.aplcntCnt}명</span>
-          </>
-        ) : (
-          '이 글의 채팅 목록'
+        채팅 목록 보기
+        {isOpen(post) && (
+          <span className="text-sm font-normal">· {post.aplcntCnt}명</span>
         )}
       </button>
     </>
@@ -111,21 +107,21 @@ function VisitorPanel({ post, onChat }) {
   if (post.chatting) {
     return (
       <>
-        <p className="mt-4 flex items-center gap-2 border-t border-line pt-3.5 text-sm font-semibold text-ink-2">
+        <p className="mt-4 flex items-center gap-2 border-t border-line pt-4 text-sm font-semibold text-ink-2">
           <MessagesSquare
             size={20}
             aria-hidden="true"
             className="text-subtle"
           />
           내 채팅
-          <span className="ml-auto inline-flex h-6 items-center rounded-full bg-tone-gray-bg px-2.5 text-[13px] font-semibold text-tone-gray-fg">
+          <Badge tone="gray" className="ml-auto">
             {isOpen(post) ? '매칭 전' : getRcrtSttsLabel(post)}
-          </span>
+          </Badge>
         </p>
         <button
           type="button"
           onClick={onChat}
-          className={`${BTN_PRIMARY} mt-3.5 w-full`}
+          className={`${BTN_PRIMARY} mt-4 w-full`}
         >
           <MessageCircle size={16} aria-hidden="true" />
           {isOpen(post) ? '채팅하기' : '내 채팅 보기'}
@@ -135,11 +131,7 @@ function VisitorPanel({ post, onChat }) {
   }
   if (!isOpen(post)) {
     return (
-      <button
-        type="button"
-        disabled
-        className={`${BTN_PRIMARY} mt-[18px] w-full`}
-      >
+      <button type="button" disabled className={`${BTN_PRIMARY} mt-5 w-full`}>
         {post.rcrtSttsCd === RCRT_STTS.MATCHED
           ? '매칭이 완료되었어요'
           : '모집이 끝났어요'}
@@ -151,12 +143,12 @@ function VisitorPanel({ post, onChat }) {
       <button
         type="button"
         onClick={onChat}
-        className={`${BTN_PRIMARY} mt-[18px] w-full`}
+        className={`${BTN_PRIMARY} mt-5 w-full`}
       >
         <MessageCircle size={16} aria-hidden="true" />
         채팅하기
       </button>
-      <p className="mt-2.5 text-center text-sm leading-[1.6] text-muted">
+      <p className="mt-2 text-center text-sm leading-[1.6] text-muted">
         문의와 일정 협의는 채팅으로 나눠 주세요
       </p>
     </>

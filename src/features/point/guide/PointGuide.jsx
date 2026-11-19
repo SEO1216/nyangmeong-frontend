@@ -25,7 +25,7 @@ export default function PointGuide({ onGoCharacter }) {
           픽셀 캐릭터로 이동
         </button>
       </div>
-      <ol className="grid gap-5 px-6 py-5 sm:grid-cols-2 lg:grid-cols-4">
+      <ol className="grid gap-5 px-6 py-5 min-[760px]:grid-cols-2 min-[1100px]:grid-cols-4">
         {STEPS.map((step, index) => (
           <li key={step.title} className="flex items-start gap-3">
             <span className="grid size-8 shrink-0 place-items-center rounded-box bg-brand-500 text-sm font-bold text-white">
