@@ -143,7 +143,9 @@ export default function TemplateFormModal({ row, onClose }) {
   };
 
   const handleSaved = () => {
-    showToast(isEdit ? '템플릿을 수정했어요' : '템플릿을 등록했어요');
+    showToast(isEdit ? '템플릿을 수정했어요' : '템플릿을 등록했어요', {
+      type: 'success',
+    });
     onClose();
   };
 

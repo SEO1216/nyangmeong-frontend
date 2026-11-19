@@ -72,7 +72,7 @@ function NicknameEdit({ mbrNcnm, onClose }) {
       {
         onSuccess: () => {
           qc.invalidateQueries({ queryKey: memberKeys.profile });
-          showToast('닉네임을 저장했어요');
+          showToast('닉네임을 저장했어요', { type: 'success' });
           onClose();
         },
         onError: (error) =>

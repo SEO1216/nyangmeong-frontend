@@ -117,7 +117,7 @@ export default function InviteModal({ pets, initialPetSn, onClose }) {
       {
         onSuccess: () => {
           onClose();
-          showToast('초대를 보냈어요');
+          showToast('초대를 보냈어요', { type: 'success' });
         },
         onError: (error) => {
           const emailField = error.fields?.find(
@@ -134,10 +134,10 @@ export default function InviteModal({ pets, initialPetSn, onClose }) {
             const { linkedPets = [], pendingPets = [] } = error.data ?? {};
             setConflict({ linkedPets, pendingPets });
             if (linkedPets.length === 0 && pendingPets.length === 0) {
-              showToast(error.message);
+              showToast(error.message, { type: 'error' });
             }
           } else {
-            showToast(error.message);
+            showToast(error.message, { type: 'error' });
           }
         },
       },

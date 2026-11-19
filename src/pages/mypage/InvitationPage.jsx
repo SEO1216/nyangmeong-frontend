@@ -30,7 +30,9 @@ export default function InvitationPage() {
           `${PATHS.LOGIN}?redirect=${encodeURIComponent(pathname + search)}`,
         ),
       onError: () =>
-        showToast('로그아웃하지 못했어요. 잠시 후 다시 시도해 주세요'),
+        showToast('로그아웃하지 못했어요. 잠시 후 다시 시도해 주세요', {
+          type: 'error',
+        }),
     });
 
   return (

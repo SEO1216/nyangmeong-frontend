@@ -128,7 +128,7 @@ export default function CareMissionFormModal({ mission, onClose }) {
       },
       {
         onSuccess: () => {
-          showToast('케어미션을 수정했어요');
+          showToast('케어미션을 수정했어요', { type: 'success' });
           onClose();
         },
       },

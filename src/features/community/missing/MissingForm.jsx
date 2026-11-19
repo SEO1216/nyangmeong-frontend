@@ -1,3 +1,4 @@
+import { PROFANITY_MESSAGE, hasProfanity } from '@/utils/profanity';
 import { Info, MapPin, Navigation } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
@@ -137,7 +138,9 @@ export default function MissingForm({
     }
     if (!values.place) next.place = '마지막 목격 장소를 골라 주세요';
     if (!values.title.trim()) next.title = '제목을 입력해 주세요';
+    else if (hasProfanity(values.title)) next.title = PROFANITY_MESSAGE;
     if (!values.body.trim()) next.body = '상세 설명을 입력해 주세요';
+    else if (hasProfanity(values.body)) next.body = PROFANITY_MESSAGE;
     if (!values.cnpl) next.cnpl = '연락 가능한 전화번호를 입력해 주세요';
     else if (!TEL_PATTERN.test(values.cnpl)) {
       next.cnpl = '전화번호 형식을 확인해 주세요 (예: 010-1234-5678)';

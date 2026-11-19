@@ -328,6 +328,7 @@ function AiChatModalPanel({ backdropRef }) {
       ref={panelRef}
       role="dialog"
       aria-label="AI 매니저"
+      data-toast-above="form"
       tabIndex={-1}
       className="fixed inset-x-0 top-16 bottom-0 z-35 flex origin-bottom-right transform-gpu flex-col overflow-hidden bg-white pb-[env(safe-area-inset-bottom)] outline-none"
     >

@@ -29,7 +29,7 @@ export default function CommentDeleteModal({ comment, onClose }) {
       { cmntSn: comment.cmntSn, delRsn: trimmedRsn },
       {
         onSuccess: () => {
-          showToast('댓글을 삭제했어요');
+          showToast('댓글을 삭제했어요', { type: 'success' });
           onClose();
         },
       },

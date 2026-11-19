@@ -78,10 +78,12 @@ export const useReadAllNotifications = () => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount });
       /** 불러온 쪽을 모두 다시 받지 않고 1쪽부터 */
       queryClient.resetQueries({ queryKey: notificationKeys.list });
-      showToast('모두 읽었어요');
+      showToast('모두 읽었어요', { type: 'success' });
     },
     onError: () =>
-      showToast('모두 읽음 처리하지 못했어요. 잠시 뒤 다시 시도해 주세요'),
+      showToast('모두 읽음 처리하지 못했어요. 잠시 뒤 다시 시도해 주세요', {
+        type: 'error',
+      }),
   });
 };
 
@@ -98,13 +100,14 @@ export const useSaveNotificationSettings = () => {
     mutationFn: saveNotificationSettings,
     onSuccess: (saved) => {
       queryClient.setQueryData(notificationKeys.settings, saved);
-      showToast('저장했어요');
+      showToast('저장했어요', { type: 'success' });
     },
     onError: (error) =>
       showToast(
         error.code === 'INVALID_INPUT_VALUE'
           ? '미리 알림 시점을 하나 이상 골라 주세요'
           : '저장하지 못했어요. 잠시 뒤 다시 시도해 주세요',
+        { type: 'error' },
       ),
   });
 };

@@ -201,7 +201,7 @@ export default function AiRouteFormModal({ route, onClose }) {
     };
     save.mutate(isEdit ? { aiRoutMpngSn: route.aiRoutMpngSn, ...body } : body, {
       onSuccess: () => {
-        showToast(SAVED_MESSAGE);
+        showToast(SAVED_MESSAGE, { type: 'success' });
         onClose();
       },
     });
@@ -210,7 +210,9 @@ export default function AiRouteFormModal({ route, onClose }) {
   const handleDelete = () => {
     remove.mutate(route.aiRoutMpngSn, {
       onSuccess: () => {
-        showToast('삭제했습니다. 다음 요청부터 반영됩니다');
+        showToast('삭제했습니다. 다음 요청부터 반영됩니다', {
+          type: 'success',
+        });
         onClose();
       },
     });

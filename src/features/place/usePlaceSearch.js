@@ -190,7 +190,7 @@ export default function usePlaceSearch(category, onCategoryChange) {
       {
         onError: (error) => {
           if (!BOOKMARK_STALE_CODES.includes(error.code)) {
-            showToast(error.message);
+            showToast(error.message, { type: 'error' });
           }
         },
       },

@@ -332,7 +332,9 @@ function AttachmentRows({ petSn, attachments }) {
       link.click();
       URL.revokeObjectURL(url);
     } catch {
-      showToast('파일을 내려받지 못했어요. 잠시 뒤 다시 시도해 주세요');
+      showToast('파일을 내려받지 못했어요. 잠시 뒤 다시 시도해 주세요', {
+        type: 'error',
+      });
     }
   };
 

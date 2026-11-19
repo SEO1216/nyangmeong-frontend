@@ -165,7 +165,7 @@ export default function InquiryDetail({ inquiry }) {
           onConfirm={() =>
             remove.mutate(inquiry.otoInqrySn, {
               onSuccess: () => {
-                showToast('문의를 삭제했어요');
+                showToast('문의를 삭제했어요', { type: 'success' });
                 navigate(PATHS.INQUIRIES, { replace: true });
               },
             })

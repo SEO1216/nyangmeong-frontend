@@ -185,7 +185,11 @@ export default function ChatMessageInput({
       },
       {
         onSuccess: () => setIsAddressOpen(false),
-        onError: (error) => showToast(error.message),
+        /** 방 닫힘은 useSendChatMessage가 이미 알림 */
+        onError: (error) => {
+          if (error.code === CHAT_ROOM_CLOSED) return;
+          showToast(error.message, { type: 'error' });
+        },
       },
     );
 

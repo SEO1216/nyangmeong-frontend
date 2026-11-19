@@ -173,7 +173,7 @@ export default function PostDetail({ post }) {
           onConfirm={() =>
             remove.mutate(post.pstSn, {
               onSuccess: () => {
-                showToast('게시글을 삭제했어요');
+                showToast('게시글을 삭제했어요', { type: 'success' });
                 navigate(listTo, { replace: true });
               },
             })
@@ -195,7 +195,7 @@ export default function PostDetail({ post }) {
               { pstSn: post.pstSn, ...values },
               {
                 onSuccess: () => {
-                  showToast('신고가 접수되었어요');
+                  showToast('신고가 접수되었어요', { type: 'success' });
                   setIsReporting(false);
                 },
               },

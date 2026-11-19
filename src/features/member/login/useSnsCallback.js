@@ -50,9 +50,9 @@ export default function useSnsCallback({ onLogin, onSignup, onRecover }) {
     handled.current = true;
     const result = takeSnsCallback(searchParams);
     if (result.mode === 'link') {
-      const backToProfile = (message) => {
+      const backToProfile = (message, type = 'error') => {
         navigate(PATHS.MYPAGE_PROFILE, { replace: true });
-        showToast(message);
+        showToast(message, { type });
       };
       if (result.status !== 'ok') {
         backToProfile(LINK_CALLBACK_MESSAGES[result.status]);
@@ -62,7 +62,7 @@ export default function useSnsCallback({ onLogin, onSignup, onRecover }) {
       linkSns.mutate(
         { snsOffrCd, code, state },
         {
-          onSuccess: () => backToProfile(MSG.snsLinked),
+          onSuccess: () => backToProfile(MSG.snsLinked, 'success'),
           onError: (error) =>
             backToProfile(
               SNS_FAILED_CODES.includes(error.code)
