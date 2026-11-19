@@ -84,6 +84,7 @@ export default function EtcResultList({ petSn, ckupRcdSn, etcInspections }) {
         <Modal
           isConfirm
           title="이 기타검사를 삭제할까요?"
+          description="삭제하면 되돌릴 수 없어요."
           isPending={deleteEtcInspection.isPending}
           onClose={() => setDeleteSn(null)}
           footer={

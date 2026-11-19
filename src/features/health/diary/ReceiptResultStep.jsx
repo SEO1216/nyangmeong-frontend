@@ -545,7 +545,8 @@ export default function ReceiptResultStep({
 
       {isRetakeOpen && (
         <ConfirmModal
-          title="입력한 내용을 버리고 다시 촬영할까요?"
+          title="다시 촬영할까요?"
+          description="입력한 내용은 사라져요."
           confirmLabel="다시 촬영하기"
           onConfirm={onRetake}
           onCancel={() => setIsRetakeOpen(false)}

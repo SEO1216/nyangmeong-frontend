@@ -266,6 +266,7 @@ export default function PrescriptionModal({
         <Modal
           isConfirm
           title="이 처방약을 삭제할까요?"
+          description="삭제하면 되돌릴 수 없어요."
           isPending={deletePrescription.isPending}
           onClose={() => setDeleteTarget(null)}
           footer={

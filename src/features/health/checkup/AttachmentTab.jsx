@@ -287,6 +287,7 @@ export default function AttachmentTab({ petSn, ckupRcdSn, attachments }) {
         <Modal
           isConfirm
           title="이 첨부 자료를 삭제할까요?"
+          description="삭제하면 되돌릴 수 없어요."
           isPending={deleteAttachment.isPending}
           onClose={() => setDeleteSn(null)}
           footer={

@@ -465,7 +465,8 @@ export default function MissingDetail({ post }) {
 
       {modal === 'delete' && (
         <ConfirmModal
-          title="실종 게시글을 삭제할까요? 삭제한 글과 제보 댓글은 되돌릴 수 없어요. 찾으셨다면 삭제 대신 '찾았어요'를 눌러 주세요"
+          title="실종 게시글을 삭제할까요?"
+          description="삭제한 글과 제보 댓글은 되돌릴 수 없어요. 찾으셨다면 삭제 대신 '찾았어요'를 눌러 주세요."
           confirmLabel="삭제하기"
           isDanger
           isPending={remove.isPending}
