@@ -1,3 +1,5 @@
+import { flushSync } from 'react-dom';
+import { PROFANITY_MESSAGE, hasProfanity } from '@/utils/profanity';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useOutletContext } from 'react-router-dom';
 import AutoTextarea from '@/components/AutoTextarea';
@@ -96,14 +98,25 @@ export default function InquiryForm({
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    const form = event.currentTarget;
     const nextErrors = {};
     if (!type) nextErrors.type = '문의 유형을 골라 주세요';
     if (!title.trim()) nextErrors.title = '제목을 입력해 주세요';
+    else if (hasProfanity(title)) nextErrors.title = PROFANITY_MESSAGE;
     if (!body.trim()) nextErrors.body = '내용을 입력해 주세요';
+    else if (hasProfanity(body)) nextErrors.body = PROFANITY_MESSAGE;
     if (images.length > maxImages)
       nextErrors.images = `캐릭터 오류 문의는 이미지를 최대 ${maxImages}장까지 올릴 수 있어요`;
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0 || isPending) return;
+    /** 오류 표시(aria-invalid)가 화면에 반영된 뒤에 첫 빠진 항목을 찾도록 바로 반영한다 */
+    flushSync(() => setErrors(nextErrors));
+    if (Object.keys(nextErrors).length > 0) {
+      /** 빠진 항목 중 첫 번째로 이동 */
+      form
+        .querySelector('[aria-invalid="true"], [data-invalid="true"]')
+        ?.focus();
+      return;
+    }
+    if (isPending) return;
     onSubmit({
       inqryTypeCd: type,
       inqryTtl: title.trim(),

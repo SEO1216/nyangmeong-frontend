@@ -42,6 +42,7 @@ SCR-CMU-001 커뮤니티 · 댓글 답글 「@닉네임」 (시작 2026-11-18) �
 | 추가-18 | `src/features/chat/room/ChatMessageInput.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 펫돌봄 채팅에서 욕설이 든 글은 전송되지 않고 입력칸 위에 안내 문구가 보인다(사진만 보낼 때는 검사하지 않음) | 요청 2026-11-19 "댓글 욕설 필터링을 펫돌봄 채팅에도 적용" |
 | 추가-19 | `src/features/chat/room/PhotoViewer.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 채팅 사진 보기의 배경·좌우 버튼·닫기 호버 색이 게시글 이미지 뷰어와 같다 | 요청 2026-11-19 "채팅 이미지 뷰어를 다른 게시글 이미지 뷰어와 같은 형태로" |
 | 추가-20 | `src/components/ImageViewer.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 게시글·1:1 문의 이미지 뷰어에서 터치로 좌우 스와이프하면 이전·다음 이미지로 넘어간다(화살표 버튼은 그대로) | 요청 2026-11-19 "게시글 이미지 뷰어도 스와이프" |
+| 추가-21 | `community/PostForm.jsx`, `care/CareForm.jsx`, `missing/MissingForm.jsx`, `inquiry/InquiryForm.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 펫이야기·돌봄·실종 글쓰기·수정과 1:1 문의 작성에서 제목이나 내용에 욕설이 있으면 등록되지 않고 그 칸 아래에 안내 문구가 보이며 포커스가 그 칸으로 간다. 펫이야기·1:1 문의 폼도 등록 시 오류가 난 첫 칸(카테고리·문의 유형 포함)으로 포커스가 간다 | 요청 2026-11-19 "글 등록 제목·내용과 1:1 문의에도 욕설 필터 적용" |
 
 ## 다음에 할 것
 
