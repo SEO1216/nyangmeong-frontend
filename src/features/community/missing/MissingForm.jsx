@@ -1,4 +1,4 @@
-import { PROFANITY_MESSAGE, hasProfanity } from '@/utils/profanity';
+import useProfanityErrors from '@/hooks/useProfanityErrors';
 import { Info, MapPin, Navigation } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
@@ -70,18 +70,26 @@ const snapshot = (values) =>
  * - 고친 것이 있으면(처음 값과 다르면) onDirtyChange(true). 나갈 때 확인은 부모(페이지)가 한다: onLeave(to)
  * - 실종 지역은 입력받지 않는다: 서버가 목격 좌표로 계산(전북 밖이면 서버가 등록 거절)
  */
+const PROFANITY_FIELDS = {
+  pstTtl: { key: 'title', id: 'missing-title-input' },
+  pstCn: { key: 'body', id: 'missing-body' },
+  chrcCn: { key: 'chrcCn', id: 'missing-feature' },
+};
+
 export default function MissingForm({
   initial,
   mode,
   cancelTo,
   isPending,
   errorMessage,
+  profanityFields,
   onSubmit,
   onLeave,
   onDirtyChange,
 }) {
   const [values, setValues] = useState(initial);
   const [errors, setErrors] = useState({});
+  useProfanityErrors(profanityFields, PROFANITY_FIELDS, setErrors);
   const [isPlaceOpen, setIsPlaceOpen] = useState(false);
   const [initialSnap] = useState(() => snapshot(initial));
   const formRef = useRef(null);
@@ -138,9 +146,7 @@ export default function MissingForm({
     }
     if (!values.place) next.place = '마지막 목격 장소를 골라 주세요';
     if (!values.title.trim()) next.title = '제목을 입력해 주세요';
-    else if (hasProfanity(values.title)) next.title = PROFANITY_MESSAGE;
     if (!values.body.trim()) next.body = '상세 설명을 입력해 주세요';
-    else if (hasProfanity(values.body)) next.body = PROFANITY_MESSAGE;
     if (!values.cnpl) next.cnpl = '연락 가능한 전화번호를 입력해 주세요';
     else if (!TEL_PATTERN.test(values.cnpl)) {
       next.cnpl = '전화번호 형식을 확인해 주세요 (예: 010-1234-5678)';
@@ -310,11 +316,15 @@ export default function MissingForm({
                 maxLength={FEATURE_MAX}
                 value={values.chrcCn}
                 placeholder="예: 빨간 목줄, 왼쪽 눈가 갈색 점"
+                aria-invalid={Boolean(errors.chrcCn)}
                 onChange={(event) =>
-                  set({ chrcCn: event.target.value.slice(0, FEATURE_MAX) })
+                  set({ chrcCn: event.target.value.slice(0, FEATURE_MAX) }, [
+                    'chrcCn',
+                  ])
                 }
                 className={INPUT}
               />
+              <FieldError>{errors.chrcCn}</FieldError>
               <p className="text-sm text-muted">
                 목록 카드에 한 줄로 보여요. 눈에 띄는 특징을 짧게 적어 주세요
               </p>
@@ -509,7 +519,7 @@ export default function MissingForm({
           </Section>
         </form>
 
-        {errorMessage && (
+        {errorMessage && profanityFields.length === 0 && (
           <p role="alert" className="mt-4 text-sm text-danger">
             {errorMessage}
           </p>

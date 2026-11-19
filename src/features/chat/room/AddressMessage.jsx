@@ -20,12 +20,16 @@ function StaticPinMap({ point }) {
     const container = containerRef.current;
     if (!kakao || !container) return;
     container.replaceChildren();
-    const position = new kakao.maps.LatLng(point.lat, point.lng);
-    new kakao.maps.StaticMap(container, {
-      center: position,
-      level: MAP_LEVEL,
-      marker: { position },
-    });
+    try {
+      const position = new kakao.maps.LatLng(point.lat, point.lng);
+      new kakao.maps.StaticMap(container, {
+        center: position,
+        level: MAP_LEVEL,
+        marker: { position },
+      });
+    } catch {
+      /** 지도를 못 그려도 모달이 깨지지 않게 빈 자리만 둔다. [장소 보기]는 그대로 쓸 수 있다 */
+    }
   }, [kakao, point.lat, point.lng]);
 
   return (

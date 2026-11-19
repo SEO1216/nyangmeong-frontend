@@ -9,7 +9,7 @@ import ReportModal from '@/components/ReportModal';
 import { showToast } from '@/components/toastStore';
 import { fitHeight } from '@/utils/fitHeight';
 import { publicFileUrl } from '@/utils/fileUrl';
-import { PROFANITY_MESSAGE, hasProfanity } from '@/utils/profanity';
+import { PROFANITY_MESSAGE, isProfanityError } from '@/utils/profanity';
 import { formatRelativeTime } from '@/utils/formatDate';
 const CMNT_MAX = 500;
 const PREVIEW_MAX = 30;
@@ -55,11 +55,7 @@ function CommentInput({
   const handleSubmit = (event) => {
     event.preventDefault();
     if (!body.trim() || isPending) return;
-    if (hasProfanity(body)) {
-      setError(PROFANITY_MESSAGE);
-      return;
-    }
-    onSubmit(body.trim(), () => setText(mention));
+    onSubmit(body.trim(), () => setText(mention), setError);
   };
 
   return (
@@ -325,7 +321,7 @@ export default function CommentSection({
   const vanishesOnDelete = (comment) =>
     Boolean(comment.prntCmntSn) || repliesOf(comment.cmntSn).length === 0;
 
-  const handleCreate = (prntCmntSn) => (cmntCn, reset) =>
+  const handleCreate = (prntCmntSn) => (cmntCn, reset, fail) =>
     create.mutate(
       { targetSn, prntCmntSn, cmntCn },
       {
@@ -333,7 +329,11 @@ export default function CommentSection({
           reset();
           setReplyTo(null);
         },
-        onError: () => showToast('댓글을 등록하지 못했어요', { type: 'error' }),
+        /** 서버가 금칙어로 거절하면 토스트 대신 입력창 아래에 안내 */
+        onError: (error) =>
+          isProfanityError(error)
+            ? fail(PROFANITY_MESSAGE)
+            : showToast('댓글을 등록하지 못했어요', { type: 'error' }),
       },
     );
 
