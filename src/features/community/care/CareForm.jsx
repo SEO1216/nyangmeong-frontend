@@ -1,5 +1,6 @@
 import { Info, MapPin } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import DatePicker from '@/components/DatePicker';
 import AmountInput from '@/components/AmountInput';
 import AutoTextarea from '@/components/AutoTextarea';
@@ -281,7 +282,8 @@ export default function CareForm({
   const handleSubmit = (event) => {
     event.preventDefault();
     const nextErrors = validate();
-    setErrors(nextErrors);
+    /** 오류 표시(aria-invalid)가 화면에 반영된 뒤에 첫 빠진 항목을 찾도록 바로 반영한다 */
+    flushSync(() => setErrors(nextErrors));
     if (Object.keys(nextErrors).length > 0) {
       /** 빠진 항목 중 첫 번째로 이동 */
       formRef.current
