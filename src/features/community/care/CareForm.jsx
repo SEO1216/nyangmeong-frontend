@@ -1,3 +1,4 @@
+import { PROFANITY_MESSAGE, hasProfanity } from '@/utils/profanity';
 import { Info, MapPin } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
@@ -273,7 +274,9 @@ export default function CareForm({
       next.amount = minWageMessage(minWage);
     }
     if (!values.title.trim()) next.title = '제목을 입력해 주세요';
+    else if (hasProfanity(values.title)) next.title = PROFANITY_MESSAGE;
     if (!values.body.trim()) next.body = '상세 설명을 입력해 주세요';
+    else if (hasProfanity(values.body)) next.body = PROFANITY_MESSAGE;
     if (!values.place) next.place = '돌봄 장소를 골라 주세요';
     if (!values.agree) next.agree = '공개 동의에 체크해 주세요';
     return next;

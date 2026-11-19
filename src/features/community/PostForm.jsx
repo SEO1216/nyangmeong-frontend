@@ -1,3 +1,5 @@
+import { flushSync } from 'react-dom';
+import { PROFANITY_MESSAGE, hasProfanity } from '@/utils/profanity';
 import { useEffect, useState } from 'react';
 import AutoTextarea from '@/components/AutoTextarea';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
@@ -68,12 +70,23 @@ export default function PostForm({
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    const form = event.currentTarget;
     const nextErrors = {};
     if (!bbsCd) nextErrors.bbsCd = '카테고리를 골라 주세요';
     if (!title.trim()) nextErrors.title = '제목을 입력해 주세요';
+    else if (hasProfanity(title)) nextErrors.title = PROFANITY_MESSAGE;
     if (!body.trim()) nextErrors.body = '내용을 입력해 주세요';
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0 || isPending) return;
+    else if (hasProfanity(body)) nextErrors.body = PROFANITY_MESSAGE;
+    /** 오류 표시(aria-invalid)가 화면에 반영된 뒤에 첫 빠진 항목을 찾도록 바로 반영한다 */
+    flushSync(() => setErrors(nextErrors));
+    if (Object.keys(nextErrors).length > 0) {
+      /** 빠진 항목 중 첫 번째로 이동 */
+      form
+        .querySelector('[aria-invalid="true"], [data-invalid="true"]')
+        ?.focus();
+      return;
+    }
+    if (isPending) return;
     onSubmit({
       bbsCd,
       pstTtl: title.trim(),
@@ -100,7 +113,11 @@ export default function PostForm({
           noValidate
           className="flex flex-col gap-9"
         >
-          <fieldset className="flex flex-col gap-2">
+          <fieldset
+            tabIndex={-1}
+            data-invalid={Boolean(errors.bbsCd)}
+            className="flex flex-col gap-2"
+          >
             <legend className={`${LABEL_CLASS} mb-2`}>
               카테고리
               <Required />
