@@ -36,7 +36,7 @@ AI 도구가 기준 없이 채우면 어느 서비스에서나 본 듯한 화면
   - `Skeleton`: 카드가 아닌 작은 요소(검색창·버튼·탭 글자·쪽 번호·구역 제목)나 카드 안 한 구역. `className`으로 크기·모양, `lines`로 여러 줄이다.
 - **모든 페이지는 실제 배치대로 만든다.** 큰 카드 1장(`<PageSkeleton />`)은 배치를 정하기 전 임시값이다.
   1. 다 불러온 화면을 1440px·390px로 띄워 카드마다 개수·칸·높이를 잰다(Playwright로 `getBoundingClientRect`).
-  2. 같은 그리드 클래스(`min-[1101px]:grid-cols-…`)에 `SkeletonCard`를 같은 순서로 놓고, 높이는 잰 값을 `h-[…px]`로 쓴다. 모바일에서 높이가 크게 다르면 `max-[760px]:h-[…px]`을 더한다.
+  2. 같은 그리드 클래스(`min-[1100px]:grid-cols-…`)에 `SkeletonCard`를 같은 순서로 놓고, 높이는 잰 값을 `h-[…px]`로 쓴다. 모바일에서 높이가 크게 다르면 `max-[760px]:h-[…px]`을 더한다.
   3. 카드 밖 요소(검색 줄·작성 버튼·쪽 번호·구역 제목)도 같은 자리에 `Skeleton`으로 둔다.
   4. 배치는 그 페이지 파일 안의 작은 함수(`XxxSkeleton`)로 둔다. 로딩 분기가 둘이면 같은 함수를 쓴다. 한 페이지에서만 쓰므로 `components/`로 올리지 않는다.
   5. 확인: 1440px·390px에서 로딩 중 본문 높이가 다 불러온 화면의 ±20% 안이고, 가로 스크롤이 없다. 가짜 API는 바로 응답하므로 확인할 때만 `queryFn`에 지연을 넣었다가 커밋 전에 지운다.
@@ -67,7 +67,7 @@ if (
 function CalendarSkeleton() {
   return (
     <PageSkeleton>
-      <div className="grid gap-5 min-[1101px]:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid gap-5 min-[1100px]:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <SkeletonCard className="h-[624px]" />
         <div className="flex flex-col gap-5">
           <SkeletonCard className="h-[262px]" />
