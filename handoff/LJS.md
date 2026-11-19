@@ -6,6 +6,8 @@
 
 ## 다음에 할 것
 
+- 2026-11-19 사람 지시로 기획 없이 바로 되돌림(급함): 로그인 방법 선택 [이메일로 로그인하기]·이메일 로그인 [로그인] 버튼(`login/LoginMethodChoice`·`EmailLoginForm`)과 `shared/AuthField` 입력칸을 2-K 전 모양으로(버튼 50px·둥글기 12·15px 굵게, 입력칸 48px·둥글기 12·라벨 13px·`*`·오류 문구 mt-2). `AuthField`라 가입·비밀번호 찾기·재설정·재가입 복구 입력칸도 같이 돌아감. 2-K 공용 규격(`ui-checklist.csv`)과 다시 다름 → YAY 알림, 규격으로 다시 맞출지 사람이 정함. 화면 검증 안 함(lint·build만)
+
 ### SCR-COM-002 플로팅 반려동물 등록 버튼 남은 것(2026-11-19)
 
 - 팀 알림(PR 본문 + 팀 채널, SJM): 플로팅 버튼 묶음(AI → 등록 → TOP)에 [반려동물 등록] 버튼 추가. `layouts/FloatingButtons.jsx`가 `features/pet/list/PetFormModal`(등록 모달)과 `features/pet/queries` `usePetLimit`을 그대로 쓴다. 모달 props·한도 응답(`remainingPetCount`)을 바꾸면 플로팅 버튼도 영향. 남은 자리가 0이거나 한도를 못 불러오면, 모바일 AI 접힘 때 숨김
