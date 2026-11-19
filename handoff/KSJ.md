@@ -36,6 +36,7 @@ SCR-CMU-001 커뮤니티 · 댓글 답글 「@닉네임」 (시작 2026-11-18) �
 | 추가-12 | `src/features/community/missing/MissingForm.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 실종센터 글쓰기에서 빠진 항목이 있는 채 첫 [등록하기]를 누르면 첫 빠진 항목으로 포커스가 간다 | 요청 2026-11-19 "MissingForm에도 같은 코드가 있는지 확인해줘"(CareForm과 같은 결함이라 같은 방식으로 고침) |
 | 추가-13 | `src/features/community/StoryRail.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 펫이야기 오른쪽 레일의 「오늘의 건강 이야기」가 흰 박스(배경·테두리·안쪽 여백) 없이 실종·돌봄 레일처럼 구역 제목과 목록으로만 보인다 | 요청 2026-11-19 "펫이야기 오른쪽 레일 박스 배경 없애줘, 다른 페이지 레일 참고" |
 | 추가-14 | `src/features/community/missing/CheckList.jsx`, `missing/MissingRail.jsx`, `care/CareGuideRail.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 「실종 체크 가이드」「돌봄 전, 꼭 확인해요」의 제목·선·글자 크기·간격이 「오늘의 건강 이야기」와 같고, 「자세한 대처 요령 보기」가 「내 펫 건강 체크하기」와 같은 전체 폭 연한 초록 버튼이다 | 요청 2026-11-19 "대처 요령 버튼과 두 가이드를 오늘의 건강 이야기와 같은 스타일·크기로" |
+| 추가-15 | `src/features/inquiry/InquiryForm.jsx`, `community/PostForm.jsx`, `care/CareForm.jsx`, `missing/MissingForm.jsx`·`BreedCombobox.jsx`, `components/ReportModal.jsx`, `src/features/community/CommentSection.jsx`, `src/utils/profanity.js` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 1:1 문의·글쓰기 폼(펫이야기·돌봄·실종)·품종 직접 입력·신고 사유가 한글 조합 중에도 최대 글자 수(50·2000)를 넘지 않고, 댓글 입력창이 한 줄처럼 보이는 입력칸(Enter로 등록, 길어지면 줄바꿈되어 높이가 늘어남)이며, 욕설이 있으면 등록되지 않고 안내 문구가 보인다 | 요청 2026-11-19 "고객센터 최대 글자 초과 입력 막기, 댓글 입력을 인풋으로, 댓글 욕설 필터링" |
 
 ## 다음에 할 것
 

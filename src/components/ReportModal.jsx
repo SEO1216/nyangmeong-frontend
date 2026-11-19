@@ -126,7 +126,7 @@ export default function ReportModal({
           aria-required={reason === ETC}
           placeholder="신고 사유를 입력해 주세요."
           onChange={(event) => {
-            setDetail(event.target.value);
+            setDetail(event.target.value.slice(0, DETAIL_MAX));
             setError('');
           }}
           className="block w-full resize-none rounded-md border border-input-line bg-white px-3 py-2 text-base placeholder:text-placeholder focus:border-brand-500 focus:ring-focus focus:outline-none"
