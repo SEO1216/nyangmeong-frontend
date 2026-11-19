@@ -149,7 +149,11 @@ export default function PostForm({
                 aria-invalid={Boolean(errors.title)}
                 onChange={(event) => {
                   /** 제목은 줄을 나눌 수 없다: 붙여 넣은 줄바꿈은 공백으로 */
-                  setTitle(event.target.value.replaceAll(/[\r\n]+/g, ' '));
+                  setTitle(
+                    event.target.value
+                      .replaceAll(/[\r\n]+/g, ' ')
+                      .slice(0, TITLE_MAX),
+                  );
                   clearError('title');
                 }}
                 onKeyDown={(event) => {
@@ -180,7 +184,7 @@ export default function PostForm({
                 aria-required="true"
                 aria-invalid={Boolean(errors.body)}
                 onChange={(event) => {
-                  setBody(event.target.value);
+                  setBody(event.target.value.slice(0, BODY_MAX));
                   clearError('body');
                 }}
                 className={`${INPUT} max-h-[600px] min-h-[200px] resize-y py-3 leading-[1.7]`}

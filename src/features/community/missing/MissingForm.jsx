@@ -252,7 +252,9 @@ export default function MissingForm({
                   placeholder="예: 보리"
                   aria-invalid={Boolean(errors.petNm)}
                   onChange={(event) =>
-                    set({ petNm: event.target.value }, ['petNm'])
+                    set({ petNm: event.target.value.slice(0, NAME_MAX) }, [
+                      'petNm',
+                    ])
                   }
                   className={INPUT}
                 />
@@ -271,7 +273,9 @@ export default function MissingForm({
                   placeholder="예: 흰색, 갈색과 흰색"
                   aria-invalid={Boolean(errors.colrNm)}
                   onChange={(event) =>
-                    set({ colrNm: event.target.value }, ['colrNm'])
+                    set({ colrNm: event.target.value.slice(0, COLOR_MAX) }, [
+                      'colrNm',
+                    ])
                   }
                   className={INPUT}
                 />
@@ -303,7 +307,9 @@ export default function MissingForm({
                 maxLength={FEATURE_MAX}
                 value={values.chrcCn}
                 placeholder="예: 빨간 목줄, 왼쪽 눈가 갈색 점"
-                onChange={(event) => set({ chrcCn: event.target.value })}
+                onChange={(event) =>
+                  set({ chrcCn: event.target.value.slice(0, FEATURE_MAX) })
+                }
                 className={INPUT}
               />
               <p className="text-sm text-muted">
@@ -408,7 +414,9 @@ export default function MissingForm({
                   placeholder="예: 보리 (몰티즈)를 찾습니다"
                   aria-invalid={Boolean(errors.title)}
                   onChange={(event) =>
-                    set({ title: event.target.value }, ['title'])
+                    set({ title: event.target.value.slice(0, TITLE_MAX) }, [
+                      'title',
+                    ])
                   }
                   className={INPUT}
                 />
@@ -433,7 +441,9 @@ export default function MissingForm({
                   aria-required="true"
                   aria-invalid={Boolean(errors.body)}
                   onChange={(event) =>
-                    set({ body: event.target.value }, ['body'])
+                    set({ body: event.target.value.slice(0, BODY_MAX) }, [
+                      'body',
+                    ])
                   }
                   className={`${INPUT} max-h-[600px] min-h-[200px] resize-y py-3 leading-[1.7]`}
                 />
