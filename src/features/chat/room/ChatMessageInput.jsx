@@ -8,7 +8,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Icon from '@/components/Icon';
 import { showToast } from '@/components/toastStore';
-import { PROFANITY_MESSAGE, hasProfanity } from '@/utils/profanity';
+import { PROFANITY_MESSAGE, isProfanityError } from '@/utils/profanity';
 import { useSendChatMessage } from '../queries';
 import {
   CHAT_ROOM_CLOSED,
@@ -84,6 +84,11 @@ export default function ChatMessageInput({
       /** 방이 닫혀 거절된 전송은 다시 보내도 같으니 재시도 줄을 만들지 않는다(안내·입력 막기는 useSendChatMessage) */
       onError: (error) => {
         if (error.code === CHAT_ROOM_CLOSED) return;
+        /** 금칙어로 거절된 글은 다시 보내도 같으니 재시도 줄 대신 안내 문구만 */
+        if (isProfanityError(error)) {
+          setTextError(PROFANITY_MESSAGE);
+          return;
+        }
         setFailed({ body, onDone });
       },
     });
@@ -93,10 +98,6 @@ export default function ChatMessageInput({
     event.preventDefault();
     if (!canSend) return;
     const text = msgCn.trim();
-    if (hasProfanity(text)) {
-      setTextError(PROFANITY_MESSAGE);
-      return;
-    }
     const clearText = () => {
       setMsgCn('');
       textareaRef.current?.focus();

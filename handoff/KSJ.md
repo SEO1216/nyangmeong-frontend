@@ -43,6 +43,7 @@ SCR-CMU-001 커뮤니티 · 댓글 답글 「@닉네임」 (시작 2026-11-18) �
 | 추가-19 | `src/features/chat/room/PhotoViewer.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 채팅 사진 보기의 배경·좌우 버튼·닫기 호버 색이 게시글 이미지 뷰어와 같다 | 요청 2026-11-19 "채팅 이미지 뷰어를 다른 게시글 이미지 뷰어와 같은 형태로" |
 | 추가-20 | `src/components/ImageViewer.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 게시글·1:1 문의 이미지 뷰어에서 터치로 좌우 스와이프하면 이전·다음 이미지로 넘어간다(화살표 버튼은 그대로) | 요청 2026-11-19 "게시글 이미지 뷰어도 스와이프" |
 | 추가-21 | `community/PostForm.jsx`, `care/CareForm.jsx`, `missing/MissingForm.jsx`, `inquiry/InquiryForm.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 펫이야기·돌봄·실종 글쓰기·수정과 1:1 문의 작성에서 제목이나 내용에 욕설이 있으면 등록되지 않고 그 칸 아래에 안내 문구가 보이며 포커스가 그 칸으로 간다. 펫이야기·1:1 문의 폼도 등록 시 오류가 난 첫 칸(카테고리·문의 유형 포함)으로 포커스가 간다 | 요청 2026-11-19 "글 등록 제목·내용과 1:1 문의에도 욕설 필터 적용" |
+| 추가-22 | `utils/profanity.js`, `hooks/useProfanityErrors.js`, `CommentSection.jsx`, `ChatMessageInput.jsx`, `PostForm.jsx`·`CareForm.jsx`·`MissingForm.jsx`·`InquiryForm.jsx`, 글쓰기·수정 페이지 6개 | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 화면 쪽 욕설 목록을 없애고, 서버가 400 PROFANITY_DETECTED로 거절하면 걸린 칸(제목·내용·실종 특징)·댓글 입력창·채팅 입력칸 아래에 안내 문구를 보이고 폼은 그 칸으로 포커스를 옮긴다. 「시바견」은 서버에서 걸리지 않는다 | 요청 2026-11-19 "백엔드 금칙어 완료, 화면 쪽 검사 제거하고 서버 응답 처리" |
 
 ## 다음에 할 것
 

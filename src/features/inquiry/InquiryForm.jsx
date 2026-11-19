@@ -1,5 +1,5 @@
 import { flushSync } from 'react-dom';
-import { PROFANITY_MESSAGE, hasProfanity } from '@/utils/profanity';
+import useProfanityErrors from '@/hooks/useProfanityErrors';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useOutletContext } from 'react-router-dom';
 import AutoTextarea from '@/components/AutoTextarea';
@@ -36,6 +36,11 @@ const toAttachItems = (imgs = []) =>
  * - characterImage: 자동 첨부될 캐릭터 이미지 주소(못 받으면 null). characterLinked이고 유형이 픽셀 캐릭터일 때 「이미지 추가」 칸 오른쪽에 삭제 불가 칸으로 보임(못 받으면 자리 표시)
  * - onSubmit({ inqryTypeCd, inqryTtl, inqryCn, images(새 File들), keepAtchFileSns(남길 기존 첨부) })
  */
+const PROFANITY_FIELDS = {
+  inqryTtl: { key: 'title', id: 'inquiry-title' },
+  inqryCn: { key: 'body', id: 'inquiry-body' },
+};
+
 export default function InquiryForm({
   initial,
   types,
@@ -44,6 +49,7 @@ export default function InquiryForm({
   hideCancel = false,
   isPending,
   errorMessage,
+  profanityFields,
   fieldErrors,
   characterLinked = false,
   characterImage = null,
@@ -61,6 +67,7 @@ export default function InquiryForm({
     initial.imgs ?? [],
   );
   const [errors, setErrors] = useState({});
+  useProfanityErrors(profanityFields, PROFANITY_FIELDS, setErrors);
   const [leaveTo, setLeaveTo] = useState(null);
 
   const isEdit = mode === 'edit';
@@ -102,9 +109,7 @@ export default function InquiryForm({
     const nextErrors = {};
     if (!type) nextErrors.type = '문의 유형을 골라 주세요';
     if (!title.trim()) nextErrors.title = '제목을 입력해 주세요';
-    else if (hasProfanity(title)) nextErrors.title = PROFANITY_MESSAGE;
     if (!body.trim()) nextErrors.body = '내용을 입력해 주세요';
-    else if (hasProfanity(body)) nextErrors.body = PROFANITY_MESSAGE;
     if (images.length > maxImages)
       nextErrors.images = `캐릭터 오류 문의는 이미지를 최대 ${maxImages}장까지 올릴 수 있어요`;
     /** 오류 표시(aria-invalid)가 화면에 반영된 뒤에 첫 빠진 항목을 찾도록 바로 반영한다 */
@@ -284,7 +289,7 @@ export default function InquiryForm({
         <FieldError>{errors.images}</FieldError>
       </form>
 
-      {errorMessage && (
+      {errorMessage && profanityFields.length === 0 && (
         <p role="alert" className="mt-4 text-sm text-danger">
           {errorMessage}
         </p>
