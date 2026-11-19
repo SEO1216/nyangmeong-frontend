@@ -379,7 +379,8 @@ export default function ScheduleModal({
 
       {confirm === 'move' && (
         <ConfirmModal
-          title={`이 일정의 검진기록과 연동된 케어 항목도 ${targetPetNm}(으)로 옮겨집니다`}
+          title="반려동물을 바꿀까요?"
+          description={`이 일정의 검진기록과 연동된 케어 항목도 ${targetPetNm}(으)로 옮겨집니다.`}
           confirmLabel="옮기기"
           isPending={isPending}
           onConfirm={() => {
@@ -391,7 +392,8 @@ export default function ScheduleModal({
       )}
       {confirm === 'delete' && (
         <ConfirmModal
-          title="이 일정을 삭제할까요? 연결된 검진기록은 그대로 남아요"
+          title="이 일정을 삭제할까요?"
+          description="연결된 검진기록은 그대로 남아요."
           confirmLabel="삭제하기"
           isDanger
           isPending={isPending}

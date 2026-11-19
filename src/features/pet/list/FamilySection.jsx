@@ -37,7 +37,6 @@ function CaregiverDeleteDialog({ pet, caregiver, onClose }) {
   return (
     <Modal
       isConfirm
-      isSpacious
       isPending={deleteCaregiver.isPending}
       title={`${caregiver.mbrNcnm}님과의 연동을 해제할까요?`}
       description={`해제하면 ${caregiver.mbrNcnm}님은 ${pet.petNm}의 기록을 더 이상 볼 수 없어요.`}

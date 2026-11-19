@@ -43,7 +43,6 @@ export default function PetUnlinkDialog({ pet, onClose }) {
   return (
     <Modal
       isConfirm
-      isSpacious
       isPending={leavePet.isPending}
       title={`${withTogetherParticle(pet.petNm)}의 가족 연동을 해제할까요?`}
       description={`해제하면 ${pet.petNm}의 건강기록·프로필에 더 이상 접근할 수 없어요. 다시 연동하려면 재요청이 필요해요.`}

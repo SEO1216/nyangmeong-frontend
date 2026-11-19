@@ -305,9 +305,10 @@ export default function CheckupModal({
       {isMoveConfirmOpen && (
         <Modal
           isConfirm
-          title={`이 검진기록과 연동된 케어 항목도 ${
+          title="반려동물을 바꿀까요?"
+          description={`이 검진기록과 연동된 케어 항목도 ${
             pets.find((pet) => pet.petSn === petSn)?.petNm
-          }(으)로 옮겨집니다`}
+          }(으)로 옮겨집니다.`}
           isPending={isPending}
           onClose={() => setIsMoveConfirmOpen(false)}
           footer={

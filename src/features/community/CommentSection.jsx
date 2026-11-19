@@ -418,6 +418,7 @@ export default function CommentSection({
       {deleteTarget && (
         <ConfirmModal
           title="댓글을 삭제할까요?"
+          description="삭제하면 되돌릴 수 없어요."
           confirmLabel="삭제하기"
           isDanger
           isPending={remove.isPending}
