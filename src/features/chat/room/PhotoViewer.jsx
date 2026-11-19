@@ -82,7 +82,7 @@ export default function PhotoViewer({
       role="dialog"
       aria-modal="true"
       aria-label="사진 보기"
-      className="fixed inset-0 z-50 bg-black/95 text-white"
+      className="fixed inset-0 z-50 bg-[rgba(30,30,30,0.92)] text-white"
     >
       <ul
         ref={listRef}
@@ -99,14 +99,14 @@ export default function PhotoViewer({
         ))}
       </ul>
 
-      <div className="absolute inset-x-0 top-0 z-10 flex h-14 items-center justify-between bg-gradient-to-b from-black/60 to-transparent px-2">
+      <div className="absolute inset-x-0 top-0 z-10 flex h-14 items-center justify-between px-2">
         <span className="pl-3 text-sm font-medium tabular-nums">
           {index + 1} / {photos.length}
         </span>
         <button
           type="button"
           aria-label="사진 보기 닫기"
-          className="grid size-11 place-items-center rounded-full hover:bg-white/15"
+          className="grid size-11 place-items-center rounded-full hover:bg-[rgba(255,255,255,0.15)]"
           onClick={onClose}
         >
           <X size={24} aria-hidden="true" />
@@ -117,7 +117,7 @@ export default function PhotoViewer({
         <button
           type="button"
           aria-label="이전 사진"
-          className="absolute top-1/2 left-4 z-10 grid size-12 -translate-y-1/2 place-items-center rounded-full bg-black/50 hover:bg-black/70 [@media(hover:none)]:hidden"
+          className="absolute top-1/2 left-4 z-10 grid size-12 -translate-y-1/2 place-items-center rounded-full bg-[rgba(15,23,35,0.62)] hover:bg-[rgba(15,23,35,0.85)] [@media(hover:none)]:hidden"
           onClick={() => goTo(index - 1)}
         >
           <ChevronLeft size={28} aria-hidden="true" />
@@ -127,7 +127,7 @@ export default function PhotoViewer({
         <button
           type="button"
           aria-label="다음 사진"
-          className="absolute top-1/2 right-4 z-10 grid size-12 -translate-y-1/2 place-items-center rounded-full bg-black/50 hover:bg-black/70 [@media(hover:none)]:hidden"
+          className="absolute top-1/2 right-4 z-10 grid size-12 -translate-y-1/2 place-items-center rounded-full bg-[rgba(15,23,35,0.62)] hover:bg-[rgba(15,23,35,0.85)] [@media(hover:none)]:hidden"
           onClick={() => goTo(index + 1)}
         >
           <ChevronRight size={28} aria-hidden="true" />

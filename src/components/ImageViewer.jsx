@@ -9,11 +9,12 @@ const ARROW_CLASS =
  * 이미지 크게 보기: 판 없이 어두운 배경 위에 이미지만 표시(화면에 맞춘 크기, 작은 원본은 늘리지 않음)
  * - images: [{ key, src, name }] (src가 없으면 불러오지 못한 자리 표시, name은 화면 맨 위 ✕와 같은 줄 가운데에 고정)
  * - index: 지금 보는 장(0부터). 「N / 전체」는 이미지 아래(여러 장일 때만)
- * - ←·→ 키와 좌우 화살표로 넘기고 처음·끝에서는 그쪽 화살표 없음. ✕·이미지 밖 클릭·ESC로 닫힘
+ * - ←·→ 키와 좌우 화살표, 터치 스와이프로 넘기고 처음·끝에서는 그쪽 화살표 없음. ✕·이미지 밖 클릭·ESC로 닫힘
  * - src가 바뀌어 아직 받는 중이면 자리 표시(공개 주소를 바로 불러 큰 사진이 느릴 때)
  */
 export default function ImageViewer({ images, index, onChange, onClose }) {
   const dialogRef = useRef(null);
+  const touchStart = useRef(null);
   useScrollLock();
   const [loadedSrc, setLoadedSrc] = useState(null);
   const { src: url, name } = images[index];
@@ -37,6 +38,24 @@ export default function ImageViewer({ images, index, onChange, onClose }) {
     if (event.key === 'ArrowRight' && hasNext) onChange(index + 1);
   };
 
+  /** 터치 스와이프: 가로로 50px 넘게, 세로보다 크게 움직이면 넘긴다(왼쪽으로 밀면 다음 장) */
+  const handleTouchStart = (event) => {
+    const touch = event.touches[0];
+    touchStart.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const handleTouchEnd = (event) => {
+    const start = touchStart.current;
+    touchStart.current = null;
+    if (!start) return;
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
+    if (dx < 0 && hasNext) onChange(index + 1);
+    if (dx > 0 && hasPrev) onChange(index - 1);
+  };
+
   /** 안쪽 요소는 pointer-events-auto라 dialog 자신이나 빈 가운데 판이 눌린 것은 이미지 밖 */
   const handleMouseDown = (event) => {
     if (event.target === event.currentTarget) onClose();
@@ -50,6 +69,8 @@ export default function ImageViewer({ images, index, onChange, onClose }) {
       onCancel={handleCancel}
       onKeyDown={handleKeyDown}
       onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       <div className="pointer-events-none flex size-full flex-col items-center justify-center gap-3 px-20 max-[760px]:px-12">
         {url ? (
