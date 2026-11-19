@@ -8,9 +8,6 @@ export const getPets = () => api.get('/pets');
 /** 한도 조회 GET /pets/limit → {petMaxCnt, linkedPetCount, remainingPetCount} */
 export const getPetLimit = () => api.get('/pets/limit');
 
-/** 캐릭터 목록 GET /pixel-characters (캐릭터 없는 반려동물은 pixelCharSn 없음) */
-export const getPixelCharacters = () => api.get('/pixel-characters');
-
 /** 상세 조회 GET /pets/{petSn} */
 export const getPet = (petSn) => api.get(`/pets/${petSn}`);
 

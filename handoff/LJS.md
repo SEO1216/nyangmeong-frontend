@@ -2,28 +2,40 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-007 AI 매니저 진입 · 같은 주소 이동에도 AI 모달 닫기 (2026-11-19, L1·L2·추가-1 검증 2회차 통과, 사람 확인). AI 모달은 페이지 이동(같은 주소 포함)에 [✕]와 같은 연출로, 채팅 모달은 같은 주소 이동에도 닫힘
+끝남: SCR-COM-002 UI 통일 2-N · 반려동물 캐릭터 표시 통일 (2026-11-19, N1~N4·추가-1 검증 통과(1회차 N4 실패 → staleTime 5분), 사람 확인). 종합 건강기록 배너 캐릭터를 마이페이지 반려동물 카드 모양으로, 캐릭터 목록 조회를 `@/hooks/usePixelCharacters` 하나로
 
-- 계기: 사람 2026-11-19 "메인에서 ai 채팅 진입시 메인 로고 클릭해도 메인으로 안 가짐". `pages/ai/AiChatModal.jsx`가 `pathname`이 바뀔 때만 닫아서 `/main`에서 연 모달은 로고(`/main`)를 눌러도 그대로다. 버그 수정이라 기능 ID 추가 없음(FN-COM-007 "페이지 이동에 닫힘"대로 맞춤), 기능명세서·화면설계서 추출 안 함
-- 디자인: 없음(동작만)
+- 계기: 사람 2026-11-19 마이페이지 › 반려동물 관리 카드와 건강기록 › 종합 건강기록 배너의 캐릭터 구조 분석 뒤 `/start`. 두 곳 모두 `components/PetFace`를 쓰지만 반려동물 카드는 `PetFace` 자체가 원(이미지를 원으로 잘라 꽉 채움, 바탕 `surface-2`+안쪽 테두리), 배너는 무대 원(`brand-50`) 안에 둥근 사각형 `PetFace`(원의 80%)라 같은 캐릭터가 다르게 보인다
+- 기준: 화면설계서 SCR-HLT-011은 "캐릭터 이미지: SCR-MYP-010에서 조회"만 있고 모양 규정 없음. 기능 ID 추가 없음(표시 통일)
+- 디자인: 없음(Figma 토큰 없음, `html/`에 해당 파일 없음). 마이페이지 반려동물 카드의 지금 모양을 기준으로 한다(사람 결정 2026-11-19 "마이 페이지 기준")
 
 | 번호 | 바꿀 파일 | 할 일 | 완료 조건 |
 | --- | --- | --- | --- |
-| L1 | `src/pages/ai/AiChatModal.jsx` | 이동 감지를 `location.key`(이동할 때마다 새 값, 같은 주소로 다시 가도 바뀜)로. 주소가 그대로면(메인에서 로고) [✕]와 같은 닫는 연출(`useCloseWithMotion`: 검색창에서 열었으면 검색창 자리로 돌아감, 플로팅 버튼이면 오른쪽 아래로 작아짐)로 닫고, 주소가 바뀌면 지금처럼 바로 닫음 | 명령: `yarn -s lint`·`yarn -s build` 종료 0 · 화면(390·1280): ① `/main` 검색창으로 AI 모달을 열고 헤더 로고를 누르면 입력 줄이 메인 검색창 자리로 돌아가며 닫힌다(✕와 같은 연출) ② 플로팅 AI 버튼으로 연 모달은 로고에 오른쪽 아래로 작아지며 닫힌다 ③ 다른 화면(예: `/health`)에서 열고 로고를 누르면 닫히고 `/main`으로 간다(전과 같음) ④ 모달 안에서 대화를 보내고 사이드바·반려동물 칩을 눌러도 모달이 닫히지 않는다 ⑤ [✕]·Esc 닫기 연출은 전과 같다 |
-| L2 | `src/layouts/ChatModal.jsx` | 펫돌봄 채팅 모달도 같은 `pathname` 기준이라 같은 문제. L1과 같이 `location.key`로 | 화면: 채팅 모달을 연 화면의 같은 메뉴 링크·로고(메인에서 연 경우)를 누르면 모달이 닫힌다 · 모달 안에서 방을 고르고 메시지를 보내도 닫히지 않는다 |
-
-- 질문: L2(펫돌봄 채팅 모달)도 같이 고칠까요? 채팅 모달 딤은 헤더 아래(z-35 < 헤더 z-40, FN-COM-009-12 "모달이 떠 있어도 헤더 조작 가능")라 로고를 누를 수 있다. `/main`에서 헤더 채팅 아이콘으로 열고 로고를 누르면 지금은 안 닫힌다. (추천: 같이, 채팅 모달은 닫는 연출이 없어 바로 닫힘)
-  - 결정: 같이(사람 "승인", L2 포함)
+| N1 | `src/features/health/summary/SummaryBanner.jsx` | 무대 `div`(연한 청록 원)와 안쪽 둥근 사각형 `PetFace`를 없애고, 반려동물 카드처럼 `PetFace` 자체를 원으로: `rounded-full`·`bg-surface-2`·안쪽 테두리 `shadow-[inset_0_0_0_1px_var(--color-line-strong)]`, 이미지가 원을 꽉 채움(`object-cover`). 크기는 지금 무대 크기 그대로(`STAGE_SIZE` 64/128/160, 점선 [캐릭터 만들기] 원과 같은 크기 유지), PC `row-span-2`·`self-center` 유지 | 명령: `yarn -s lint`·`yarn -s build` 종료 0 · 화면(1280·900·390, `/health`와 `/mypage/pets` 비교): 배너 캐릭터가 반려동물 카드와 같은 모양(회색 바탕 원에 꽉 찬 캐릭터 + 안쪽 테두리), 크기 64/128/160, 760 미만 연한 청록 띠 위에서도 원이 보인다, 캐릭터 없는 주양육 동물은 같은 크기 점선 [캐릭터 만들기] 그대로, 오류 확인 중 동물은 흑백, 반려동물을 바꿔도 배너 높이 그대로 |
+| N2 | `src/hooks/usePixelCharacters.js`(새 파일) | 캐릭터 목록 조회를 한곳에: 키 `pixelCharacterKeys.all`(`['pixel-characters']`), `GET /pixel-characters` 호출, `usePixelCharacters({ isPolling, select })`(생성 중이면 4초마다·12분 상한 폴링은 `features/pet/queries.js`에서 그대로 옮김). `features/health`가 `features/pet` 훅을 가져올 수 없어(의존 방향) `hooks/`에 둔다. 같은 자리에 캐릭터 이미지 조회 `hooks/useCharacterImage.js`가 이미 있음 | 명령: `yarn -s lint`·`yarn -s build` 종료 0 · `rg -n "getPixelCharacters\|healthKeys.pixelCharacters" src` 결과가 새 파일만 |
+| N3 | `src/features/pet/queries.js`·`pet/api.js`·`src/pages/mypage/CharacterPage.jsx` | pet의 `usePixelCharacters`·폴링 상수·`getPixelCharacters`를 지우고 새 훅을 쓴다. `useCharState`는 `usePixelCharacters({ select })`로, 캐릭터 생성·꾸미기·삭제 뒤 무효화 4곳은 `pixelCharacterKeys.all`로. `healthKeys` import가 남지 않으면 지운다 | 화면(1280·390, `/mypage/characters`): 캐릭터 목록이 전과 같이 보이고, 생성 중 캐릭터가 있으면 4초마다 다시 읽는다(Network 탭), 꾸미기 저장 뒤 목록이 새로 읽힌다 |
+| N4 | `src/features/health/queries.js`·`health/api.js`·`summary/SummaryBanner.jsx` | health의 `usePixelCharacters`·`healthKeys.pixelCharacters`·`getPixelCharacters`를 지우고 `SummaryBanner`가 새 훅을 쓴다 | 화면(`/health`): 캐릭터 없는 주양육 동물은 점선 [캐릭터 만들기], 있는 동물은 캐릭터. `/mypage/characters` → `/health` 이동 때 `/pixel-characters`를 다시 받지 않는다(캐시 하나) |
 
 ### 추가 요청
 
 | 번호 | 바꿀 파일 | 완료 조건 | 요청 |
 | --- | --- | --- | --- |
-| 추가-1 | `src/pages/ai/AiChatModal.jsx` | 명령: `yarn -s lint`·`yarn -s build` 종료 0 · 화면(1280·390): 다른 화면(예: `/health`)에서 플로팅 [AI]로 연 모달이 헤더 로고(다른 주소로 이동)를 누르면 뒤 화면은 `/main`으로 바뀌고 모달은 오른쪽 아래로 작아지며 닫힌다(✕와 같은 연출). GNB·바텀 네비 등 다른 주소 링크도 같다. 메인 검색창에서 연 모달이 다른 주소로 가면 지금처럼 바로 닫힌다. 모달 안에서 AI가 화면을 옮기는 경우(바로가기)는 지금처럼 먼저 닫고 이동한다 | 요청 2026-11-19 12:45 "다른 페이지에서 플로팅 버튼으로 AI 채팅 진입 후 로고 눌렀을 때 스케일 다운으로 닫히게" |
-- 위험: 모달이 열린 동안 뒤 화면이 주소의 `?` 값만 바꿔도(`setSearchParams`·`navigate(..., { replace })`) `key`가 바뀌어 모달이 닫힌다. 지금 AI 모달 안(`AiChatScreen`)과 메인은 주소를 바꾸지 않음(grep 확인). L1 ④·L2에서 화면으로 확인한다
+| 추가-1 | `src/features/pet/queries.js` | 명령: `yarn -s lint`·`yarn -s build` 종료 0 · 화면(1280): `/health`에서 캐릭터 목록을 받은 뒤 반려동물 등록(`useCreatePet`)·초대 수락(`useAcceptInvitation`)이 성공하면 `/pixel-characters`를 다시 읽어, 캐릭터 없는 새 주양육 동물을 `/health`에서 고르면 배너에 기본 캐릭터가 아니라 점선 [캐릭터 만들기]가 바로 나온다(등록 한도·공용 DB 때문에 등록·수락 응답은 Playwright route로 가로채도 된다) | 요청 2026-11-19 14:37 "등록 뒤 5분 동안 배너에 [캐릭터 만들기] 대신 기본 캐릭터가 나오는 것(staleTime 5분 부작용, Playwright 재현) 수정" |
+
+- 반려동물 카드(`features/pet/list/PetSlide.jsx`)는 기준이라 바꾸지 않는다. 새 공용 부품 없음(`PetStage` 안 만듦)
+- 캐시 키가 `['health', 'pixel-characters']` → `['pixel-characters']`로 바뀐다. 쓰는 곳은 위 파일뿐(grep 확인)
+- 알아 둘 것: 원으로 꽉 채우므로 배너에서도 캐릭터 그림(320×320 투명 바탕 도트)의 귀·발끝이 원 가장자리에서 잘릴 수 있다(반려동물 카드와 같음)
+- 질문: 배너는 `alt` 없이 꾸밈 이미지다. 반려동물 카드처럼 `alt="{이름} 캐릭터"`를 넣을까요? (추천: 넣지 않음. 바로 옆에 이름이 있어 낭독기가 두 번 읽음)
+  - 결정: 넣지 않음(사람 "승인" 2026-11-19)
+- 범위 밖(말만): `PetFace`의 `iconClassName`은 효과 없음(넘기는 곳 정리는 각 담당)
+- 팀 알림(PR 본문 + 팀 채널, JAJ·SJM): ① 종합 건강기록 배너 캐릭터가 마이페이지 반려동물 카드와 같은 모양(회색 원에 꽉 참, 연한 청록 무대 원 없앰) ② 캐릭터 목록 조회가 `@/hooks/usePixelCharacters` 하나로(키 `pixelCharacterKeys.all`). `features/pet`·`features/health`의 `usePixelCharacters`·`getPixelCharacters`·`healthKeys.pixelCharacters` 없어짐
 - 새 의존성: 없음
 
 ## 다음에 할 것
+
+- SCR-COM-002 UI 통일 2-N 팀 알림(PR 본문 + 팀 채널, JAJ·SJM): ① 종합 건강기록 배너 캐릭터가 마이페이지 반려동물 카드와 같은 모양(회색 원에 꽉 참, 연한 청록 무대 원 없앰) ② 캐릭터 목록 조회가 `@/hooks/usePixelCharacters` 하나로(키 `pixelCharacterKeys.all`, 5분 `staleTime`). `features/pet`·`features/health`의 `usePixelCharacters`·`getPixelCharacters`·`healthKeys.pixelCharacters` 없어짐. 반려동물 등록·초대 수락 뒤에도 캐릭터 목록을 다시 읽음 ③ 캐릭터 상태가 바뀌는 새 기능을 만들면 `pixelCharacterKeys.all`을 무효화해야 함(안 하면 5분 동안 옛 값)
+- 2-N 사람이 정할 것: 마이페이지 반려동물 카드에도 캐릭터 없는 주양육 동물일 때 점선 [캐릭터 만들기]를 넣을지(배너와 같게, `features/pet/list/PetSlide.jsx`, SJM 화면). 2026-11-19 물었고 답 없이 마무리
+- 2-N 참고(검증 보고, 판정 밖): 캐릭터 없는 동물의 `GET /pets/{petSn}/character-image` 404(백엔드 기본 그림 교체 건, 백엔드 재시작 필요). 추가-1 초대 수락은 route로만 확인(다음 `/health` 진입 때 다시 읽음)
+- SCR-COM-004 알림 드롭다운 · 목록 무한 스크롤 연결(백엔드 LJS 알림 2026-11-19, 백엔드 PR 전·병합 시점을 프론트와 맞춤): `GET /api/notifications?tab=&page=&size=5` 응답이 배열 → `{ content, page, size, totalElements, totalPages, hasNext }`. 프론트: ① `data.content`로 읽기(병합 뒤 지금 코드는 목록을 못 읽음) ② 열 때·탭 바꿀 때 page=1, 목록 끝에서 page+1, `hasNext` false면 멈춤 ③ `inappNotiSn`으로 중복 제거 ④ 행이 5개보다 많이 보이는 화면에서 끝 감지가 다음 쪽을 이어 부르는지 ⑤ 0건은 '새 알림이 없어요' 그대로. 미읽음 개수·모두 읽음 API는 그대로(모두 읽음 뒤 page=1부터). 계약은 백엔드 `docs/api/notification.md`. 백엔드 PR #271(프론트 연결 PR과 같이 병합, 아직 병합 안 함). 마일스톤 절은 백엔드 세션이 `milestones/LJS.md` "## 제외" 앞에 넣음(대기)
 
 - SCR-COM-007 참고(검증 보고 2026-11-19, 판정 밖): `pages/ai/AiChatModal.jsx` `useCloseWithMotion` 위 주석 "화면 이동으로 닫을 때는 이 함수를 쓰지 않는다"가 이제 코드와 다름(이제 이동에도 씀). 다음에 이 파일을 고칠 때 한 줄 고친다. 390은 AI 모달이 화면 아래까지 덮어 바텀 네비를 누를 수 없음. 모달 안 바로가기 이동(`handleOpenMain`)은 코드로만 확인
 - SCR-COM-007 팀 알림(PR 본문 + 팀 채널, KSJ): 펫돌봄 채팅 모달(`layouts/ChatModal.jsx`)이 같은 주소로 다시 이동(로고·같은 GNB)해도 닫힌다(`location.key` 기준). 모달이 열린 동안 뒤 화면이 주소의 `?` 값을 바꾸면 모달이 닫히니 그런 화면을 만들면 알려 달라
