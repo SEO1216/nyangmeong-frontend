@@ -18,9 +18,6 @@ export const getPetLimit = () => api.get('/pets/limit');
 /** 반려동물 상세 GET /pets/{petSn} (SJM 백엔드, 건강 일지 체중 그래프의 목표체중 goalBdwg) */
 export const getPetDetail = (petSn) => api.get(`/pets/${petSn}`);
 
-/** 내 반려동물별 캐릭터 목록 GET /pixel-characters (LJS 백엔드, 캐릭터 없는 반려동물은 pixelCharSn 없음) */
-export const getPixelCharacters = () => api.get('/pixel-characters');
-
 /**
  * 반려동물들의 일정 목록(FN-HLT-003-29·31·40)
  * - GET /care-schedules 한 번으로 여러 반려동물 일정을 받음

@@ -2,9 +2,43 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 공용 페이지 이동 · 모바일 쪽 번호 5개(760 미만 `BoardPagination` 5개 묶음) (2026-11-19, 검증 통과, 사람 확인)
+끝남: SCR-COM-004 알림 드롭다운 · 목록 더 불러오기 연결 (2026-11-19, B1·B2·추가-1·추가-2 검증 통과(1회차 B2 실패 → 끝 줄이 새로 보일 때만 부름), 사람 확인). 알림 목록을 5건씩 끝에서 더 불러오고, 탭 바꿀 때 이전 목록 없이, 로딩 중 스크롤 막음
+
+- 계기: "다음에 할 것"의 SCR-COM-004 연결(백엔드 LJS `b6d0f57`, PR #271은 이 연결 PR과 같이 병합). `GET /notifications` 응답이 배열 → `{ content, page, size, totalElements, totalPages, hasNext }`(`?tab=&page=&size=5`, 안 읽음 우선·같은 상태끼리 최신순). 계약은 백엔드 `docs/api/notification.md`
+- 기준: 공통레이아웃 기능명세서 v0.10 FN-COM-004-04·05·12·15, 화면설계서 v0.13 SCR-COM-004 ③. 기능 ID 추가 없음
+- 디자인: 없음(Figma 토큰 없음, `html/`에 해당 파일 없음). 지금 드롭다운 그대로, 목록 끝 상태 줄만 더한다(가계부 앱 무한 스크롤 `ExpenseLoadMore`와 같은 방식)
+
+| 번호 | 바꿀 파일 | 할 일 | 완료 조건 |
+| --- | --- | --- | --- |
+| B1 | `src/features/notification/api.js`·`queries.js` | `getNotifications({ tab, page })`가 `size: 5`로 부른다. `useNotifications`를 `useInfiniteQuery`로(`initialPageParam: 1`, `hasNext`면 `page + 1`, `select`로 쪽들의 `content`를 이어 붙이고 `inappNotiSn`으로 중복 제거, 탭 바꿀 때 `keepPreviousData`). `gcTime: 0`으로 패널을 닫거나 탭을 떠나면 캐시를 버려 다시 열기·탭 되돌아오기가 1쪽부터. 모두 읽음 성공 뒤 목록은 `resetQueries`(1쪽부터), 개별 읽음은 지금처럼 무효화 | 명령: `yarn -s lint`·`yarn -s build` 종료 0 · `rg -n "getNotifications" src` 결과가 `api.js`·`queries.js`만 |
+| B2 | `src/layouts/NotificationDropdown.jsx` | 목록 칸(264px 스크롤) 맨 아래에 끝 감지 줄을 두고 `@/hooks/useInView`로 보이면 `hasNextPage`·불러오는 중 아님일 때 `fetchNextPage`. 불러오는 중이면 그 줄에 `Skeleton` 한 행, 다음 쪽 실패면 "불러오지 못했어요" + [다시 시도](`fetchNextPage`), `hasNext` false면 줄 없음(문구 없음). 0건 '새 알림이 없어요', 첫 쪽 스켈레톤 5행은 그대로 | 화면(1280·390, 검증 백엔드 8081이 백엔드 LJS `b6d0f57` 이상): 드롭다운을 열면 `page=1&size=5` 한 번, 목록 끝까지 스크롤하면 `page=2`, `hasNext` false 쪽 뒤로는 더 부르지 않는다 · 탭을 바꾸면 그 탭 `page=1`, 닫고 다시 열면 `page=1`부터 · 0건 탭은 '새 알림이 없어요' · 두 쪽에 같은 `inappNotiSn`이 오면 한 번만 보인다 · 다음 쪽 실패 때 [다시 시도]로 다시 부른다 · [모두 읽음] 뒤 `page=1`부터 다시 · 알림 행 클릭 이동은 전과 같다(검증 계정 알림이 5건 이하이거나 겹침·실패를 만들 수 없으면 Playwright route로 응답을 가로채도 된다) |
+
+### 추가 요청
+
+| 번호 | 바꿀 파일 | 완료 조건 | 요청 |
+| --- | --- | --- | --- |
+| 추가-1 | `src/features/notification/queries.js`·`src/layouts/NotificationDropdown.jsx` | 명령: `yarn -s lint`·`yarn -s build` 종료 0 · 화면(1280·390): 알림 드롭다운에서 탭 칩을 바꾸면 이전 탭 목록이 보이지 않고 바로 첫 쪽 스켈레톤 5행 → 새 탭 목록(같은 탭으로 돌아와도 같음), 끝까지 스크롤 더 불러오기·다시 열기 1쪽부터는 전과 같다 | 요청 2026-11-19 15:10 "칩으로 다른 카테고리로 넘어갈 때 이전 탭 목록이 보이는 딜레이를 없앤다(혼란스러움)" |
+| 추가-2 | `src/layouts/NotificationDropdown.jsx` | 명령: `yarn -s lint`·`yarn -s build` 종료 0 · 화면(1280·390): 드롭다운을 열 때·탭 칩을 바꿀 때 첫 쪽 스켈레톤이 보이는 동안 목록 칸이 스크롤되지 않는다(휠·터치로 움직이지 않고 스크롤 막대 없음), 목록이 나오면 전처럼 스크롤·끝에서 더 불러오기 | 요청 2026-11-19 15:20 "로딩 때 목록이 잠깐 스크롤되는 것, 순서 확인해서 로딩 중에는 스크롤 안 되게" |
+
+- 백엔드 8081이 옛 코드(배열 응답)면 8081만 끄고 백엔드 LJS 브랜치로 다시 띄운다(8080은 건드리지 않음)
+- 알아 둘 것: `gcTime: 0`이라 열 때마다 첫 쪽 스켈레톤이 잠깐 보인다(지금은 5분 안에 다시 열면 캐시를 먼저 보여 줌). 행 클릭 읽음 뒤 무효화는 불러온 쪽 수만큼 다시 부른다(패널이 바로 닫히는 이동은 상관없음, 채팅 모달 알림만 해당)
+- 사람이 고치는 문서: 공통레이아웃 기능명세서 v0.10 FN-COM-004-05 "최대 5건을 미리보기로" → "5건씩, 목록 끝에서 다음 5건을 더 불러온다", 화면설계서 v0.13 SCR-COM-004 ③ "최대 5건 미리보기" 같은 문구
+- 범위 밖: 미읽음 개수·모두 읽음·개별 읽음 API는 그대로
+- 새 의존성: 없음
 
 ## 다음에 할 것
+
+- SCR-COM-002 UI 통일 2-N 팀 알림(PR 본문 + 팀 채널, JAJ·SJM): ① 종합 건강기록 배너 캐릭터가 마이페이지 반려동물 카드와 같은 모양(회색 원에 꽉 참, 연한 청록 무대 원 없앰) ② 캐릭터 목록 조회가 `@/hooks/usePixelCharacters` 하나로(키 `pixelCharacterKeys.all`, 5분 `staleTime`). `features/pet`·`features/health`의 `usePixelCharacters`·`getPixelCharacters`·`healthKeys.pixelCharacters` 없어짐. 반려동물 등록·초대 수락 뒤에도 캐릭터 목록을 다시 읽음 ③ 캐릭터 상태가 바뀌는 새 기능을 만들면 `pixelCharacterKeys.all`을 무효화해야 함(안 하면 5분 동안 옛 값)
+- 2-N 사람이 정할 것: 마이페이지 반려동물 카드에도 캐릭터 없는 주양육 동물일 때 점선 [캐릭터 만들기]를 넣을지(배너와 같게, `features/pet/list/PetSlide.jsx`, SJM 화면). 2026-11-19 물었고 답 없이 마무리
+- 2-N 참고(검증 보고, 판정 밖): 캐릭터 없는 동물의 `GET /pets/{petSn}/character-image` 404(백엔드 기본 그림 교체 건, 백엔드 재시작 필요). 추가-1 초대 수락은 route로만 확인(다음 `/health` 진입 때 다시 읽음)
+- SCR-COM-004 알림 목록 더 불러오기 팀 알림·PR(PR 본문): 백엔드 PR #271(`GET /notifications` 쪽 응답 `{ content, page, size, totalElements, totalPages, hasNext }`)과 이 프론트 PR을 같이 병합한다(한쪽만 병합하면 알림 목록을 못 읽음). 드롭다운이 5건씩 끝에서 더 불러오고, 탭을 바꾸면 이전 탭 목록 없이 스켈레톤부터, 로딩 중 목록 칸 스크롤 막음. `useNotifications`가 `useInfiniteQuery`(`gcTime: 0`)로 바뀜
+- SCR-COM-004 사람이 고치는 문서: 공통레이아웃 기능명세서 v0.10 FN-COM-004-05 "최대 5건을 미리보기로" → "5건씩, 목록 끝에서 다음 5건을 더 불러온다", 화면설계서 v0.13 SCR-COM-004 ③ 같은 문구
+- SCR-COM-004 참고(검증 보고, 판정 밖): 목록 맨 아래에서 [모두 읽음]을 누르면 1쪽만 다시 받고, 끝 줄이 보이는 자리여도 다음 쪽을 저절로 부르지 않음(한 번 위로 올렸다 내리면 부름). 0건 탭·두 쪽 겹침·다음 쪽 실패는 Playwright route로만 확인
+
+- SCR-COM-007 참고(검증 보고 2026-11-19, 판정 밖): `pages/ai/AiChatModal.jsx` `useCloseWithMotion` 위 주석 "화면 이동으로 닫을 때는 이 함수를 쓰지 않는다"가 이제 코드와 다름(이제 이동에도 씀). 다음에 이 파일을 고칠 때 한 줄 고친다. 390은 AI 모달이 화면 아래까지 덮어 바텀 네비를 누를 수 없음. 모달 안 바로가기 이동(`handleOpenMain`)은 코드로만 확인
+- SCR-COM-007 팀 알림(PR 본문 + 팀 채널, KSJ): 펫돌봄 채팅 모달(`layouts/ChatModal.jsx`)이 같은 주소로 다시 이동(로고·같은 GNB)해도 닫힌다(`location.key` 기준). 모달이 열린 동안 뒤 화면이 주소의 `?` 값을 바꾸면 모달이 닫히니 그런 화면을 만들면 알려 달라
+
+- 기본 캐릭터 네모 임시 그림 없애기(사람 2026-11-19): 백엔드 `resources/character/default-dog.png`·`default-cat.png`(`CharacterDefaultImage`, 캐릭터 없음·오류 확인 중일 때 `GET /pets/{petSn}/character-image`가 200으로 줌)를 프론트 `src/assets/pets/default-character-*.png` 도트 그림으로 교체 요청. 백엔드 연결: 기본 캐릭터 그림 교체(백엔드 저장소에서 /start). 백엔드 회신 2026-11-19: 1안으로 기획, 사람 승인 대기. 백엔드 그림을 프론트 `default-character-*-full.png`(512 전신)로 바꾸고 얼굴은 기존 자르기로 프론트 얼굴 그림과 같은 픽셀. API 그대로, 프론트 할 일 없음. 백엔드 회신 2 2026-11-19: 교체·검증 통과(face 256·full 512 도트, 캐릭터 없음·오류 확인 중 모두 200), 백엔드 커밋·사람 확인 대기. 프론트에서 보려면 백엔드 재시작 필요
 
 - SCR-COM-002 쪽 번호 팀 알림(PR 본문 + 팀 채널, 모두): 760 미만에서 공용 `BoardPagination` 쪽 번호가 5개 묶음(1~5, 6~10 …)으로 바뀜(760 이상은 10개 그대로). 카드 쪽 번호 `Pagination`은 원래 5개라 그대로
 
@@ -17,7 +51,7 @@
 - 사람이 고치는 문서: 공통레이아웃 기능명세서 FN-COM-002-27 "플로팅 반려동물 등록 버튼" 추가, 화면설계서 SCR-COM-002 ⑦ 플로팅 버튼 설명
 - 참고(검증 보고, 판정 밖): `/mypage/pets`에는 화면의 [반려동물 등록]과 플로팅 버튼이 같은 이름으로 둘 보인다(낭독기에서 헷갈릴 수 있음). 등록 성공 뒤 동작(토스트 후 그 자리)은 공용 DB라 코드로만 확인
 
-- SCR-COM-002 UI 통일 2-M(남은 옛 분기점 KSJ 커뮤니티 7개 파일·SJM `ExpenseHistory` JS, AI 대화·라우팅 매핑 삭제 확인 `isDanger`, `ui.md` 예시 `min-[1101px]`): 2026-11-19 기획했다가 플로팅 등록 버튼 먼저(사람). 다음 `/start`에서 다시 기획
+- SCR-COM-002 UI 통일 2-M(2026-11-19 두 번째 기획 M1~M4: KSJ 커뮤니티 8개 파일 `1101`·`761` → `1100`·`760`, SJM `ExpenseHistory` `MOBILE_QUERY`, AI 대화·라우팅 매핑 삭제 확인 `isDanger`, `ui.md` 예시 2곳. 범위 밖 `Card` `sm:`·`adminTableStyles` `md:`·`AuthLayout`·`MyPageHomePage`. 로고 버그 먼저(사람)) (남은 옛 분기점 KSJ 커뮤니티 7개 파일·SJM `ExpenseHistory` JS, AI 대화·라우팅 매핑 삭제 확인 `isDanger`, `ui.md` 예시 `min-[1101px]`): 2026-11-19 기획했다가 플로팅 등록 버튼 먼저(사람). 다음 `/start`에서 다시 기획
 
 ### SCR-COM-002 UI 통일 다음 단계(사람 결정 2026-11-18)
 
