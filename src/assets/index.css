@@ -70,10 +70,10 @@
   --color-line-soft: #edf1f1;
   --color-line-strong: #b9c4c4;
   --color-input-line: #d3dae2;
-  /** 화면 바탕·푸터(따뜻한 미색) */
-  --color-page-bg: #faf8f5;
-  --color-footer: #f5f2ee;
-  --color-footer-line: #eae6e0;
+  /** 화면 바탕·푸터·푸터 선(옅은 청회색, 2026-11-20) */
+  --color-page-bg: #f7f9f9;
+  --color-footer: #f1f6f6;
+  --color-footer-line: #dfe5e6;
   /** 창 뒤 딤(투명도는 /45처럼 붙인다)·사진 보기 바탕 */
   --color-dim: #0f1723;
   --color-viewer: #2b2b2b;

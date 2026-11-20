@@ -38,6 +38,15 @@ export default function UserHeader() {
   const { data: chatUnread } = useChatUnreadCount(Boolean(me));
 
   const gnbRef = useRef(null);
+  /** 맨 위에서는 바탕·테두리 투명(화면 바탕색 그대로), 아래로 스크롤하면 흰색 반투명과 테두리를 보인다 */
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 0);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   const gnbTimer = useRef(null);
   const skipGnbFocus = useRef(false);
 
@@ -137,7 +146,13 @@ export default function UserHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 h-16 border-b border-line bg-white/[.92] backdrop-blur-[10px] backdrop-saturate-[1.4]">
+      <header
+        className={`sticky top-0 z-40 h-16 border-b transition-colors ${
+          isScrolled
+            ? 'border-line bg-white/[.92] backdrop-blur-[10px] backdrop-saturate-[1.4]'
+            : 'border-transparent bg-transparent'
+        }`}
+      >
         <div className="mx-auto grid h-full max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center gap-6 px-8 max-[1100px]:flex max-[1100px]:gap-3 max-[760px]:px-4">
           <Link to={PATHS.MAIN} className="justify-self-start">
             <img src={logo} alt="냥멍케어" className="h-8 w-[121px]" />

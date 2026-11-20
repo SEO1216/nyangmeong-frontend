@@ -2,10 +2,12 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 로그인·가입 버튼·입력칸 높이 48 통일 (2026-11-20, 검증 통과, 사람 확인). 입력칸 옆 버튼 8개(B1)와 추가-1(로그인 50px 버튼·보안코드·가입·비밀번호 찾기·재설정·재가입 복구·탈퇴 완료·약관 창 큰 버튼)을 `authStyles`의 `AUTH_BTN_PRIMARY`·`AUTH_BTN_SECONDARY`·`SIDE_BTN`(48px·둥글기 12)로
+끝남: SCR-COM-002 화면 바탕색·헤더·푸터 색 정리 (2026-11-20, 검증 통과, 사람 확인). 화면 바탕 `--color-page-bg` #f7f9f9(관리자·로그인·주소 지도 화면도 `bg-page-bg`), 회원 헤더는 맨 위 투명·스크롤 때 흰 반투명+아래선, 푸터 #f1f6f6·선 #dfe5e6·로고 그림·팀원 5명 이메일·대표전화·FAX
 
 ## 다음에 할 것
 
+- SCR-COM-002 바탕·헤더·푸터 색 팀 알림(PR 본문 + 팀 채널, 모두): 화면 바탕 `--color-page-bg`가 #faf8f5 → #f7f9f9, 관리자(`AdminLayout`)·로그인·가입(`AuthLayout`, 760 미만 `bg-white` 지움) 바탕도 `bg-page-bg`. 회원 헤더(`UserHeader`)는 맨 위에서 바탕·아래선 투명, 스크롤하면 흰 반투명+아래선. 푸터 `--color-footer` #f1f6f6·`--color-footer-line` #dfe5e6(위 테두리도 footer-line), "냥멍케어" 글자 대신 로고 그림, Dev Team 안인철 뺌. KSJ: `chat/room/AddressMapScreen` 바탕 `bg-surface-2` → `bg-page-bg`
+- SCR-COM-002 커밋 전 사람 확인: `layouts/UserFooter.jsx`에 팀원 실제 이메일 5개·대표전화·FAX가 들어감(공개 저장소). 본인들 동의 확인
 - SCR-COM-002 로그인·가입 버튼 48 팀 알림(PR 본문 + 팀 채널, YAY): `features/member` 로그인·가입·비밀번호 찾기·재설정·재가입 복구·탈퇴 완료·약관 창 버튼과 입력칸 옆 버튼이 `shared/authStyles`의 `AUTH_BTN_PRIMARY`·`AUTH_BTN_SECONDARY`·`SIDE_BTN`(공용 버튼 + 48px·둥글기 12)로 바뀜. 로그인 [이메일로 로그인하기]·[로그인]은 50px·15px 굵게·떠오름 → 48px·16px 600·떠오름 없음, 보안코드 그림 칸·새로고침·입력칸 40 → 48. 2-K 공용 규격(40·6)과 다름(입력칸 48에 맞춤). 회원정보·탈퇴 안내 화면(`profile/`·`withdraw/` 나머지)은 그대로 40
 - 검증 참고(판정 밖): 비밀번호 찾기·재설정·재가입 복구·닉네임 모달·SNS 가입·탈퇴 완료·약관 창은 코드로만 확인(SNS·탈퇴 계정 필요)
 

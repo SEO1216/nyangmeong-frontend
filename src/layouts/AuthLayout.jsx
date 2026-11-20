@@ -26,7 +26,7 @@ export default function AuthLayout() {
   const copy = isSignup ? PANEL_COPY.signup : PANEL_COPY.login;
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-surface-2 p-4 max-[760px]:items-start max-[760px]:bg-white max-[760px]:p-0 min-[1100px]:p-5">
+    <div className="flex min-h-dvh items-center justify-center bg-page-bg p-4 max-[760px]:items-start max-[760px]:p-0 min-[1100px]:p-5">
       <main
         className={`grid w-full max-w-270 min-[760px]:h-150 overflow-hidden rounded-4xl bg-white shadow-[0_20px_50px_rgba(0,0,0,0.08)] transition-[grid-template-columns] duration-800 ease-[cubic-bezier(0.25,1,0.5,1)] max-[760px]:min-h-dvh max-[760px]:grid-cols-1 max-[760px]:rounded-none max-[760px]:shadow-none ${
           isWide
