@@ -12,7 +12,7 @@ import EmptyResult from '@/components/EmptyResult';
 import PostForm from '@/features/community/PostForm';
 import { profanityFieldsOf } from '@/utils/profanity';
 import { usePost, useUpdatePost } from '@/features/community/queries';
-import useLeaveGuard from '@/features/community/useLeaveGuard';
+import useLeaveGuard from '@/hooks/useLeaveGuard';
 import SubPageLayout from '@/layouts/SubPageLayout';
 import { PATHS } from '@/routes/paths';
 import SkeletonCard from '@/components/SkeletonCard';

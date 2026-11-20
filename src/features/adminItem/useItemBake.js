@@ -9,9 +9,8 @@ const BAKE_ERROR_MESSAGES = {
   CHARACTER_API_ERROR: '굽기에 실패했어요. 잠시 후 다시 시도해 주세요',
 };
 
-/** 전체 굽기 대상: 판매 중이고 굽기 지시가 있거나 그림 참고(서버 굽기 대상과 같음) */
-export const canBakeItem = (item) =>
-  item.ntslYn && (Boolean(item.bakeHint) || Boolean(item.bakeImgRefYn));
+/** 전체 굽기 대상: 판매 중이고 그림 참고(서버 굽기 대상과 같음) */
+export const canBakeItem = (item) => item.ntslYn && Boolean(item.bakeImgRefYn);
 
 /**
  * [아이템 전체 굽기]

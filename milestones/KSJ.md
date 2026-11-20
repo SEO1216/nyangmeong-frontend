@@ -285,11 +285,13 @@
 - 이미 바뀐 것: 요청서에 「프론트는 입력창과 사진·위치 버튼을 이미 막았다」(파일은 확인 필요)
 - 결과(2026-11-16): 검증 1회차 `통과`, 사람 확인. 입력 막기는 이미 되어 있었고 409 `CHAT_ROOM_CLOSED` 처리(토스트·재조회·다시 보내기 줄 없음)를 더함
 
-## SCR-CMU-005 우리동네 펫돌봄 채팅 · 거래 취소 요청과 나가기 차단 — 대기
+## SCR-CMU-005 우리동네 펫돌봄 채팅 · 거래 취소 요청과 나가기 차단 — 끝
 - 기능: 명세 기능 ID 추가 없음(백엔드 요청서 `docs/backend-request-care-chat.md` 4번 나가기 차단·5번 거래 취소 요청, 사람 요청 2026-11-15). 걸치는 FN-CMU-005-02 나가기, FN-CMU-005-06~11 거래 단계
 - 기다리는 것: 백엔드 SCR-CMU-005 거래 취소 요청과 나가기 차단(KSJ, 백엔드 끝 2026-11-18, PR 병합 전). `POST /api/care-matches/{petPrtcMtchSn}/cancel-request`(Body `{"cnclRsn"}` 50자, 201 `CareCancelDemandItem`)·`/cancel-request/approve`·`/reject`·`/withdraw`, `GET /api/chat-rooms/{sn}`의 `cnclDmnd`(`mtchCnclDmndSn`, `dmndMbrSn`, `mineYn`, `cnclRsn`, `dmndSttsCd` PCAC0021 요청중·0022 동의·0023 거절·0024 철회, `regDt`, `prcsDt`). 매칭완료~수령 대기(PCAC0013~0015) 나가기는 409 `CHAT_LEAVE_IN_DEAL`, 요청중에는 완료 요청·완료 확인·수령 확인이 409 `CARE_MATCH_INVALID_STATE`. 동의하면 매칭 PCAC0017·글 모집중·방 `CHTC0002`. 사유는 칩 문구 또는 직접 입력 문자열 하나로 보낸다(코드 없음)
 - 완료 조건: 채팅방 메뉴에 「거래 취소 요청」이 있고 사유를 골라 보내면 요청한 쪽에 대기 카드와 「요청 철회하기」, 받은 쪽에 사유와 「취소에 동의」·「거절하고 계속」이 보인다(`cnclDmnd.mineYn`). 동의 뒤 입력창이 읽기 전용이 되고 나가기가 켜진다. 매칭완료~수령 대기에는 나가기가 막히고, 서버 409 `CHAT_LEAVE_IN_DEAL`이 와도 안내를 보인다
 - 이미 바뀐 것: 요청서에 「프론트는 (나가기) 메뉴만 비활성화했다」(파일은 확인 필요)
+- 추가 요청: 추가-1 메뉴 안내 문구 14px, 추가-2 모집중이 아닌 글의 채팅에서 [매칭 요청하기] 숨김
+- 결과(2026-11-20): 검증 3회차 `확인 못 함 있음`(연결 남음만), `yarn -s lint` 0·`yarn -s build` 0, 사람 확인. 1회차 실패(동의 뒤 카드에 「거래가 취소됐어요」 없음)는 고침
 
 ## SCR-CMU-001 커뮤니티 · 댓글 삭제 표시 정리 — 끝
 - 기능: 명세 기능 ID 추가 없음(사람 요청 2026-11-18). 걸치는 FN-CMU-001-11 댓글·대댓글(펫이야기), FN-CMU-002-07 댓글·대댓글(실종센터). 같은 `CommentSection.jsx`를 쓴다
@@ -353,6 +355,13 @@
 - 완료 조건: 터치 기기(주 입력이 손가락)에서 이미지 뷰어의 이전·다음 화살표가 안 보이고 스와이프로 넘긴다(마우스는 그대로). `/dev/chat`과 `ChatDevPage`가 없고 `/dev/sub-page`는 그대로다. 하단 썸네일 줄은 이번엔 하지 않는다
 - 추가 요청: 추가-26 `ImageViewer.jsx` `ARROW_CLASS`에 `pointer-coarse:hidden`, 추가-27 `devRoutes.js`의 `/dev/chat` 라우트와 `pages/dev/ChatDevPage.jsx` 삭제(진짜 [채팅하기]는 `CareDetail`에 있고 가리키는 곳 없음)
 - 결과(2026-11-20): `yarn -s lint` 0·`yarn -s build` 0, 사람 확인(검증 에이전트 없이 직접 요청·확인). 빌드 CSS에 `@media (pointer:coarse)` 규칙 생성 확인
+
+## SCR-CMU-005 우리동네 펫돌봄 채팅 · 거래 취소 재요청 제한 안내 — 끝
+- 기능: 명세 기능 ID 추가 없음(사람 결정 2026-11-20). 걸치는 FN-CMU-005-06 거래 취소 요청
+- 기다리는 것: 백엔드 SCR-CMU-005 거래 취소 요청 후속(KSJ, 백엔드 끝 2026-11-20, PR 병합 전). `POST /api/care-matches/{petPrtcMtchSn}/cancel-request`가 이번 거래에서 내 요청이 거절(PCAC0023)된 적이 있으면 409 `CARE_DEAL_CANCEL_REJECTED`(「상대가 거절한 거래 취소는 이 거래에서 다시 요청할 수 없어요.」). 상대는 요청할 수 있다. 무응답 자동 동의는 매칭완료(PCAC0013)만 7일, 6일째 받은 쪽 알림
+- 완료 조건: 내 거래 취소 요청이 거절되면(`cnclDmnd.mineYn` 참, `dmndSttsCd` PCAC0023) 채팅방 메뉴의 「거래 취소 요청」이 숨거나 비활성이다. 서버 409 `CARE_DEAL_CANCEL_REJECTED`가 와도 서버 메시지를 보인다. 「거래 취소 요청과 나가기 차단」 절과 함께 한다
+- 결과(2026-11-20): 위 절과 함께 검증·사람 확인. 흐린 메뉴·거절 안내·409 토스트는 응답을 가로채 확인
+- 연결 남음: 기능 7 실제 서버 409 `CARE_DEAL_CANCEL_REJECTED` (백엔드 KSJ 브랜치 후속 병합·재시작 필요, KSJ)
 
 ## 제외
 - FN-COM-002-01~24, 003-01~10, 004-01~16, 005-01~10, 006-01~09, 007-01~07, 008-01~21: 공통레이아웃 화면은 LJS 담당(분배표 "공통레이아웃(COM)")

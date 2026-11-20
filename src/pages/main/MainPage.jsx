@@ -34,7 +34,7 @@ export default function MainPage() {
   const [isTutorialReplay, setIsTutorialReplay] = useState(false);
   const isTutorialOpen =
     isTutorialReplay ||
-    (tutorial.isSuccess && !tutorial.data.tutorialSeenYn && !isTutorialDone);
+    (tutorial.isSuccess && !tutorial.data.tutrlViewYn && !isTutorialDone);
 
   const handleTutorialClose = () => {
     setIsTutorialDone(true);

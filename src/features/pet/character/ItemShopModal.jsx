@@ -21,6 +21,7 @@ const PURCHASE_ERRORS = {
   POINT_NOT_ENOUGH: '포인트가 부족해요',
   ITEM_ALREADY_HELD: '이미 보유한 아이템이 있어요',
   PET_PRIMARY_ONLY: '주양육자만 꾸밀 수 있어요',
+  IDEMPOTENCY_KEY_REUSED: '구매하지 못했어요. 다시 시도해 주세요',
 };
 
 /**
@@ -40,8 +41,11 @@ export default function ItemShopModal({ pet, worn, onClose }) {
   const [part, setPart] = useState(ALL);
   const [cart, setCart] = useState([]);
   const [tryOn, setTryOn] = useState({});
-  /** 실패 뒤 재시도에도 같은 값을 보내 중복 결제를 막는다 */
-  const [idmptDmndId] = useState(() => crypto.randomUUID());
+  /**
+   * 실패 뒤 재시도에도 같은 값을 보내 중복 결제를 막는다.
+   * 이미 처리한 키를 다른 내용으로 보냈다는 409면 새 키로 바꾼다
+   */
+  const [idmptDmndId, setIdmptDmndId] = useState(() => crypto.randomUUID());
 
   const shopItems = shop?.items ?? [];
   const hldPnt = shop?.hldPnt ?? 0;
@@ -118,12 +122,16 @@ export default function ItemShopModal({ pet, worn, onClose }) {
           });
           onClose();
         },
-        onError: (error) =>
+        onError: (error) => {
+          if (error.code === 'IDEMPOTENCY_KEY_REUSED') {
+            setIdmptDmndId(crypto.randomUUID());
+          }
           showToast(
             PURCHASE_ERRORS[error.code] ??
               '구매하지 못했어요. 잠시 뒤 다시 시도해 주세요',
             { type: 'error' },
-          ),
+          );
+        },
       },
     );
   };
