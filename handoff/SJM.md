@@ -2,10 +2,11 @@
 
 ## 지금 하는 것
 
-SCR-MYP-002 반려동물 프로필 목록 · 인식 번호 한 줄 표시, 빈 값 "-" 통일 (명세 v0.8) — 끝 (2026-11-20, 검증 `통과` 1회차, lint·build 0, 사람 확인 완료)
+SCR-MYP-010 캐릭터 없음 카드 "?" 위치·크기 (FN-MYP-010-02·07, 명세 v0.8) — 끝 (2026-11-20, 검증 `통과` 2회차 보고, lint·build 0, 사람 확인 완료)
 
-- FN-MYP-002-02·03: `src/features/pet/list/PetSlide.jsx` 한 파일. `ChipNo`는 한 줄(`whitespace-nowrap`, 761~1099px `text-sm`), 빈 값은 PC·모바일 모두 흐린 "-"(`EmptyDash`, 모바일 `emptyText` "-"). 새 API·새 의존성 없음, 연결 남음 없음
-- 정리(공용 DB): 없음. 기존 루루(petSn 3)·연탄(petSn 1006)을 보기만 했고 탄이(PET_SN=2)를 포함해 바뀐 행이 없다
+- `src/features/pet/character/CharacterCard.jsx` 한 파일. 실루엣 영역을 `@container` 바깥 래퍼로 두고 효과는 안쪽 span에만 걸었다. "?"는 `isNone`에만, left 50%·top 41%·`text-[46cqw]`·bold·`text-muted`. 무대도 `@container`라 [캐릭터 만들기]는 `whitespace-nowrap`, 좁으면 `px-2!`·`text-xs`(180px 미만), 180~240px `px-3!`·`text-sm`. 새 API·새 의존성 없음
+- 추가 요청(모두 사람이 요청, 통과): 추가-1 좁은 카드에서 [캐릭터 만들기] 한 줄 유지, 추가-2 오류 확인 중 카드 가로채기 확인(코드 변경 없음)
+- 정리(공용 DB): 없음. 응답 가로채기와 GET 조회만 했다
 
 ## 다음에 할 것
 

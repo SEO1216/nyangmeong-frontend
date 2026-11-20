@@ -54,7 +54,7 @@ export default function CharacterCard({
 
   const stage = (
     <span
-      className={`relative grid aspect-square place-items-end justify-items-center pb-[16%] after:absolute after:inset-x-0 after:bottom-0 after:h-[22%] after:bg-white after:opacity-55 ${
+      className={`@container relative grid aspect-square place-items-end justify-items-center pb-[16%] after:absolute after:inset-x-0 after:bottom-0 after:h-[22%] after:bg-white after:opacity-55 ${
         isDone ? STAGE_TONES[toneIndex % STAGE_TONES.length] : 'bg-surface-2'
       } ${canDecorate ? 'group-hover:shadow-[inset_0_0_0_2px_var(--color-brand-100)]' : ''}`}
     >
@@ -62,31 +62,33 @@ export default function CharacterCard({
         aria-hidden="true"
         className="absolute bottom-[17%] left-1/2 z-[1] h-[7%] w-[46%] -translate-x-1/2 rounded-full bg-ink opacity-[0.08]"
       />
+      {/* 실루엣 영역: 효과는 안쪽 span에만 걸어 "?"가 물려받지 않게 하고, cqw는 이 영역 폭 기준 */}
       <span
         aria-hidden="true"
-        className={`relative z-[2] grid aspect-square w-[62%] place-items-center ${
-          isError ? 'opacity-55 grayscale' : ''
-        } ${isNone || isGenerating ? 'opacity-[0.12] brightness-0' : ''}`}
+        className="relative z-[2] aspect-square w-[62%] @container"
       >
-        {isDone ? (
-          <FileImage
-            src={src}
-            pending={isPending}
-            className="size-full object-contain [image-rendering:pixelated]"
-            fallback={defaultCharacter}
-          />
-        ) : (
-          defaultCharacter
+        <span
+          className={`grid size-full place-items-center ${
+            isError ? 'opacity-55 grayscale' : ''
+          } ${isNone || isGenerating ? 'opacity-[0.12] brightness-0' : ''}`}
+        >
+          {isDone ? (
+            <FileImage
+              src={src}
+              pending={isPending}
+              className="size-full object-contain [image-rendering:pixelated]"
+              fallback={defaultCharacter}
+            />
+          ) : (
+            defaultCharacter
+          )}
+        </span>
+        {isNone && (
+          <span className="absolute top-[41%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-[46cqw] leading-none font-bold text-muted">
+            ?
+          </span>
         )}
       </span>
-      {isNone && (
-        <span
-          aria-hidden="true"
-          className="absolute top-[34%] left-1/2 z-[3] -translate-x-1/2 text-lg font-bold text-subtle"
-        >
-          ?
-        </span>
-      )}
       {(isRep || isError || isGenerating) && (
         <span className="absolute top-3 left-3 z-[4] flex flex-col items-start gap-1">
           {isRep && <Badge tone="solid">대표</Badge>}
@@ -95,11 +97,12 @@ export default function CharacterCard({
         </span>
       )}
       {isOwn && isNone && (
-        <span className="absolute inset-x-4 bottom-3 z-[5]">
+        <span className="absolute inset-x-2 bottom-3 z-[5] @[180px]:inset-x-4">
+          {/* 카드(무대) 폭이 좁으면 안쪽 여백·글자를 줄여 한 줄로 유지 */}
           <button
             type="button"
             onClick={() => onCreate(pet)}
-            className={`${BTN_PRIMARY} h-9 w-full`}
+            className={`${BTN_PRIMARY} h-9 w-full px-2! text-xs whitespace-nowrap @[180px]:px-3! @[180px]:text-sm @[240px]:px-4! @[240px]:text-base`}
           >
             캐릭터 만들기
           </button>
