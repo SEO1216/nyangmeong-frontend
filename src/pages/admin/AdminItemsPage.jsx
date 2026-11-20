@@ -41,6 +41,20 @@ const moveItem = (items, index, direction) => {
   return next;
 };
 
+/** 순서 저장 400의 칸별 문구(그 밖은 서버 message) */
+const ORDER_FIELD_MESSAGES = {
+  itemSns:
+    '그사이 이 부위의 아이템이 바뀌었어요. 목록을 다시 불러왔으니 순서를 다시 정해 주세요.',
+  itemRegnCd: '이 부위는 순서를 바꿀 수 없어요.',
+};
+
+/** 순서 저장 오류의 첫 칸 이름(검증 오류가 아니면 undefined) */
+const getOrderErrorField = (error) => error?.fields?.[0]?.field;
+
+/** 순서 저장 오류 문구 */
+const getOrderErrorMessage = (error) =>
+  ORDER_FIELD_MESSAGES[getOrderErrorField(error)] ?? error.message;
+
 /**
  * [아이템]
  * - 부위 탭은 ?itemRegnCd=, 행 클릭 -> 수정 모달, [아이템 등록] -> 등록 모달
@@ -88,6 +102,13 @@ export default function AdminItemsPage() {
           showToast('순서를 저장했어요', { type: 'success' });
           setOrderedItems(null);
         },
+        /** 부위 목록이 서버와 달라진 경우: 목록을 다시 읽어 편집 목록을 서버 순서로 */
+        onError: async (error) => {
+          if (getOrderErrorField(error) !== 'itemSns') return;
+          const result = await items.refetch();
+          if (!result.data) return;
+          setOrderedItems((current) => (current == null ? null : result.data));
+        },
       },
     );
   };
@@ -104,7 +125,7 @@ export default function AdminItemsPage() {
         <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
           {saveOrder.isError && (
             <p role="alert" className="mr-auto text-sm text-danger">
-              {saveOrder.error.message}
+              {getOrderErrorMessage(saveOrder.error)}
             </p>
           )}
           <button
