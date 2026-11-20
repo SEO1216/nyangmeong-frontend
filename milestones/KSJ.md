@@ -347,6 +347,13 @@
 - 추가 요청: 추가-25 `profanity.js` `PROFANITY_MESSAGE`를 서버 문구로, `useChatWindow.js` `listPstSn` 주석을 「그 글의 채팅을 목록 맨 위에 둠」으로
 - 결과(2026-11-20): `yarn -s lint` 0·`yarn -s build` 0, 사람 확인(검증 에이전트 없이 직접 요청·확인). 문구를 한 상수가 정해 폼 칸·댓글·채팅이 함께 바뀜
 
+## SCR-CMU-001 커뮤니티 · 이미지 뷰어 터치 화살표 숨김, 채팅 확인용 화면 삭제 — 끝
+- 기능: 명세 기능 ID 추가 없음(사람 요청 2026-11-20). 걸치는 FN-CMU-001 첨부 이미지 크게 보기, FN-CSC-003 문의 상세 이미지, FN-COM-009 채팅 창
+- API: 바뀌지 않음
+- 완료 조건: 터치 기기(주 입력이 손가락)에서 이미지 뷰어의 이전·다음 화살표가 안 보이고 스와이프로 넘긴다(마우스는 그대로). `/dev/chat`과 `ChatDevPage`가 없고 `/dev/sub-page`는 그대로다. 하단 썸네일 줄은 이번엔 하지 않는다
+- 추가 요청: 추가-26 `ImageViewer.jsx` `ARROW_CLASS`에 `pointer-coarse:hidden`, 추가-27 `devRoutes.js`의 `/dev/chat` 라우트와 `pages/dev/ChatDevPage.jsx` 삭제(진짜 [채팅하기]는 `CareDetail`에 있고 가리키는 곳 없음)
+- 결과(2026-11-20): `yarn -s lint` 0·`yarn -s build` 0, 사람 확인(검증 에이전트 없이 직접 요청·확인). 빌드 CSS에 `@media (pointer:coarse)` 규칙 생성 확인
+
 ## 제외
 - FN-COM-002-01~24, 003-01~10, 004-01~16, 005-01~10, 006-01~09, 007-01~07, 008-01~21: 공통레이아웃 화면은 LJS 담당(분배표 "공통레이아웃(COM)")
 - FN-COM-009-01·04: 채팅 창 열기(헤더 아이콘 진입, 창 하나만 유지)는 LJS 담당("화면과 API 담당이 다른 곳" 표). 이미 끝남

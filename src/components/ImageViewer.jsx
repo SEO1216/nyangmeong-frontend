@@ -2,8 +2,9 @@ import { ChevronLeft, ChevronRight, ImageIcon, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import useScrollLock from '@/hooks/useScrollLock';
 
+/** pointer-coarse: 주 입력이 손가락이면 숨긴다(스와이프로 넘김). 마우스 기기와 키보드 ←→는 그대로 */
 const ARROW_CLASS =
-  'absolute top-1/2 flex size-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-[rgba(15,23,35,0.62)] text-white hover:bg-[rgba(15,23,35,0.85)] max-[760px]:size-10';
+  'pointer-coarse:hidden absolute top-1/2 flex size-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-[rgba(15,23,35,0.62)] text-white hover:bg-[rgba(15,23,35,0.85)] max-[760px]:size-10';
 
 /**
  * 이미지 크게 보기: 판 없이 어두운 배경 위에 이미지만 표시(화면에 맞춘 크기, 작은 원본은 늘리지 않음)
