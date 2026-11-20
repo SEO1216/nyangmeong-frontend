@@ -1546,7 +1546,7 @@
 - 완료 조건 결과: 검증 `통과`(2026-11-13, 회차 1), 사람 확인 2026-11-13
 - 연결 남음: 없음
 
-## SCR-MYP-011 아이템 상점 모달 · 구매 멱등키 재사용 409 처리 — 대기
+## SCR-MYP-011 아이템 상점 모달 · 구매 멱등키 재사용 409 처리 — 끝
 - 기능: 명세 기능 ID 추가 없음(백엔드 버그 수정 연결, 2026-11-13). 걸치는 기능 FN-MYP-011-05 구매
 - 기다리는 것: 백엔드 LJS `SCR-MYP-011 아이템 상점 모달 · 구매 멱등키 재사용 막기`(끝, 커밋·develop 병합 뒤 동작)
 - 완료 조건: 구매 응답이 409 `IDEMPOTENCY_KEY_REUSED`이면 `ItemShopModal.jsx`가 새 `idmptDmndId`를 만들고 상점 목록을 다시 읽어, 모달을 닫지 않고 다시 살 수 있다. `PURCHASE_ERRORS`에 이 코드의 문구가 있다. 서버 메시지: "이미 처리한 구매 요청입니다. 상점을 닫았다가 다시 열어 주세요."
@@ -1572,7 +1572,7 @@
 - 완료 조건: 캐릭터 오류 처리에서 CHRC0008(무료 재생성) 응답의 `regenJobSn`으로 Python `POST /ai/admin/characters/jobs/{regenJobSn}/regenerate`(관리자 쿠키, 202)를 부른다. 상세의 `regenJobSttsCd`·`regenJobSttsCdNm`으로 재생성 상태를 보여 주고, CHRC0004(실패)면 다시 처리(CHRC0008·CHRC0009) 버튼을 보인다. 진행 중 다시 처리는 409 `PIXEL_CHARACTER_CREATING`, 성공 뒤는 409 `ALREADY_PROCESSED`. 계약은 백엔드 `docs/api/support.md` character-error 행과 `AdminInquiryResponse`
 - 결과(2026-11-16): `features/adminInquiry/api.js` `regenerateAdminCharacter`, `queries.js` 무료 재생성 뒤 AI 서버 호출(실패해도 처리는 성공, 토스트로 알림)·요청·생성 중 5초 다시 받기, `InquiryCharacterError.jsx` 재생성 상태 표시·생성 실패면 다시 처리 버튼. 추가-1 요청·생성 중 로딩 아이콘과 안내. 검증 2회차 통과, 사람 확인
 
-## SCR-ADM-070 아이템 · 그림 교체 뒤 전체 굽기 다시 시작 — 대기
+## SCR-ADM-070 아이템 · 그림 교체 뒤 전체 굽기 다시 시작 — 끝
 - 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-070-03
 - 기다리는 것: 백엔드 SCR-ADM-070 아이템 · 굽기를 그림 참고로만(LJS 백엔드, 끝 2026-11-17). 굽기 지시(`bakeHint`)가 요청·응답에서 없어졌고, 굽기 대상은 `bakeImgRefYn: true` 아이템뿐이다. 굽기 대상 아이템(수정 후 true)의 그림을 `PATCH /admin/items/{itemSn}` `image`로 바꾸면 백엔드가 그 아이템의 착용 시트·실패 표시를 지워 모든 캐릭터가 다시 대상이 된다
 - 완료 조건: 수정 모달에서 굽기 대상 아이템의 그림을 바꿔 저장하면 등록 때처럼 전체 굽기(`POST /ai/items/{itemSn}/bake` 반복)가 자동 시작된다. `bakeImgRefYn`만 바꾸면 시작하지 않는다. `features/adminItem/api.js` 목록 주석과 `useItemBake.js` `canBakeItem`에서 `bakeHint`를 뺀다. 이미 그렇게 동작하면 확인만 하고 끝낸다

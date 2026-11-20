@@ -46,7 +46,7 @@ const moveItem = (items, index, direction) => {
  * - 부위 탭은 ?itemRegnCd=, 행 클릭 -> 수정 모달, [아이템 등록] -> 등록 모달
  * - [순서 바꾸기]는 부위 탭에서만: 상점 순서가 부위 안 정렬 순서라서
  * - 순서 편집 중에는 행 클릭·탭 이동·등록 막음, [저장]하면 서버 순서로, [취소]하면 처음 순서로
- * - 전체 굽기: 등록 성공 뒤 굽기 대상이면 바로 시작, 행 [굽기]로 끊긴 굽기 이어 하기. 표 위 진행 줄
+ * - 전체 굽기: 등록·그림 교체 저장 뒤 굽기 대상이면 바로 시작, 행 [굽기]로 끊긴 굽기 이어 하기. 표 위 진행 줄
  */
 export default function AdminItemsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -228,8 +228,8 @@ export default function AdminItemsPage() {
           item={editing === NEW_ITEM ? null : editing}
           parts={parts.data}
           onClose={() => setEditing(null)}
-          onCreated={(created) => {
-            if (canBakeItem(created)) itemBake.start(created);
+          onBakeNeeded={(saved) => {
+            if (canBakeItem(saved)) itemBake.start(saved);
           }}
         />
       )}
