@@ -4,9 +4,9 @@ import { ChevronLeft } from 'lucide-react';
 // 모바일은 화면 높이 비율로 고정해서, 인증번호 칸·안내처럼 내용이 늘어도 제목이 움직이지 않고 아래로만 늘어난다.
 // 내용이 적은 화면(spacing="sparse")과 로그인 방법 선택("center")은 더 내려서(16%) 가운데 쪽에, 나머지는 위쪽(6%)
 const SPACER = {
-  normal: 'grow max-md:h-[6dvh] max-md:grow-0',
-  sparse: 'grow max-md:h-[16dvh] max-md:grow-0',
-  center: 'grow max-md:h-[16dvh] max-md:grow-0',
+  normal: 'grow max-[760px]:h-[6dvh] max-[760px]:grow-0',
+  sparse: 'grow max-[760px]:h-[16dvh] max-[760px]:grow-0',
+  center: 'grow max-[760px]:h-[16dvh] max-[760px]:grow-0',
 };
 
 // 인증 화면 카드. 칸 높이를 채워서 AuthActions(주 버튼 묶음)가 모든 화면에서 맨 아래에 오게 한다.

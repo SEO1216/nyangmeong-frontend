@@ -1,4 +1,5 @@
 import { Mail } from 'lucide-react';
+import { AUTH_BTN_PRIMARY } from '../shared/authStyles';
 import AuthActions from '../shared/AuthActions';
 import AuthBody from '../shared/AuthBody';
 import AuthCard from '../shared/AuthCard';
@@ -20,7 +21,7 @@ export default function LoginMethodChoice({
       <AuthHeading title="로그인" subtitle="가입한 방법으로 로그인해 주세요." />
       {/* 모바일은 초록 버튼을 다른 화면 주 버튼처럼 맨 아래에 두고,
           PC는 SNS·이메일 버튼을 한 묶음으로 가운데에 둔다(버튼 묶음 아래 칸이 남는 칸을 가져감) */}
-      <AuthBody className="md:grow-0">
+      <AuthBody className="min-[760px]:grow-0">
         {isJoined && (
           <AuthNotice
             type="ok"
@@ -33,14 +34,14 @@ export default function LoginMethodChoice({
         )}
         <SnsLoginButtons disabled={isSnsPending} />
       </AuthBody>
-      <AuthActions className="md:grow">
+      <AuthActions className="min-[760px]:grow">
         <div className="mb-6 flex items-center gap-4 text-subtle before:h-px before:flex-1 before:bg-line after:h-px after:flex-1 after:bg-line">
           또는
         </div>
         <button
           type="button"
           onClick={onSelectEmail}
-          className="inline-flex h-[50px] w-full items-center justify-center gap-1.5 rounded-xl bg-brand-500 text-[15px] font-bold text-white transition hover:-translate-y-px hover:bg-brand-600"
+          className={`${AUTH_BTN_PRIMARY} w-full`}
         >
           <Mail className="size-5" />
           이메일로 로그인하기

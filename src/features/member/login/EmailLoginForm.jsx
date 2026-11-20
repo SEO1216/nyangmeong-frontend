@@ -1,4 +1,5 @@
 import { Lock, Mail } from 'lucide-react';
+import { AUTH_BTN_PRIMARY } from '../shared/authStyles';
 import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/routes/paths';
 import CaptchaBlock from './CaptchaBlock';
@@ -73,7 +74,7 @@ export default function EmailLoginForm({ onBack, onSuccess, onSignup }) {
           <button
             type="submit"
             disabled={!form.isFilled || form.isPending}
-            className="inline-flex h-[50px] w-full items-center justify-center rounded-xl bg-brand-500 text-[15px] font-bold text-white transition hover:enabled:-translate-y-px hover:enabled:bg-brand-600 disabled:cursor-not-allowed disabled:bg-surface-3 disabled:text-line-strong"
+            className={`${AUTH_BTN_PRIMARY} w-full`}
           >
             로그인
           </button>

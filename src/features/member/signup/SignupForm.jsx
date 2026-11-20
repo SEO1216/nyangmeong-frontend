@@ -3,8 +3,7 @@ import AuthActions from '../shared/AuthActions';
 import AuthCard from '../shared/AuthCard';
 import AuthHeading from '../shared/AuthHeading';
 import AuthNotice from '../shared/AuthNotice';
-import { BTN_PRIMARY } from '@/components/buttonStyles';
-import { TEXT_LINK } from '../shared/authStyles';
+import { TEXT_LINK, AUTH_BTN_PRIMARY } from '../shared/authStyles';
 import TermsModal from '../shared/TermsModal';
 import EmailStep from './EmailStep';
 import NicknameModal from './NicknameModal';
@@ -75,7 +74,7 @@ export function SignupComplete({ form, onGoLogin }) {
           <button
             type="button"
             onClick={onGoLogin}
-            className={`${BTN_PRIMARY} w-full`}
+            className={`${AUTH_BTN_PRIMARY} w-full`}
           >
             로그인으로
           </button>

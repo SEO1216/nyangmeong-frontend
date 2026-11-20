@@ -1,6 +1,6 @@
 import { Check, ChevronRight } from 'lucide-react';
+import { AUTH_BTN_PRIMARY } from '../shared/authStyles';
 import Checkbox from '@/components/Checkbox';
-import { BTN_PRIMARY } from '@/components/buttonStyles';
 import AuthActions from '../shared/AuthActions';
 import AuthBody from '../shared/AuthBody';
 import { hasTermsView } from '../shared/validate';
@@ -20,7 +20,7 @@ export function TermsChecklist({ form, lockedSn, isRoomy = false }) {
         <button
           type="button"
           onClick={form.retryTerms}
-          className={`${BTN_PRIMARY} w-full`}
+          className={`${AUTH_BTN_PRIMARY} w-full`}
         >
           다시 시도
         </button>
@@ -114,7 +114,7 @@ export default function TermsStep({ form }) {
           type="button"
           disabled={!form.isTermsOk}
           onClick={() => form.goStep('email')}
-          className={`${BTN_PRIMARY} w-full`}
+          className={`${AUTH_BTN_PRIMARY} w-full`}
         >
           다음
         </button>

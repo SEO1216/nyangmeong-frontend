@@ -27,7 +27,7 @@ export default function Card({
       {/* onHeaderClick은 마우스용 보조. 키보드는 action 안의 버튼으로 같은 동작을 한다 */}
       <div
         onClick={onHeaderClick}
-        className={`flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-line-soft px-[18px] py-4 sm:px-[22px] sm:py-[18px] ${
+        className={`flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-line-soft px-[18px] py-4 min-[760px]:px-[22px] min-[760px]:py-[18px] ${
           onHeaderClick ? 'cursor-pointer' : ''
         }`}
       >
@@ -51,7 +51,7 @@ export default function Card({
         {action}
       </div>
       <div
-        className={`flex-1 px-[18px] pt-4 pb-[18px] sm:px-[22px] sm:pt-5 sm:pb-[22px] ${bodyClassName}`}
+        className={`flex-1 px-[18px] pt-4 pb-[18px] min-[760px]:px-[22px] min-[760px]:pt-5 min-[760px]:pb-[22px] ${bodyClassName}`}
       >
         {children}
       </div>

@@ -1,5 +1,5 @@
 import { Phone } from 'lucide-react';
-import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import { SIDE_BTN, AUTH_BTN_PRIMARY } from '../shared/authStyles';
 import { normalizePhone } from '../shared/validate';
 import AuthActions from '../shared/AuthActions';
 import AuthBody from '../shared/AuthBody';
@@ -10,7 +10,7 @@ import { SIGNUP_MESSAGES as MSG } from './signupMessages';
 export default function PhoneStep({ form }) {
   return (
     <>
-      <AuthBody className="max-md:pt-8">
+      <AuthBody className="max-[760px]:pt-8">
         <div className="flex flex-col gap-4 max-[760px]:gap-5">
           <AuthField
             id="signup-phone"
@@ -29,7 +29,7 @@ export default function PhoneStep({ form }) {
                 type="button"
                 onClick={form.submitPhoneCheck}
                 disabled={!normalizePhone(form.phone) || form.isPhoneChecking}
-                className={`${BTN_SECONDARY} min-w-22 shrink-0 whitespace-nowrap`}
+                className={SIDE_BTN}
               >
                 중복확인
               </button>
@@ -43,7 +43,7 @@ export default function PhoneStep({ form }) {
           type="button"
           disabled={!form.isPhoneChecked}
           onClick={() => form.goStep('password')}
-          className={`${BTN_PRIMARY} w-full`}
+          className={`${AUTH_BTN_PRIMARY} w-full`}
         >
           다음
         </button>

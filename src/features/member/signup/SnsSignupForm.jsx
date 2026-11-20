@@ -1,11 +1,11 @@
 import { Phone } from 'lucide-react';
+import { SIDE_BTN, AUTH_BTN_PRIMARY } from '../shared/authStyles';
 import AuthActions from '../shared/AuthActions';
 import AuthBody from '../shared/AuthBody';
 import AuthCard from '../shared/AuthCard';
 import AuthField from '../shared/AuthField';
 import AuthHeading from '../shared/AuthHeading';
 import AuthNotice from '../shared/AuthNotice';
-import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import { normalizePhone } from '../shared/validate';
 import { SNS_NAME } from '../shared/snsCodes';
 import TermsModal from '../shared/TermsModal';
@@ -77,7 +77,7 @@ export default function SnsSignupForm({ snsSignup, onCancel, onGoLogin }) {
                     disabled={
                       !normalizePhone(form.phone) || form.isPhoneChecking
                     }
-                    className={`${BTN_SECONDARY} min-w-22 shrink-0 whitespace-nowrap`}
+                    className={SIDE_BTN}
                   >
                     중복확인
                   </button>
@@ -98,7 +98,7 @@ export default function SnsSignupForm({ snsSignup, onCancel, onGoLogin }) {
             <button
               type="button"
               onClick={onCancel}
-              className={`${BTN_PRIMARY} w-full`}
+              className={`${AUTH_BTN_PRIMARY} w-full`}
             >
               로그인으로
             </button>
@@ -106,7 +106,7 @@ export default function SnsSignupForm({ snsSignup, onCancel, onGoLogin }) {
             <button
               type="submit"
               disabled={!form.canJoin || form.isJoining}
-              className={`${BTN_PRIMARY} w-full`}
+              className={`${AUTH_BTN_PRIMARY} w-full`}
             >
               회원가입
             </button>

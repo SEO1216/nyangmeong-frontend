@@ -2,6 +2,30 @@
 
 기준: 공통레이아웃_기능명세서_v0.4_20261001, AI매니저_기능명세서_v0.7_20261009 (DMS, 2026-10-17), 커뮤니티_기능명세서_v0.7_20261019 (CMU-005만, KSJ 마일스톤에서 옮김, 2026-10-21), AI매니저_기능명세서_v0.9_20261026 (SCR-AIM-013만, DMS 업로드 전 로컬 사본, 2026-10-26), 관리자_기능명세서_v0.2_20261030 (DMS, 2026-10-30. 화면설계서 `관리자_화면설계서_v0.1_20261030`, 순서는 백엔드 `docs/admin/implementation-plan.md` 3절 단계)
 
+## SCR-COM-002 공용 Modal · 스크롤 막대 겹침 전수조사 — 끝
+- 기능: 명세 기능 ID 추가 없음(버그 조사, 사람 요청 2026-11-20 "스크롤 중복되는 애들 전수조사"), 걸치는 기능 FN-COM-002. C1 전수조사 표 / C2 공용 `Modal` `isLarge` 겹침 / C3 `FormModal` `isFixedHeight` 겹침 / C4 각 파일 겹침
+- 기다리는 것: 없음. `features/health`(JAJ)·`features/pet`·`features/expense`(SJM)·`features/member`(YAY) 파일을 고치면 담당에게 알림
+- 결정: Q1 본문 안 고정 높이 목록의 `max-h`를 없애 본문 스크롤 하나로(PC 두 칸 구조는 그대로), Q2 다른 담당 파일도 같이 고치고 알림(사람 "추천안대로" 2026-11-20)
+- 완료 조건: 기획 C1~C4
+- C1 전수조사 표(코드 기준, 막대 개수는 검증에서 잼):
+  | 곳 | 담당 | 원인 | 고칠 곳 | 결과 |
+  | --- | --- | --- | --- | --- |
+  | `components/Modal.jsx` `isLarge` 갈래(`FormModal`→영수증 인식 결과·검진·관찰 등, `ScheduleModal`, `CareManageModal`, `HealthGuideModal`, `ItemShopModal`, `PetFormModal`, `ServiceTutorialModal`, `ShortcutEditModal`) | 공용 | dialog에 `overflow-hidden` 없음 → 브라우저 기본 `dialog:modal { overflow: auto }`로 dialog도 스크롤 | 공용 | C2 고침: `isLarge` dialog에 `overflow-hidden` |
+  | `health/diary/FormModal.jsx` `isFixedHeight`(처방·투약) | JAJ | `<form>` `overflow-y-auto` + 760 미만 `Modal` 본문 `overflow-y-auto` | 그대로 | C3: `<form>`이 `min-h-0 flex-1`이라 본문은 넘치지 않음(본문 막대 안 생김). C2로 dialog 막대도 없어져 코드 수정 없음 |
+  | `member/shared/TermsModal.jsx` 약관 본문 | YAY | 본문 안 `max-h-[50vh] overflow-y-auto` | 파일 | C4 고침: `max-h`·`overflow` 없앰(본문 스크롤 하나) |
+  | `adminTerms/TermsHistoryModal.jsx` 버전 내용 | LJS | 같음(50vh) | 파일 | C4 고침 |
+  | `adminPoint/PointAdjustModal.jsx` 회원 검색 결과 | LJS | 본문 안 `max-h-[200px] overflow-y-auto` | 파일 | C4 고침 |
+  | `expense/dashboard/ExpenseDuplicateDialog.jsx` 같은 지출 목록 | SJM | `isConfirm` 확인 창은 본문 스크롤이 없어 안쪽 목록(`max-h-60`)이 유일한 막대 | 그대로 | 겹침 아님 |
+  | `health/checkup/BloodResultList.jsx` 결과 목록(`max-h-96`) | JAJ | 모달이 아니라 검진상세 화면 탭 안 목록 | 그대로 | 대상 아님 |
+  | `CareManageModal`·`ShortcutEditModal`·`ItemShopModal` PC 두 칸 | JAJ·LJS·SJM | 왼쪽·오른쪽 칸이 각각 스크롤(의도된 구조) | 그대로 | 사람 결정(Q1) |
+  | `components/ConfirmModal`(공용 `Modal isConfirm`) | 공용 | 작은 모달 갈래(dialog `overflow-hidden`) | 그대로 | 겹침 없음 |
+  | `components/ImageViewer.jsx` | 공용 | dialog `overflow-hidden`, 안쪽 스크롤 없음 | 그대로 | 겹침 없음 |
+  | `expense/shared/ExpenseDetailSheet.jsx` | SJM | dialog 하나만 스크롤(안쪽 스크롤 없음) | 그대로 | 겹침 없음 |
+  | `layouts/ChatModal.jsx`·`pages/ai/AiChatModal.jsx` | KSJ·LJS | 바깥 `overflow-hidden`, 목록·대화 칸이 각각 스크롤(두 칸) | 그대로 | 겹침 없음 |
+  | 그 밖의 `Modal` 사용 파일(약 60개) | 각 담당 | 본문 안에 `overflow-y-auto`·`max-h` 스크롤 영역 없음(grep) | 그대로 | 겹침 없음 |
+- 완료 조건 결과: 검증 `통과`(2026-11-20, 1회차, 5180·8081, 영수증 인식·약관 본문은 Playwright 가짜 응답), 사람 확인 2026-11-20. C3은 코드 수정 없음(C2로 해결)
+- 연결 남음: 없음
+
 ## SCR-COM-002 기본 레이아웃 · 공용 Modal 밖 dialog 뒤 스크롤 잠금 — 끝
 - 기능: 명세 기능 ID 추가 없음(버그, 사람 요청 2026-11-16 "다음 작업으로"), 걸치는 기능 FN-COM-002
 - 배경: `showModal()`을 직접 부르고 `useScrollLock`이 없는 창은 열린 채 뒤 페이지가 휠로 스크롤된다. 5180·8081에서 확인(2026-11-16): `ScheduleModal`(일정 추가·수정), `FormModal`(건강 일지 입력 틀, 관찰 항목 추가로 확인), `ConfirmModal`(단독, 게시글 삭제 확인), `ImageViewer`(첨부 이미지 크게 보기), `ExpenseDetailSheet`(390px 지출 상세). 공용 `Modal`(오늘 기록 추가·게시글 신고)은 막힘. 창을 연 채 `useScrollLock`과 같은 html 스타일을 걸면 막히는 것까지 확인(ConfirmModal·ImageViewer)
@@ -1456,12 +1480,14 @@
 - 버그 후보(담당자에게 먼저 알림): 78 펫이야기 상세 내 글에도 신고 버튼(`community/PostDetail.jsx`, KSJ), 82 `ZONES` 순서 반대(`health/CareChipPicker.jsx`·`CareItemFields.jsx`, JAJ)
 - 이번엔 안 함: 기준 미정 18행(55·57·61·63·64·65·67·70·77·81·85·88~91), 메모 "변경없음"·"잠시 패스"·"정하지 않음" 행(8·17·19·21·25·30·35·75·86·97)
 
-## SCR-COM-002 공통 ⋮ 메뉴 공통화 — 대기
+## SCR-COM-002 공통 ⋮ 메뉴 공통화 — 끝
 - 기능: (사람 지시 2026-11-08 "리팩토링 때 한번에", 명세 FN 추가 없음) A1 `components/KebabMenu.jsx` variant 추가, A2 `CareItemMenu`·A3 `ExpenseMenu`를 KebabMenu 껍데기로, A4 `MainShortcuts`의 `ShortcutMenu`를 KebabMenu로
 - 기다리는 것: 없음
 - 완료 조건: 네 곳(AI 사이드바·건강기록 3곳·가계부·메인 바로가기) ⋮ 메뉴가 전과 같은 항목·모양으로 열리고 닫힌다 / `MoreVertical`은 `KebabMenu`와 범위 밖 CommentSection·PetSlide에만 남는다
 - 순서: 남은 작업 중 맨 마지막(사람 2026-11-10 "메뉴 공통화는 제일 마지막으로")
 - 같이 할 것(사람 2026-11-19 "리팩토링 때 한번에"): UI 통일 2-O 남은 Tailwind 기본 분기점 정리. `components/Card` `sm:`, `adminTableStyles` `md:`, `layouts/AuthLayout`·`AuthSlider` `md:`·`lg:`, `pages/mypage/MyPageHomePage` `md:`를 760·1100으로 바꾸고(640~759·760~767·1024~1099px 모양이 바뀜, JAJ·YAY 알림), 주석 고침(`CareFilters`·`MissingFilters` "미만는", `AiChatModal` `useCloseWithMotion` 주석). 숫자 분기점 560·600·1000·1260은 그대로 두고 담당자 알림만
+- 완료 조건 결과: 검증 `통과`(2026-11-20, 회차 1, A1~A5·B1·B2), 사람 확인 2026-11-20. 건강기록 `CareItemMenu`는 지금 1곳(지속 관찰 상세)에서만 쓴다. `MoreVertical`은 KebabMenu·CommentSection·`pet/list/MoreMenu`에만
+- 연결 남음: 없음
 
 ## SCR-MAN-001 메인페이지 · 사진 용도 판단 AI 연결 — 끝
 - 기능: 명세 기능 ID 추가 없음(메인 개편 뒤 추가, 기능명세서·화면설계서 미반영). 걸치는 기능 FN-MAN-002, SCR-AIM-013. SCR-MAN-001 "검색창 이미지 첨부 → AI 대화창 의도 판단"의 연결 남음 A3
@@ -1648,6 +1674,13 @@
 - 기다리는 것: 없음(백엔드 `GET·PUT /members/me/tutorial` develop 병합)
 - 완료 조건: 핸드오프 기획 C1~C2
 - 완료 조건 결과: 검증 `통과`(2026-11-20, 회차 1, 8081 실제 API + false·500은 Playwright route), 사람 확인 2026-11-20
+- 연결 남음: 없음
+
+## SCR-COM-002 로그인·가입 · 입력칸 옆 버튼 높이 맞추기 — 끝
+- 기능: 명세 기능 ID 추가 없음(사람 요청 2026-11-20, YAY 화면 스타일 수정)
+- 기다리는 것: 없음
+- 완료 조건: 핸드오프 기획 B1~B2, 추가-1(로그인·가입 계열 버튼·보안코드 칸 모두 48·둥글기 12)
+- 완료 조건 결과: 검증 `통과`(2026-11-20, 회차 2, B1·B2·추가-1), 사람 확인 2026-11-20
 - 연결 남음: 없음
 
 ## 제외

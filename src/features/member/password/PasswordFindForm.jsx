@@ -5,8 +5,11 @@ import AuthCard from '../shared/AuthCard';
 import AuthField from '../shared/AuthField';
 import AuthHeading from '../shared/AuthHeading';
 import AuthNotice from '../shared/AuthNotice';
-import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
-import { TEXT_LINK } from '../shared/authStyles';
+import {
+  TEXT_LINK,
+  AUTH_BTN_PRIMARY,
+  AUTH_BTN_SECONDARY,
+} from '../shared/authStyles';
 import { resendLabel } from '../shared/emailCert';
 import { SNS_NAME } from '../shared/snsCodes';
 import { PASSWORD_MESSAGES as MSG } from './passwordMessages';
@@ -50,7 +53,7 @@ export default function PasswordFindForm({
           <button
             type="button"
             onClick={onGoLogin}
-            className={`${BTN_PRIMARY} w-full`}
+            className={`${AUTH_BTN_PRIMARY} w-full`}
           >
             로그인으로
           </button>
@@ -71,7 +74,7 @@ export default function PasswordFindForm({
           onSubmit={form.submitCode}
           className="flex grow flex-col"
         >
-          <AuthBody className="max-md:pt-8">
+          <AuthBody className="max-[760px]:pt-8">
             {!form.isCodeLocked && notice}
             <div className={`${SUMMARY} flex justify-between gap-3`}>
               <span className="text-muted">인증할 이메일</span>
@@ -115,7 +118,7 @@ export default function PasswordFindForm({
                 <button
                   type="button"
                   onClick={() => onRecover(form.email)}
-                  className={`${BTN_SECONDARY} w-full`}
+                  className={`${AUTH_BTN_SECONDARY} w-full`}
                 >
                   재가입 복구 절차
                 </button>
@@ -129,8 +132,8 @@ export default function PasswordFindForm({
               disabled={form.isPending || form.resendSeconds > 0}
               className={
                 form.isCodeLocked
-                  ? `${BTN_PRIMARY} w-full flex-1`
-                  : `${BTN_SECONDARY} w-full basis-[120px]`
+                  ? `${AUTH_BTN_PRIMARY} w-full flex-1`
+                  : `${AUTH_BTN_SECONDARY} w-full basis-[120px]`
               }
             >
               {resendLabel(form.resendSeconds)}
@@ -139,7 +142,7 @@ export default function PasswordFindForm({
               <button
                 type="submit"
                 disabled={form.isPending}
-                className={`${BTN_PRIMARY} w-full flex-1`}
+                className={`${AUTH_BTN_PRIMARY} w-full flex-1`}
               >
                 인증번호 확인
               </button>
@@ -167,7 +170,7 @@ export default function PasswordFindForm({
         onSubmit={form.submitEmail}
         className="flex grow flex-col"
       >
-        <AuthBody className="max-md:pt-8">
+        <AuthBody className="max-[760px]:pt-8">
           <AuthField
             id="find-email"
             icon={Mail}
@@ -184,7 +187,7 @@ export default function PasswordFindForm({
           <button
             type="submit"
             disabled={form.isPending}
-            className={`${BTN_PRIMARY} w-full`}
+            className={`${AUTH_BTN_PRIMARY} w-full`}
           >
             인증번호 보내기
           </button>
