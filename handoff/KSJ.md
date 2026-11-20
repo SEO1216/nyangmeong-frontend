@@ -2,14 +2,14 @@
 
 ## 지금 하는 것
 
-끝남: SCR-CMU-001 커뮤니티 정리 (2026-11-19, 사람 확인, `yarn -s lint` 0·`yarn -s build` 0). 추가-3~23: 채팅·상세 화면 보정, 글자 수 초과 입력 차단(한글 조합 중 포함), 댓글 입력창 자동 높이, 이미지 뷰어 스와이프, 서버 금칙어(`PROFANITY_DETECTED`) 안내(화면 쪽 단어 목록 삭제), 채팅 주소 메시지 지도 SDK 준비 판단(`StaticMap is not a constructor`). 근거는 `milestones/KSJ.md`와 PR #438·#439·#443·#446·#449
+끝남: SCR-CMU-001 커뮤니티 정리 (2026-11-19, 사람 확인, `yarn -s lint` 0·`yarn -s build` 0). 추가-3~27: 채팅·상세 화면 보정, 글자 수 초과 입력 차단(한글 조합 중 포함), 댓글 입력창 자동 높이, 이미지 뷰어 스와이프, 서버 금칙어(`PROFANITY_DETECTED`) 안내(화면 쪽 단어 목록 삭제), 채팅 주소 메시지 지도 SDK 준비 판단(`StaticMap is not a constructor`), 펫뉴스·펫이야기·펫돌봄 목록 썸네일 위·아래 여백을 글과 같게(최소 150px, 칸이 카드 높이를 채움), 금칙어 안내 문구를 서버 문구로 통일, 이미지 뷰어 화살표를 터치 기기에서 숨김, `/dev/chat` 삭제. 근거는 `milestones/KSJ.md`와 PR #438·#439·#443·#446·#449·#451·#454·#456(추가-26·27은 다음 PR)
+
 
 ## 다음에 할 것
 
 ### 내가 할 것(프론트)
-- 서버 금칙어 안내 문구(「부적절한 표현이 포함되어 있어요.」)와 화면 문구를 맞출지 정한다. 이미지 뷰어 하단 썸네일 줄(생각해 보기로 함)과 터치 기기에서 화살표 버튼 숨길지도 정한다
+- 이미지 뷰어 하단 썸네일 줄은 이번엔 하지 않기로 함(2026-11-20). 필요해지면 `ImageViewer.jsx`가 이미 받는 `images`·`index`·`onChange`로 줄을 그리면 되고 모바일에서 보일지 정한다
 - SCR-CMU-001: 기능명세서 FN-CMU-001-11·002-07 「삭제된 댓글은 문구로 대체」를 새 삭제 정책으로 고친다(사람). `TC_커뮤니티.md`에서 TC-CMU-001-11-18 행이 11-17 위에 있다(순서만)
-- SCR-CMU-005: `src/hooks/useChatWindow.js` 33행 주석 「그 글의 채팅만 보여 주며」를 현재 동작(그 글의 채팅을 맨 위에 둠)에 맞게 고친다
 - 수집 기사로 펫뉴스 상세·목록 높이 기준을 운영 데이터에서 다시 확인한다(로컬은 수집 기사가 없고 시드 썸네일이 가짜 주소)
 
 ### 남을 기다리는 것(연결 남음)
@@ -18,7 +18,7 @@
 - SCR-ADM-110: 「거래완료 글 숨김 기준 일수」 입력칸은 LJS가 develop에 넣음(`settingFields.js`). 서버 필드 `community.dlngCmptnHideCrtrDayCnt`가 병합된 뒤 저장이 되는지만 LJS와 확인한다
 - SCR-CMU-001: 서버 자동 댓글에 붙는 🎉는 화면에서 가렸고 서버(`LostReportService.FOUND_COMMENT`)에서도 뺄지는 선택
 - SCR-CMU-002: 실종센터 검색 안내 문구를 「제목, 지역, 품종, 특징으로 검색」으로 바꾸는 것은 백엔드 `GET /lost-reports` 검색에 제목(`PST_TTL`)이 들어간 뒤에 한다(백엔드 저장소에서 /start)
-- 채팅 API 연결(LJS, 2026-11-05 전달): `features/chat/api.js` 가짜를 백엔드 채팅·매칭 API로. 연결 뒤 SCR-CMU-004 FN-CMU-004-05 [내 채팅 보기]·[채팅하기]가 기존 방을 여는지 확인(회원 152 글 3 → 방 8). 같이 남은 것: 헤더 안 읽은 수 배지(COM-002-11), 004-09 펫돌봄 알림이 채팅방을 여는 방 식별자(`otoChatRoomSn`, YAY), 마지막에 본 방을 새로고침 뒤에도 기억할지. `/dev/chat`·`ChatDevPage`(「[채팅하기]가 생기면 지움」)와 `/dev/sub-page`(고객센터 이관 끝) 삭제도 LJS에 알린다
+- 채팅 API 연결은 LJS가 끝냄(`features/chat/api.js`가 실제 API). SCR-CMU-004 FN-CMU-004-05 [내 채팅 보기]·[채팅하기]가 기존 방을 여는지 확인(회원 152 글 3 → 방 8). 같이 남은 것: 헤더 안 읽은 수 배지(COM-002-11), 004-09 펫돌봄 알림이 채팅방을 여는 방 식별자(`otoChatRoomSn`, YAY), 마지막에 본 방을 새로고침 뒤에도 기억할지. `/dev/chat`은 지웠고(추가-27) `/dev/sub-page`(고객센터 이관 끝)는 지워도 되는지 LJS에 알린다
 - SCR-CMU-001: 댓글 알림 저장(FN-CMU-001-11, YAY `notification`)
 - SCR-CMU-002: 장소 검색을 YAY `GET /places`로 교체(FN-CMU-002-11, YAY), 종료 알림(FN-CMU-002-09, YAY). 읍·면·동 필터는 DB `RGN` 전주시 아래 행이 생기면 다시 본다
 - SCR-CMU-003: FN-CMU-003-04 관리자 글 첨부 이미지 실제 표시(시드 첨부 4061~4074가 공개 주소에서 404, LJS 관리자 뉴스 등록이 공개 파일로 저장하는지). 비공개 파일이면 `NewsDetail.jsx`를 `useFileImage`로 바꾼다
@@ -26,7 +26,6 @@
 - 375px 페이지 가로 스크롤은 공용 푸터가 원인(`UserFooter.jsx`, LJS). LJS 반응형 작업이 들어오면 다시 본다(CSC 추가-4). 푸터 일러스트와 내용 사이 여백도 LJS가 정한다
 
 ### 백엔드(백엔드 저장소에서 /start)
-- 작성자 본인이 자기 글 상세를 열어도 조회수가 오른다(`PostService.getPost`·`LostReportService.getReport`·`CareRecruitmentService.getRecruitment`). 작성자는 건너뛰게 고친다(사람이 백엔드에서 진행)
 - SCR-CMU-002: FN-CMU-002-10·13 `POST·PATCH /lost-reports`가 `vrtySn`·`vrtyDrctInptNm` 둘 다 없는 요청을 받게(`LostReportService` 「둘 중 하나만」 검사). 이것이 들어간 뒤 품종 없는 글의 상세(「강아지」만)·카드(품종 줄 없음)·수정 폼(미선택으로 열림)을 확인하고 프론트 PR을 합친다
 - 관리자 설정 `dscvAutoCmntCn`(찾았어요 자동 댓글)이 저장만 되고 댓글에는 반영되지 않는다. `LostReportService.FOUND_COMMENT` 상수가 쓰인다. 설정값을 쓰게 하면 프론트 미리보기(`missingCodes.js` `foundCommentText`)도 설정값을 받아야 한다
 - 펫돌봄 완료 사진 관리자 열람(SCR-ADM-022, 진행): 관리자 전용 `GET /api/admin/care-matches/{petPrtcRcrtSn}/images/{atchFileSn}` 구현은 로컬에 있고 커밋 전. 끝나면 LJS에 `CareMatchDetailModal.jsx` `publicFileUrl` → `useFileImage` 전달. 채팅 실시간 제안(`docs/api/community.md` 「실시간」) 검토는 따로
