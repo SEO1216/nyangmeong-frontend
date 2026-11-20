@@ -5,6 +5,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
+import { healthKeys } from '@/features/health/queries';
 import { pointKeys } from '@/features/point/queries';
 import {
   pixelCharacterKeys,
@@ -322,7 +323,11 @@ export const useSetRepresentativePet = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: setRepresentativePet,
-    onSuccess: () => qc.invalidateQueries({ queryKey: petKeys.all }),
+    /** 플로팅 AI 버튼 캐릭터는 healthKeys.myPets로 대표를 읽으므로 같이 무효화해 바로 바뀌게 한다 */
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: petKeys.all });
+      qc.invalidateQueries({ queryKey: healthKeys.myPets });
+    },
   });
 };
 

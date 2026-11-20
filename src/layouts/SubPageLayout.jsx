@@ -7,6 +7,7 @@ import { findActiveItem, SUB_MENUS } from './subMenus';
 /**
  * [사이드 메뉴가 있는 서브 화면 틀]
  * - 경로(전체 폭) + 사이드 메뉴 210px(섹션 제목 포함) + 페이지 머리·본문(디자인 COM-5)
+ * - 760~1099px(태블릿)도 같은 칸 구조, 사이드 메뉴만 180px로 좁힌다. 760px 미만은 한 칸(메뉴는 바텀 네비)
  * - 사용법·prop 표: handoff/LJS.md
  */
 export default function SubPageLayout({
@@ -30,7 +31,7 @@ export default function SubPageLayout({
 
   /** 760px 이하: 하단 여백은 UserLayout main이 바텀 네비 기준으로 맡아 0, 위 여백 0으로 헤더~경로 24px */
   return (
-    <div className="grid grid-cols-1 pt-2 pb-[126px] max-[760px]:pt-0 max-[760px]:pb-0 text-ink leading-[1.6] break-keep min-[1100px]:grid-cols-[210px_minmax(0,1fr)] min-[1100px]:gap-x-12">
+    <div className="grid grid-cols-1 pt-2 pb-[126px] max-[760px]:pt-0 max-[760px]:pb-0 text-ink leading-[1.6] break-keep min-[760px]:grid-cols-[180px_minmax(0,1fr)] min-[760px]:gap-x-8 min-[1100px]:grid-cols-[210px_minmax(0,1fr)] min-[1100px]:gap-x-12">
       <SubPageHead
         section={sectionMenu}
         activeItem={activeItem}
@@ -38,10 +39,9 @@ export default function SubPageLayout({
         description={description}
         pixel={pixel ? sectionMenu.pixel : null}
         action={headAction}
-        hasSwitch={!title && !hasBack}
         onLeave={onLeave}
       />
-      <div className="min-[1100px]:col-start-1 min-[1100px]:row-span-2 min-[1100px]:row-start-2">
+      <div className="min-[760px]:col-start-1 min-[760px]:row-span-2 min-[760px]:row-start-2">
         <SideMenu
           section={section}
           active={activeItem?.to}
@@ -51,7 +51,7 @@ export default function SubPageLayout({
         {sideBottom}
       </div>
       <div
-        className={`flex min-w-0 flex-col min-[1100px]:col-start-2 min-[1100px]:row-start-3 ${contentClassName}`}
+        className={`flex min-w-0 flex-col min-[760px]:col-start-2 min-[760px]:row-start-3 ${contentClassName}`}
       >
         {hasBack && <BackLink to={backTo ?? activeItem.to} onLeave={onLeave} />}
         {children}

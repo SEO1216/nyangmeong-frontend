@@ -12,7 +12,7 @@ import { showToast } from '@/components/toastStore';
 import CareForm from '@/features/community/care/CareForm';
 import { toFormValues } from '@/features/community/care/careUtils';
 import { useCare, useUpdateCare } from '@/features/community/careQueries';
-import useLeaveGuard from '@/features/community/useLeaveGuard';
+import useLeaveGuard from '@/hooks/useLeaveGuard';
 import SubPageLayout from '@/layouts/SubPageLayout';
 import { PATHS } from '@/routes/paths';
 import SkeletonCard from '@/components/SkeletonCard';
