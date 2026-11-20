@@ -20,6 +20,7 @@ import {
   useObservationItems,
 } from '../queries';
 import EmptyResult from '@/components/EmptyResult';
+import NoticeInfo from '../shared/NoticeInfo';
 import ObservationDetail from './ObservationDetail';
 import {
   ObservationMobileDetail,
@@ -28,11 +29,36 @@ import {
 import ObservationModal from './ObservationModal';
 import ObservationPhoto from './ObservationPhoto';
 import {
+  CHART_COUNT,
   formatSize,
   getItemDiffText,
   getItemValueText,
   isEndedItem,
 } from './observationUtils';
+
+/**
+ * 크기 변화 그래프 안내 ⓘ: 카드 제목 「지속 관찰」 바로 오른쪽, 항목·크기 유무와 상관없이 늘 보임(760px 미만 목록 화면도 같은 자리)
+ * 그래프 아래 「회차가 2개 이상 쌓이면…」 문구 대신 (※신규 정책, 2026-11-20)
+ */
+function ChartInfo() {
+  return (
+    <NoticeInfo
+      label="크기 변화 그래프 안내"
+      tipClassName="w-72 max-[760px]:w-64"
+    >
+      <b className="block font-semibold text-ink">크기 변화 그래프</b>
+      <span className="block break-keep">
+        · 크기를 적은 회차만 그래프에 보여요
+      </span>
+      <span className="block break-keep">
+        · 크기를 2번 이상 적으면 그래프가 생겨요
+      </span>
+      <span className="block break-keep">
+        · 최근 {CHART_COUNT}회차까지 보여요
+      </span>
+    </NoticeInfo>
+  );
+}
 
 /**
  * [지속 관찰 카드]
@@ -308,6 +334,7 @@ export default function ObservationCard({
     return (
       <Card
         title="지속 관찰"
+        sub={<ChartInfo />}
         className="min-w-0"
         action={!openItem && registerButton(`${BTN_PRIMARY}`, '+ 추가')}
       >
@@ -340,8 +367,11 @@ export default function ObservationCard({
     <Card
       title="지속 관찰"
       sub={
-        <span className="font-normal text-placeholder">
-          관찰 중 {activeCount}건 · 종료 {items.length - activeCount}건
+        <span className="inline-flex items-center gap-2">
+          <ChartInfo />
+          <span className="font-normal text-placeholder">
+            관찰 중 {activeCount}건 · 종료 {items.length - activeCount}건
+          </span>
         </span>
       }
       className="min-w-0"

@@ -1,6 +1,5 @@
 import DatePicker from '@/components/DatePicker';
 import Icon from '@/components/Icon';
-import NoticeBox from '@/components/NoticeBox';
 import { formatYmdWeekday, getTodayYmd } from '@/utils/formatDate';
 import {
   CARE_CYCLES,
@@ -37,16 +36,61 @@ const ZONES = [
   { cd: CARE_ZONE.REGULAR, nm: '정기관리' },
 ];
 
+/** 두 칸 줄: 760px 미만도 두 칸(① 항목명·반복 유형 줄만 위아래) */
+const PAIR_ROW = 'grid grid-cols-2 gap-4';
+
 function Optional() {
   return <span className="ml-1 text-[13px] font-medium text-subtle">선택</span>;
+}
+
+/**
+ * 다음 예정일: 정기관리이고 주기가 맞을 때만. 마지막으로 한 날을 비우면 오늘(등록일)부터 계산
+ * - lastCmptnYmd: 수정할 항목의 마지막 완료일
+ */
+const getNextDueYmd = (fields, lastCmptnYmd) => {
+  if (fields.careZoneCd !== CARE_ZONE.REGULAR || !fields.careCycleCd)
+    return null;
+  if (
+    fields.careCycleCd === CUSTOM_CYCLE &&
+    !isValidCycleDays(fields.cycleDrctInptDayCnt)
+  )
+    return null;
+  return addCycle(
+    fields.lastCmptnYmd || lastCmptnYmd || getTodayYmd(),
+    fields.careCycleCd,
+    fields.cycleDrctInptDayCnt,
+  );
+};
+
+/**
+ * [다음 예정일 한 줄] 「다음 예정일 YYYY-MM-DD(요일)」 (※신규 정책, 2026-11-20: NoticeBox 대신 한 줄)
+ * - 760px 이상은 모달 버튼 줄 왼쪽, 760px 미만은 입력칸 맨 아래. 계산할 수 없으면 그리지 않음
+ */
+export function NextDueText({ fields, lastCmptnYmd = null, className = '' }) {
+  const nextDueYmd = getNextDueYmd(fields, lastCmptnYmd);
+  if (!nextDueYmd) return null;
+  return (
+    <p className={`text-sm text-muted tabular-nums ${className}`}>
+      다음 예정일{' '}
+      <span className="font-semibold text-ink">
+        {formatYmdWeekday(nextDueYmd)}
+      </span>
+    </p>
+  );
 }
 
 /**
  * [관리 항목 입력칸] (FN-HLT-003-21~24·38)
  * - fields·onChange: careDue.js의 입력칸 값과 바뀐 칸
  * - isBasic: 기본 항목 -> 주기만 수정. isEdit: 마지막으로 한 날은 수정 Body에 없어 숨김
- * - isCycleOnly: 항목명·아이콘·반복 유형 칸과 다음 예정일 상자를 숨기고 주기 칸만(「케어 항목 관리」 모달의 기본 정기관리 주기 수정, ※신규 정책)
- * - lastCmptnYmd: 수정할 항목의 마지막 완료일(다음 예정일 계산용)
+ * - isCycleOnly: 항목명·아이콘·반복 유형 칸을 숨기고 주기·반복 일수만(「케어 항목 관리」 모달의 기본 정기관리 주기 수정, ※신규 정책)
+ * - 순서 (※신규 정책, 2026-11-20): ① 항목명 | 반복 유형 ② 아이콘 10개 한 줄(760px 미만 5열 2줄) ③ 주기 한 줄
+ *   ④ 반복 일수 | 마지막으로 한 날. 간격 gap-4
+ *   - 주기는 반복 유형을 고르기 전·일상관리일 때도 잠근 채 보이고 안내 문구
+ *   - 반복 일수는 직접입력일 때만 입력(아니면 잠금·빈 값·「-」). 마지막으로 한 날은 정기관리일 때만(일상관리면 잠금·빈 값·「-」)
+ *   - 반복 유형을 고르기 전엔 ④를 그리지 않음
+ *   - 수정할 때는 마지막으로 한 날이 없어 반복 일수만 왼쪽 칸
+ * - 다음 예정일은 NextDueText로 모달이 그림
  */
 export default function CareItemFields({
   fields,
@@ -54,63 +98,69 @@ export default function CareItemFields({
   isBasic = false,
   isEdit = false,
   isCycleOnly = false,
-  lastCmptnYmd = null,
   nameRef = null,
 }) {
   const todayYmd = getTodayYmd();
   const isRegular = fields.careZoneCd === CARE_ZONE.REGULAR;
-  const isCustomCycle = fields.careCycleCd === CUSTOM_CYCLE;
+  const hasZone = fields.careZoneCd != null;
+  const isCustomCycle = isRegular && fields.careCycleCd === CUSTOM_CYCLE;
   const hasValidDays = isValidCycleDays(fields.cycleDrctInptDayCnt);
-  const hasValidCycle = fields.careCycleCd && (!isCustomCycle || hasValidDays);
   /** 빈 칸은 버튼만 끄고, 값이 있는데 범위 밖일 때만 안내 */
   const showDaysError =
     isCustomCycle && fields.cycleDrctInptDayCnt !== '' && !hasValidDays;
-  /** 비우면 오늘(등록일)부터 계산 */
-  const nextDueYmd =
-    isRegular && hasValidCycle
-      ? addCycle(
-          fields.lastCmptnYmd || lastCmptnYmd || todayYmd,
-          fields.careCycleCd,
-          fields.cycleDrctInptDayCnt,
-        )
-      : null;
-  const nextDue = nextDueYmd && (
-    <NoticeBox className="tabular-nums">
-      다음 예정일 {formatYmdWeekday(nextDueYmd)}
-    </NoticeBox>
-  );
 
   return (
-    <>
+    <div className="flex flex-col gap-4">
       {!isCycleOnly && (
         <>
-          <label className="flex flex-col gap-1.5">
-            <span className={LABEL}>
-              항목명
-              <Required />
-            </span>
-            <input
-              ref={nameRef}
-              value={fields.careArtclNm}
-              maxLength={MAX_NAME_LENGTH}
-              placeholder="예: 영양제"
-              disabled={isBasic}
-              className={INPUT}
-              onChange={(event) =>
-                onChange({ careArtclNm: event.target.value })
-              }
-            />
-            {!isBasic && (
-              <CharCount value={fields.careArtclNm} max={MAX_NAME_LENGTH} />
-            )}
-          </label>
+          <div className={`${PAIR_ROW} max-[760px]:grid-cols-1`}>
+            <label className="flex min-w-0 flex-col gap-1.5">
+              {/** 글자 수는 라벨 줄 오른쪽: 660 높이 안에 들어가게 (※신규 정책, 2026-11-20) */}
+              <span className={LABEL}>
+                항목명
+                <Required />
+                {!isBasic && (
+                  <span className="ml-auto flex font-normal">
+                    <CharCount
+                      value={fields.careArtclNm}
+                      max={MAX_NAME_LENGTH}
+                    />
+                  </span>
+                )}
+              </span>
+              <input
+                ref={nameRef}
+                value={fields.careArtclNm}
+                maxLength={MAX_NAME_LENGTH}
+                placeholder="예: 영양제"
+                disabled={isBasic}
+                className={INPUT}
+                onChange={(event) =>
+                  onChange({ careArtclNm: event.target.value })
+                }
+              />
+            </label>
+
+            <fieldset className="flex min-w-0 flex-col gap-1.5">
+              <legend className={`${LABEL} mb-1.5`}>
+                반복 유형
+                <Required />
+              </legend>
+              <SegmentSwitch
+                options={ZONES}
+                selected={fields.careZoneCd}
+                isLocked={isBasic}
+                onSelect={(careZoneCd) => onChange({ careZoneCd })}
+              />
+            </fieldset>
+          </div>
 
           <fieldset className="flex flex-col gap-1.5">
             <legend className={`${LABEL} mb-1.5`}>
               카테고리 대표 아이콘
               <Optional />
             </legend>
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-10 gap-2 max-[760px]:grid-cols-5">
               {ICONS.map((icon) => {
                 const isSelected = fields.rprsIconId === icon.name;
                 const isEtc = icon.name === DEFAULT_CARE_ICON;
@@ -142,84 +192,76 @@ export default function CareItemFields({
             </div>
             <p className={HELP}>고르지 않으면 기본 아이콘으로 추가돼요</p>
           </fieldset>
-
-          <fieldset className="flex flex-col gap-1.5">
-            <legend className={`${LABEL} mb-1.5`}>
-              반복 유형
-              <Required />
-            </legend>
-            <SegmentSwitch
-              options={ZONES}
-              selected={fields.careZoneCd}
-              isLocked={isBasic}
-              onSelect={(careZoneCd) => onChange({ careZoneCd })}
-            />
-          </fieldset>
         </>
       )}
 
-      {isRegular && (
-        <>
-          <fieldset className="flex flex-col gap-1.5">
-            <legend className={`${LABEL} mb-1.5`}>
-              주기
-              <Required />
-            </legend>
-            <SegmentSwitch
-              options={CARE_CYCLES}
-              selected={fields.careCycleCd}
-              onSelect={(careCycleCd) => onChange({ careCycleCd })}
-            />
-            {isCustomCycle && (
-              <>
-                <div className="relative mt-2">
-                  <input
-                    type="number"
-                    min={1}
-                    max={MAX_CYCLE_DAYS}
-                    value={fields.cycleDrctInptDayCnt}
-                    placeholder="예: 10"
-                    aria-label="반복 일수"
-                    aria-invalid={showDaysError}
-                    className={`${INPUT} pr-16 tabular-nums`}
-                    onChange={(event) =>
-                      onChange({ cycleDrctInptDayCnt: event.target.value })
-                    }
-                  />
-                  <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-subtle">
-                    일마다
-                  </span>
-                </div>
-                <p className={HELP}>마지막으로 한 날부터 n일마다</p>
-                {showDaysError && <FieldError>{CYCLE_DAYS_ERROR}</FieldError>}
-              </>
-            )}
-          </fieldset>
+      {/** 주기: 정기관리가 아니면 잠근 채 보임 (※신규 정책, 2026-11-20) */}
+      <fieldset className="flex flex-col gap-1.5">
+        <legend className={`${LABEL} mb-1.5`}>
+          주기
+          {isRegular && <Required />}
+        </legend>
+        <div className={isRegular ? '' : 'opacity-40'}>
+          <SegmentSwitch
+            options={CARE_CYCLES}
+            selected={isRegular ? fields.careCycleCd : null}
+            isLocked={!isRegular}
+            onSelect={(careCycleCd) => onChange({ careCycleCd })}
+          />
+        </div>
+        {!isRegular && (
+          <p className={HELP}>
+            정기관리를 고르면 정할 수 있어요. 일상관리는 매일이에요
+          </p>
+        )}
+      </fieldset>
 
-          {isEdit ? (
-            !isCycleOnly && nextDue
-          ) : (
-            <div className="flex flex-col gap-1.5">
-              <label className="flex flex-col gap-1.5">
-                <span className={LABEL}>
-                  마지막으로 한 날
-                  <Optional />
-                </span>
-                <DatePicker
-                  value={fields.lastCmptnYmd}
-                  max={todayYmd}
-                  onChange={(lastYmd) => onChange({ lastCmptnYmd: lastYmd })}
-                />
-              </label>
-              <p className={HELP}>
-                마지막으로 한 날을 알려주시면 다음 예정일을 더 정확하게
-                계산해요. 비우면 오늘부터 셉니다
-              </p>
-              {nextDue}
+      {(hasZone || isCycleOnly) && (
+        <div className={PAIR_ROW}>
+          <label className="flex min-w-0 flex-col gap-1.5">
+            <span className={LABEL}>
+              반복 일수
+              {isCustomCycle && <Required />}
+            </span>
+            <div className="relative">
+              <input
+                type="number"
+                min={1}
+                max={MAX_CYCLE_DAYS}
+                value={isCustomCycle ? fields.cycleDrctInptDayCnt : ''}
+                placeholder={isCustomCycle ? '예: 10' : '-'}
+                disabled={!isCustomCycle}
+                aria-invalid={showDaysError}
+                className={`${INPUT} pr-16 tabular-nums`}
+                onChange={(event) =>
+                  onChange({ cycleDrctInptDayCnt: event.target.value })
+                }
+              />
+              <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-subtle">
+                일마다
+              </span>
             </div>
+            {showDaysError && <FieldError>{CYCLE_DAYS_ERROR}</FieldError>}
+          </label>
+
+          {!isEdit && (
+            <label className="flex min-w-0 flex-col gap-1.5">
+              <span className={LABEL}>
+                마지막으로 한 날
+                <Optional />
+              </span>
+              {/** 일상관리는 마지막으로 한 날을 보내지 않음(toCareCreateBody) -> 잠금·빈 값·「-」 (※신규 정책, 2026-11-20) */}
+              <DatePicker
+                value={isRegular ? fields.lastCmptnYmd : ''}
+                max={todayYmd}
+                placeholder={isRegular ? undefined : '-'}
+                disabled={!isRegular}
+                onChange={(lastYmd) => onChange({ lastCmptnYmd: lastYmd })}
+              />
+            </label>
           )}
-        </>
+        </div>
       )}
-    </>
+    </div>
   );
 }
