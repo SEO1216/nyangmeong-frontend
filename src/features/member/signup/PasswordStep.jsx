@@ -6,7 +6,6 @@ import SignupSummary from './SignupSummary';
 import { SIGNUP_MESSAGES as MSG } from './signupMessages';
 
 export default function PasswordStep({ form }) {
-  const target = form.guideTarget;
   return (
     <form
       noValidate
@@ -23,7 +22,6 @@ export default function PasswordStep({ form }) {
         placeholder="비밀번호 입력"
         autoComplete="new-password"
         error={form.passwordError}
-        hasGuide={target === 'password'}
       />
       <AuthField
         id="signup-confirm"
@@ -37,7 +35,6 @@ export default function PasswordStep({ form }) {
         autoComplete="new-password"
         error={form.confirmError}
         success={form.confirmSuccess}
-        hasGuide={target === 'confirm'}
       />
       <SignupSummary
         rows={[

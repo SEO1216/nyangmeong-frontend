@@ -6,7 +6,6 @@ import { resendLabel } from '../shared/emailCert';
 import { SIGNUP_MESSAGES as MSG } from './signupMessages';
 
 export default function EmailStep({ form }) {
-  const target = form.guideTarget;
   return (
     <>
       <div className="flex flex-col gap-5">
@@ -20,7 +19,6 @@ export default function EmailStep({ form }) {
           autoComplete="username"
           inputMode="email"
           error={form.errors.email}
-          hasGuide={target === 'email'}
           action={
             <button
               type="button"
@@ -50,7 +48,6 @@ export default function EmailStep({ form }) {
           <AuthNotice
             type={form.notice.type}
             message={form.notice.message}
-            hasGuide={target === 'notice'}
           />
         )}
         {form.isSent && !form.isCodeLocked && (
@@ -74,7 +71,6 @@ export default function EmailStep({ form }) {
                 {MSG.spamHint}
               </>
             }
-            hasGuide={target === 'code'}
             endAdornment={
               !form.isEmailVerified && (
                 <span className="font-semibold text-danger tabular-nums">

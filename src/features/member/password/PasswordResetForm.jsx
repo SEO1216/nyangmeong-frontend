@@ -15,7 +15,6 @@ export default function PasswordResetForm({
   onRetryAuth,
 }) {
   const form = usePasswordReset(grant);
-  const target = form.guideTarget;
 
   if (form.isDone) {
     return (
@@ -45,7 +44,7 @@ export default function PasswordResetForm({
           title="비밀번호 재설정"
           subtitle="본인확인을 다시 하면 비밀번호를 바꿀 수 있습니다."
         />
-        <AuthNotice type="error" message={MSG.needVerify} hasGuide />
+        <AuthNotice type="error" message={MSG.needVerify} />
         <div className="flex flex-col gap-3">
           <button
             type="button"
@@ -81,7 +80,6 @@ export default function PasswordResetForm({
         <AuthNotice
           type={form.notice.type}
           message={form.notice.message}
-          hasGuide={target === 'notice'}
         />
       )}
       <form noValidate onSubmit={form.submit} className="flex flex-col gap-5">
@@ -96,7 +94,6 @@ export default function PasswordResetForm({
           autoComplete="new-password"
           error={form.passwordError}
           help={MSG.pwHelp}
-          hasGuide={target === 'password'}
         />
         <AuthField
           id="reset-confirm"
@@ -110,7 +107,6 @@ export default function PasswordResetForm({
           autoComplete="new-password"
           error={form.confirmError}
           success={form.confirmSuccess}
-          hasGuide={target === 'confirm'}
         />
         <button
           type="submit"

@@ -12,7 +12,6 @@ import useEmailLogin from './useEmailLogin';
 export default function EmailLoginForm({ onBack, onSuccess, onSignup }) {
   const navigate = useNavigate();
   const form = useEmailLogin(onSuccess);
-  const target = form.guideTarget;
 
   return (
     <AuthCard onBack={onBack}>
@@ -25,7 +24,6 @@ export default function EmailLoginForm({ onBack, onSuccess, onSignup }) {
         <AuthNotice
           type={form.notice.type}
           message={form.notice.message}
-          hasGuide={target === 'notice'}
         />
       )}
       <form noValidate onSubmit={form.submit} className="flex flex-col gap-5">
@@ -40,7 +38,6 @@ export default function EmailLoginForm({ onBack, onSuccess, onSignup }) {
           autoComplete="username"
           inputMode="email"
           error={form.errors.email}
-          hasGuide={target === 'email'}
         />
         <AuthField
           id="login-password"
@@ -52,7 +49,6 @@ export default function EmailLoginForm({ onBack, onSuccess, onSignup }) {
           placeholder="비밀번호 입력"
           autoComplete="current-password"
           error={form.errors.password}
-          hasGuide={target === 'password'}
         />
         {form.isCaptchaOn && (
           <CaptchaBlock
@@ -62,7 +58,6 @@ export default function EmailLoginForm({ onBack, onSuccess, onSignup }) {
             onChange={form.changeCaptcha}
             onRefresh={form.refreshCaptcha}
             error={form.errors.captcha}
-            hasGuide={target === 'captcha'}
           />
         )}
         <div className="-mt-2 flex justify-end">
