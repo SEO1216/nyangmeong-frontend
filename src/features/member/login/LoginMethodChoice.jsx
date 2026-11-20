@@ -31,7 +31,6 @@ export default function LoginMethodChoice({
         <AuthNotice
           type={snsNotice.type}
           message={snsNotice.message}
-          hasGuide
         />
       )}
       <SnsLoginButtons disabled={isSnsPending} />

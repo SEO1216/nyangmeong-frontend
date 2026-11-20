@@ -19,7 +19,6 @@ const CONFIRM_BTN =
 
 // 1단계. 복구할 이메일을 읽기 전용으로 보이고 인증번호로 본인을 확인한다
 function VerifyStep({ form }) {
-  const target = form.guideTarget;
   return (
     <form noValidate onSubmit={form.submitVerify}>
       <div className="flex flex-col gap-5">
@@ -33,7 +32,6 @@ function VerifyStep({ form }) {
           autoComplete="username"
           error={form.errors.email}
           help={MSG.emailHelp}
-          hasGuide={target === 'email'}
           action={
             <button
               type="button"
@@ -52,7 +50,6 @@ function VerifyStep({ form }) {
           <AuthNotice
             type={form.notice.type}
             message={form.notice.message}
-            hasGuide={target === 'notice'}
           />
         )}
         {form.isSent && !form.isCodeLocked && (
@@ -68,7 +65,6 @@ function VerifyStep({ form }) {
             maxLength={6}
             error={form.errors.code}
             help={MSG.sent}
-            hasGuide={target === 'code'}
             endAdornment={
               <span className="font-semibold text-danger tabular-nums">
                 {form.countdown.text}
@@ -166,7 +162,6 @@ function ConfirmStep({ form }) {
             error={form.errors.phone}
             success={form.isPhoneChecked ? SIGNUP.phoneAvailable : ''}
             help={form.phone ? SIGNUP.phoneNeedCheck : SIGNUP.phoneHelp}
-            hasGuide={form.guideTarget === 'phone'}
             action={
               <button
                 type="button"
@@ -241,7 +236,6 @@ export default function RecoveryForm({
             <AuthNotice
               type={form.notice.type}
               message={form.notice.message}
-              hasGuide={form.guideTarget === 'notice'}
             />
             {form.notice.isExpired && (
               <button

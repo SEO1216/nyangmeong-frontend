@@ -105,7 +105,6 @@ export default function SignupForm({ onBackToLogin, onGoLogin, onRecover }) {
           <AuthNotice
             type={form.notice.type}
             message={form.notice.message}
-            hasGuide={form.guideTarget === 'notice'}
           />
         )}
         <Body form={form} />

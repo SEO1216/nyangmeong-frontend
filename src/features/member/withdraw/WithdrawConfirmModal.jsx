@@ -70,7 +70,6 @@ export default function WithdrawConfirmModal({
         error={error}
         success={success}
         help="문구를 정확히 입력하면 탈퇴 버튼이 활성화됩니다."
-        hasGuide
       />
     </Modal>
   );
