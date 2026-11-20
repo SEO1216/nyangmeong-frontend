@@ -1,8 +1,8 @@
 import { ChevronLeft } from 'lucide-react';
 
-export default function AuthCard({ onBack, children }) {
+export default function AuthCard({ onBack, className = '', children }) {
   return (
-    <section className="relative w-full">
+    <section className={`relative w-full ${className}`}>
       {onBack && (
         <button
           type="button"
