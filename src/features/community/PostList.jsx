@@ -97,7 +97,7 @@ export default function PostList({
                   {item.thumbAtchFileSn && (
                     <span
                       aria-hidden="true"
-                      className="relative col-start-2 row-span-2 row-start-1 h-[150px] self-start overflow-hidden rounded-[10px] bg-surface-2 max-[760px]:order-1 max-[760px]:h-auto max-[760px]:col-start-1 max-[760px]:row-span-1 max-[760px]:row-start-auto max-[760px]:aspect-[16/9] max-[760px]:min-h-0"
+                      className="relative col-start-2 row-span-2 row-start-1 min-h-[150px] self-stretch overflow-hidden rounded-[10px] bg-surface-2 max-[760px]:order-1 max-[760px]:col-start-1 max-[760px]:row-span-1 max-[760px]:row-start-auto max-[760px]:aspect-[16/9] max-[760px]:min-h-0"
                     >
                       <FileImage
                         src={publicFileUrl(item.thumbAtchFileSn)}
