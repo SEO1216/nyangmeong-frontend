@@ -2,15 +2,14 @@
 
 ## 지금 하는 것
 
-끝남: SCR-CMU-001 커뮤니티 정리 (2026-11-19, 사람 확인, `yarn -s lint` 0·`yarn -s build` 0). 추가-3~24: 채팅·상세 화면 보정, 글자 수 초과 입력 차단(한글 조합 중 포함), 댓글 입력창 자동 높이, 이미지 뷰어 스와이프, 서버 금칙어(`PROFANITY_DETECTED`) 안내(화면 쪽 단어 목록 삭제), 채팅 주소 메시지 지도 SDK 준비 판단(`StaticMap is not a constructor`), 펫뉴스·펫이야기·펫돌봄 목록 썸네일 위·아래 여백을 글과 같게(최소 150px, 칸이 카드 높이를 채움). 근거는 `milestones/KSJ.md`와 PR #438·#439·#443·#446·#449·#451(추가-24는 다음 PR)
+끝남: SCR-CMU-001 커뮤니티 정리 (2026-11-19, 사람 확인, `yarn -s lint` 0·`yarn -s build` 0). 추가-3~25: 채팅·상세 화면 보정, 글자 수 초과 입력 차단(한글 조합 중 포함), 댓글 입력창 자동 높이, 이미지 뷰어 스와이프, 서버 금칙어(`PROFANITY_DETECTED`) 안내(화면 쪽 단어 목록 삭제), 채팅 주소 메시지 지도 SDK 준비 판단(`StaticMap is not a constructor`), 펫뉴스·펫이야기·펫돌봄 목록 썸네일 위·아래 여백을 글과 같게(최소 150px, 칸이 카드 높이를 채움), 금칙어 안내 문구를 서버 문구로 통일. 근거는 `milestones/KSJ.md`와 PR #438·#439·#443·#446·#449·#451·#454(추가-25는 다음 PR)
 
 
 ## 다음에 할 것
 
 ### 내가 할 것(프론트)
-- 서버 금칙어 안내 문구(「부적절한 표현이 포함되어 있어요.」)와 화면 문구를 맞출지 정한다. 이미지 뷰어 하단 썸네일 줄(생각해 보기로 함)과 터치 기기에서 화살표 버튼 숨길지도 정한다
+- 이미지 뷰어 하단 썸네일 줄(생각해 보기로 함)과 터치 기기에서 화살표 버튼 숨길지도 정한다
 - SCR-CMU-001: 기능명세서 FN-CMU-001-11·002-07 「삭제된 댓글은 문구로 대체」를 새 삭제 정책으로 고친다(사람). `TC_커뮤니티.md`에서 TC-CMU-001-11-18 행이 11-17 위에 있다(순서만)
-- SCR-CMU-005: `src/hooks/useChatWindow.js` 33행 주석 「그 글의 채팅만 보여 주며」를 현재 동작(그 글의 채팅을 맨 위에 둠)에 맞게 고친다
 - 수집 기사로 펫뉴스 상세·목록 높이 기준을 운영 데이터에서 다시 확인한다(로컬은 수집 기사가 없고 시드 썸네일이 가짜 주소)
 
 ### 남을 기다리는 것(연결 남음)
@@ -27,7 +26,6 @@
 - 375px 페이지 가로 스크롤은 공용 푸터가 원인(`UserFooter.jsx`, LJS). LJS 반응형 작업이 들어오면 다시 본다(CSC 추가-4). 푸터 일러스트와 내용 사이 여백도 LJS가 정한다
 
 ### 백엔드(백엔드 저장소에서 /start)
-- 작성자 본인이 자기 글 상세를 열어도 조회수가 오른다(`PostService.getPost`·`LostReportService.getReport`·`CareRecruitmentService.getRecruitment`). 작성자는 건너뛰게 고친다(사람이 백엔드에서 진행)
 - SCR-CMU-002: FN-CMU-002-10·13 `POST·PATCH /lost-reports`가 `vrtySn`·`vrtyDrctInptNm` 둘 다 없는 요청을 받게(`LostReportService` 「둘 중 하나만」 검사). 이것이 들어간 뒤 품종 없는 글의 상세(「강아지」만)·카드(품종 줄 없음)·수정 폼(미선택으로 열림)을 확인하고 프론트 PR을 합친다
 - 관리자 설정 `dscvAutoCmntCn`(찾았어요 자동 댓글)이 저장만 되고 댓글에는 반영되지 않는다. `LostReportService.FOUND_COMMENT` 상수가 쓰인다. 설정값을 쓰게 하면 프론트 미리보기(`missingCodes.js` `foundCommentText`)도 설정값을 받아야 한다
 - 펫돌봄 완료 사진 관리자 열람(SCR-ADM-022, 진행): 관리자 전용 `GET /api/admin/care-matches/{petPrtcRcrtSn}/images/{atchFileSn}` 구현은 로컬에 있고 커밋 전. 끝나면 LJS에 `CareMatchDetailModal.jsx` `publicFileUrl` → `useFileImage` 전달. 채팅 실시간 제안(`docs/api/community.md` 「실시간」) 검토는 따로
