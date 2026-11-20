@@ -2,9 +2,12 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 화면 바탕색·헤더·푸터 색 정리 (2026-11-20, 검증 통과, 사람 확인). 화면 바탕 `--color-page-bg` #f7f9f9(관리자·로그인·주소 지도 화면도 `bg-page-bg`), 회원 헤더는 맨 위 투명·스크롤 때 흰 반투명+아래선, 푸터 #f1f6f6·선 #dfe5e6·로고 그림·팀원 5명 이메일·대표전화·FAX
+끝남: SCR-MAN-001 바로가기 조회 400 원인 확인 (2026-11-20, 검증 통과 1회차, 사람 확인). 로컬 백엔드에서 `/main` 진입 4경우(로그인 직후·직접 입력·새로고침·로고로 이동) 모두 `GET /pets/main-shortcuts` 200, 400 재현 안 됨, 코드 수정 없음
 
 ## 다음에 할 것
+
+- SCR-MAN-001 400 참고(판정 밖): 재현은 GET 진입 4경우만 했다. 바로가기 편집 저장 `PUT /pets/main-shortcuts`는 시도 안 함. 다시 400을 보면 메서드·응답 본문(오류 코드)을 남겨 새 마일스톤으로
+- 범위 밖(말만, 2026-11-20 로컬 백엔드): `/main` 진입마다 `GET /members/me/tutorial` 404, `GET /pets/{petSn}/character-image?part=face` 404·500(반려동물마다 다름). 띄운 백엔드 버전 때문인지 확인 안 함
 
 - SCR-COM-002 바탕·헤더·푸터 색 팀 알림(PR 본문 + 팀 채널, 모두): 화면 바탕 `--color-page-bg`가 #faf8f5 → #f7f9f9, 관리자(`AdminLayout`)·로그인·가입(`AuthLayout`, 760 미만 `bg-white` 지움) 바탕도 `bg-page-bg`. 회원 헤더(`UserHeader`)는 맨 위에서 바탕·아래선 투명, 스크롤하면 흰 반투명+아래선. 푸터 `--color-footer` #f1f6f6·`--color-footer-line` #dfe5e6(위 테두리도 footer-line), "냥멍케어" 글자 대신 로고 그림, Dev Team 안인철 뺌. KSJ: `chat/room/AddressMapScreen` 바탕 `bg-surface-2` → `bg-page-bg`
 - SCR-COM-002 커밋 전 사람 확인: `layouts/UserFooter.jsx`에 팀원 실제 이메일 5개·대표전화·FAX가 들어감(공개 저장소). 본인들 동의 확인
@@ -199,7 +202,6 @@ SCR-MAN-002 랜딩 · SCR-MAN-001 메인 픽셀 디자인 시안(2026-11-17, 기
 - SCR-ADM-070 참고(검증 보고 2026-11-11, 판정 밖): 픽셀 그림 없이 [등록]을 눌러 나온 "픽셀 그림을 만들어 골라 주세요"가 그림을 만든 뒤에도 [이 그림 쓰기]까지 남는다
 - 로컬 서버 메모(2026-11-11): AI 서버는 `--reload` 없이 띄우면 `git pull` 뒤 새 API가 404다(이번에 `pixel-image`가 404였음). ai 저장소 README대로 `uv run uvicorn app.main:app --reload`로 띄운다
 
-- SCR-MAN-001 `/api/pets/main-shortcuts` 400(2026-11-11 검증 보고, 판정 밖): 검증 브라우저에서 `/main`을 열 때 콘솔에 한 번 찍혔다. 이번 변경(입력 줄 문구·단추)과 이어진 것인지 확인 안 함. 재현 기획 B1~B3(새로고침·직접 입력·화면 이동·로그인 직후, H1~H4)은 2026-11-11 세션에서 썼다가 아이템 작업으로 미룸. 2026-11-14 다시 기획(GET `search`에는 400 던지는 줄이 없어 PUT일 가능성, 기록에 메서드·회차 없음)했다가 사람이 넘김
 - SCR-COM-007 이번 PR 알림(2026-11-11): 팀 채널에 ① 공통 알림 `components/ToastContainer.jsx`가 popover(top layer)라 `<dialog>` 모달 위에 보임(쓰는 법 그대로) ② 원 금액·포인트 숫자에 `tabular-nums`를 붙임(가계부 SJM, 건강 일지 영수증·케어 캘린더 JAJ, 돌봄·채팅 거래 카드 KSJ, 관리자), 새 금액 표시·입력에도 붙여 달라고 알린다(초안은 2026-11-11 대화에서 만듦)
 - SCR-COM-007 `/ai-chat` 새 창 페이지 정리(사람 2026-11-11): PC도 모달로 바뀐 뒤 앱 안에서 여는 곳이 없다(주소 직접 입력만). 없앨지 정하고, 없애면 `routes/paths.js`·`docs/routes.md`·AI 서버 라우팅 매핑을 같이 고친다
 - AI 서버 `POST /ai/conversations` 실패(2026-11-11 검증 보고): 검증 브라우저(5180→프록시 `/ai/`)에서 `net::ERR_FAILED`로 "메시지를 보내지 못했어요"가 나온다(GET은 200, 바꾸지 않은 메인 모달에서도 같음). 아래 `fetch('/ai/...')` 항목과 같은 원인인지 본다
