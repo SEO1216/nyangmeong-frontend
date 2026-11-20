@@ -6,7 +6,8 @@ const gnbItems = (label) =>
 
 /**
  * [모바일 바텀 네비]
- * - 760px 미만에서 메인·플레이스를 뺀 사용자 화면은 푸터 대신 바텀 네비를 둠(docs/convention/ui.md)
+ * - 760px 미만에서 메인·플레이스·설정을 뺀 사용자 화면은 푸터 대신 바텀 네비를 둠(docs/convention/ui.md)
+ * - 설정은 메뉴가 알림 설정 하나뿐이라 바텀 네비를 두지 않는다
  * - paths는 바텀 네비를 둘 경로(하위 경로 포함), items는 그 메뉴의 서브 메뉴
  */
 export const BOTTOM_NAV_MENUS = [
@@ -38,11 +39,6 @@ export const BOTTOM_NAV_MENUS = [
       { label: '자주하는 질문', to: PATHS.FAQS },
       { label: '1:1 문의', to: PATHS.INQUIRIES },
     ],
-  },
-  {
-    label: '설정',
-    paths: [PATHS.SETTINGS_NOTIFICATIONS],
-    items: [{ label: '알림 설정', to: PATHS.SETTINGS_NOTIFICATIONS }],
   },
 ];
 

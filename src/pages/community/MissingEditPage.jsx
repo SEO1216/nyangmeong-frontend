@@ -16,7 +16,7 @@ import {
   useMissing,
   useUpdateMissing,
 } from '@/features/community/missingQueries';
-import useLeaveGuard from '@/features/community/useLeaveGuard';
+import useLeaveGuard from '@/hooks/useLeaveGuard';
 import SubPageLayout from '@/layouts/SubPageLayout';
 import { PATHS } from '@/routes/paths';
 import { profanityFieldsOf } from '@/utils/profanity';

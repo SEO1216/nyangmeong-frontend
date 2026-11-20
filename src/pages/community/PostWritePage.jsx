@@ -3,7 +3,7 @@ import PostForm from '@/features/community/PostForm';
 import { BBS_INFO } from '@/features/community/postCodes';
 import { profanityFieldsOf } from '@/utils/profanity';
 import { useCreatePost } from '@/features/community/queries';
-import useLeaveGuard from '@/features/community/useLeaveGuard';
+import useLeaveGuard from '@/hooks/useLeaveGuard';
 import SubPageLayout from '@/layouts/SubPageLayout';
 import { PATHS } from '@/routes/paths';
 

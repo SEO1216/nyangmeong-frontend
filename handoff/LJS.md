@@ -2,11 +2,32 @@
 
 ## 지금 하는 것
 
-끝남: SCR-MAN-001 메인 전체 서비스 튜토리얼 모달 (2026-11-20, 검증 11회차 `확인 못 함 있음`=연결 남음 T3뿐, 추가-1~12 포함, 사람 확인). 처음 접속하면 메인에서 건강기록 둘러보기 모달과 같은 모양(왼쪽 목차·오른쪽 제목·설명·그림, 1040×660 고정)으로 5개 기능을 소개, 왼쪽 아래 [?]로 다시 보기, 열고 닫을 때 AI 매니저 플로팅 대화창과 같은 스케일 연출. 봤음은 가짜 API
+끝남: SCR-COM-002 사람 확인 피드백 묶음 (2026-11-20, 검증 2회차 통과, 추가-1 포함, 사람 확인). F1 글쓰기 나가기 확인 창 공용 `hooks/useLeaveGuard` / F2 모바일 설정 바텀 네비 빼기·줄바꿈 / F3·추가-1 시간 선택 시·분 직접 입력, 오전/오후 "--" 없앰, 시·분 목록 맨 위 [직접 입력] / F4 사용자 모달 입력 상한 현황(아래 표) / F5 태블릿(760~1099)도 왼쪽 사이드 메뉴(180px), 제목 옆 ▾ 없앰 / F6 대표 지정 뒤 플로팅 AI 버튼 바로 반영
 
 ## 다음에 할 것
 
-- SCR-MAN-001 연결 남음: T3 (백엔드 연결 회원별 서비스 튜토리얼 봤음 조회·저장 API와 필드, 백엔드 저장소에서 /start). 지금은 `features/dashboard/api.js` 가짜(새로고침하면 다시 열림, 응답 키 `tutorialSeenYn`은 임시). 백엔드 저장소 마일스톤에 대기 절 넣음
+- SCR-COM-002 피드백 묶음 팀 알림(PR 본문 + 팀 채널): 모두: 760~1099px에서 서브 화면(SubPageLayout) 왼쪽에 사이드 메뉴 180px가 생겨 본문이 좁아짐(제목 옆 ▾ 메뉴 없어짐, 768에서 반려동물 카드 값이 말줄임). 공용 `TimeSelect` 시·분은 직접 입력 가능, 오전/오후는 빈 칸 없이 오전부터(시간 비운 칸도 오전으로 보임). KSJ: `features/community/useLeaveGuard`가 `@/hooks/useLeaveGuard`로 옮겨짐(커뮤니티 글쓰기·수정 6곳 import, `InquiryForm` 나가기 확인이 공용 훅으로, 문의 확인 창 제목/설명 나눔). SJM: `useSetRepresentativePet`이 `healthKeys.myPets`도 무효화. 아래 F4 표의 가계부 메모·초대 이메일 상한 없음
+- SCR-COM-002 피드백 묶음 참고(검증 보고, 판정 밖): 시 칸에 13을 치면 1이 남아 벗어날 때 01, 분 75는 07이 됨(둘째 글자만 막음). 빈 시·분 칸 안내 글자는 "--"(칸 폭이 좁음)
+- F4 사용자 화면 모달 입력 상한 현황(2026-11-20 분석, 코드 수정 없음. 서버 = 백엔드 요청 DTO `@Size`). 담당자에게 알리고 고칠지는 사람이 정함
+  | 모달·폼 | 칸 | 프론트 상한 | 서버 상한 | 담당 | 결과 |
+  | --- | --- | --- | --- | --- | --- |
+  | 가계부 직접 입력(`expense/shared/ExpenseForm.jsx`)·영수증 확인(`ExpenseReceiptReview.jsx`) | 메모 `dtlMttr` | 없음 | 1000 | SJM | 다름: 1000자 넘기면 서버 400 |
+  | 공동양육 초대(`pet/list/InviteModal.jsx`) | 이메일 `invtnTrgtEml` | 없음 | 254 | SJM | 다름: 254자 넘기면 서버 400 |
+  | 반려동물 등록·수정(`pet/list/PetFormModal.jsx`) | 품종 검색 칸(`BreedCombo`) | 없음 | 직접 입력 `vrtyDrctInptNm` 40(직접 입력 칸은 40으로 맞음) | SJM | 검색 칸이라 저장 안 됨, 확인만 |
+  | 반려동물 등록·수정 | 이름 20·직접 입력 품종 40·직접 입력 색 20·인식칩 15·성격·알레르기·질병 1000 | 같음 | 같음(칩은 12 또는 15자리 패턴) | SJM | 맞음 |
+  | 신고(`components/ReportModal.jsx`) | 상세 `dclrDtlCn` | 500 | 500 | 공용 | 맞음 |
+  | 채팅 주소 공유(`chat/room/AddressShareModal.jsx`) | 상세 주소 30·공유 주소 200(잘라서 보냄) | 같음 | 30·200 | KSJ | 맞음(검색어 칸은 저장 안 됨) |
+  | 펫돌봄 거래 취소(`chat/room/CareDealCard.jsx`) | 직접 입력 사유 | 50 | 50 | KSJ | 맞음 |
+  | 처방(`health/checkup/PrescriptionModal.jsx`) | 약 이름 | 40 | 40 | JAJ | 맞음 |
+  | 기타 검사(`EtcInspectionModal.jsx`) | 검사명 100·결과 500·메모 200 | 같음 | 같음 | JAJ | 맞음 |
+  | 일정(`health/ScheduleModal.jsx`) | 병원 80·일정 이름 40·메모 500 | 같음 | 같음 | JAJ | 맞음 |
+  | 검진(`health/diary/CheckupModal.jsx`) | 병원 80·내용 500·메모 200 | 같음 | 같음 | JAJ | 맞음 |
+  | 관찰(`health/diary/ObservationModal.jsx`) | 항목 이름 40·세부 위치 40·메모 200 | 같음 | 같음 | JAJ | 맞음 |
+  | 케어 항목(`health/CareItemFields.jsx`) | 항목 이름 | 40 | 40 | JAJ | 맞음 |
+  | 가계부 | 사용처 `expndPlcusNm` | 80 | 80 | SJM | 맞음 |
+  | 파일·숫자만 있는 모달(영수증 올리기·첨부·캐릭터 만들기·예방·하루 기록·지출 한도) | - | - | - | - | 글자 칸 없음, 대상 아님 |
+- 모바일 바텀 네비 구조(사람과 이야기 2026-11-20, 팀 논의 필요): 지금은 섹션 서브 메뉴를 바텀 네비에 두어 화면마다 내용이 바뀜. 흔한 방식은 최상위 메뉴(홈·건강기록·커뮤니티·마이페이지 등) 고정. 모든 사용자 화면·다른 담당 화면에 걸쳐 팀 결정 뒤 따로 기획
+- SCR-MAN-001 연결 남음: T3 (백엔드 연결 회원별 서비스 튜토리얼 봤음 조회·저장 API와 필드, 백엔드 저장소에서 /start). 지금은 `features/dashboard/api.js` 가짜(새로고침하면 다시 열림, 응답 키 `tutorialSeenYn`은 임시). 백엔드 저장소 마일스톤에 대기 절 넣음. 백엔드 회신 2026-11-20(구현·빌드 통과, 사람 확인·병합 전): 조회 `GET /members/me/tutorial` → `{ tutrlViewYn }`, 저장 `PUT /members/me/tutorial`(body 없음, 멱등) → `{ tutrlViewYn: true }`. 필드 이름은 `tutrlViewYn`(`tutorialSeenYn` 아님). 신규 가입만 false, 기존 회원은 SQL로 true. 공용 DB 컬럼은 백엔드 PR 병합 뒤 생김(그 전 실제 호출 500 가능). 계약: 백엔드 `docs/api/member.md`
 - SCR-MAN-001 튜토리얼 커밋 전 사람 확인: `src/assets/tutorial/` 스크린샷 5장 개인정보(로컬 테스트 데이터 닉네임·반려동물 이름·포인트·지출, 커뮤니티 인기 포토의 다른 회원 사진·닉네임). 플레이스는 지도를 뺀 472×520 그대로(사람 결정)
 - SCR-MAN-001 튜토리얼 팀 알림(PR 본문 + 팀 채널, JAJ): 건강기록 둘러보기 모달(`features/health/shared/HealthGuideModal.jsx`)의 목차 한 줄·사진 칸·확대 화면이 `components/TocButton`·`ZoomBox`(새 `isFill`)·`ZoomOverlay`로 옮겨짐(모양·동작 그대로). 모두: 튜토리얼 문구가 각 담당 기능을 한 줄씩 소개하므로 메뉴 이름·기능이 바뀌면 LJS에게 알림
 - SCR-MAN-001 사람이 고치는 문서: 메인페이지 기능명세서에 서비스 튜토리얼 기능 ID(FN-MAN-0xx) 추가, 화면설계서 SCR-MAN-001에 튜토리얼 모달·왼쪽 아래 [?]
