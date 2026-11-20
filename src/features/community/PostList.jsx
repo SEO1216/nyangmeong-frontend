@@ -16,7 +16,7 @@ import StoryRail from './StoryRail';
 
 /** 왼쪽(필터·목록)과 오른쪽 레일. 로딩 자리도 같은 배치를 쓴다 */
 export const POST_LIST_GRID =
-  'grid grid-cols-[minmax(0,1fr)_300px] items-start gap-x-8 gap-y-10 max-[1100px]:grid-cols-2 max-[1100px]:gap-x-5 max-[760px]:grid-cols-1';
+  'grid grid-cols-[minmax(0,1fr)_280px] items-start gap-x-8 gap-y-10 max-[1100px]:grid-cols-2 max-[1100px]:gap-x-5 max-[760px]:grid-cols-1';
 
 export default function PostList({
   posts,
@@ -97,7 +97,7 @@ export default function PostList({
                   {item.thumbAtchFileSn && (
                     <span
                       aria-hidden="true"
-                      className="relative col-start-2 row-span-2 row-start-1 h-[150px] self-start overflow-hidden rounded-[10px] bg-surface-2 max-[760px]:order-1 max-[760px]:h-auto max-[760px]:col-start-1 max-[760px]:row-span-1 max-[760px]:row-start-auto max-[760px]:aspect-[16/9] max-[760px]:min-h-0"
+                      className="relative col-start-2 row-span-2 row-start-1 min-h-[150px] self-stretch overflow-hidden rounded-[10px] bg-surface-2 max-[760px]:order-1 max-[760px]:col-start-1 max-[760px]:row-span-1 max-[760px]:row-start-auto max-[760px]:aspect-[16/9] max-[760px]:min-h-0"
                     >
                       <FileImage
                         src={publicFileUrl(item.thumbAtchFileSn)}

@@ -102,19 +102,21 @@ export default function PostDetail({ post }) {
               <i className="mx-1 h-4 w-px bg-line-strong" aria-hidden="true" />
               <SharePanel title={post.pstTtl} />
             </div>
-            <button
-              type="button"
-              aria-label="신고"
-              onClick={() => setIsReporting(true)}
-              className="ml-auto inline-flex min-h-9 cursor-pointer items-center gap-2 px-1 text-sm font-medium text-subtle hover:text-ink max-[760px]:min-h-11 max-[760px]:min-w-11 max-[760px]:justify-center"
-            >
-              <Flag
-                size={20}
-                aria-hidden="true"
-                className="min-[761px]:hidden"
-              />
-              <span className="max-[760px]:hidden">신고</span>
-            </button>
+            {!post.owner && (
+              <button
+                type="button"
+                aria-label="신고"
+                onClick={() => setIsReporting(true)}
+                className="ml-auto inline-flex min-h-9 cursor-pointer items-center gap-2 px-1 text-sm font-medium text-subtle hover:text-ink max-[760px]:min-h-11 max-[760px]:min-w-11 max-[760px]:justify-center"
+              >
+                <Flag
+                  size={20}
+                  aria-hidden="true"
+                  className="min-[760px]:hidden"
+                />
+                <span className="max-[760px]:hidden">신고</span>
+              </button>
+            )}
           </div>
         </article>
 
@@ -163,7 +165,8 @@ export default function PostDetail({ post }) {
 
       {isDeleting && (
         <ConfirmModal
-          title="게시글을 삭제할까요? 삭제한 글은 되돌릴 수 없어요"
+          title="게시글을 삭제할까요?"
+          description="삭제한 글은 되돌릴 수 없어요."
           confirmLabel="삭제하기"
           isDanger
           isPending={remove.isPending}
@@ -171,7 +174,7 @@ export default function PostDetail({ post }) {
           onConfirm={() =>
             remove.mutate(post.pstSn, {
               onSuccess: () => {
-                showToast('게시글을 삭제했어요');
+                showToast('게시글을 삭제했어요', { type: 'success' });
                 navigate(listTo, { replace: true });
               },
             })
@@ -193,7 +196,7 @@ export default function PostDetail({ post }) {
               { pstSn: post.pstSn, ...values },
               {
                 onSuccess: () => {
-                  showToast('신고가 접수되었어요');
+                  showToast('신고가 접수되었어요', { type: 'success' });
                   setIsReporting(false);
                 },
               },

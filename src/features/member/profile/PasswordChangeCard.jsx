@@ -62,7 +62,7 @@ function PasswordEdit({ onClose }) {
       { currentPswd: curPswd, pswd: newPswd, pswdCnfrm: cfmPswd },
       {
         onSuccess: () => {
-          showToast('비밀번호를 변경했어요');
+          showToast('비밀번호를 변경했어요', { type: 'success' });
           onClose();
         },
         onError: (err) => {
@@ -73,7 +73,7 @@ function PasswordEdit({ onClose }) {
             err.code !== 'PASSWORD_SAME_AS_CURRENT' &&
             !err.fields?.some((item) => item.field === 'pswd')
           ) {
-            showToast('잠시 후 다시 시도해 주세요');
+            showToast('잠시 후 다시 시도해 주세요', { type: 'error' });
           }
         },
       },

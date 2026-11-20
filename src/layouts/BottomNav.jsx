@@ -14,6 +14,7 @@ export default function BottomNav({ menu }) {
   return (
     <nav
       aria-label={`${menu.label} 메뉴`}
+      data-toast-above
       className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white pb-[env(safe-area-inset-bottom)] min-[760px]:hidden"
     >
       <ul className="flex h-[60px]">

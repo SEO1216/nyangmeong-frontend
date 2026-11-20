@@ -1,4 +1,3 @@
-import { useId, useState } from 'react';
 import { ChevronRight, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import LoadError from '@/components/LoadError';
@@ -9,6 +8,7 @@ import Skeleton from '@/components/Skeleton';
 import { formatDate } from '@/utils/formatDate';
 import { pickJosa } from '@/utils/josa';
 import { useHealthReport, useRefreshHealthReport } from '../queries';
+import NoticeInfo from '../shared/NoticeInfo';
 import { CardTitle } from '../summary/SummaryParts';
 import { getMovePath, getMoveState } from './widgetItems';
 
@@ -94,7 +94,7 @@ const toCreatedAt = (crtDt) =>
 /**
  * [AI 건강분석 리포트] 항상 맨 앞(D9)
  * - 760px 이상 격자 한 줄 전체 폭 띠(민트 배경 띠, 팁마다 세로 막대), 760px 미만 두 칸 폭 한 줄 띠(민트 배경, 핀 없음) (※신규 정책)
- * - 내용은 AI 계약(ai docs/api/healthreport.md): 제목 줄 · 팁 1~3개(팁마다 앞에 세로 막대, 한 줄에 이어 놓고 넘치면 줄바꿈). 760px 이상은 제목·팁을 흰 상자 하나에 · 고정 안내 · 만든 시각
+ * - 내용은 AI 계약(ai docs/api/healthreport.md): 제목 줄 · 팁 1~3개(팁마다 앞에 세로 막대, 한 문단으로 이어 최대 2줄 말줄임). 760px 이상은 제목·팁을 흰 상자 하나에 · 고정 안내 · 만든 시각
  * - 고정 안내(notice)는 ⓘ에 마우스를 올리거나 ⓘ를 누르면 보임
  * - 14일 기록이 없으면(dataLackYn) 제목 줄 없이 고정 안내 팁만
  * - [새로고침]은 하루 1회(rfrshPsblYn). 못 하면(rfrshPsblYn false·409) 버튼 대신 안내 문구, 실패 문구는 띠 안에
@@ -120,7 +120,11 @@ export function AiReportCard({ pet }) {
             <h3 id="hlt011-ai-report" className="text-lg font-bold text-ink">
               <CardTitle icon="auto_awesome">AI 건강분석 리포트</CardTitle>
             </h3>
-            {data && <NoticeInfo notice={data.notice} />}
+            {data && (
+              <NoticeInfo label="AI 건강분석 리포트 안내">
+                {data.notice}
+              </NoticeInfo>
+            )}
             {data?.crtDt && (
               <span className="text-sm whitespace-nowrap text-subtle">
                 <span aria-hidden="true" className="text-line-strong">
@@ -173,43 +177,6 @@ export function AiReportCard({ pet }) {
   );
 }
 
-/**
- * 고정 안내 ⓘ: 마우스를 올리면(hover 기기) 보이고, 누르면 열고 닫음(터치 화면)
- * - 포커스가 빠지거나 Esc를 누르면 닫음
- */
-function NoticeInfo({ notice }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const noticeId = useId();
-
-  return (
-    <span
-      className="group relative inline-flex"
-      onBlur={() => setIsOpen(false)}
-      onKeyDown={(event) => {
-        if (event.key === 'Escape') setIsOpen(false);
-      }}
-    >
-      <button
-        type="button"
-        aria-label="AI 건강분석 리포트 안내"
-        aria-expanded={isOpen}
-        aria-describedby={noticeId}
-        onClick={() => setIsOpen((open) => !open)}
-        className="inline-flex rounded-sm text-subtle hover:text-brand-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
-      >
-        <Icon name="info" className="text-lg" />
-      </button>
-      <span
-        id={noticeId}
-        role="tooltip"
-        className={`absolute top-full left-0 z-10 mt-2 w-72 rounded-box border border-line bg-white px-4 py-3 text-xs leading-[1.6] text-muted shadow-depth-sm [@media(hover:hover)]:group-hover:block ${isOpen ? 'block' : 'hidden'}`}
-      >
-        {notice}
-      </span>
-    </span>
-  );
-}
-
 /** 760px 이상 띠 본문: 불러오는 중 · 실패 · 데이터 부족 · 리포트 */
 function AiReportBody({ pet, report, isRefreshing }) {
   if (report.isPending || isRefreshing) {
@@ -242,17 +209,18 @@ function AiReportBody({ pet, report, isRefreshing }) {
             {toReportTitle(pet.petNm, rptTtl)}
           </p>
         )}
-        <ul className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-ink-2">
+        {/** 팁은 한 문단으로 이어 붙여 최대 2줄, 넘치면 말줄임. 마우스를 올리면 전체 팁(title, 알레르기·기저질환과 같음) (※신규 정책, 2026-11-20) */}
+        <p className="line-clamp-2 text-sm text-ink-2" title={tips.join(' ')}>
           {tips.map((tip, index) => (
-            <li key={index} className="inline-flex items-center gap-1.5">
+            <span key={index} className="mr-6 last:mr-0">
               <span
                 aria-hidden="true"
-                className="h-3.5 w-1 shrink-0 rounded-full bg-brand-500"
+                className="mr-1.5 inline-block h-3.5 w-1 rounded-full bg-brand-500 align-middle"
               />
               {tip}
-            </li>
+            </span>
           ))}
-        </ul>
+        </p>
       </div>
       {staleYn && (
         <p className="text-sm text-muted">최근 기록이 아직 반영되지 않았어요</p>

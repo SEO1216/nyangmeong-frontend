@@ -7,7 +7,9 @@ import ConfirmModal from '@/components/ConfirmModal';
 import { INPUT } from '@/components/formStyles';
 import ReportModal from '@/components/ReportModal';
 import { showToast } from '@/components/toastStore';
+import { fitHeight } from '@/utils/fitHeight';
 import { publicFileUrl } from '@/utils/fileUrl';
+import { PROFANITY_MESSAGE, isProfanityError } from '@/utils/profanity';
 import { formatRelativeTime } from '@/utils/formatDate';
 const CMNT_MAX = 500;
 const PREVIEW_MAX = 30;
@@ -32,10 +34,15 @@ function CommentInput({
   const [text, setText] = useState(mention);
   const generatedId = useId();
   const id = inputId ?? generatedId;
-  const textareaRef = useRef(null);
+  const inputRef = useRef(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const el = textareaRef.current;
+    fitHeight(inputRef.current);
+  }, [text]);
+
+  useEffect(() => {
+    const el = inputRef.current;
     if (mention && el) {
       el.focus();
       el.setSelectionRange(mention.length, mention.length);
@@ -48,7 +55,7 @@ function CommentInput({
   const handleSubmit = (event) => {
     event.preventDefault();
     if (!body.trim() || isPending) return;
-    onSubmit(body.trim(), () => setText(mention));
+    onSubmit(body.trim(), () => setText(mention), setError);
   };
 
   return (
@@ -57,14 +64,35 @@ function CommentInput({
         {placeholder}
       </label>
       <textarea
-        ref={textareaRef}
+        ref={inputRef}
+        rows={1}
         id={id}
         value={text}
         maxLength={CMNT_MAX + mention.length}
         placeholder={placeholder}
-        onChange={(event) => setText(event.target.value)}
-        className={`${INPUT} min-h-20 resize-y py-3 leading-[1.6]`}
+        aria-invalid={Boolean(error)}
+        onChange={(event) => {
+          /** 한 줄 입력칸처럼 쓰되 길어지면 줄바꿈되어 높이가 늘어난다. 붙여 넣은 줄바꿈은 공백으로 */
+          setText(
+            event.target.value
+              .replaceAll(/[\r\n]+/g, ' ')
+              .slice(0, CMNT_MAX + mention.length),
+          );
+          setError('');
+        }}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+            event.preventDefault();
+            event.currentTarget.form.requestSubmit();
+          }
+        }}
+        className={`${INPUT} min-h-10 resize-none overflow-hidden py-2 leading-6`}
       />
+      {error && (
+        <p role="alert" className="text-sm text-danger">
+          {error}
+        </p>
+      )}
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs text-subtle">
           {body.length} / {CMNT_MAX}
@@ -186,9 +214,7 @@ function CommentRow({
       </span>
       <div className="min-w-0">
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-subtle">
-          <b className="text-base font-semibold text-ink">
-            {comment.mbrNcnm}
-          </b>
+          <b className="text-base font-semibold text-ink">{comment.mbrNcnm}</b>
           {isFoundNotice && (
             <Badge tone="ok" bordered>
               찾았어요
@@ -295,7 +321,7 @@ export default function CommentSection({
   const vanishesOnDelete = (comment) =>
     Boolean(comment.prntCmntSn) || repliesOf(comment.cmntSn).length === 0;
 
-  const handleCreate = (prntCmntSn) => (cmntCn, reset) =>
+  const handleCreate = (prntCmntSn) => (cmntCn, reset, fail) =>
     create.mutate(
       { targetSn, prntCmntSn, cmntCn },
       {
@@ -303,7 +329,11 @@ export default function CommentSection({
           reset();
           setReplyTo(null);
         },
-        onError: () => showToast('댓글을 등록하지 못했어요'),
+        /** 서버가 금칙어로 거절하면 토스트 대신 입력창 아래에 안내 */
+        onError: (error) =>
+          isProfanityError(error)
+            ? fail(PROFANITY_MESSAGE)
+            : showToast('댓글을 등록하지 못했어요', { type: 'error' }),
       },
     );
 
@@ -388,6 +418,7 @@ export default function CommentSection({
       {deleteTarget && (
         <ConfirmModal
           title="댓글을 삭제할까요?"
+          description="삭제하면 되돌릴 수 없어요."
           confirmLabel="삭제하기"
           isDanger
           isPending={remove.isPending}
@@ -399,7 +430,8 @@ export default function CommentSection({
               {
                 onSuccess: () => {
                   setDeleteTarget(null);
-                  if (vanishes) showToast('댓글이 삭제되었습니다');
+                  if (vanishes)
+                    showToast('댓글이 삭제되었습니다', { type: 'success' });
                 },
               },
             );
@@ -421,7 +453,7 @@ export default function CommentSection({
               { cmntSn: reportTarget.cmntSn, ...values },
               {
                 onSuccess: () => {
-                  showToast('신고가 접수되었어요');
+                  showToast('신고가 접수되었어요', { type: 'success' });
                   setReportTarget(null);
                 },
               },

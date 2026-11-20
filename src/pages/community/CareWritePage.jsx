@@ -3,7 +3,7 @@ import { showToast } from '@/components/toastStore';
 import CareForm from '@/features/community/care/CareForm';
 import { EMPTY_FORM } from '@/features/community/care/careUtils';
 import { useCreateCare } from '@/features/community/careQueries';
-import useLeaveGuard from '@/features/community/useLeaveGuard';
+import useLeaveGuard from '@/hooks/useLeaveGuard';
 import SubPageLayout from '@/layouts/SubPageLayout';
 import { PATHS } from '@/routes/paths';
 
@@ -17,7 +17,7 @@ export default function CareWritePage() {
     mutate(values, {
       onSuccess: ({ petPrtcRcrtSn }) => {
         setDirty(false);
-        showToast('돌봄 요청을 등록했어요');
+        showToast('돌봄 요청을 등록했어요', { type: 'success' });
         navigate(
           generatePath(PATHS.COMMUNITY_PETCARE_DETAIL, { petPrtcRcrtSn }),
         );

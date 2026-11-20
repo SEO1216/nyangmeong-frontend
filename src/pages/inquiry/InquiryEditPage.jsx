@@ -15,6 +15,7 @@ import {
   useUpdateInquiry,
 } from '@/features/inquiry/queries';
 import { PATHS } from '@/routes/paths';
+import { profanityFieldsOf } from '@/utils/profanity';
 
 export default function InquiryEditPage() {
   const navigate = useNavigate();
@@ -64,6 +65,7 @@ export default function InquiryEditPage() {
       isPending={update.isPending}
       errorMessage={update.error?.message}
       fieldErrors={update.error?.fields}
+      profanityFields={profanityFieldsOf(update.error)}
       onSubmit={handleSubmit}
     />
   );

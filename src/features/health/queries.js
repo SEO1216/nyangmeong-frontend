@@ -25,7 +25,6 @@ import {
   getMyPets,
   getPetDetail,
   getPetLimit,
-  getPixelCharacters,
   getSchedules,
   saveCareIndications,
   updateCareItem,
@@ -95,7 +94,6 @@ export const healthKeys = {
   all: ['health'],
   myPets: ['health', 'my-pets'],
   petDetail: (petSn) => ['health', 'my-pets', 'detail', petSn],
-  pixelCharacters: ['health', 'pixel-characters'],
   schedules: ['health', 'schedules'],
   scheduleList: (params) => ['health', 'schedules', params],
   careItems: ['health', 'care-items'],
@@ -140,7 +138,7 @@ export const healthKeys = {
   healthReport: (petSn) => ['health', 'health-report', petSn],
 };
 
-const showErrorToast = (error) => showToast(error.message);
+const showErrorToast = (error) => showToast(error.message, { type: 'error' });
 
 /** 내 반려동물 목록(GET /pets) */
 export const useMyPets = () =>
@@ -156,13 +154,6 @@ export const usePetDetail = (petSn, isEnabled) =>
     queryKey: healthKeys.petDetail(petSn),
     queryFn: () => getPetDetail(petSn),
     enabled: isEnabled && petSn != null,
-  });
-
-/** 내 반려동물별 캐릭터 목록(GET /pixel-characters), 종합 건강기록 히어로의 캐릭터 유무 판정 */
-export const usePixelCharacters = () =>
-  useQuery({
-    queryKey: healthKeys.pixelCharacters,
-    queryFn: getPixelCharacters,
   });
 
 /** params: { petSns, fromYmd, toYmd, size } */

@@ -52,7 +52,7 @@ export function FilterToggle({ controls, isOpen, onToggle, activeCount }) {
       aria-expanded={isOpen}
       aria-controls={controls}
       onClick={onToggle}
-      className={`${BTN_SECONDARY} col-span-full w-fit min-[761px]:hidden`}
+      className={`${BTN_SECONDARY} col-span-full w-fit min-[760px]:hidden`}
     >
       <SlidersHorizontal size={16} aria-hidden="true" />
       상세 필터

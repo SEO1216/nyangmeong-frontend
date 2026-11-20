@@ -52,9 +52,9 @@ const validate = ({ itemRegnCd, itemNm, needPnt, image, isEdit }) => ({
  * - 삭제는 없고 판매를 끄면 판매 중지: 이미 산 회원의 아이템은 남음
  * - [등록]·[저장]을 누르면 칸마다 검사하고, 저장하면 토스트 후 닫음. 실패하면 입력 유지 + 서버 문구
  * - 이미지는 실사 사진으로 만든 픽셀 그림만 올림(ItemPixelImageField)
- * - 등록 성공 뒤 onCreated({ itemSn, ...보낸 값 }): 화면이 전체 굽기를 시작할지 정함
+ * - 등록 성공 뒤, 수정에서 그림을 새로 골라 저장한 뒤 onBakeNeeded({ itemSn, ...보낸 값 }): 화면이 전체 굽기를 시작할지 정함
  */
-export default function ItemFormModal({ item, parts, onClose, onCreated }) {
+export default function ItemFormModal({ item, parts, onClose, onBakeNeeded }) {
   const formId = useId();
   const isEdit = Boolean(item);
 
@@ -103,7 +103,9 @@ export default function ItemFormModal({ item, parts, onClose, onCreated }) {
   };
 
   const handleSaved = () => {
-    showToast(isEdit ? '아이템을 수정했어요' : '아이템을 등록했어요');
+    showToast(isEdit ? '아이템을 수정했어요' : '아이템을 등록했어요', {
+      type: 'success',
+    });
     onClose();
   };
 
@@ -118,21 +120,27 @@ export default function ItemFormModal({ item, parts, onClose, onCreated }) {
       itemNm: itemNm.trim(),
       needPnt: Number(needPnt.trim()),
       ntslYn,
-      /** 굽기는 늘 픽셀 그림 기준(굽기 지시는 보내지 않아 기존 값 유지) */
+      /** 굽기는 늘 픽셀 그림 기준 */
       bakeImgRefYn: true,
       ...(image ? { image: image.file } : {}),
     };
     if (isEdit) {
       update.mutate(
         { itemSn: item.itemSn, ...body },
-        { onSuccess: handleSaved },
+        {
+          onSuccess: () => {
+            handleSaved();
+            /** 그림을 바꾸면 서버가 착용 시트를 지워 다시 굽기 대상이 됨 */
+            if (image) onBakeNeeded?.({ itemSn: item.itemSn, ...body });
+          },
+        },
       );
       return;
     }
     create.mutate(body, {
       onSuccess: ({ itemSn }) => {
         handleSaved();
-        onCreated?.({ itemSn, ...body });
+        onBakeNeeded?.({ itemSn, ...body });
       },
     });
   };

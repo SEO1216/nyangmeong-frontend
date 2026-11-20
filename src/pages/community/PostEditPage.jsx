@@ -10,8 +10,9 @@ import {
 import { showToast } from '@/components/toastStore';
 import EmptyResult from '@/components/EmptyResult';
 import PostForm from '@/features/community/PostForm';
+import { profanityFieldsOf } from '@/utils/profanity';
 import { usePost, useUpdatePost } from '@/features/community/queries';
-import useLeaveGuard from '@/features/community/useLeaveGuard';
+import useLeaveGuard from '@/hooks/useLeaveGuard';
 import SubPageLayout from '@/layouts/SubPageLayout';
 import { PATHS } from '@/routes/paths';
 import SkeletonCard from '@/components/SkeletonCard';
@@ -83,6 +84,7 @@ export default function PostEditPage() {
           update.isError &&
           '게시글을 저장하지 못했어요. 잠시 뒤 다시 시도해 주세요'
         }
+        profanityFields={profanityFieldsOf(update.error)}
         onSubmit={handleSubmit}
         onLeave={onLeave}
         onDirtyChange={setDirty}

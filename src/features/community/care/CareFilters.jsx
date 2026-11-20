@@ -20,7 +20,7 @@ const countActive = ({ mine, region, from, to, pet, size }) =>
 
 /**
  * 필터: 돌봄 지역(시·군·구 → 읍·면·동) · 돌봄 날짜 · 반려동물 · 반려견 크기. 바꾸면 바로 적용(AND). 배경 없이 위 라벨 + 아래 입력
- * - 761px 이상은 2열(왼쪽 지역·반려동물, 오른쪽 날짜·크기), 760px 이하는 1열이고 [상세 필터]로 열고 닫음
+ * - 760px 이상은 2열(왼쪽 지역·반려동물, 오른쪽 날짜·크기), 760px 미만은 1열이고 [상세 필터]로 열고 닫음
  * - filters: { region, dong, from, to, pet, size }, onChange(바뀐 값만), onReset
  * - 고양이를 고르면 반려견 크기는 비활성(값은 비움)
  */
@@ -37,7 +37,7 @@ export default function CareFilters({ filters, onChange, onReset }) {
     { value: '', label: '읍·면·동 전체' },
     ...dongs.map((row) => ({ value: String(row.rgnSn), label: row.emdNm })),
   ];
-  /** 760px 이하에서 닫혀 있으면 숨기는 칸 */
+  /** 760px 미만에서 닫혀 있으면 숨기는 칸 */
   const foldClass = isOpen ? '' : 'max-[760px]:hidden';
 
   return (

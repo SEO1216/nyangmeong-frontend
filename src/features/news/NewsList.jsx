@@ -51,11 +51,14 @@ function NewsCard({ item, search }) {
           </p>
         </div>
         {hasThumb && (
-          <NewsThumb
-            src={thumbSrc}
-            onError={() => setThumbFailed(true)}
-            className="col-start-2 row-span-2 row-start-1 h-[150px] w-full self-start max-[760px]:order-1 max-[760px]:h-auto max-[760px]:col-start-1 max-[760px]:row-span-1 max-[760px]:row-start-auto max-[760px]:aspect-[16/9] max-[760px]:min-h-0"
-          />
+          /** 이미지는 칸 안에 absolute로 채워 사진 크기가 카드 높이를 키우지 않고, 칸이 카드 안쪽 높이를 채워 위·아래 여백이 글과 같다 */
+          <div className="relative col-start-2 row-span-2 row-start-1 min-h-[150px] w-full max-[760px]:order-1 max-[760px]:col-start-1 max-[760px]:row-span-1 max-[760px]:row-start-auto max-[760px]:aspect-[16/9] max-[760px]:min-h-0">
+            <NewsThumb
+              src={thumbSrc}
+              onError={() => setThumbFailed(true)}
+              className="absolute inset-0 h-full w-full"
+            />
+          </div>
         )}
         <div className="flex items-center gap-x-3 text-sm text-subtle max-[760px]:order-3">
           <span className="inline-flex items-center gap-2 font-semibold text-ink-2">

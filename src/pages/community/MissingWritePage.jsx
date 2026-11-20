@@ -4,8 +4,9 @@ import Modal from '@/components/Modal';
 import { BTN_PRIMARY } from '@/components/buttonStyles';
 import MissingForm from '@/features/community/missing/MissingForm';
 import { EMPTY_FORM } from '@/features/community/missing/missingUtils';
+import { profanityFieldsOf } from '@/utils/profanity';
 import { useCreateMissing } from '@/features/community/missingQueries';
-import useLeaveGuard from '@/features/community/useLeaveGuard';
+import useLeaveGuard from '@/hooks/useLeaveGuard';
 import SubPageLayout from '@/layouts/SubPageLayout';
 import { PATHS } from '@/routes/paths';
 
@@ -37,6 +38,7 @@ export default function MissingWritePage() {
         cancelTo={PATHS.COMMUNITY_MISSING}
         isPending={isPending}
         errorMessage={isError && error.message}
+        profanityFields={profanityFieldsOf(error)}
         onSubmit={handleSubmit}
         onLeave={onLeave}
         onDirtyChange={setDirty}

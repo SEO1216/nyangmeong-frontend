@@ -16,9 +16,10 @@ import {
   useMissing,
   useUpdateMissing,
 } from '@/features/community/missingQueries';
-import useLeaveGuard from '@/features/community/useLeaveGuard';
+import useLeaveGuard from '@/hooks/useLeaveGuard';
 import SubPageLayout from '@/layouts/SubPageLayout';
 import { PATHS } from '@/routes/paths';
+import { profanityFieldsOf } from '@/utils/profanity';
 import SkeletonCard from '@/components/SkeletonCard';
 
 /** 로딩 자리: 폼 카드 + 오른쪽 작성 안내 레일(실제 수정 화면과 같은 배치·높이) */
@@ -62,7 +63,7 @@ export default function MissingEditPage() {
       {
         onSuccess: () => {
           setDirty(false);
-          showToast('수정한 내용을 저장했어요');
+          showToast('수정한 내용을 저장했어요', { type: 'success' });
           navigate(detailPath);
         },
       },
@@ -97,6 +98,7 @@ export default function MissingEditPage() {
         cancelTo={detailPath}
         isPending={update.isPending}
         errorMessage={update.isError && update.error.message}
+        profanityFields={profanityFieldsOf(update.error)}
         onSubmit={handleSubmit}
         onLeave={onLeave}
         onDirtyChange={setDirty}

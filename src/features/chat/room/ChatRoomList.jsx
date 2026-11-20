@@ -276,6 +276,7 @@ export default function ChatRoomList({
           failed.length > 0
             ? `${failed.length}개는 삭제하지 못했어요`
             : `채팅방 ${succeeded.length}개를 삭제했어요`,
+          { type: failed.length > 0 ? 'error' : 'success' },
         );
       },
     });

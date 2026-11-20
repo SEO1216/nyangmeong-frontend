@@ -1,4 +1,4 @@
-import { ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Modal from '@/components/Modal';
@@ -6,12 +6,14 @@ import {
   BTN_DANGER,
   BTN_PRIMARY,
   BTN_SECONDARY,
+  TEXT_ACTION,
   TEXT_ACTION_DANGER,
 } from '@/components/buttonStyles';
 import { showToast } from '@/components/toastStore';
+import useMediaQuery from '@/hooks/useMediaQuery';
 import { formatDate } from '@/utils/formatDate';
 import CareChipPicker from './CareChipPicker';
-import CareItemFields from './CareItemFields';
+import CareItemFields, { NextDueText } from './CareItemFields';
 import { CareWarnBox } from './CareShortageNotice';
 import SegmentSwitch from './SegmentSwitch';
 import {
@@ -45,13 +47,22 @@ const MODES = [
   { cd: MODE.PICK, nm: '고르기' },
   { cd: MODE.EDIT, nm: '수정' },
 ];
-const EDIT_HINT = '고칠 항목을 눌러 주세요';
+/** 입력 칸 아래 버튼 줄(760px 이상): 오른쪽 칸 맨 아래 */
+const PANEL_ACTIONS =
+  'mt-auto flex items-center gap-2 border-t border-line pt-4';
 
 /**
  * [케어 항목 관리 모달] (※신규 정책)
- * - 왼쪽 맨 위 [고르기 | 수정] 전환(처음 고르기)
- *   - 고르기: 칩으로 켜고 끔(5개 이상), 오른쪽은 새 항목 만들기
- *   - 수정: 칩을 누르면 오른쪽에서 고침. 직접 만든 항목은 전체 칸 + [삭제하기], 기본 정기관리는 주기만, 연동 항목은 검진상세 이동 안내
+ * - 760px 이상: 1040×660 고정(공용 Modal 기본 높이, 누를 때마다 크기가 바뀌지 않음), 본문 반반 두 칸 (※신규 정책, 2026-11-20)
+ *   - 왼쪽: [고르기 | 수정] + 칩(칸 안 스크롤). 오른쪽: 회색 입력 칸, 버튼 줄은 칸 맨 아래
+ *   - 오른쪽은 처음엔 늘 「새 항목 만들기」(「고칠 항목을 눌러 주세요」 상태 없음). [수정]에서 칩을 누르면 그 항목, 제목 줄 [+ 새 항목으로]로 다시 새 항목
+ * - 760px 미만: 같은 모달 안 화면 두 장 (※신규 정책, 2026-11-20)
+ *   - ① 고르기 화면: [고르기 | 수정] + [+ 새 항목] + 칩, 아래 줄은 「n개 골랐어요」 + [저장하기](닫기는 ✕)
+ *   - ② 입력 화면: [+ 새 항목]이나 [수정]에서 칩을 누르면. 제목 자리에 항목 이름, 왼쪽 ‹, 버튼은 모달 아래 줄에만
+ *     ‹·[취소]·[수정 취소]는 고치던 칸을 버리고 ①로, [추가]·[수정 반영]은 초안에 넣고 ①로. 실제 저장은 ① [저장하기] 때
+ * - [고르기 | 수정] 전환(처음 고르기)
+ *   - 고르기: 칩으로 켜고 끔(5개 이상)
+ *   - 수정: 칩을 누르면 그 항목을 고침. 직접 만든 항목은 전체 칸 + [삭제하기], 기본 정기관리는 주기만, 연동 항목은 검진상세 이동 안내
  *   - 상태를 바꾸면 [수정 반영]한 내용은 남고 고치던 칸은 버림
  * - [삭제하기]: 확인창 뒤 칩만 빠지고 실제 삭제는 [저장하기] 때
  * - [저장하기]: 생성 -> 수정 -> 고른 항목 저장 -> 삭제. 실패하면 닫지 않고 남은 단계만 다시 시도
@@ -79,6 +90,10 @@ export default function CareManageModal({
   const [mode, setMode] = useState(MODE.PICK);
   const [deletingItem, setDeletingItem] = useState(null);
   const [movingPath, setMovingPath] = useState(null);
+  /** 760px 미만 ② 입력 화면 여부 (※신규 정책, 2026-11-20) */
+  const [isFormView, setIsFormView] = useState(false);
+  const isNarrow = useMediaQuery('(width < 760px)');
+  const isForm = isNarrow && isFormView;
   const navigate = useNavigate();
   const nameRef = useRef(null);
   const newCountRef = useRef(0);
@@ -100,6 +115,12 @@ export default function CareManageModal({
   const isEditMode = mode === MODE.EDIT;
   /** 기본 정기관리: 주기만 고침 */
   const isCycleOnly = editingItem?.bscArtclYn === true;
+  const isLinked = editingItem != null && isLinkedCareItem(editingItem);
+  /** 직접 만든 항목: [삭제하기] */
+  const isDeletable = editingItem != null && !isCycleOnly && !isLinked;
+  const panelTitle = editingItem
+    ? `${isLinked ? '연동 항목' : isCycleOnly ? '주기 수정' : '항목 수정'} · ${editingItem.careArtclNm}`
+    : '새 항목 만들기';
 
   /** 상태 전환: 반영하지 않은 입력칸은 버림 */
   const handleModeChange = (nextMode) => {
@@ -140,12 +161,27 @@ export default function CareManageModal({
       },
     ]);
     resetPanel(fields.careZoneCd);
-    nameRef.current?.focus();
+    if (isNarrow) setIsFormView(false);
+    else nameRef.current?.focus();
   };
 
+  /** [수정]에서 칩을 누름: 760px 미만은 ② 입력 화면으로 */
   const handleEdit = (target) => {
     setEditingKey(target.chipKey);
     setFields(target.fields ?? toCareFields(target));
+    setIsFormView(true);
+  };
+
+  /** 760px 미만 [+ 새 항목]: 빈 입력 화면 */
+  const handleOpenNew = () => {
+    resetPanel();
+    setIsFormView(true);
+  };
+
+  /** 고치던 칸을 버림: 760px 이상은 새 항목으로, 760px 미만은 ① 고르기 화면으로 */
+  const handleCancelPanel = () => {
+    resetPanel();
+    setIsFormView(false);
   };
 
   const handleApplyEdit = () => {
@@ -157,7 +193,7 @@ export default function CareManageModal({
           : item,
       ),
     );
-    resetPanel();
+    handleCancelPanel();
   };
 
   const handleDelete = (target) => {
@@ -165,7 +201,7 @@ export default function CareManageModal({
       target.careArtclSn ?? doneRef.current.createdSns[target.chipKey];
     if (careArtclSn != null) setRemovedSns((prev) => [...prev, careArtclSn]);
     setItems((prev) => prev.filter((item) => item.chipKey !== target.chipKey));
-    if (editingKey === target.chipKey) resetPanel();
+    if (editingKey === target.chipKey) handleCancelPanel();
     setDeletingItem(null);
   };
 
@@ -210,14 +246,14 @@ export default function CareManageModal({
       },
       {
         onSuccess: () => {
-          showToast('케어 항목을 저장했어요');
+          showToast('케어 항목을 저장했어요', { type: 'success' });
           onClose();
         },
       },
     );
   };
 
-  const footer = (
+  const pickFooter = (
     <>
       <p className="mr-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
         {saveChanges.isError && (
@@ -238,7 +274,8 @@ export default function CareManageModal({
         </span>
       </p>
       <div className="flex gap-2">
-        {!isForced && (
+        {/** 760px 미만 ① 고르기 화면은 [저장하기]만, 닫기는 ✕ (※신규 정책, 2026-11-20) */}
+        {!isForced && !isNarrow && (
           <button
             type="button"
             className={`${BTN_SECONDARY} min-w-20`}
@@ -260,135 +297,191 @@ export default function CareManageModal({
     </>
   );
 
+  /** 입력 칸 버튼: 새 항목 [추가] / 직접 만든 항목 「삭제하기」 + [수정 취소][수정 반영] / 기본 정기 [수정 취소][수정 반영] */
+  const deleteButton = isDeletable && (
+    <button
+      type="button"
+      className={TEXT_ACTION_DANGER}
+      onClick={() => setDeletingItem(editingItem)}
+    >
+      삭제하기
+    </button>
+  );
+  const panelButtons = editingItem ? (
+    <div className="ml-auto flex gap-2">
+      <button
+        type="button"
+        className={`${BTN_SECONDARY} min-w-20`}
+        onClick={handleCancelPanel}
+      >
+        수정 취소
+      </button>
+      <button
+        type="button"
+        className={`${BTN_PRIMARY} min-w-20`}
+        disabled={!canApply}
+        onClick={handleApplyEdit}
+      >
+        수정 반영
+      </button>
+    </div>
+  ) : (
+    <div className="ml-auto flex gap-2">
+      {isNarrow && (
+        <button
+          type="button"
+          className={`${BTN_SECONDARY} min-w-20`}
+          onClick={handleCancelPanel}
+        >
+          취소
+        </button>
+      )}
+      <button
+        type="button"
+        className={`${BTN_PRIMARY} min-w-20`}
+        disabled={!canApply}
+        onClick={handleAdd}
+      >
+        추가
+      </button>
+    </div>
+  );
+  /** 다음 예정일: 기본 정기관리 주기 수정에는 없음 */
+  const nextDue = !isCycleOnly && !isLinked && (
+    <NextDueText fields={fields} lastCmptnYmd={editingItem?.lastCmptnYmd} />
+  );
+
+  /** 760px 미만 ② 입력 화면 아래 줄: 입력 칸 버튼만(연동 항목은 칸 안 [검진상세에서 관리 ›]만) */
+  const formFooter = !isLinked && (
+    <>
+      {deleteButton}
+      {panelButtons}
+    </>
+  );
+
   return (
     <Modal
-      title="케어 항목 관리"
-      footer={footer}
+      title={isForm ? panelTitle : '케어 항목 관리'}
+      headerLead={
+        isForm && (
+          <button
+            type="button"
+            aria-label="케어 고르기로 돌아가기"
+            className="-ml-2 grid size-8 shrink-0 place-items-center rounded-md text-subtle hover:bg-surface-2"
+            onClick={handleCancelPanel}
+          >
+            <ChevronLeft className="size-5" aria-hidden="true" />
+          </button>
+        )
+      }
+      footer={isForm ? formFooter : pickFooter}
       isLarge
-      isAutoHeight
       width={1040}
       isCloseIconHidden={isForced}
       isDismissDisabled={isForced}
       isPending={saveChanges.isPending}
       onClose={onClose}
     >
-      <div className="grid gap-6 px-6 py-5 min-[1100px]:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="flex min-w-0 flex-col gap-4">
-          {/** 더 고를 개수 = 5 − 지금 보이는 개수 (※신규 정책) */}
-          {isForced && (
-            <CareWarnBox>
-              케어가 {shownCount}개로 줄었어요. {MIN_CARE_COUNT - shownCount}개
-              이상 더 골라 주세요.
-            </CareWarnBox>
-          )}
-          <SegmentSwitch
-            options={MODES}
-            selected={mode}
-            className="w-full max-w-60"
-            onSelect={handleModeChange}
-          />
-          <p className="text-muted">
-            {petNm}에게 챙겨 줄 케어를 5개 이상 골라요.
-          </p>
-          <CareChipPicker
-            items={items}
-            isOn={(item) => item.isOn}
-            isEditMode={isEditMode}
-            editingKey={editingKey}
-            onToggle={handleToggle}
-            onEdit={handleEdit}
-          />
-        </div>
-
-        {isEditMode && editingItem && isLinkedCareItem(editingItem) ? (
-          <LinkedCarePanel
-            petSn={petSn}
-            item={editingItem}
-            onMove={handleMove}
-          />
-        ) : isEditMode && !editingItem ? (
-          <section
-            aria-label="항목 수정"
-            className="self-start rounded-[14px] border border-transparent bg-surface-2 p-4"
-          >
-            <p className="text-sm text-muted">{EDIT_HINT}</p>
-          </section>
-        ) : (
-          <section
-            aria-label={
-              editingItem
-                ? isCycleOnly
-                  ? '주기 수정'
-                  : '항목 수정'
-                : '새 항목 만들기'
-            }
-            className={`flex flex-col gap-4 self-start rounded-[14px] border bg-surface-2 p-4 ${
-              editingItem ? 'border-brand-500' : 'border-transparent'
-            }`}
-          >
-            <div>
-              <h3 className="font-bold break-keep text-ink">
-                {editingItem
-                  ? `${isCycleOnly ? '주기 수정' : '항목 수정'} · ${editingItem.careArtclNm}`
-                  : '새 항목 만들기'}
-              </h3>
-              {!editingItem && (
-                <p className="mt-1 text-sm text-muted">
-                  만든 항목은 켜진 상태로 왼쪽에 추가돼요
-                </p>
+      <div className="grid min-h-0 flex-1 grid-cols-2 max-[760px]:grid-cols-1">
+        {!isForm && (
+          <div className="flex min-h-0 min-w-0 flex-col gap-4 overflow-y-auto px-6 py-5">
+            {/** 더 고를 개수 = 5 − 지금 보이는 개수 (※신규 정책) */}
+            {isForced && (
+              <CareWarnBox>
+                케어가 {shownCount}개로 줄었어요. {MIN_CARE_COUNT - shownCount}
+                개 이상 더 골라 주세요.
+              </CareWarnBox>
+            )}
+            <div className="flex items-center gap-2">
+              <SegmentSwitch
+                options={MODES}
+                selected={mode}
+                className="w-full max-w-60"
+                onSelect={handleModeChange}
+              />
+              {isNarrow && (
+                <button
+                  type="button"
+                  className={`${BTN_SECONDARY} ml-auto shrink-0`}
+                  onClick={handleOpenNew}
+                >
+                  + 새 항목
+                </button>
               )}
             </div>
-            <CareItemFields
-              fields={fields}
-              isEdit={editingItem?.careArtclSn != null}
-              isCycleOnly={isCycleOnly}
-              lastCmptnYmd={editingItem?.lastCmptnYmd}
-              nameRef={nameRef}
-              onChange={changeFields}
+            <p className="text-muted">
+              {petNm}에게 챙겨 줄 케어를 5개 이상 골라요.
+            </p>
+            <CareChipPicker
+              items={items}
+              isOn={(item) => item.isOn}
+              isEditMode={isEditMode}
+              editingKey={editingKey}
+              onToggle={handleToggle}
+              onEdit={handleEdit}
             />
-            {isCycleOnly && (
-              <p className="text-sm text-muted">
-                기본 항목은 주기만 바꿀 수 있어요
-              </p>
-            )}
-            {editingItem ? (
-              <>
-                <div className="flex gap-2">
+          </div>
+        )}
+
+        {(!isNarrow || isForm) && (
+          <section
+            aria-label={panelTitle}
+            className="flex min-h-0 min-w-0 flex-col gap-4 overflow-y-auto bg-surface-2 px-6 py-5 max-[760px]:bg-white"
+          >
+            {!isNarrow && (
+              <div className="flex items-start justify-between gap-3">
+                {/** 안내 문구는 제목 오른쪽 같은 줄: 660 높이 안에 들어가게 (※신규 정책, 2026-11-20) */}
+                <div className="flex min-w-0 flex-wrap items-baseline gap-x-2">
+                  <h3 className="font-bold break-keep text-ink">
+                    {panelTitle}
+                  </h3>
+                  {!editingItem && (
+                    <p className="text-sm text-muted">
+                      만든 항목은 켜진 상태로 왼쪽에 추가돼요
+                    </p>
+                  )}
+                </div>
+                {editingItem && (
                   <button
                     type="button"
-                    className={`${BTN_SECONDARY} flex-1`}
+                    className={`${TEXT_ACTION} -my-1.5 shrink-0`}
                     onClick={() => resetPanel()}
                   >
-                    수정 취소
-                  </button>
-                  <button
-                    type="button"
-                    className={`${BTN_PRIMARY} flex-1`}
-                    disabled={!canApply}
-                    onClick={handleApplyEdit}
-                  >
-                    수정 반영
-                  </button>
-                </div>
-                {!isCycleOnly && (
-                  <button
-                    type="button"
-                    className={`${TEXT_ACTION_DANGER} self-center`}
-                    onClick={() => setDeletingItem(editingItem)}
-                  >
-                    삭제하기
+                    + 새 항목으로
                   </button>
                 )}
-              </>
+              </div>
+            )}
+            {isLinked ? (
+              <LinkedCarePanel
+                petSn={petSn}
+                item={editingItem}
+                onMove={handleMove}
+              />
             ) : (
-              <button
-                type="button"
-                className={`${BTN_PRIMARY} w-full`}
-                disabled={!canApply}
-                onClick={handleAdd}
-              >
-                추가
-              </button>
+              <>
+                {isCycleOnly && (
+                  <p className="text-sm text-muted">
+                    기본 항목은 주기만 바꿀 수 있어요
+                  </p>
+                )}
+                <CareItemFields
+                  fields={fields}
+                  isEdit={editingItem?.careArtclSn != null}
+                  isCycleOnly={isCycleOnly}
+                  nameRef={nameRef}
+                  onChange={changeFields}
+                />
+                {isNarrow ? (
+                  nextDue
+                ) : (
+                  <div className={PANEL_ACTIONS}>
+                    {deleteButton}
+                    {nextDue}
+                    {panelButtons}
+                  </div>
+                )}
+              </>
             )}
           </section>
         )}
@@ -455,7 +548,7 @@ const INFO_ROW = 'flex justify-between gap-3';
 
 /**
  * [연동 항목 안내 칸] (※신규 정책)
- * - 「수정」 상태에서 처방약·반복 예방 칩을 누르면 오른쪽 칸 대신 보임
+ * - 「수정」 상태에서 처방약·반복 예방 칩을 누르면 입력 칸 대신 보임. 제목은 입력 칸 제목 줄(760px 미만은 모달 제목)이 그림 (※신규 정책, 2026-11-20)
  * - 케어리스트에서는 고칠 수 없고, [검진상세에서 관리 ›]로 검진상세 그 탭(CareTile 이동 링크와 같은 규칙)에 감. ckupRcdSn이 없으면 버튼 숨김
  */
 function LinkedCarePanel({ petSn, item, onMove }) {
@@ -471,20 +564,12 @@ function LinkedCarePanel({ petSn, item, onMove }) {
       ];
 
   return (
-    <section
-      aria-label="연동 항목"
-      className="flex flex-col gap-4 self-start rounded-[14px] border border-brand-500 bg-surface-2 p-4"
-    >
-      <div>
-        <h3 className="font-bold break-keep text-ink">
-          연동 항목 · {item.careArtclNm}
-        </h3>
-        <p className="mt-1 text-sm break-keep text-muted">
-          케어리스트에서는 수정·삭제할 수 없어요. 아래 버튼을 누르면 검진상세로
-          이동해 관리할 수 있어요
-        </p>
-      </div>
-      <dl className="flex flex-col gap-2 rounded-box bg-white p-4 text-sm tabular-nums">
+    <>
+      <p className="text-sm break-keep text-muted">
+        케어리스트에서는 수정·삭제할 수 없어요. 아래 버튼을 누르면 검진상세로
+        이동해 관리할 수 있어요
+      </p>
+      <dl className="flex flex-col gap-2 rounded-box bg-white p-4 text-sm tabular-nums max-[760px]:bg-surface-2">
         <div className={INFO_ROW}>
           <dt className="text-muted">연동</dt>
           <dd className="font-semibold text-ink">
@@ -517,6 +602,6 @@ function LinkedCarePanel({ petSn, item, onMove }) {
           <ChevronRight className="size-4" aria-hidden="true" />
         </button>
       )}
-    </section>
+    </>
   );
 }

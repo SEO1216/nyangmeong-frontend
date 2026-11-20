@@ -2,6 +2,30 @@
 
 기준: 공통레이아웃_기능명세서_v0.4_20261001, AI매니저_기능명세서_v0.7_20261009 (DMS, 2026-10-17), 커뮤니티_기능명세서_v0.7_20261019 (CMU-005만, KSJ 마일스톤에서 옮김, 2026-10-21), AI매니저_기능명세서_v0.9_20261026 (SCR-AIM-013만, DMS 업로드 전 로컬 사본, 2026-10-26), 관리자_기능명세서_v0.2_20261030 (DMS, 2026-10-30. 화면설계서 `관리자_화면설계서_v0.1_20261030`, 순서는 백엔드 `docs/admin/implementation-plan.md` 3절 단계)
 
+## SCR-COM-002 공용 Modal · 스크롤 막대 겹침 전수조사 — 끝
+- 기능: 명세 기능 ID 추가 없음(버그 조사, 사람 요청 2026-11-20 "스크롤 중복되는 애들 전수조사"), 걸치는 기능 FN-COM-002. C1 전수조사 표 / C2 공용 `Modal` `isLarge` 겹침 / C3 `FormModal` `isFixedHeight` 겹침 / C4 각 파일 겹침
+- 기다리는 것: 없음. `features/health`(JAJ)·`features/pet`·`features/expense`(SJM)·`features/member`(YAY) 파일을 고치면 담당에게 알림
+- 결정: Q1 본문 안 고정 높이 목록의 `max-h`를 없애 본문 스크롤 하나로(PC 두 칸 구조는 그대로), Q2 다른 담당 파일도 같이 고치고 알림(사람 "추천안대로" 2026-11-20)
+- 완료 조건: 기획 C1~C4
+- C1 전수조사 표(코드 기준, 막대 개수는 검증에서 잼):
+  | 곳 | 담당 | 원인 | 고칠 곳 | 결과 |
+  | --- | --- | --- | --- | --- |
+  | `components/Modal.jsx` `isLarge` 갈래(`FormModal`→영수증 인식 결과·검진·관찰 등, `ScheduleModal`, `CareManageModal`, `HealthGuideModal`, `ItemShopModal`, `PetFormModal`, `ServiceTutorialModal`, `ShortcutEditModal`) | 공용 | dialog에 `overflow-hidden` 없음 → 브라우저 기본 `dialog:modal { overflow: auto }`로 dialog도 스크롤 | 공용 | C2 고침: `isLarge` dialog에 `overflow-hidden` |
+  | `health/diary/FormModal.jsx` `isFixedHeight`(처방·투약) | JAJ | `<form>` `overflow-y-auto` + 760 미만 `Modal` 본문 `overflow-y-auto` | 그대로 | C3: `<form>`이 `min-h-0 flex-1`이라 본문은 넘치지 않음(본문 막대 안 생김). C2로 dialog 막대도 없어져 코드 수정 없음 |
+  | `member/shared/TermsModal.jsx` 약관 본문 | YAY | 본문 안 `max-h-[50vh] overflow-y-auto` | 파일 | C4 고침: `max-h`·`overflow` 없앰(본문 스크롤 하나) |
+  | `adminTerms/TermsHistoryModal.jsx` 버전 내용 | LJS | 같음(50vh) | 파일 | C4 고침 |
+  | `adminPoint/PointAdjustModal.jsx` 회원 검색 결과 | LJS | 본문 안 `max-h-[200px] overflow-y-auto` | 파일 | C4 고침 |
+  | `expense/dashboard/ExpenseDuplicateDialog.jsx` 같은 지출 목록 | SJM | `isConfirm` 확인 창은 본문 스크롤이 없어 안쪽 목록(`max-h-60`)이 유일한 막대 | 그대로 | 겹침 아님 |
+  | `health/checkup/BloodResultList.jsx` 결과 목록(`max-h-96`) | JAJ | 모달이 아니라 검진상세 화면 탭 안 목록 | 그대로 | 대상 아님 |
+  | `CareManageModal`·`ShortcutEditModal`·`ItemShopModal` PC 두 칸 | JAJ·LJS·SJM | 왼쪽·오른쪽 칸이 각각 스크롤(의도된 구조) | 그대로 | 사람 결정(Q1) |
+  | `components/ConfirmModal`(공용 `Modal isConfirm`) | 공용 | 작은 모달 갈래(dialog `overflow-hidden`) | 그대로 | 겹침 없음 |
+  | `components/ImageViewer.jsx` | 공용 | dialog `overflow-hidden`, 안쪽 스크롤 없음 | 그대로 | 겹침 없음 |
+  | `expense/shared/ExpenseDetailSheet.jsx` | SJM | dialog 하나만 스크롤(안쪽 스크롤 없음) | 그대로 | 겹침 없음 |
+  | `layouts/ChatModal.jsx`·`pages/ai/AiChatModal.jsx` | KSJ·LJS | 바깥 `overflow-hidden`, 목록·대화 칸이 각각 스크롤(두 칸) | 그대로 | 겹침 없음 |
+  | 그 밖의 `Modal` 사용 파일(약 60개) | 각 담당 | 본문 안에 `overflow-y-auto`·`max-h` 스크롤 영역 없음(grep) | 그대로 | 겹침 없음 |
+- 완료 조건 결과: 검증 `통과`(2026-11-20, 1회차, 5180·8081, 영수증 인식·약관 본문은 Playwright 가짜 응답), 사람 확인 2026-11-20. C3은 코드 수정 없음(C2로 해결)
+- 연결 남음: 없음
+
 ## SCR-COM-002 기본 레이아웃 · 공용 Modal 밖 dialog 뒤 스크롤 잠금 — 끝
 - 기능: 명세 기능 ID 추가 없음(버그, 사람 요청 2026-11-16 "다음 작업으로"), 걸치는 기능 FN-COM-002
 - 배경: `showModal()`을 직접 부르고 `useScrollLock`이 없는 창은 열린 채 뒤 페이지가 휠로 스크롤된다. 5180·8081에서 확인(2026-11-16): `ScheduleModal`(일정 추가·수정), `FormModal`(건강 일지 입력 틀, 관찰 항목 추가로 확인), `ConfirmModal`(단독, 게시글 삭제 확인), `ImageViewer`(첨부 이미지 크게 보기), `ExpenseDetailSheet`(390px 지출 상세). 공용 `Modal`(오늘 기록 추가·게시글 신고)은 막힘. 창을 연 채 `useScrollLock`과 같은 html 스타일을 걸면 막히는 것까지 확인(ConfirmModal·ImageViewer)
@@ -1423,7 +1447,29 @@
 - 결과(2026-11-19): P1·P2 검증 통과, P3 코드로만(공용 DB라 등록 안 누름), 사람 확인. 추가-1 `/mypage/pets`에서도 보이고 이동 없이 그 자리에서 `PetFormModal`을 연다(P2 ②·P3 returnTo 대체), 추가-2 발바닥 옆 `+` 아이콘 — 둘 다 통과. 기획과 달라진 것: 아이콘 `Plus` → `PawPrint`(20px) + `Plus`(12px)
 - 연결 남음: 없음
 
-## SCR-COM-002 UI 통일 2-M · 남은 옛 분기점·삭제 확인 정리 — 대기
+## SCR-COM-002 공용 페이지 이동 · 모바일 쪽 번호 5개 — 끝
+- 기능: (팀 요청 2026-11-19, 명세 기능 ID 추가 없음) 760px 미만에서 `components/BoardPagination.jsx`의 쪽 번호가 10개(`PAGE_GROUP_SIZE`)라 390 폭에서 [›]가 다음 줄로 넘어간다. 모바일은 5개만 보이게 한다(팀 결정 "5개만 보이게"). 쓰는 곳: 커뮤니티·고객센터·펫뉴스 목록, 관리자 목록, 가계부 전체 내역 등(공용이라 파일 수정 없이 같이 바뀜). `components/Pagination.jsx`(카드 쪽 번호)도 같은 기준인지 기획 때 본다
+- 기다리는 것: 없음
+- 완료 조건: 390 폭 목록(예: `/community`, `/notices`)에서 쪽 번호 5개와 [‹]·[›]가 한 줄에 보이고, 6쪽 이상으로 넘어가면 다음 5개 묶음이 보인다 / 760 이상은 지금처럼 10개 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-19): `components/BoardPagination.jsx`가 `useMediaQuery('(width < 760px)')`로 묶음 5/10. `Pagination.jsx`는 이미 5개라 그대로. 검증 1회차 통과, 사람 확인 2026-11-19
+- 추가 요청(사람 2026-11-19): 추가-1 AI 매니저 첫 말풍선을 회원별 키(`nyangmeong-ai-bubble-seen.<mbrSn>`)로, 메인·비로그인에서는 본 것으로 치지 않음(`hooks/useAiDock.js`·`layouts/FloatingButtons.jsx`). 검증 통과, 사람 확인 2026-11-19
+- 연결 남음: 없음
+
+## SCR-COM-007 AI 매니저 진입 · 같은 주소 이동에도 AI 모달 닫기 — 끝
+- 기능: (사람 요청 2026-11-19, 버그, 명세 기능 ID 추가 없음) 메인에서 연 AI 모달이 헤더 로고(같은 `/main`)를 눌러도 안 닫힘. `AiChatModal`(선택: `ChatModal`)의 닫는 기준을 `pathname` → `location.key`
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 L1~L2 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-19): L1·L2 검증 1회차 통과, 추가-1(다른 주소 이동도 [✕]와 같은 닫는 연출, 플로팅에서 열었으면 작아짐) 2회차 통과, 사람 확인. 기획과 달라진 것: 기획은 다른 주소 이동 때 바로 닫힘이었으나 추가-1로 연출을 탐(메인 검색창에서 연 모달이 메인을 떠나면 돌아갈 자리가 없어 바로 닫힘)
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 2-N · 반려동물 캐릭터 표시 통일 — 끝
+- 기능: (2026-11-19, 사람 요청) 종합 건강기록 배너(JAJ `features/health/summary/SummaryBanner`)의 캐릭터를 마이페이지 반려동물 카드(SJM `features/pet/list/PetSlide`) 모양으로, 캐릭터 목록 조회(`usePixelCharacters`)를 `hooks/` 하나로
+- 기다리는 것: 없음
+- 완료 조건: 기획(핸드오프 "지금 하는 것")의 N1~N4 / `yarn -s lint`·`yarn -s build` 0
+- 결과(2026-11-19): N1~N4 검증 2회차 통과(1회차 실패: `/mypage/characters` → `/health` 이동 때 `/pixel-characters` 재요청 → 새 훅에 `staleTime` 5분), 추가-1(등록·초대 수락 뒤 캐릭터 목록 무효화, staleTime 부작용 Playwright 재현 뒤 사람 요청) 통과, 사람 확인. 기획과 달라진 것: 첫 기획(공용 `PetStage`, 배너 모양 기준)을 사람 결정으로 마이페이지 카드 기준·`usePixelCharacters` 통합으로 바꿈
+- 연결 남음: 없음
+
+## SCR-COM-002 UI 통일 2-M · 남은 옛 분기점·삭제 확인 정리 — 끝
 - 기능: (2 마일스톤의 마지막 조각, 2026-11-19, 기준 `docs/convention/ui.md` "화면 폭 분기점"·`ConfirmModal isDanger`) 커뮤니티(KSJ)·가계부(SJM) 남은 옛 분기점, AI 대화·라우팅 매핑 삭제 확인 빨간 버튼, `ui.md` 예시 분기점
 - 기다리는 것: 없음
 - 완료 조건: 기획(핸드오프 "지금 하는 것")의 M1~M4 / `yarn -s lint`·`yarn -s build` 0
@@ -1434,11 +1480,14 @@
 - 버그 후보(담당자에게 먼저 알림): 78 펫이야기 상세 내 글에도 신고 버튼(`community/PostDetail.jsx`, KSJ), 82 `ZONES` 순서 반대(`health/CareChipPicker.jsx`·`CareItemFields.jsx`, JAJ)
 - 이번엔 안 함: 기준 미정 18행(55·57·61·63·64·65·67·70·77·81·85·88~91), 메모 "변경없음"·"잠시 패스"·"정하지 않음" 행(8·17·19·21·25·30·35·75·86·97)
 
-## SCR-COM-002 공통 ⋮ 메뉴 공통화 — 대기
+## SCR-COM-002 공통 ⋮ 메뉴 공통화 — 끝
 - 기능: (사람 지시 2026-11-08 "리팩토링 때 한번에", 명세 FN 추가 없음) A1 `components/KebabMenu.jsx` variant 추가, A2 `CareItemMenu`·A3 `ExpenseMenu`를 KebabMenu 껍데기로, A4 `MainShortcuts`의 `ShortcutMenu`를 KebabMenu로
 - 기다리는 것: 없음
 - 완료 조건: 네 곳(AI 사이드바·건강기록 3곳·가계부·메인 바로가기) ⋮ 메뉴가 전과 같은 항목·모양으로 열리고 닫힌다 / `MoreVertical`은 `KebabMenu`와 범위 밖 CommentSection·PetSlide에만 남는다
 - 순서: 남은 작업 중 맨 마지막(사람 2026-11-10 "메뉴 공통화는 제일 마지막으로")
+- 같이 할 것(사람 2026-11-19 "리팩토링 때 한번에"): UI 통일 2-O 남은 Tailwind 기본 분기점 정리. `components/Card` `sm:`, `adminTableStyles` `md:`, `layouts/AuthLayout`·`AuthSlider` `md:`·`lg:`, `pages/mypage/MyPageHomePage` `md:`를 760·1100으로 바꾸고(640~759·760~767·1024~1099px 모양이 바뀜, JAJ·YAY 알림), 주석 고침(`CareFilters`·`MissingFilters` "미만는", `AiChatModal` `useCloseWithMotion` 주석). 숫자 분기점 560·600·1000·1260은 그대로 두고 담당자 알림만
+- 완료 조건 결과: 검증 `통과`(2026-11-20, 회차 1, A1~A5·B1·B2), 사람 확인 2026-11-20. 건강기록 `CareItemMenu`는 지금 1곳(지속 관찰 상세)에서만 쓴다. `MoreVertical`은 KebabMenu·CommentSection·`pet/list/MoreMenu`에만
+- 연결 남음: 없음
 
 ## SCR-MAN-001 메인페이지 · 사진 용도 판단 AI 연결 — 끝
 - 기능: 명세 기능 ID 추가 없음(메인 개편 뒤 추가, 기능명세서·화면설계서 미반영). 걸치는 기능 FN-MAN-002, SCR-AIM-013. SCR-MAN-001 "검색창 이미지 첨부 → AI 대화창 의도 판단"의 연결 남음 A3
@@ -1523,7 +1572,7 @@
 - 완료 조건 결과: 검증 `통과`(2026-11-13, 회차 1), 사람 확인 2026-11-13
 - 연결 남음: 없음
 
-## SCR-MYP-011 아이템 상점 모달 · 구매 멱등키 재사용 409 처리 — 대기
+## SCR-MYP-011 아이템 상점 모달 · 구매 멱등키 재사용 409 처리 — 끝
 - 기능: 명세 기능 ID 추가 없음(백엔드 버그 수정 연결, 2026-11-13). 걸치는 기능 FN-MYP-011-05 구매
 - 기다리는 것: 백엔드 LJS `SCR-MYP-011 아이템 상점 모달 · 구매 멱등키 재사용 막기`(끝, 커밋·develop 병합 뒤 동작)
 - 완료 조건: 구매 응답이 409 `IDEMPOTENCY_KEY_REUSED`이면 `ItemShopModal.jsx`가 새 `idmptDmndId`를 만들고 상점 목록을 다시 읽어, 모달을 닫지 않고 다시 살 수 있다. `PURCHASE_ERRORS`에 이 코드의 문구가 있다. 서버 메시지: "이미 처리한 구매 요청입니다. 상점을 닫았다가 다시 열어 주세요."
@@ -1549,7 +1598,7 @@
 - 완료 조건: 캐릭터 오류 처리에서 CHRC0008(무료 재생성) 응답의 `regenJobSn`으로 Python `POST /ai/admin/characters/jobs/{regenJobSn}/regenerate`(관리자 쿠키, 202)를 부른다. 상세의 `regenJobSttsCd`·`regenJobSttsCdNm`으로 재생성 상태를 보여 주고, CHRC0004(실패)면 다시 처리(CHRC0008·CHRC0009) 버튼을 보인다. 진행 중 다시 처리는 409 `PIXEL_CHARACTER_CREATING`, 성공 뒤는 409 `ALREADY_PROCESSED`. 계약은 백엔드 `docs/api/support.md` character-error 행과 `AdminInquiryResponse`
 - 결과(2026-11-16): `features/adminInquiry/api.js` `regenerateAdminCharacter`, `queries.js` 무료 재생성 뒤 AI 서버 호출(실패해도 처리는 성공, 토스트로 알림)·요청·생성 중 5초 다시 받기, `InquiryCharacterError.jsx` 재생성 상태 표시·생성 실패면 다시 처리 버튼. 추가-1 요청·생성 중 로딩 아이콘과 안내. 검증 2회차 통과, 사람 확인
 
-## SCR-ADM-070 아이템 · 그림 교체 뒤 전체 굽기 다시 시작 — 대기
+## SCR-ADM-070 아이템 · 그림 교체 뒤 전체 굽기 다시 시작 — 끝
 - 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-070-03
 - 기다리는 것: 백엔드 SCR-ADM-070 아이템 · 굽기를 그림 참고로만(LJS 백엔드, 끝 2026-11-17). 굽기 지시(`bakeHint`)가 요청·응답에서 없어졌고, 굽기 대상은 `bakeImgRefYn: true` 아이템뿐이다. 굽기 대상 아이템(수정 후 true)의 그림을 `PATCH /admin/items/{itemSn}` `image`로 바꾸면 백엔드가 그 아이템의 착용 시트·실패 표시를 지워 모든 캐릭터가 다시 대상이 된다
 - 완료 조건: 수정 모달에서 굽기 대상 아이템의 그림을 바꿔 저장하면 등록 때처럼 전체 굽기(`POST /ai/items/{itemSn}/bake` 반복)가 자동 시작된다. `bakeImgRefYn`만 바꾸면 시작하지 않는다. `features/adminItem/api.js` 목록 주석과 `useItemBake.js` `canBakeItem`에서 `bakeHint`를 뺀다. 이미 그렇게 동작하면 확인만 하고 끝낸다
@@ -1569,6 +1618,78 @@
 - 배경: 백엔드 `POST /api/notifications/read-all`이 develop에 들어옴(백엔드 PR #261). 응답 `{count}`(바꾼 건수, 0건도 200). 프론트 코드는 이미 같은 주소를 부른다
 - 완료 조건: 실제 API로 [모두 읽음] 성공 흐름(토스트 "모두 읽었어요"·배지 사라짐·"미읽음 0"·목록 읽음 모양) 확인. 코드 변경이 필요 없으면 확인만 하고 끝낸다
 - 결과(2026-11-17): 코드 변경 없음. 검증 1회차 통과(8081 실제 API, 미읽음 2건 → `count` 2·토스트·배지 사라짐·미읽음 0, 0건 회원은 버튼 비활성), 사람 확인 2026-11-17
+
+## SCR-COM-004 알림 드롭다운 · 목록 더 불러오기 연결 — 끝
+- 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-COM-004-04·05·12·15
+- 기다리는 것: 백엔드 SCR-COM-004 목록 더 불러오기(LJS, 끝, PR은 이 연결 PR과 같이 병합)
+- 완료 조건: 헤더 알림 드롭다운이 `GET /api/notifications?tab=&page=&size=` 응답의 `data.content`를 읽고, 목록 끝에 닿으면 다음 쪽(기본 5건)을 불러오며 `hasNext` false면 멈춘다. `inappNotiSn`으로 중복을 거르고, 탭 변경·다시 열기는 1쪽부터, 0건이면 '새 알림이 없어요'
+
+## SCR-COM-002 기본 레이아웃 · 공용 토스트 폭·쌓임·모바일 위치 — 끝
+- 기능: 명세 기능 ID 추가 없음(사람 요청 2026-11-19 토스트 분석 뒤), 걸치는 기능 FN-COM-002-24. T1 폭 / T2 같은 문구 합침·최대 3개 / T3 채팅 주소 이중 토스트 / T4 모바일 하단 막대 위 / T5 type(info·success·error) / T6 등장·퇴장 애니메이션 / T7 호출부 전체 type
+- 기다리는 것: 없음
+- 결정: 애니메이션·성공/실패 구분 넣음, 실패는 빨간 상자, 다른 담당 폴더 호출부도 고치고 사람이 전달(사람 2026-11-19)
+- 추가 요청: 추가-1 두 문장 토스트는 문장마다 새 줄, `text-wrap: pretty`
+- 완료 조건: 기획(핸드오프 "지금 하는 것") T1~T7
+- 완료 조건 결과: 검증 `통과`(2026-11-19, 3회차 T1~T7, 추가-1 포함 재검증 통과. 1·2회차 T4 실패), 사람 확인 2026-11-19
+- 이번엔 안 함: 캐릭터 꾸미기 저장 줄·장소 지도 팝업 겹침, 닫기 버튼·hover 멈춤
+- 연결 남음: 없음
+
+## SCR-ADM-070 아이템 · 순서 저장 400 칸 이름 표시 — 끝
+- 기능: 명세 기능 ID 추가 없음, 걸치는 기능 FN-ADM-070-04
+- 기다리는 것: 백엔드 SCR-ADM-070 순서 저장 400 칸 이름(LJS, 끝)
+- 완료 조건: 관리자 아이템 순서 저장이 400 `INVALID_INPUT_VALUE`이면 `data[0].field`로 문구를 가른다(`itemSns`: 그 부위 아이템 목록이 빠졌거나 중복·다른 부위가 섞임, 목록을 다시 불러온다 / `itemRegnCd`: 쓸 수 없는 부위)
+- 끝: 2026-11-20 검증 1회차 통과(O1 칸별 문구, O2 `itemSns`면 목록 다시 읽기), 사람 확인
+- 연결 남음: 없음
+
+## SCR-COM-002 기본 레이아웃 · 공용 확인 창 왼쪽 정렬·제목·설명 — 끝
+- 기능: 명세 기능 ID 추가 없음(사람 요청 2026-11-19 "굵은 글자가 가운데에 떡하니"), 걸치는 기능 FN-COM-002. C1 공용 `Modal isConfirm` 왼쪽 정렬·제목 600·PC 버튼 오른쪽 / C2 `ConfirmModal` / C3 제목만 있는 창 설명 추가 / C4 두 문장 제목 나누기
+- 기다리는 것: 없음
+- 결정(사람 2026-11-19): 추천안 A(문구 왼쪽 정렬 + PC 버튼 오른쪽 모음, 760 미만 꽉 참), 제목과 설명을 같이 둔다
+- 완료 조건: 핸드오프 기획 C1~C4
+- 완료 조건 결과: 검증 `통과`(2026-11-19, 회차 1), 사람 확인 2026-11-19
+- 이번엔 안 함: 직접 버튼 27곳 `ConfirmModal`로 바꾸기(리팩토링 묶음), 설명 있는 창 문구, 설명 끝 마침표 통일
+- 연결 남음: 없음
+
+## SCR-MAN-001 메인페이지 · 전체 서비스 튜토리얼 모달 — 끝
+- 기능: 명세 기능 ID 추가 없음(사람 요청 2026-11-20, 기능명세서 v0.11·화면설계서 v0.11에 튜토리얼 없음, 기능 ID 추가는 문서 담당이 DMS에). 처음 접속한 회원에게 메인에서 서비스 전체를 7단계 모달로 소개
+- 결정(사람 2026-11-20): 화면 요소를 가리키지 않고 모달 안에서만 소개(건강기록 튜토리얼 1단계 형태) / "봤음"은 서버 저장 / 반려동물 등록은 넣지 않음 / 7단계(시작·AI 매니저·건강기록·플레이스·커뮤니티·마이페이지·끝), 고객센터·설정 제외 / 플로팅 버튼은 AI 매니저 단계에서 설명
+- 기다리는 것: 백엔드 "튜토리얼 봤음" 조회·저장(LJS 백엔드, 없음). 가짜 응답으로 먼저 만든다
+- 결정 2(사람 2026-11-20): 다시 보기는 메인 왼쪽 아래 ? 버튼(메인에만)
+- 완료 조건: 핸드오프 기획 T1~T5
+- 추가 요청(사람 2026-11-20): 추가-1 건강기록 모달처럼 왼쪽 항목·오른쪽 설명·스크린샷 / 추가-2 시작·끝 단계 빼고 둘러보기 한 화면 / 추가-3 왼쪽을 사이드 메뉴 모양으로 / 추가-4 StepBar 공용화 되돌림(T2 취소) / 추가-5 건강기록 둘러보기 모달(`HealthGuideModal`)과 같은 모양, 목차·사진 칸·확대 화면을 `components/`로 올림 / 추가-6 오른쪽 위쪽 붙이기·왼쪽 상자 높이 꽉 / 추가-7 설명을 제목 아래로·그림이 남은 높이 / 추가-8·9 AI 매니저 설명에 [AI 매니저] 버튼 안내와 줄바꿈 / 추가-10 [?] 상자 없이·띠 위에 겹쳐·AI 매니저 플로팅 대화창과 같은 스케일 연출 / 추가-11 아이콘 24px / 추가-12 누르는 영역 44px
+- 완료 조건 결과: 검증 `확인 못 함 있음`(2026-11-20, 11회차, 연결 남음 T3뿐. 1회차 실패: 처음 열린 모달이 닫힘 연출 없이 사라짐 → 저장을 연출 뒤로 옮겨 통과), 사람 확인 2026-11-20
+- 연결 남음: T3 (백엔드 연결 회원별 서비스 튜토리얼 봤음 조회·저장 API와 필드, 백엔드 저장소에서 /start) → 해소(2026-11-20, "서비스 튜토리얼 봤음 서버 연결" 절)
+
+## SCR-COM-002 사람 확인 피드백 묶음 — 끝
+- 기능: 명세 기능 ID 추가 없음(사람 요청 2026-11-20). F1 목록으로 나가기 확인 창 공용화 / F2 모바일 설정 바텀 네비 빼기·줄바꿈 / F3 시간 선택 직접 입력 / F4 모달 입력 상한 / F5 태블릿 왼쪽 사이드 메뉴 / F6 대표 지정 플로팅 버튼 즉시 반영
+- 결정(사람 2026-11-20): F3 시·분 칸 직접 입력, 공용이라 쓰는 곳 전부 / F4 사용자 화면만 현황 분석(코드 수정 없음) / F5 제목 옆 ▾ 대신 태블릿도 왼쪽 사이드 메뉴. 모바일 바텀 네비 구조는 팀 논의로 넘김
+- 기다리는 것: 없음
+- 완료 조건: 핸드오프 기획 F1~F6
+- 추가 요청(사람 2026-11-20): 추가-1 오전/오후 "--" 없애고 시·분 목록 맨 위 "--"를 [직접 입력]으로
+- 완료 조건 결과: 검증 `통과`(2026-11-20, 회차 2, 1회차도 통과 뒤 추가-1), 사람 확인 2026-11-20
+- 연결 남음: 없음
+
+## SCR-MAN-001 메인페이지 · 서비스 튜토리얼 봤음 서버 연결 — 끝
+- 기능: 명세 기능 ID 추가 없음(위 "전체 서비스 튜토리얼 모달" 절의 연결 남음 T3)
+- 기다리는 것: 없음(백엔드 `GET·PUT /members/me/tutorial` develop 병합)
+- 완료 조건: 핸드오프 기획 C1~C2
+- 완료 조건 결과: 검증 `통과`(2026-11-20, 회차 1, 8081 실제 API + false·500은 Playwright route), 사람 확인 2026-11-20
+- 연결 남음: 없음
+
+## SCR-COM-002 로그인·가입 · 입력칸 옆 버튼 높이 맞추기 — 끝
+- 기능: 명세 기능 ID 추가 없음(사람 요청 2026-11-20, YAY 화면 스타일 수정)
+- 기다리는 것: 없음
+- 완료 조건: 핸드오프 기획 B1~B2, 추가-1(로그인·가입 계열 버튼·보안코드 칸 모두 48·둥글기 12)
+- 완료 조건 결과: 검증 `통과`(2026-11-20, 회차 2, B1·B2·추가-1), 사람 확인 2026-11-20
+- 연결 남음: 없음
+
+## SCR-COM-002 기본 레이아웃 · 화면 바탕색 · 헤더 스크롤 · 푸터 정리 — 끝
+- 기능: 명세 기능 ID 추가 없음(사람 요청 2026-11-20, 바탕색 #FFFFFF로 시작해 추가-5에서 #f7f9f9)
+- 기다리는 것: 없음
+- 완료 조건: 핸드오프 기획 W1~W4
+- 추가 요청(사람 2026-11-20): 추가-1 헤더 아래선 스크롤 때만 / 추가-2 푸터 팀원 이메일·대표전화·FAX / 추가-3 푸터 로고 그림·Dev Team과 대표전화 아래끝 맞춤 / 추가-4 푸터 #fdfcfa(추가-7이 대신함) / 추가-5 바탕 #f7f9f9 / 추가-6 헤더 맨 위 투명·스크롤 때 흰 반투명 / 추가-7 푸터 #f1f6f6·선 #dfe5e6
+- 완료 조건 결과: 검증 `통과`(2026-11-20, 1회차 W4 조건이 hover까지 잡아 실패 → 사람이 루프 clear 뒤 조건 고침, 이후 통과), 사람 확인 2026-11-20
+- 연결 남음: 없음
 
 ## 제외
 - FN-AIM-009-01~27: 화면 담당이 JAJ(milestone.md "화면과 API 담당이 다른 곳" — AIM-009 영수증 결과 규칙, 화면은 SCR-HLT-002)

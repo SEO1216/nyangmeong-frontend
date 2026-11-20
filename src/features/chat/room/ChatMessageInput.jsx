@@ -8,6 +8,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Icon from '@/components/Icon';
 import { showToast } from '@/components/toastStore';
+import { PROFANITY_MESSAGE, isProfanityError } from '@/utils/profanity';
 import { useSendChatMessage } from '../queries';
 import {
   CHAT_ROOM_CLOSED,
@@ -55,6 +56,7 @@ export default function ChatMessageInput({
   const [msgCn, setMsgCn] = useState('');
   const [photos, setPhotos] = useState([]);
   const [photoError, setPhotoError] = useState(null);
+  const [textError, setTextError] = useState(null);
   const [failed, setFailed] = useState(null);
   const [isAddressOpen, setIsAddressOpen] = useState(false);
   const textareaRef = useRef(null);
@@ -82,6 +84,11 @@ export default function ChatMessageInput({
       /** 방이 닫혀 거절된 전송은 다시 보내도 같으니 재시도 줄을 만들지 않는다(안내·입력 막기는 useSendChatMessage) */
       onError: (error) => {
         if (error.code === CHAT_ROOM_CLOSED) return;
+        /** 금칙어로 거절된 글은 다시 보내도 같으니 재시도 줄 대신 안내 문구만 */
+        if (isProfanityError(error)) {
+          setTextError(PROFANITY_MESSAGE);
+          return;
+        }
         setFailed({ body, onDone });
       },
     });
@@ -179,7 +186,11 @@ export default function ChatMessageInput({
       },
       {
         onSuccess: () => setIsAddressOpen(false),
-        onError: (error) => showToast(error.message),
+        /** 방 닫힘은 useSendChatMessage가 이미 알림 */
+        onError: (error) => {
+          if (error.code === CHAT_ROOM_CLOSED) return;
+          showToast(error.message, { type: 'error' });
+        },
       },
     );
 
@@ -212,6 +223,11 @@ export default function ChatMessageInput({
       {photoError && (
         <p role="alert" className="mb-2 text-sm text-danger">
           {photoError}
+        </p>
+      )}
+      {textError && (
+        <p role="alert" className="mb-2 text-sm text-danger">
+          {textError}
         </p>
       )}
       {failed && (
@@ -274,7 +290,10 @@ export default function ChatMessageInput({
             disabled={isDisabled}
             className="h-10 max-h-[88px] min-w-0 flex-1 resize-none bg-transparent py-2 leading-6 text-ink outline-none placeholder:text-placeholder disabled:cursor-not-allowed disabled:placeholder:text-subtle"
             value={msgCn}
-            onChange={(event) => setMsgCn(event.target.value)}
+            onChange={(event) => {
+              setMsgCn(event.target.value);
+              setTextError(null);
+            }}
             onKeyDown={handleKeyDown}
           />
           <button

@@ -60,7 +60,7 @@ function HealthTipsTab() {
   const handleUnassignConfirm = () => {
     unassign.mutate(unassigning.pstSn, {
       onSuccess: () => {
-        showToast('건강팁 지정을 해제했어요');
+        showToast('건강팁 지정을 해제했어요', { type: 'success' });
         setUnassigning(null);
       },
     });
@@ -133,7 +133,7 @@ function PhrasesTab() {
         phrsCn: phrase.phrsCn,
         useYn: next,
       },
-      { onError: (error) => showToast(error.message) },
+      { onError: (error) => showToast(error.message, { type: 'error' }) },
     );
 
   if (phrases.isPending) {
@@ -219,7 +219,7 @@ function CommentariesTab() {
   const handleToggle = (commentary, next) =>
     update.mutate(
       { cmntyAiCmtrySn: commentary.cmntyAiCmtrySn, useYn: next },
-      { onError: (error) => showToast(error.message) },
+      { onError: (error) => showToast(error.message, { type: 'error' }) },
     );
   const handlePageChange = (nextPage) =>
     setSearchParams({ tab: 'comments', page: nextPage });

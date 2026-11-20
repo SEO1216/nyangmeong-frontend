@@ -117,7 +117,9 @@ export default function AdminNewsFormModal({ news, onClose }) {
   };
 
   const handleSaved = () => {
-    showToast(isEdit ? '뉴스를 수정했어요' : '뉴스를 등록했어요');
+    showToast(isEdit ? '뉴스를 수정했어요' : '뉴스를 등록했어요', {
+      type: 'success',
+    });
     onClose();
   };
 

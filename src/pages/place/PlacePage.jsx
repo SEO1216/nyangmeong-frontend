@@ -33,12 +33,17 @@ export default function PlacePage() {
     sheet.setSheet('peek');
   };
 
-  // 현재 지도 안에 있으면서 검색 결과에 없는 즐겨찾기는 번호 없는 별 핀으로 보인다
-  const strayFavorites = place.favorites.filter(
-    (fav) =>
-      !place.isOutside(fav) &&
-      !place.results.some((result) => result.plcSn === fav.plcSn),
-  );
+  // 현재 지도 안에 있으면서 검색 결과에 없는 즐겨찾기는 번호 없는 별 핀으로 보인다.
+  // 다시 검색한 영역 밖이어도 목록에서 고른 즐겨찾기는 지도가 그리로 가므로 핀을 보인다.
+  // 새 영역 결과를 받는 동안은 결과가 비어 모든 즐겨찾기가 별 핀이 됐다가 번호 핀으로 바뀌므로, 고른 것만 남긴다
+  const strayFavorites = place.favorites.filter((fav) => {
+    const isSelected = fav.plcSn === place.selectedPlace?.plcSn;
+    if (!place.query.isSuccess) return isSelected;
+    return (
+      (!place.isOutside(fav) || isSelected) &&
+      !place.results.some((result) => result.plcSn === fav.plcSn)
+    );
+  });
 
   return (
     <div
@@ -84,6 +89,7 @@ export default function PlacePage() {
         results={place.results}
         strayFavorites={strayFavorites}
         selectedPlace={place.selectedPlace}
+        isFavorite={(target) => place.bookmarkSnOf(target) !== null}
         fitKey={search.fitKey}
         homeArea={place.homeArea}
         isReady={place.query.isSuccess}

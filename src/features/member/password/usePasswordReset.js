@@ -102,14 +102,6 @@ export default function usePasswordReset(grant) {
     );
   };
 
-  const guideTarget = passwordError
-    ? 'password'
-    : confirmError
-      ? 'confirm'
-      : notice
-        ? 'notice'
-        : null;
-
   return {
     password,
     confirm,
@@ -121,7 +113,6 @@ export default function usePasswordReset(grant) {
     isDone,
     isExpired,
     isPending: reset.isPending,
-    guideTarget,
     changePassword,
     changeConfirm,
     blurConfirm,

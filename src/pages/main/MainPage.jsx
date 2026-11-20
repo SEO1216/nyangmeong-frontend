@@ -5,6 +5,9 @@ import HeroAsk from '@/features/dashboard/HeroAsk';
 import MainShortcuts, {
   PetRegisterTile,
 } from '@/features/dashboard/MainShortcuts';
+import { useServiceTutorial } from '@/features/dashboard/queries';
+import ServiceTutorialModal from '@/features/dashboard/ServiceTutorialModal';
+import TutorialReplayButton from '@/features/dashboard/TutorialReplayButton';
 import { useMyPets } from '@/features/health/queries';
 import { useMe } from '@/features/member/queries';
 import { PATHS } from '@/routes/paths';
@@ -16,6 +19,7 @@ import { PATHS } from '@/routes/paths';
  * - `/main`은 회원만 들어온다(mainRoutes `auth: 'member'`)
  * - 헤더 아래 → 인사말: PC 120px·760px 이하 56px 고정(UserLayout main pt-6 24px 포함), 바로가기 줄 수와 상관없이 같은 자리(사람 요청 2026-11-11). 메인은 푸터 없이 스크롤하지 않는다
  * - 세 묶음 사이 PC 56px·760px 이하 40px(사람 요청 2026-11-11)
+ * - 서비스 튜토리얼: 봤음 조회가 성공해 안 봤을 때만 연다(불러오는 중·실패면 열지 않음, 반려동물 수와 상관없음). 왼쪽 아래 [?]로 다시 연다
  */
 export default function MainPage() {
   const { data: pets, isError } = useMyPets();
@@ -24,6 +28,18 @@ export default function MainPage() {
     pets?.find((pet) => pet.rprsPetYn) ?? pets?.[0] ?? null;
   /** 인사말 시간대는 들어온 시각으로 한 번 정한다(머무는 동안 다시 그려도 그대로) */
   const [enteredAt] = useState(() => new Date());
+  const tutorial = useServiceTutorial();
+  /** 이 화면에서 한 번 닫았으면 저장 실패여도 다시 열지 않음 */
+  const [isTutorialDone, setIsTutorialDone] = useState(false);
+  const [isTutorialReplay, setIsTutorialReplay] = useState(false);
+  const isTutorialOpen =
+    isTutorialReplay ||
+    (tutorial.isSuccess && !tutorial.data.tutrlViewYn && !isTutorialDone);
+
+  const handleTutorialClose = () => {
+    setIsTutorialDone(true);
+    setIsTutorialReplay(false);
+  };
 
   return (
     <section
@@ -55,6 +71,8 @@ export default function MainPage() {
           )}
         </>
       )}
+      <TutorialReplayButton onClick={() => setIsTutorialReplay(true)} />
+      {isTutorialOpen && <ServiceTutorialModal onClose={handleTutorialClose} />}
     </section>
   );
 }

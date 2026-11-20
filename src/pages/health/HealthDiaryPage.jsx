@@ -169,7 +169,7 @@ function HealthDiaryContent({ mbrSn }) {
     if (!chatReceipt) return;
     const { recptSn, petSn, ocr } = chatReceipt;
     if (!ocr) {
-      showToast(getChatReceiptFailure(chatReceipt));
+      showToast(getChatReceiptFailure(chatReceipt), { type: 'error' });
       return;
     }
     /* eslint-disable-next-line react-hooks/set-state-in-effect -- 인식 결과가 도착한 시점에 한 번 열기 */
@@ -177,7 +177,8 @@ function HealthDiaryContent({ mbrSn }) {
   }, [chatReceipt]);
   /** 없는·남의 영수증(404)·양육하지 않는 반려동물(403) 등은 모달 없이 안내 */
   useEffect(() => {
-    if (isChatReceiptError) showToast(CHAT_RECEIPT_LOAD_ERROR);
+    if (isChatReceiptError)
+      showToast(CHAT_RECEIPT_LOAD_ERROR, { type: 'error' });
   }, [isChatReceiptError]);
   /** 대화창에서 연 모달은 한 번만: 새로고침 때 다시 열리지 않게 쿼리 제거 */
   useEffect(() => {
@@ -270,6 +271,7 @@ function HealthDiaryContent({ mbrSn }) {
     if (other) {
       showToast(
         `${saved.map((item) => item.petNm).join('·')} ${saved.length}마리 검진기록을 저장했어요 · ${other.petNm} 기록 보기`,
+        { type: 'success' },
       );
     }
     navigate(

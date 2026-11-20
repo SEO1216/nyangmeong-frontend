@@ -1,8 +1,10 @@
+import { flushSync } from 'react-dom';
+import useLeaveGuard from '@/hooks/useLeaveGuard';
+import useProfanityErrors from '@/hooks/useProfanityErrors';
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useOutletContext } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import AutoTextarea from '@/components/AutoTextarea';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
-import ConfirmModal from '@/components/ConfirmModal';
 import DropdownSelect from '@/components/DropdownSelect';
 import FieldError, { Required } from '@/components/FieldError';
 import { INPUT, LABEL } from '@/components/formStyles';
@@ -34,6 +36,11 @@ const toAttachItems = (imgs = []) =>
  * - characterImage: 자동 첨부될 캐릭터 이미지 주소(못 받으면 null). characterLinked이고 유형이 픽셀 캐릭터일 때 「이미지 추가」 칸 오른쪽에 삭제 불가 칸으로 보임(못 받으면 자리 표시)
  * - onSubmit({ inqryTypeCd, inqryTtl, inqryCn, images(새 File들), keepAtchFileSns(남길 기존 첨부) })
  */
+const PROFANITY_FIELDS = {
+  inqryTtl: { key: 'title', id: 'inquiry-title' },
+  inqryCn: { key: 'body', id: 'inquiry-body' },
+};
+
 export default function InquiryForm({
   initial,
   types,
@@ -42,12 +49,12 @@ export default function InquiryForm({
   hideCancel = false,
   isPending,
   errorMessage,
+  profanityFields,
   fieldErrors,
   characterLinked = false,
   characterImage = null,
   onSubmit,
 }) {
-  const navigate = useNavigate();
   const { leaveRef } = useOutletContext() ?? {};
   const [type, setType] = useState(initial.inqryTypeCd);
   const [title, setTitle] = useState(initial.inqryTtl);
@@ -59,7 +66,7 @@ export default function InquiryForm({
     initial.imgs ?? [],
   );
   const [errors, setErrors] = useState({});
-  const [leaveTo, setLeaveTo] = useState(null);
+  useProfanityErrors(profanityFields, PROFANITY_FIELDS, setErrors);
 
   const isEdit = mode === 'edit';
   const hasCharacterImage =
@@ -79,11 +86,11 @@ export default function InquiryForm({
     return () => window.removeEventListener('beforeunload', warn);
   }, [isDirty]);
 
-  /** 목록으로·취소: 고친 것이 있으면 먼저 확인 */
-  const handleLeave = (target) => {
-    if (isDirty) setLeaveTo(target);
-    else navigate(target);
-  };
+  /** 목록으로·취소: 고친 것이 있으면 먼저 확인(공용 나가기 확인 창) */
+  const { onLeave: handleLeave, leaveModal } = useLeaveGuard({
+    isDirty,
+    mode: isEdit ? 'edit' : 'write',
+  });
 
   /** 고객센터 틀의 사이드 메뉴·머리 이동도 같은 확인을 거치도록 설정 */
   useEffect(() => {
@@ -96,14 +103,23 @@ export default function InquiryForm({
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    const form = event.currentTarget;
     const nextErrors = {};
     if (!type) nextErrors.type = '문의 유형을 골라 주세요';
     if (!title.trim()) nextErrors.title = '제목을 입력해 주세요';
     if (!body.trim()) nextErrors.body = '내용을 입력해 주세요';
     if (images.length > maxImages)
       nextErrors.images = `캐릭터 오류 문의는 이미지를 최대 ${maxImages}장까지 올릴 수 있어요`;
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0 || isPending) return;
+    /** 오류 표시(aria-invalid)가 화면에 반영된 뒤에 첫 빠진 항목을 찾도록 바로 반영한다 */
+    flushSync(() => setErrors(nextErrors));
+    if (Object.keys(nextErrors).length > 0) {
+      /** 빠진 항목 중 첫 번째로 이동 */
+      form
+        .querySelector('[aria-invalid="true"], [data-invalid="true"]')
+        ?.focus();
+      return;
+    }
+    if (isPending) return;
     onSubmit({
       inqryTypeCd: type,
       inqryTtl: title.trim(),
@@ -194,7 +210,12 @@ export default function InquiryForm({
               )}
               onChange={(event) => {
                 /** 제목은 줄을 나눌 수 없다: 붙여 넣은 줄바꿈은 공백으로 */
-                setTitle(event.target.value.replaceAll(/[\r\n]+/g, ' '));
+                /** 한글 조합 중에는 maxLength를 넘겨 들어오므로 직접 자른다 */
+                setTitle(
+                  event.target.value
+                    .replaceAll(/[\r\n]+/g, ' ')
+                    .slice(0, TITLE_MAX),
+                );
                 clearError('title');
               }}
               onKeyDown={(event) => {
@@ -229,7 +250,7 @@ export default function InquiryForm({
               aria-required="true"
               aria-invalid={Boolean(errors.body || serverFieldError('inqryCn'))}
               onChange={(event) => {
-                setBody(event.target.value);
+                setBody(event.target.value.slice(0, BODY_MAX));
                 clearError('body');
               }}
               className={`${INPUT} max-h-[600px] min-h-[200px] resize-y py-3 leading-[1.7]`}
@@ -266,7 +287,7 @@ export default function InquiryForm({
         <FieldError>{errors.images}</FieldError>
       </form>
 
-      {errorMessage && (
+      {errorMessage && profanityFields.length === 0 && (
         <p role="alert" className="mt-4 text-sm text-danger">
           {errorMessage}
         </p>
@@ -292,19 +313,7 @@ export default function InquiryForm({
         </button>
       </div>
 
-      {leaveTo && (
-        <ConfirmModal
-          title={
-            isEdit
-              ? '수정을 그만둘까요? 고친 내용은 저장되지 않고 원래 문의가 그대로 남아요'
-              : '작성을 그만둘까요? 지금까지 쓴 내용은 저장되지 않아요'
-          }
-          confirmLabel="나가기"
-          cancelLabel={isEdit ? '계속 수정' : '계속 쓰기'}
-          onConfirm={() => navigate(leaveTo)}
-          onCancel={() => setLeaveTo(null)}
-        />
-      )}
+      {leaveModal}
     </section>
   );
 }

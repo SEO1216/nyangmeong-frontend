@@ -231,6 +231,7 @@ export default function BloodResultList({ checkup, items }) {
         <Modal
           isConfirm
           title={`선택한 ${selectedSns.length}개 항목을 삭제할까요?`}
+          description="삭제하면 되돌릴 수 없어요."
           isPending={deleteInspections.isPending}
           onClose={() => setIsConfirmOpen(false)}
           footer={

@@ -2,9 +2,76 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 플로팅 반려동물 등록 버튼(발바닥+ 버튼, 그 자리에서 등록 모달) (2026-11-19, 검증 통과, 사람 확인)
+끝남: SCR-COM-002 화면 바탕색·헤더·푸터 색 정리 (2026-11-20, 검증 통과, 사람 확인). 화면 바탕 `--color-page-bg` #f7f9f9(관리자·로그인·주소 지도 화면도 `bg-page-bg`), 회원 헤더는 맨 위 투명·스크롤 때 흰 반투명+아래선, 푸터 #f1f6f6·선 #dfe5e6·로고 그림·팀원 5명 이메일·대표전화·FAX
 
 ## 다음에 할 것
+
+- SCR-COM-002 바탕·헤더·푸터 색 팀 알림(PR 본문 + 팀 채널, 모두): 화면 바탕 `--color-page-bg`가 #faf8f5 → #f7f9f9, 관리자(`AdminLayout`)·로그인·가입(`AuthLayout`, 760 미만 `bg-white` 지움) 바탕도 `bg-page-bg`. 회원 헤더(`UserHeader`)는 맨 위에서 바탕·아래선 투명, 스크롤하면 흰 반투명+아래선. 푸터 `--color-footer` #f1f6f6·`--color-footer-line` #dfe5e6(위 테두리도 footer-line), "냥멍케어" 글자 대신 로고 그림, Dev Team 안인철 뺌. KSJ: `chat/room/AddressMapScreen` 바탕 `bg-surface-2` → `bg-page-bg`
+- SCR-COM-002 커밋 전 사람 확인: `layouts/UserFooter.jsx`에 팀원 실제 이메일 5개·대표전화·FAX가 들어감(공개 저장소). 본인들 동의 확인
+- SCR-COM-002 로그인·가입 버튼 48 팀 알림(PR 본문 + 팀 채널, YAY): `features/member` 로그인·가입·비밀번호 찾기·재설정·재가입 복구·탈퇴 완료·약관 창 버튼과 입력칸 옆 버튼이 `shared/authStyles`의 `AUTH_BTN_PRIMARY`·`AUTH_BTN_SECONDARY`·`SIDE_BTN`(공용 버튼 + 48px·둥글기 12)로 바뀜. 로그인 [이메일로 로그인하기]·[로그인]은 50px·15px 굵게·떠오름 → 48px·16px 600·떠오름 없음, 보안코드 그림 칸·새로고침·입력칸 40 → 48. 2-K 공용 규격(40·6)과 다름(입력칸 48에 맞춤). 회원정보·탈퇴 안내 화면(`profile/`·`withdraw/` 나머지)은 그대로 40
+- 검증 참고(판정 밖): 비밀번호 찾기·재설정·재가입 복구·닉네임 모달·SNS 가입·탈퇴 완료·약관 창은 코드로만 확인(SNS·탈퇴 계정 필요)
+
+
+- 버그 후보(JAJ, 사람이 처리 방법 정함): 관찰 입력 모달 사진 미리보기가 칸 안에 다 안 들어오고 잘림. `features/health/diary/ObservationModal.jsx:266` `grid h-40 place-items-center` 상자 안 `img.size-full object-contain`이 grid에서 높이 100%를 못 받아 원래 비율로 커짐(600×900 그림 → 618×927, 칸 160). 공용 모달 문제 아님. `flex items-center justify-center`면 618×158. 수정 모드(`ObservationPhoto`)도 같은 칸
+- SCR-COM-002 ⋮ 메뉴 공통화 팀 알림(PR 본문 + 팀 채널): JAJ `health/CareItemMenu`·SJM `expense/shared/ExpenseMenu`가 공용 `KebabMenu variant="row"` 껍데기(props 그대로, 아래 공간이 모자라면 위로 펼침이 새로 생김). JAJ·YAY·SJM: `components/Card`(`sm:`→760), `adminTableStyles`(`md:`→760), 로그인·가입 `AuthLayout`·`AuthSlider`(768→760, 1024→1100), 마이페이지 홈(768→760)이라 640~759·760~767·1024~1099px 모양이 바뀜. 숫자 분기점 560·600·1000·1260(`MissingListPage`·`MissingList`·`CareDealCard`·`PetSlide`·`HealthDashboard`·`DailyTrendCard`)은 그대로, 담당자 알림만
+- ⋮ 메뉴 참고(검증 보고, 판정 밖): AI 사이드바 ⋮ 메뉴를 Esc로 닫으면 AI 매니저 모달까지 닫힘(전부터, KebabMenu Esc가 막지 않음). 검증이 `.playwright-mcp/pr/LJS-20261120-SCR-MAN-001-after-1440.png`를 덮어씀(그 PR에 쓰려면 다시 찍기)
+- "UI 통일 2 · 다른 담당 폴더 적용" 마일스톤을 끝낼지 사람이 정함(조각 모두 끝, 2-O도 이번에 끝)
+
+- SCR-COM-002 스크롤 막대 겹침 팀 알림(PR 본문 + 팀 채널): 모두: 공용 `Modal` `isLarge` 모달(건강 일지 입력·일정·케어 항목 관리·건강기록 둘러보기·아이템 상점·반려동물 등록·수정 등)이 dialog 자체로는 스크롤하지 않고 본문만 스크롤(가장자리 막대 없어짐). YAY: `member/shared/TermsModal` 약관 본문의 `max-h-[50vh]` 안쪽 스크롤을 없애 모달 본문 스크롤 하나로. 모달 본문 안에 `max-h`+`overflow-y-auto` 목록을 새로 두면 막대가 둘이 되니 본문 스크롤에 맡기기(PC 두 칸 구조는 칸마다 하나)
+- SCR-COM-002 스크롤 막대 겹침 참고(검증 보고, 판정 밖): `ExpenseDuplicateDialog`(확인 창 안 목록이 유일한 막대)·`BloodResultList`(모달 아닌 화면 목록)는 코드로만 판정. PC 두 칸 모달(`ShortcutEditModal`·`CareManageModal`)은 1280×560에서 칸마다 막대 1개씩(사람 결정대로 그대로)
+
+- SCR-MYP-011 구매 409 팀 알림(PR 본문, SJM): `features/pet/character/ItemShopModal.jsx`(멱등키를 409 때 새로 만듦, `PURCHASE_ERRORS` 문구 추가)·`features/pet/queries.js` `usePurchaseItems` `onError`(409 때 상세·상점·포인트 무효화)를 고침
+- SCR-MYP-011 참고(검증 보고, 판정 밖): 검증 계정 아이템 미리보기 `POST /ai/characters/3/preview` 400("미리보기를 불러오지 못했어요" 토스트, 이번 변경과 무관)
+- SCR-COM-002 피드백 묶음 팀 알림(PR 본문 + 팀 채널): 모두: 760~1099px에서 서브 화면(SubPageLayout) 왼쪽에 사이드 메뉴 180px가 생겨 본문이 좁아짐(제목 옆 ▾ 메뉴 없어짐, 768에서 반려동물 카드 값이 말줄임). 공용 `TimeSelect` 시·분은 직접 입력 가능, 오전/오후는 빈 칸 없이 오전부터(시간 비운 칸도 오전으로 보임). KSJ: `features/community/useLeaveGuard`가 `@/hooks/useLeaveGuard`로 옮겨짐(커뮤니티 글쓰기·수정 6곳 import, `InquiryForm` 나가기 확인이 공용 훅으로, 문의 확인 창 제목/설명 나눔). SJM: `useSetRepresentativePet`이 `healthKeys.myPets`도 무효화. 아래 F4 표의 가계부 메모·초대 이메일 상한 없음
+- SCR-COM-002 피드백 묶음 참고(검증 보고, 판정 밖): 시 칸에 13을 치면 1이 남아 벗어날 때 01, 분 75는 07이 됨(둘째 글자만 막음). 빈 시·분 칸 안내 글자는 "--"(칸 폭이 좁음)
+- F4 사용자 화면 모달 입력 상한 현황(2026-11-20 분석, 코드 수정 없음. 서버 = 백엔드 요청 DTO `@Size`). 담당자에게 알리고 고칠지는 사람이 정함
+  | 모달·폼 | 칸 | 프론트 상한 | 서버 상한 | 담당 | 결과 |
+  | --- | --- | --- | --- | --- | --- |
+  | 가계부 직접 입력(`expense/shared/ExpenseForm.jsx`)·영수증 확인(`ExpenseReceiptReview.jsx`) | 메모 `dtlMttr` | 없음 | 1000 | SJM | 다름: 1000자 넘기면 서버 400 |
+  | 공동양육 초대(`pet/list/InviteModal.jsx`) | 이메일 `invtnTrgtEml` | 없음 | 254 | SJM | 다름: 254자 넘기면 서버 400 |
+  | 반려동물 등록·수정(`pet/list/PetFormModal.jsx`) | 품종 검색 칸(`BreedCombo`) | 없음 | 직접 입력 `vrtyDrctInptNm` 40(직접 입력 칸은 40으로 맞음) | SJM | 검색 칸이라 저장 안 됨, 확인만 |
+  | 반려동물 등록·수정 | 이름 20·직접 입력 품종 40·직접 입력 색 20·인식칩 15·성격·알레르기·질병 1000 | 같음 | 같음(칩은 12 또는 15자리 패턴) | SJM | 맞음 |
+  | 신고(`components/ReportModal.jsx`) | 상세 `dclrDtlCn` | 500 | 500 | 공용 | 맞음 |
+  | 채팅 주소 공유(`chat/room/AddressShareModal.jsx`) | 상세 주소 30·공유 주소 200(잘라서 보냄) | 같음 | 30·200 | KSJ | 맞음(검색어 칸은 저장 안 됨) |
+  | 펫돌봄 거래 취소(`chat/room/CareDealCard.jsx`) | 직접 입력 사유 | 50 | 50 | KSJ | 맞음 |
+  | 처방(`health/checkup/PrescriptionModal.jsx`) | 약 이름 | 40 | 40 | JAJ | 맞음 |
+  | 기타 검사(`EtcInspectionModal.jsx`) | 검사명 100·결과 500·메모 200 | 같음 | 같음 | JAJ | 맞음 |
+  | 일정(`health/ScheduleModal.jsx`) | 병원 80·일정 이름 40·메모 500 | 같음 | 같음 | JAJ | 맞음 |
+  | 검진(`health/diary/CheckupModal.jsx`) | 병원 80·내용 500·메모 200 | 같음 | 같음 | JAJ | 맞음 |
+  | 관찰(`health/diary/ObservationModal.jsx`) | 항목 이름 40·세부 위치 40·메모 200 | 같음 | 같음 | JAJ | 맞음 |
+  | 케어 항목(`health/CareItemFields.jsx`) | 항목 이름 | 40 | 40 | JAJ | 맞음 |
+  | 가계부 | 사용처 `expndPlcusNm` | 80 | 80 | SJM | 맞음 |
+  | 파일·숫자만 있는 모달(영수증 올리기·첨부·캐릭터 만들기·예방·하루 기록·지출 한도) | - | - | - | - | 글자 칸 없음, 대상 아님 |
+- 모바일 바텀 네비 구조(사람과 이야기 2026-11-20, 팀 논의 필요): 지금은 섹션 서브 메뉴를 바텀 네비에 두어 화면마다 내용이 바뀜. 흔한 방식은 최상위 메뉴(홈·건강기록·커뮤니티·마이페이지 등) 고정. 모든 사용자 화면·다른 담당 화면에 걸쳐 팀 결정 뒤 따로 기획
+- SCR-MAN-001 튜토리얼 커밋 전 사람 확인: `src/assets/tutorial/` 스크린샷 5장 개인정보(로컬 테스트 데이터 닉네임·반려동물 이름·포인트·지출, 커뮤니티 인기 포토의 다른 회원 사진·닉네임). 플레이스는 지도를 뺀 472×520 그대로(사람 결정)
+- SCR-MAN-001 튜토리얼 팀 알림(PR 본문 + 팀 채널, JAJ): 건강기록 둘러보기 모달(`features/health/shared/HealthGuideModal.jsx`)의 목차 한 줄·사진 칸·확대 화면이 `components/TocButton`·`ZoomBox`(새 `isFill`)·`ZoomOverlay`로 옮겨짐(모양·동작 그대로). 모두: 튜토리얼 문구가 각 담당 기능을 한 줄씩 소개하므로 메뉴 이름·기능이 바뀌면 LJS에게 알림
+- SCR-MAN-001 사람이 고치는 문서: 메인페이지 기능명세서에 서비스 튜토리얼 기능 ID(FN-MAN-0xx) 추가, 화면설계서 SCR-MAN-001에 튜토리얼 모달·왼쪽 아래 [?]
+- SCR-MAN-001 튜토리얼 참고(검증 보고, 판정 밖): 연출 상수 4개를 `pages/ai/AiChatModal.jsx`에서 복사(features는 pages를 import 못 함, AI 쪽만 바꾸면 두 연출이 달라짐). 390에서 그림 상자가 세로로 길어 [크게 보기]가 그림과 떨어진 상자 모서리에 있음. 메인 [AI 매니저] 버튼 글자는 760 미만에서 `sr-only`(`HeroAsk.jsx:161`)라 설명 문구와 모바일 모양이 다를 수 있음
+
+- SCR-COM-002 공용 확인 창 팀 알림(PR 본문 + 팀 채널, 모두): 확인 창(`ConfirmModal`·`Modal isConfirm`)이 왼쪽 정렬·제목 18px 600·설명 16px 회색, 760px 이상은 버튼이 오른쪽에 자기 너비(최소 80px), 760 미만은 반반 꽉 참. 파일 수정 없이 전체 적용. `Modal`의 `isSpacious` 없어짐(SJM `pet/list` 4곳에서 지움). 문구: 로그아웃 "로그아웃할까요?"+설명, JAJ 건강기록 삭제 창 5곳 설명 추가·일정 삭제·반려동물 변경·다시 촬영 제목/설명 나눔, KSJ 댓글 삭제 설명 추가·게시글·돌봄·실종·문의 삭제·글쓰기 나가기 제목/설명 나눔, SJM 가계부 다시 촬영 제목/설명 나눔. 확인 창 제목은 질문 한 문장, 덧붙일 말은 `description`에 쓰기
+- 확인 창 참고(검증 보고·구현, 판정 밖): `components/ConfirmModal.jsx` 위 주석 "가운데 정렬, 버튼 꽉 참"이 이제 코드와 다름(다음에 이 파일을 고칠 때). `inquiry/InquiryForm.jsx` 나가기 창 제목에 두 문장이 붙어 있음(기획 목록 밖, KSJ). PC 프로필 메뉴로 연 로그아웃 창은 폭을 1100 아래로 줄이면 닫힘(헤더 드롭다운이 사라짐, 전부터)
+- 카카오 지도 키 도메인(2026-11-19 확인): `localhost:5180`·`127.0.0.1`은 등록되지 않아 `sdk.js` 401 `domain mismatched`(5173·5174는 됨). 검증(5180)에서 지도 확인이 필요하면 키 관리자가 카카오 개발자 콘솔 Web 사이트 도메인에 `http://localhost:5180`을 추가해야 함
+
+- SCR-COM-002 UI 통일 2-M 팀 알림(PR 본문 + 팀 채널, KSJ·SJM): 펫돌봄·실종센터·펫이야기 상세(`features/community`·`pages/community/CareListPage`) 분기점이 `min-[760px]`·`max-[1100px]`·`min-[1100px]`로 바뀌어 폭이 정확히 760·1100px일 때 PC 쪽 모양. 가계부 전체 내역(`ExpenseHistory`)도 760px부터 PC. AI 대화 삭제·관리자 라우팅 매핑 삭제 확인 버튼이 빨간색
+- 2-M 참고(검증 보고, 판정 밖): `care/CareFilters.jsx`·`missing/MissingFilters.jsx` 주석 "760px 미만는" 조사 오타(→ "미만은"). 다음에 이 파일을 고칠 때 같이. 2-M 범위 밖으로 남긴 옛 분기점: `components/Card` `sm:`, `adminTableStyles` `md:`, `AuthLayout`·`MyPageHomePage`, 랜딩 `LandingHeader` 768·`ProcessSection` 1280(랜딩 교체 SCR-MAN-002 때)
+
+- SCR-COM-002 공용 토스트 팀 알림(PR 본문 + 팀 채널, 모두, 사람이 전달): `showToast(message, { type: 'success' | 'error' })` 생김(인자 없으면 info). JAJ·SJM·KSJ·YAY 폴더 호출부 약 70개 파일에 type을 붙임(문구·시점 그대로, 일부 Prettier 줄바꿈). 같은 문구 합침·최대 3개, 두 문장은 문장마다 새 줄. 760 미만에서 화면 아래 고정 막대를 새로 만들면 `data-toast-above`(안쪽 요소 기준이면 `="form"`처럼 선택자) 달기
+- SCR-COM-002 토스트 범위 밖(말만): 모바일 캐릭터 꾸미기 저장 줄(`CharacterDecorate.jsx`, SJM)·PC 장소 지도 팝업(`PlacePopup`, YAY)과 토스트 겹침, 닫기 버튼·hover 멈춤
+- SCR-COM-002 토스트 참고(검증 보고, 판정 밖): 기획 T4는 CSS `:has`로 적었으나 구현은 JS로 막대 위 끝을 재서 인라인 `bottom`. Vite HMR 뒤 콘솔에서 `import('/src/components/toastStore.js')`로 부르면 앱과 다른 모듈이라 안 뜸(`performance` 리소스 주소로 import)
+- 버그 후보(KSJ, 검증 중 발견): 390 채팅 모달에서 주소 메시지가 있는 방을 열면 화면이 비어 버림. `features/chat/room/AddressMessage.jsx:25` `kakao.maps.StaticMap is not a constructor`
+- SCR-COM-002 UI 통일 2-N 팀 알림(PR 본문 + 팀 채널, JAJ·SJM): ① 종합 건강기록 배너 캐릭터가 마이페이지 반려동물 카드와 같은 모양(회색 원에 꽉 참, 연한 청록 무대 원 없앰) ② 캐릭터 목록 조회가 `@/hooks/usePixelCharacters` 하나로(키 `pixelCharacterKeys.all`, 5분 `staleTime`). `features/pet`·`features/health`의 `usePixelCharacters`·`getPixelCharacters`·`healthKeys.pixelCharacters` 없어짐. 반려동물 등록·초대 수락 뒤에도 캐릭터 목록을 다시 읽음 ③ 캐릭터 상태가 바뀌는 새 기능을 만들면 `pixelCharacterKeys.all`을 무효화해야 함(안 하면 5분 동안 옛 값)
+- 2-N 사람이 정할 것: 마이페이지 반려동물 카드에도 캐릭터 없는 주양육 동물일 때 점선 [캐릭터 만들기]를 넣을지(배너와 같게, `features/pet/list/PetSlide.jsx`, SJM 화면). 2026-11-19 물었고 답 없이 마무리
+- 2-N 참고(검증 보고, 판정 밖): 캐릭터 없는 동물의 `GET /pets/{petSn}/character-image` 404(백엔드 기본 그림 교체 건, 백엔드 재시작 필요). 추가-1 초대 수락은 route로만 확인(다음 `/health` 진입 때 다시 읽음)
+- SCR-COM-004 알림 목록 더 불러오기 팀 알림·PR(PR 본문): 백엔드 PR #271(`GET /notifications` 쪽 응답 `{ content, page, size, totalElements, totalPages, hasNext }`)과 이 프론트 PR을 같이 병합한다(한쪽만 병합하면 알림 목록을 못 읽음). 드롭다운이 5건씩 끝에서 더 불러오고, 탭을 바꾸면 이전 탭 목록 없이 스켈레톤부터, 로딩 중 목록 칸 스크롤 막음. `useNotifications`가 `useInfiniteQuery`(`gcTime: 0`)로 바뀜
+- SCR-COM-004 사람이 고치는 문서: 공통레이아웃 기능명세서 v0.10 FN-COM-004-05 "최대 5건을 미리보기로" → "5건씩, 목록 끝에서 다음 5건을 더 불러온다", 화면설계서 v0.13 SCR-COM-004 ③ 같은 문구
+- SCR-COM-004 참고(검증 보고, 판정 밖): 목록 맨 아래에서 [모두 읽음]을 누르면 1쪽만 다시 받고, 끝 줄이 보이는 자리여도 다음 쪽을 저절로 부르지 않음(한 번 위로 올렸다 내리면 부름). 0건 탭·두 쪽 겹침·다음 쪽 실패는 Playwright route로만 확인
+
+- SCR-COM-007 참고(검증 보고 2026-11-19, 판정 밖): `pages/ai/AiChatModal.jsx` `useCloseWithMotion` 위 주석 "화면 이동으로 닫을 때는 이 함수를 쓰지 않는다"가 이제 코드와 다름(이제 이동에도 씀). 다음에 이 파일을 고칠 때 한 줄 고친다. 390은 AI 모달이 화면 아래까지 덮어 바텀 네비를 누를 수 없음. 모달 안 바로가기 이동(`handleOpenMain`)은 코드로만 확인
+- SCR-COM-007 팀 알림(PR 본문 + 팀 채널, KSJ): 펫돌봄 채팅 모달(`layouts/ChatModal.jsx`)이 같은 주소로 다시 이동(로고·같은 GNB)해도 닫힌다(`location.key` 기준). 모달이 열린 동안 뒤 화면이 주소의 `?` 값을 바꾸면 모달이 닫히니 그런 화면을 만들면 알려 달라
+
+- 기본 캐릭터 네모 임시 그림 없애기(사람 2026-11-19): 백엔드 `resources/character/default-dog.png`·`default-cat.png`(`CharacterDefaultImage`, 캐릭터 없음·오류 확인 중일 때 `GET /pets/{petSn}/character-image`가 200으로 줌)를 프론트 `src/assets/pets/default-character-*.png` 도트 그림으로 교체 요청. 백엔드 연결: 기본 캐릭터 그림 교체(백엔드 저장소에서 /start). 백엔드 회신 2026-11-19: 1안으로 기획, 사람 승인 대기. 백엔드 그림을 프론트 `default-character-*-full.png`(512 전신)로 바꾸고 얼굴은 기존 자르기로 프론트 얼굴 그림과 같은 픽셀. API 그대로, 프론트 할 일 없음. 백엔드 회신 2 2026-11-19: 교체·검증 통과(face 256·full 512 도트, 캐릭터 없음·오류 확인 중 모두 200), 백엔드 커밋·사람 확인 대기. 프론트에서 보려면 백엔드 재시작 필요
+
+- SCR-COM-002 쪽 번호 팀 알림(PR 본문 + 팀 채널, 모두): 760 미만에서 공용 `BoardPagination` 쪽 번호가 5개 묶음(1~5, 6~10 …)으로 바뀜(760 이상은 10개 그대로). 카드 쪽 번호 `Pagination`은 원래 5개라 그대로
 
 - 2026-11-19 사람 지시로 기획 없이 바로 되돌림(급함): 로그인 방법 선택 [이메일로 로그인하기]·이메일 로그인 [로그인] 버튼(`login/LoginMethodChoice`·`EmailLoginForm`)과 `shared/AuthField` 입력칸을 2-K 전 모양으로(버튼 50px·둥글기 12·15px 굵게, 입력칸 48px·둥글기 12·라벨 13px·`*`·오류 문구 mt-2). `AuthField`라 가입·비밀번호 찾기·재설정·재가입 복구 입력칸도 같이 돌아감. 2-K 공용 규격(`ui-checklist.csv`)과 다시 다름 → YAY 알림, 규격으로 다시 맞출지 사람이 정함. 화면 검증 안 함(lint·build만)
 
@@ -15,7 +82,6 @@
 - 사람이 고치는 문서: 공통레이아웃 기능명세서 FN-COM-002-27 "플로팅 반려동물 등록 버튼" 추가, 화면설계서 SCR-COM-002 ⑦ 플로팅 버튼 설명
 - 참고(검증 보고, 판정 밖): `/mypage/pets`에는 화면의 [반려동물 등록]과 플로팅 버튼이 같은 이름으로 둘 보인다(낭독기에서 헷갈릴 수 있음). 등록 성공 뒤 동작(토스트 후 그 자리)은 공용 DB라 코드로만 확인
 
-- SCR-COM-002 UI 통일 2-M(남은 옛 분기점 KSJ 커뮤니티 7개 파일·SJM `ExpenseHistory` JS, AI 대화·라우팅 매핑 삭제 확인 `isDanger`, `ui.md` 예시 `min-[1101px]`): 2026-11-19 기획했다가 플로팅 등록 버튼 먼저(사람). 다음 `/start`에서 다시 기획
 
 ### SCR-COM-002 UI 통일 다음 단계(사람 결정 2026-11-18)
 

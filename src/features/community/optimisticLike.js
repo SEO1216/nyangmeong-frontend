@@ -29,7 +29,9 @@ export const useOptimisticLike = ({ detailKey, allKey }) => {
     },
     onError: (error, _variables, context) => {
       queryClient.setQueryData(detailKey, context?.previous);
-      showToast(error?.message || '좋아요를 처리하지 못했어요');
+      showToast(error?.message || '좋아요를 처리하지 못했어요', {
+        type: 'error',
+      });
     },
     onSettled: () => {
       /** Promise를 돌려주면 재조회가 끝날 때까지 버튼이 잠기므로 기다리지 않는다 */

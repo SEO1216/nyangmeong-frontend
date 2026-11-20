@@ -109,6 +109,9 @@ const getOrphanColr = (pet) => {
 
 const formatRecordDate = (rcdDt) => rcdDt.slice(5, 10);
 
+const CHIP_NO_LENGTHS = [12, 15];
+const CHIP_NO_MESSAGE = '인식칩 번호는 숫자 12자리 또는 15자리로 입력해 주세요';
+
 /** 서버 필드명 -> 화면 오류 자리 매핑 */
 const ERROR_KEY = {
   vrtySn: 'vrty',
@@ -142,6 +145,9 @@ const validate = ({ form, breedText, isWeightLocked, isColrMismatched }) => {
   }
   if (!form.petBrdt) {
     errors.push(['petBrdt', '생년월일을 골라 주세요', 'pet-brdt']);
+  }
+  if (form.chipNo !== '' && !CHIP_NO_LENGTHS.includes(form.chipNo.length)) {
+    errors.push(['chipNo', CHIP_NO_MESSAGE, 'pet-chip']);
   }
   if (!isWeightLocked) {
     if (form.petBdwg === '') {
@@ -472,6 +478,7 @@ function PetForm({
       onSuccess: (saved) => {
         showToast(
           isEdit ? '반려동물 정보를 수정했어요.' : '반려동물을 등록했어요.',
+          { type: 'success' },
         );
         if (!isEdit && onCreated) onCreated(saved);
         else onClose();
@@ -480,11 +487,14 @@ function PetForm({
         if (error.fields) {
           setErrors(
             Object.fromEntries(
-              error.fields.map((f) => [errorKeyOf(f.field), f.message]),
+              error.fields.map((f) => [
+                errorKeyOf(f.field),
+                f.field === 'chipNo' ? CHIP_NO_MESSAGE : f.message,
+              ]),
             ),
           );
         } else {
-          showToast(error.message);
+          showToast(error.message, { type: 'error' });
         }
       },
     };
@@ -831,15 +841,22 @@ function PetForm({
             </summary>
             <div className="flex flex-col gap-6 border-t border-line-soft p-4">
               <Row>
-                <Field id="pet-chip" label="인식칩 번호" optional>
+                <Field
+                  id="pet-chip"
+                  label="인식칩 번호"
+                  optional
+                  error={errors.chipNo}
+                >
                   <input
                     id="pet-chip"
                     name="chipNo"
                     value={form.chipNo}
                     onChange={handleChipNoChange}
                     inputMode="numeric"
-                    maxLength={20}
-                    placeholder="숫자만 입력 (최대 20자리)"
+                    maxLength={15}
+                    placeholder="숫자 12자리 또는 15자리"
+                    aria-invalid={errors.chipNo ? 'true' : undefined}
+                    aria-describedby="pet-chip-e"
                     className={INPUT}
                   />
                 </Field>

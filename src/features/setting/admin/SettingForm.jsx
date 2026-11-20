@@ -152,6 +152,7 @@ function SettingSectionNav({ activeTitle, onSelect }) {
   return (
     <nav
       aria-label="운영 설정 묶음"
+      data-toast-above
       className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white pb-[env(safe-area-inset-bottom)] min-[760px]:hidden"
     >
       <ul className="flex h-[60px]">
@@ -244,7 +245,7 @@ export default function SettingForm({ settings }) {
     event.preventDefault();
     if (!isDirty) return;
     save.mutate(body, {
-      onSuccess: () => showToast('저장했어요'),
+      onSuccess: () => showToast('저장했어요', { type: 'success' }),
       onError: handleSaveError,
     });
   };

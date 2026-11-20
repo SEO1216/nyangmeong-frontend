@@ -98,7 +98,7 @@ export default function CharacterDecorate({ pet }) {
       {
         onSuccess: () => {
           setDraft(null);
-          showToast('착용 상태를 저장했어요');
+          showToast('착용 상태를 저장했어요', { type: 'success' });
         },
         onError: (error) => {
           if (error.code === 'PIXEL_CHARACTER_UNDER_REVIEW') {
@@ -109,6 +109,7 @@ export default function CharacterDecorate({ pet }) {
           showToast(
             SAVE_ERRORS[error.code] ??
               '저장하지 못했어요. 잠시 뒤 다시 시도해 주세요',
+            { type: 'error' },
           );
         },
       },

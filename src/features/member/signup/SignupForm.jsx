@@ -1,9 +1,9 @@
 import StepMotion from '@/components/StepMotion';
+import AuthActions from '../shared/AuthActions';
 import AuthCard from '../shared/AuthCard';
 import AuthHeading from '../shared/AuthHeading';
 import AuthNotice from '../shared/AuthNotice';
-import { BTN_PRIMARY } from '@/components/buttonStyles';
-import { TEXT_LINK } from '../shared/authStyles';
+import { TEXT_LINK, AUTH_BTN_PRIMARY } from '../shared/authStyles';
 import TermsModal from '../shared/TermsModal';
 import EmailStep from './EmailStep';
 import NicknameModal from './NicknameModal';
@@ -25,8 +25,6 @@ const STEPS = {
     title: '이메일을 인증해 주세요',
     subtitle: '인증한 이메일 주소를 로그인 아이디로 사용합니다.',
     Body: EmailStep,
-    // 이메일 입력칸을 이메일 로그인의 아이디 칸과 같은 높이에 둔다(추가-8)
-    spacing: 'stepEmail',
   },
   phone: {
     no: 3,
@@ -46,32 +44,41 @@ const STEPS = {
 // form: direction, nickname, isNicknameOpen, openNickname, closeNickname, saveNickname
 export function SignupComplete({ form, onGoLogin }) {
   return (
-    <AuthCard>
-      <StepMotion stepKey="complete" direction={form.direction}>
-        <AuthHeading
-          title="회원가입이 완료되었습니다"
-          subtitle="가입한 계정으로 로그인해 주세요."
-        />
-        <div className="rounded-box bg-surface-2 px-5 py-6 text-center">
-          <small className="block text-muted">현재 저장된 닉네임</small>
-          <strong className="mt-1 block text-2xl font-bold">
-            {form.nickname}
-          </strong>
+    <AuthCard isCentered={false}>
+      <StepMotion
+        stepKey="complete"
+        direction={form.direction}
+        className="flex flex-1 flex-col"
+      >
+        {/* 제목 묶음은 칸 가운데, 버튼은 맨 아래 */}
+        <div className="flex flex-1 flex-col justify-center text-center">
+          <AuthHeading
+            title="회원가입이 완료되었습니다"
+            subtitle="가입한 계정으로 로그인해 주세요."
+          />
+          <div className="rounded-box bg-surface-2 px-5 py-6">
+            <small className="block text-muted">현재 저장된 닉네임</small>
+            <strong className="mt-1 block text-2xl font-bold">
+              {form.nickname}
+            </strong>
+            <button
+              type="button"
+              onClick={form.openNickname}
+              className="mt-2 font-semibold text-brand-600 hover:underline hover:underline-offset-[3px]"
+            >
+              닉네임 설정
+            </button>
+          </div>
+        </div>
+        <AuthActions>
           <button
             type="button"
-            onClick={form.openNickname}
-            className="mt-2 font-semibold text-brand-600 hover:underline hover:underline-offset-[3px]"
+            onClick={onGoLogin}
+            className={`${AUTH_BTN_PRIMARY} w-full`}
           >
-            닉네임 설정
+            로그인으로
           </button>
-        </div>
-        <button
-          type="button"
-          onClick={onGoLogin}
-          className={`${BTN_PRIMARY} w-full mt-8`}
-        >
-          로그인으로
-        </button>
+        </AuthActions>
       </StepMotion>
       {form.isNicknameOpen && (
         <NicknameModal
@@ -93,20 +100,23 @@ export default function SignupForm({ onBackToLogin, onGoLogin, onRecover }) {
     return <SignupComplete form={form} onGoLogin={onGoLogin} />;
   }
 
-  const { no, title, subtitle, Body, spacing = 'step' } = STEPS[form.step];
+  const { no, title, subtitle, Body } = STEPS[form.step];
   return (
-    <AuthCard onBack={form.goBack}>
+    <AuthCard
+      onBack={form.goBack}
+      spacing={form.step === 'phone' ? 'sparse' : 'normal'}
+    >
       <StepMotion stepKey={`${form.step}-head`} direction={form.direction}>
-        <AuthHeading title={title} subtitle={subtitle} spacing={spacing} />
+        <AuthHeading title={title} subtitle={subtitle} />
       </StepMotion>
       <SignupStepper current={no} />
-      <StepMotion stepKey={form.step} direction={form.direction}>
+      <StepMotion
+        stepKey={form.step}
+        direction={form.direction}
+        className="flex grow flex-col"
+      >
         {form.notice && !(form.step === 'email' && form.isCodeLocked) && (
-          <AuthNotice
-            type={form.notice.type}
-            message={form.notice.message}
-            hasGuide={form.guideTarget === 'notice'}
-          />
+          <AuthNotice type={form.notice.type} message={form.notice.message} />
         )}
         <Body form={form} />
       </StepMotion>

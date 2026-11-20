@@ -11,7 +11,8 @@ const WIDTH_CLASSES = {
 };
 
 /**
- * isConfirm: 가운데 정렬 확인 팝업(role="alertdialog", description이 있으면 aria-describedby로 연결), 아니면 제목 줄과 ✕가 있는 입력 모달
+ * isConfirm: 왼쪽 정렬 확인 팝업(role="alertdialog", description이 있으면 aria-describedby로 연결), 아니면 제목 줄과 ✕가 있는 입력 모달.
+ *            제목 18px 600, 설명 16px 회색. 버튼은 760px 이상이면 오른쪽에 자기 너비로, 760px 미만이면 반반 꽉 참
  * isLarge: 화면을 크게 덮는 모달. 본문(children)이 남는 높이를 차지하고 푸터는 맨 아래에 구분선과 함께 고정,
  *          760px 이하에서는 화면 전체
  * isAutoHeight: isLarge와 함께 쓴다. 높이를 내용에 맞추고 화면을 넘으면 본문 안쪽에서 스크롤, 760px 이하는 화면 전체 그대로
@@ -25,9 +26,9 @@ const WIDTH_CLASSES = {
  * isTitleHidden: 제목 글자를 화면에서 숨긴다(화면 읽기용 이름은 유지, ✕는 오른쪽에 그대로)
  * isTitleSmall: 제목을 18px(확인 창 제목과 같은 크기)로 줄인다. 기본은 22px
  * isDismissDisabled: 배경 클릭·ESC로 닫지 않는다(입력 유실 방지). ✕·푸터 버튼으로만 닫힌다
- * isSpacious: isConfirm과 함께 쓴다. 본문 안쪽 여백을 넓혀(가로 40px, 위 40px) 좁은 문구 확인 창에 맞춘다
  * 열려 있는 동안 페이지 스크롤을 잠근다(useScrollLock, 창이 겹쳐도 마지막이 닫힐 때 풀린다)
- * 길어지면(isLarge·isTop이 아닐 때) 제목 줄·푸터는 두고 본문만 안쪽에서 스크롤한다(막대가 모서리 밖으로 나가지 않게)
+ * 길어지면(isTop이 아닐 때) 제목 줄·푸터는 두고 본문만 안쪽에서 스크롤한다(막대가 모서리 밖으로 나가지 않게).
+ *   dialog 자체는 overflow-hidden이라 브라우저 기본값(dialog:modal overflow auto)으로 막대가 하나 더 생기지 않는다
  * isTop: 가운데 대신 화면 위에서 80px 떨어져 고정. 내용 높이가 바뀌어도(검색 결과 등) 위치가 고정.
  *        dialog를 화면 전체 투명 스크롤 영역으로 두고 흰 판을 그 안에 놓아, 길어지면 모달 안이 아니라 화면 전체 스크롤
  */
@@ -42,7 +43,6 @@ export default function Modal({
   isSheet = false,
   isWide = false,
   width = null,
-  isSpacious = false,
   isTop = false,
   isTitleHidden = false,
   isTitleSmall = false,
@@ -109,17 +109,18 @@ export default function Modal({
   const content = (
     <>
       {isConfirm ? (
-        <div
-          className={`text-center ${isSpacious ? 'px-10 pt-10 pb-8' : 'px-8 pt-8 pb-6'}`}
-        >
+        <div className="px-6 pt-7 pb-5">
           <h2
             id={titleId}
-            className="text-lg leading-[1.35] font-bold break-keep"
+            className="text-lg leading-7 font-semibold break-keep"
           >
             {title}
           </h2>
           {description && (
-            <p id={descId} className="mt-2 leading-[1.6] break-keep text-muted">
+            <p
+              id={descId}
+              className="mt-2 text-base leading-6 break-keep text-muted"
+            >
               {description}
             </p>
           )}
@@ -178,7 +179,9 @@ export default function Modal({
               ? 'flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-line px-6 py-2.5'
               : isWide
                 ? 'flex justify-end gap-2 px-6 pb-6'
-                : `flex gap-2 pb-6 *:min-w-0 *:flex-1 ${isConfirm && isSpacious ? 'px-10' : 'px-6'}`
+                : isConfirm
+                  ? 'flex gap-2 px-6 pb-6 max-[760px]:*:min-w-0 max-[760px]:*:flex-1 min-[760px]:justify-end min-[760px]:*:min-w-20'
+                  : 'flex gap-2 px-6 pb-6 *:min-w-0 *:flex-1'
           }
         >
           {footer}
@@ -216,7 +219,7 @@ export default function Modal({
               isAutoHeight
                 ? 'max-h-[calc(100dvh-2rem)] min-[760px]:h-fit'
                 : 'h-[min(660px,calc(100dvh-2rem))] max-h-none'
-            } ${WIDTH_CLASSES[width] ?? 'w-[min(760px,calc(100vw-2rem))]'} max-w-none flex-col rounded-modal open:flex ${
+            } ${WIDTH_CLASSES[width] ?? 'w-[min(760px,calc(100vw-2rem))]'} max-w-none flex-col overflow-hidden rounded-modal open:flex ${
               isSheet
                 ? ''
                 : 'max-[760px]:h-dvh max-[760px]:max-h-none max-[760px]:w-screen max-[760px]:rounded-none'

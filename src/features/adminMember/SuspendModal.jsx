@@ -38,7 +38,7 @@ export default function SuspendModal({ member, onClose }) {
       },
       {
         onSuccess: () => {
-          showToast('회원을 정지했어요');
+          showToast('회원을 정지했어요', { type: 'success' });
           onClose();
         },
       },

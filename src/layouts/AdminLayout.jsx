@@ -146,7 +146,8 @@ function AdminLogoutConfirm({ onClose }) {
 
   return (
     <ConfirmModal
-      title="로그아웃하시겠어요?"
+      title="로그아웃할까요?"
+      description="다시 이용하려면 로그인해 주세요."
       confirmLabel="로그아웃"
       errorMessage={
         logout.isError
@@ -171,7 +172,7 @@ export default function AdminLayout() {
   const handleLogoutClose = () => setIsLogoutOpen(false);
 
   return (
-    <div className="min-h-screen bg-surface-2">
+    <div className="min-h-screen bg-page-bg">
       <ScrollToTop />
       {/** 상단 바 */}
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line bg-white px-4">

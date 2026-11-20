@@ -2,7 +2,12 @@
  * [거래 카드의 단계별 안내]
  * - 상태 × 역할마다 지금 할 일과 버튼 하나 (FN-CMU-005-11), 문구는 디자인 시안(nyangmung-message.js)과 동일
  */
-import { MTCH_STTS, ROLE, isActiveStage } from '../shared/chatCodes';
+import {
+  MTCH_STTS,
+  ROLE,
+  getDealCancelState,
+  isActiveStage,
+} from '../shared/chatCodes';
 
 const { PRE, REQUESTED, MATCHED, DONE_REQ, PAYING, COMPLETE } = MTCH_STTS;
 
@@ -62,6 +67,19 @@ export const DEAL_ASKS = {
     confirmLabel: '완료 확인',
     action: 'confirm',
   },
+  dealCancelWithdrawAsk: {
+    title: '거래 취소 요청을 철회할까요?',
+    description: '철회하면 거래가 원래대로 이어져요',
+    confirmLabel: '요청 철회',
+    action: 'dealCancelWithdraw',
+  },
+  dealCancelApproveAsk: {
+    title: '거래 취소에 동의할까요?',
+    description: '동의하면 거래가 취소되고 더 이상 대화할 수 없어요',
+    confirmLabel: '취소에 동의',
+    action: 'dealCancelApprove',
+    isDanger: true,
+  },
   paidAsk: {
     title: '비용을 받으셨나요?',
     description: '확인하면 되돌릴 수 없고, 거래가 완료돼요',
@@ -79,15 +97,95 @@ export const CANCEL_REASONS = [
   OTHER_REASON,
 ];
 
+/** 거래 취소 요청 사유(매칭 완료 뒤). 고른 문구 또는 직접 입력한 문자열 하나를 cnclRsn으로 보낸다 */
+export const DEAL_CANCEL_REASONS = [
+  '일정이 맞지 않게 됐어요',
+  '상대와 연락이 어려워요',
+  '조건이 달라졌어요',
+  OTHER_REASON,
+];
+
 export const OTHER_REASON_MAX_LENGTH = 50;
+
+/** 받은 쪽이 7일 동안 응답하지 않으면 서버가 자동 동의하는 단계(매칭 완료만) */
+const AUTO_APPROVE_NOTICE = '7일 동안 응답이 없으면 자동으로 동의돼요';
+
+/**
+ * 거래 취소 요청이 걸려 있거나 동의돼 거래가 취소된 방의 안내. 해당 없으면 null(getDealGuide를 쓴다)
+ * - 요청한 쪽: 철회, 받은 쪽: 동의·거절. 매칭 완료 단계에만 자동 동의 안내
+ */
+export const getDealCancelGuide = (room) => {
+  const state = getDealCancelState(room);
+  const reason = room.cnclDmnd?.cnclRsn;
+  const isMatched = room.mtchDlngSttsCd === MTCH_STTS.MATCHED;
+
+  switch (state) {
+    case 'requesting-mine':
+      return {
+        icon: 'hourglass_top',
+        title: '거래 취소 요청에 대한 응답을 기다리고 있어요',
+        description: `사유: ${reason}${isMatched ? ` · 상대가 ${AUTO_APPROVE_NOTICE}` : ''}`,
+        actions: [
+          {
+            key: 'dealCancelWithdrawAsk',
+            label: '요청 철회하기',
+            variant: 'secondary',
+          },
+        ],
+        tone: '',
+      };
+    case 'requesting-theirs':
+      return {
+        icon: 'event_busy',
+        title: '상대가 거래 취소를 요청했어요',
+        description: `사유: ${reason}${isMatched ? ` · ${AUTO_APPROVE_NOTICE}` : ''}`,
+        actions: [
+          {
+            key: 'dealCancelApproveAsk',
+            label: '취소에 동의',
+            variant: 'danger',
+          },
+          {
+            key: 'dealCancelReject',
+            label: '거절하고 계속',
+            variant: 'primary',
+          },
+        ],
+        tone: 'todo',
+      };
+    case 'approved':
+      return room.mtchDlngSttsCd === MTCH_STTS.CANCELED
+        ? {
+            icon: 'event_busy',
+            title: '거래가 취소됐어요',
+            description: `사유: ${reason}`,
+            actions: [],
+            tone: 'end',
+          }
+        : null;
+    default:
+      return null;
+  }
+};
 
 /**
  * 지금 할 일: { icon, title, description, actions, tone }
  * - actions: 내 차례일 때만 있고 { key, label, variant }, primary는 최대 하나
  * - tone: todo 내 차례, done 거래 완료, end 종료, '' 기다림
  */
-export const getDealGuide = (stage, role) => {
+export const getDealGuide = (stage, role, isRecruiting = true) => {
   const isOwner = role === ROLE.GUARDIAN;
+
+  /** 모집중이 아니면 매칭을 요청할 수 없으니 매칭 전·요청 취소 단계의 요청 버튼과 기다림 안내를 대신한다 */
+  if (!isRecruiting && (stage === PRE || stage === MTCH_STTS.CANCELED)) {
+    return {
+      icon: 'event_busy',
+      title: '모집이 마감돼 매칭을 요청할 수 없어요',
+      description: '대화는 이어서 할 수 있어요',
+      actions: [],
+      tone: 'end',
+    };
+  }
 
   switch (stage) {
     case PRE:

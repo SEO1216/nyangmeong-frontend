@@ -1,10 +1,9 @@
 import { RefreshCw } from 'lucide-react';
-import AiErrorGuide from '@/components/AiErrorGuide';
 import FieldError, { Required } from '@/components/FieldError';
 import { INPUT, LABEL } from '@/components/formStyles';
 
 const ART =
-  'flex h-10 flex-1 items-center justify-center overflow-hidden rounded-md border border-line bg-surface-2';
+  'flex h-12 flex-1 items-center justify-center overflow-hidden rounded-xl border border-line bg-surface-2';
 
 export default function CaptchaBlock({
   image,
@@ -13,7 +12,6 @@ export default function CaptchaBlock({
   onChange,
   onRefresh,
   error,
-  hasGuide,
 }) {
   return (
     <div className="relative">
@@ -36,7 +34,7 @@ export default function CaptchaBlock({
           onClick={onRefresh}
           disabled={isLoading}
           aria-label="보안코드 새로고침"
-          className="grid size-10 shrink-0 place-items-center rounded-md border border-input-line text-ink-2 hover:enabled:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="grid size-12 shrink-0 place-items-center rounded-xl border border-input-line text-ink-2 hover:enabled:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <RefreshCw className="size-5" />
         </button>
@@ -51,16 +49,9 @@ export default function CaptchaBlock({
         aria-required="true"
         aria-invalid={Boolean(error)}
         aria-describedby={error ? 'login-captcha-error' : undefined}
-        className={INPUT}
+        className={`${INPUT} !h-12 !rounded-xl`}
       />
-      {/* AI 안내가 붙으면 같은 문구가 두 번 보이지 않게 말풍선만 보인다. 말풍선은 aria-hidden이라 이 문구를 화면 읽기용으로 남긴다 */}
-      {error && hasGuide && (
-        <p id="login-captcha-error" role="alert" className="sr-only">
-          {error}
-        </p>
-      )}
-      {!hasGuide && <FieldError id="login-captcha-error">{error}</FieldError>}
-      {error && hasGuide && <AiErrorGuide message={error} />}
+      <FieldError id="login-captcha-error">{error}</FieldError>
     </div>
   );
 }

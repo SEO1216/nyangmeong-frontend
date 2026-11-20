@@ -196,14 +196,13 @@ function SlideHeight({ children }) {
   );
 }
 
-/** 현재 위치 점. 맨 끝은 + (한도에 차면 일반 점). 점은 작아도 누르는 영역은 PC 24px·760 미만 44px(UI 체크리스트 37) */
-/** 760 미만: 높이 44, 폭은 nav 폭을 점 수로 나눠 최대 44(점이 많아도 줄을 넘지 않는다) */
-const DOT_HIT =
-  'grid h-6 min-w-6 place-items-center max-[760px]:h-11 max-[760px]:min-w-0 max-[760px]:max-w-11 max-[760px]:flex-1';
+/** 현재 위치 점. 맨 끝은 + (한도에 차면 일반 점). 점은 작아도 누르는 영역은 PC 24×24px·760 미만 폭 14×높이 44px(UI 체크리스트 37). 폭이 고정이라 점은 가운데에 모이고, 점이 많아 줄을 넘을 때만 줄어든다. + 버튼은 원이 20px라 760 미만에서도 폭 24px */
+const PLUS_HIT = 'grid h-6 w-6 min-w-0 place-items-center max-[760px]:h-11';
+const DOT_HIT = `${PLUS_HIT} max-[760px]:w-3.5`;
 
 function PetDots({ pets, index, isFull, onMove }) {
   const dotClass = (isCurrent) =>
-    `block h-2 rounded-full transition-[width] duration-200 ${isCurrent ? 'w-6 bg-brand-600' : 'w-2 bg-line-strong'}`;
+    `block h-2 rounded-full transition-[width] duration-200 ${isCurrent ? 'w-6 bg-brand-600 max-[760px]:w-3' : 'w-2 bg-line-strong'}`;
 
   return (
     <nav
@@ -241,7 +240,7 @@ function PetDots({ pets, index, isFull, onMove }) {
           onClick={() => onMove(pets.length)}
           aria-label="반려동물 등록"
           aria-current={index === pets.length ? 'true' : undefined}
-          className={`group relative ${DOT_HIT}`}
+          className={`group relative ${PLUS_HIT}`}
         >
           <span
             aria-hidden="true"
@@ -323,7 +322,7 @@ function PetCard({ pet, onEdit, onDelete, onUnlink, onInvite, children }) {
   return (
     <article
       aria-labelledby="pet-name"
-      className="relative grid gap-5 rounded-modal border border-line bg-white p-5 pt-10 pb-16 shadow-depth-sm max-[760px]:grid-cols-[84px_minmax(0,1fr)] max-[760px]:gap-x-4 max-[760px]:gap-y-0 min-[760px]:grid-cols-[140px_minmax(0,1fr)] min-[760px]:gap-x-8 min-[760px]:gap-y-6 min-[760px]:px-8 min-[1100px]:grid-cols-[220px_minmax(0,1fr)] min-[1100px]:gap-x-14 min-[1100px]:px-12"
+      className="relative grid gap-5 rounded-modal border border-line bg-white p-5 pt-10 pb-16 shadow-depth-sm max-[760px]:grid-cols-[84px_minmax(0,1fr)] max-[760px]:gap-x-4 max-[760px]:gap-y-0 min-[760px]:grid-cols-[140px_minmax(0,1fr)] min-[760px]:gap-x-8 min-[760px]:gap-y-6 min-[760px]:px-8 min-[1100px]:grid-cols-[180px_minmax(0,1fr)] min-[1100px]:gap-x-10 min-[1100px]:px-10"
     >
       <div className="flex items-center justify-center max-[760px]:self-center">
         <PetFace
@@ -381,7 +380,7 @@ function PetCard({ pet, onEdit, onDelete, onUnlink, onInvite, children }) {
 /** PC 상세: 2열 × 4행 grid 하나. 같은 행끼리 높이가 같아 좌우 구분선이 맞는다 */
 function InfoGrid({ pet, vrtyName }) {
   return (
-    <dl className="m-0 grid grid-cols-2 gap-x-6 max-[760px]:hidden min-[1100px]:gap-x-12">
+    <dl className="m-0 grid grid-cols-2 gap-x-6 max-[760px]:hidden min-[1100px]:max-[1260px]:grid-cols-[minmax(0,1fr)_minmax(250px,1fr)] min-[1100px]:gap-x-12">
       <InfoRow label="품종">{vrtyName || getPetSeName(pet)}</InfoRow>
       <InfoRow label="인식 번호" valueClassName="tabular-nums">
         <ChipNo value={pet.chipNo} />
@@ -441,7 +440,7 @@ function MobileInfo({ pet }) {
             <span className="text-badge font-medium text-subtle"> {range}</span>
           )}
         </MobileRow>
-        <MobileRow label="인식 번호" empty={!pet.chipNo} emptyText="미등록">
+        <MobileRow label="인식 번호" empty={!pet.chipNo} emptyText="-">
           {pet.chipNo}
         </MobileRow>
         <MobileList label="알레르기" value={pet.algyCn} isOpen={isOpen} />
@@ -449,7 +448,9 @@ function MobileInfo({ pet }) {
         {isOpen && (
           <>
             <MobileRow label="털색">{getColrName(pet)}</MobileRow>
-            <MobileRow label="특징">{pet.chrcCn}</MobileRow>
+            <MobileRow label="특징" empty={!pet.chrcCn} emptyText="-">
+              {pet.chrcCn}
+            </MobileRow>
           </>
         )}
       </dl>
@@ -485,7 +486,7 @@ function MobileList({ label, value, isOpen }) {
   const hiddenCount = items.length - VISIBLE_LIST_COUNT;
 
   return (
-    <MobileRow label={label} empty={items.length === 0} emptyText="없음">
+    <MobileRow label={label} empty={items.length === 0} emptyText="-">
       {isOpen ? (
         items.join(', ')
       ) : (
@@ -506,25 +507,22 @@ function MobileList({ label, value, isOpen }) {
 
 /** 한 줄 행. 위 두 칸은 위 선, 마지막 두 칸은 아래 선이 없다 */
 const ROW =
-  'flex h-14 min-w-0 items-center gap-6 min-[760px]:max-[1100px]:gap-3 border-b border-line-soft [&:nth-child(-n+2)]:border-t [&:nth-child(-n+2)]:border-t-line-strong [&:nth-last-child(-n+2)]:border-b-0';
-const DT = 'w-20 shrink-0 text-subtle min-[760px]:max-[1100px]:w-16';
+  'flex h-14 min-w-0 items-center gap-6 min-[760px]:max-[1260px]:gap-3 border-b border-line-soft [&:nth-child(-n+2)]:border-t [&:nth-child(-n+2)]:border-t-line-strong [&:nth-last-child(-n+2)]:border-b-0';
+const DT = 'w-20 shrink-0 text-subtle min-[760px]:max-[1260px]:w-16';
 const DD = 'relative m-0 flex min-w-0 flex-1 items-center gap-2 font-semibold';
 
-/** 인식 번호: 띄어쓰기 없이 이어 쓴다. 15자리는 국가번호(앞 3자리) 뒤에서만 줄이 바뀔 수 있다 */
+/** 빈 값 표시: PC·모바일 공통 흐린 "-" */
+function EmptyDash() {
+  return <span className="font-normal text-muted">-</span>;
+}
+
+/** 인식 번호: 띄어쓰기 없이 이어 쓰고 줄을 바꾸지 않는다(복사 때 공백 없음). 761~1099px는 글자를 한 단계 줄인다 */
 function ChipNo({ value }) {
-  if (!value) return null;
+  if (!value) return <EmptyDash />;
   const digits = value.replace(/\s/g, '');
   return (
-    <span className="min-w-0 min-[760px]:max-[1100px]:text-sm">
-      {digits.length === 15 ? (
-        <>
-          {digits.slice(0, 3)}
-          <wbr />
-          {digits.slice(3)}
-        </>
-      ) : (
-        digits
-      )}
+    <span className="min-w-0 whitespace-nowrap min-[760px]:max-[1100px]:text-sm">
+      {digits}
     </span>
   );
 }
@@ -567,6 +565,11 @@ function ChrcRow({ value }) {
   return (
     <div className={ROW}>
       <dt className={DT}>특징</dt>
+      {!value && (
+        <dd className={DD}>
+          <EmptyDash />
+        </dd>
+      )}
       {value && (
         <dd className={DD}>
           <span ref={textRef} className="min-w-0 truncate">
@@ -602,6 +605,11 @@ function ListRow({ label, value }) {
   return (
     <div className={ROW}>
       <dt className={DT}>{label}</dt>
+      {items.length === 0 && (
+        <dd className={DD}>
+          <EmptyDash />
+        </dd>
+      )}
       {items.length > 0 && (
         <dd className={DD}>
           <span className="min-w-0 truncate">

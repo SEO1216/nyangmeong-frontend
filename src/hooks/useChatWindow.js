@@ -30,7 +30,7 @@ export function closeChatWindow() {
 
 /**
  * open({ otoChatRoomSn?, pstSn?, listPstSn? }) 반환, 창 열림 true·팝업 차단 false
- * - listPstSn: 돌봄 글 [채팅 목록 보기]가 그 글의 채팅만 보여 주며 열 때
+ * - listPstSn: 돌봄 글 [채팅 목록 보기]가 그 글의 채팅을 목록 맨 위에 두고 열 때(다른 글의 채팅도 아래에 그대로 보인다)
  * - 클릭 핸들러에서 바로 호출: 요청을 기다린 뒤 부르면 팝업 차단
  */
 export default function useChatWindow() {

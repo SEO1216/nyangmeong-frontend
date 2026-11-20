@@ -24,12 +24,12 @@ function CaregiverDeleteDialog({ pet, caregiver, onClose }) {
       {
         onSuccess: () => {
           onClose();
-          showToast('연동을 해제했어요');
+          showToast('연동을 해제했어요', { type: 'success' });
         },
         onError: (error) => {
           /** 이미 해제된 연동이면 목록은 다시 읽히므로 창을 닫는다 */
           if (error.code === 'CAREGIVER_NOT_FOUND') onClose();
-          showToast(error.message);
+          showToast(error.message, { type: 'error' });
         },
       },
     );
@@ -37,7 +37,6 @@ function CaregiverDeleteDialog({ pet, caregiver, onClose }) {
   return (
     <Modal
       isConfirm
-      isSpacious
       isPending={deleteCaregiver.isPending}
       title={`${caregiver.mbrNcnm}님과의 연동을 해제할까요?`}
       description={`해제하면 ${caregiver.mbrNcnm}님은 ${pet.petNm}의 기록을 더 이상 볼 수 없어요.`}

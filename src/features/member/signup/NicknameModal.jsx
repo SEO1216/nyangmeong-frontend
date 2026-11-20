@@ -2,7 +2,7 @@ import { User } from 'lucide-react';
 import { useState } from 'react';
 import Modal from '@/components/Modal';
 import { useCheckNicknameAvailability, useSetupNickname } from '../queries';
-import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import { SIDE_BTN, AUTH_BTN_PRIMARY } from '../shared/authStyles';
 import AuthField from '../shared/AuthField';
 import { NICKNAME_MAX, isValidNickname } from '../shared/validate';
 import { SIGNUP_MESSAGES as MSG } from './signupMessages';
@@ -75,7 +75,7 @@ export default function NicknameModal({ savedNickname, onSaved, onClose }) {
           type="button"
           disabled={!canSave}
           onClick={handleSave}
-          className={`${BTN_PRIMARY} w-full`}
+          className={`${AUTH_BTN_PRIMARY} w-full`}
         >
           닉네임 설정 완료
         </button>
@@ -100,7 +100,6 @@ export default function NicknameModal({ savedNickname, onSaved, onClose }) {
           error={error}
           success={status === 'available' ? MSG.nickAvailable : ''}
           help={help}
-          hasGuide
           endAdornment={
             <span className="text-sm text-subtle tabular-nums">
               {value.length} / {NICKNAME_MAX}
@@ -111,7 +110,7 @@ export default function NicknameModal({ savedNickname, onSaved, onClose }) {
               type="button"
               onClick={handleCheck}
               disabled={!isValid || isSame || isBusy}
-              className={`${BTN_SECONDARY} min-w-22 shrink-0 whitespace-nowrap`}
+              className={SIDE_BTN}
             >
               중복확인
             </button>

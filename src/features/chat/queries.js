@@ -11,6 +11,7 @@ import useKakaoMap from '@/hooks/useKakaoMap';
 import { searchPlaces } from '@/utils/placeSearch';
 import {
   acceptCareMatch,
+  approveDealCancel,
   cancelCareMatch,
   chatImageUrl,
   confirmCareCompletion,
@@ -24,8 +25,11 @@ import {
   getChatUnreadCount,
   leaveChatRoom,
   readChatRoom,
+  rejectDealCancel,
   requestCareCompletion,
   requestCareMatch,
+  requestDealCancel,
+  withdrawDealCancel,
 } from './api';
 import { retainChatRealtime, setViewingChatRoom } from './realtime';
 import { CHAT_ROOM_CLOSED, MSG_TYPE } from './shared/chatCodes';
@@ -185,7 +189,7 @@ export const useCreateChatRoom = () => {
     mutationFn: createChatRoom,
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: chatKeys.lists }),
-    onError: (error) => showToast(error.message),
+    onError: (error) => showToast(error.message, { type: 'error' }),
   });
 };
 
@@ -211,7 +215,7 @@ export const useSendChatMessage = (otoChatRoomSn) => {
     /** 화면은 열려 있는데 서버에서 방이 닫힌 경우: 방 정보를 다시 받아 입력을 막는다 */
     onError: (error) => {
       if (error.code !== CHAT_ROOM_CLOSED) return;
-      showToast(error.message);
+      showToast(error.message, { type: 'error' });
       queryClient.invalidateQueries({
         queryKey: chatKeys.detail(otoChatRoomSn),
       });
@@ -244,6 +248,10 @@ const DEAL_API = {
   doneRequest: requestCareCompletion,
   confirm: confirmCareCompletion,
   receive: confirmCareReceipt,
+  dealCancel: requestDealCancel,
+  dealCancelApprove: approveDealCancel,
+  dealCancelReject: rejectDealCancel,
+  dealCancelWithdraw: withdrawDealCancel,
 };
 
 /** 거래 단계 변경 { action, cnclRsn }: 서버가 방·대화에 반영하므로 끝나면 다시 조회 */
@@ -264,7 +272,7 @@ export const useDealAction = (room) => {
       queryClient.invalidateQueries({ queryKey: ['care-matches'] });
       queryClient.invalidateQueries({ queryKey: chatKeys.lists });
     },
-    onError: (error) => showToast(error.message),
+    onError: (error) => showToast(error.message, { type: 'error' }),
   });
 };
 
@@ -299,6 +307,12 @@ export const useLeaveChatRoom = (otoChatRoomSn) => {
   return useMutation({
     mutationFn: () => leaveChatRoom(otoChatRoomSn),
     onSuccess: () => invalidateSummaries(queryClient),
-    onError: (error) => showToast(error.message),
+    onError: (error) => {
+      showToast(error.message, { type: 'error' });
+      /** 409 CHAT_LEAVE_IN_DEAL 등: 방 상태가 화면과 다르니 다시 조회 */
+      queryClient.invalidateQueries({
+        queryKey: chatKeys.detail(otoChatRoomSn),
+      });
+    },
   });
 };
