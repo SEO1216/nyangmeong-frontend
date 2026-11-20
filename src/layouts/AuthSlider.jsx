@@ -5,25 +5,25 @@
 // 가운데 정렬은 justify-center-safe로 해서 내용이 길어져도 위쪽(제목)이 잘리지 않는다
 // 모바일 로그인은 위에 붙이고(뒤로가기·제목은 로고 아래), 제목 아래 간격은 로그인 폼이 준다(추가-3·5)
 const PANE =
-  'flex h-full w-1/2 flex-col overflow-y-auto px-8 py-8 max-md:h-auto max-md:w-full max-md:px-4 max-md:py-6 lg:px-12.5';
+  'flex h-full w-1/2 flex-col overflow-y-auto px-8 py-8 max-[760px]:h-auto max-[760px]:w-full max-[760px]:px-4 max-[760px]:py-6 min-[1100px]:px-12.5';
 
 export default function AuthSlider({ isSignup, login, signup }) {
   return (
     <div className="min-h-0 w-full min-w-0 flex-1 overflow-clip">
       <div
-        className={`flex h-full w-[200%] transition-transform duration-700 ease-out max-md:w-full max-md:transition-none ${
-          isSignup ? '-translate-x-1/2 max-md:translate-x-0' : ''
+        className={`flex h-full w-[200%] transition-transform duration-700 ease-out max-[760px]:w-full max-[760px]:transition-none ${
+          isSignup ? '-translate-x-1/2 max-[760px]:translate-x-0' : ''
         }`}
       >
         <div
           inert={isSignup}
-          className={`${PANE} justify-center-safe max-md:justify-start ${isSignup ? 'max-md:hidden' : ''}`}
+          className={`${PANE} justify-center-safe max-[760px]:justify-start ${isSignup ? 'max-[760px]:hidden' : ''}`}
         >
           {login}
         </div>
         <div
           inert={!isSignup}
-          className={`${PANE} justify-start ${isSignup ? '' : 'max-md:hidden'}`}
+          className={`${PANE} justify-start ${isSignup ? '' : 'max-[760px]:hidden'}`}
         >
           {signup}
         </div>

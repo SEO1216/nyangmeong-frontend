@@ -2,9 +2,15 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 공용 Modal 스크롤 막대 겹침 전수조사 (2026-11-20, 검증 1회차 통과, 사람 확인). 공용 `Modal` `isLarge` dialog에 `overflow-hidden`(브라우저 기본 dialog 스크롤로 막대가 하나 더 생기던 것), 약관·약관 이력·포인트 조정 모달 본문 안 고정 높이 목록을 없애 본문 스크롤 하나로
+끝남: SCR-COM-002 공통 ⋮ 메뉴 공통화 (2026-11-20, 검증 1회차 통과, 사람 확인). 공용 `KebabMenu`에 `variant`(reveal·row), `CareItemMenu`·`ExpenseMenu`는 껍데기, 메인 바로가기 `ShortcutMenu` 삭제. 같이 Tailwind 기본 분기점 5개 파일 760·1100, 주석 3곳
 
 ## 다음에 할 것
+
+- 로그인·회원가입 화면 입력칸 옆 버튼 전수조사 후 높이를 입력칸에 맞추기(사람 요청 2026-11-20, 다음 작업). `/start`로 기획
+- 버그 후보(JAJ, 사람이 처리 방법 정함): 관찰 입력 모달 사진 미리보기가 칸 안에 다 안 들어오고 잘림. `features/health/diary/ObservationModal.jsx:266` `grid h-40 place-items-center` 상자 안 `img.size-full object-contain`이 grid에서 높이 100%를 못 받아 원래 비율로 커짐(600×900 그림 → 618×927, 칸 160). 공용 모달 문제 아님. `flex items-center justify-center`면 618×158. 수정 모드(`ObservationPhoto`)도 같은 칸
+- SCR-COM-002 ⋮ 메뉴 공통화 팀 알림(PR 본문 + 팀 채널): JAJ `health/CareItemMenu`·SJM `expense/shared/ExpenseMenu`가 공용 `KebabMenu variant="row"` 껍데기(props 그대로, 아래 공간이 모자라면 위로 펼침이 새로 생김). JAJ·YAY·SJM: `components/Card`(`sm:`→760), `adminTableStyles`(`md:`→760), 로그인·가입 `AuthLayout`·`AuthSlider`(768→760, 1024→1100), 마이페이지 홈(768→760)이라 640~759·760~767·1024~1099px 모양이 바뀜. 숫자 분기점 560·600·1000·1260(`MissingListPage`·`MissingList`·`CareDealCard`·`PetSlide`·`HealthDashboard`·`DailyTrendCard`)은 그대로, 담당자 알림만
+- ⋮ 메뉴 참고(검증 보고, 판정 밖): AI 사이드바 ⋮ 메뉴를 Esc로 닫으면 AI 매니저 모달까지 닫힘(전부터, KebabMenu Esc가 막지 않음). 검증이 `.playwright-mcp/pr/LJS-20261120-SCR-MAN-001-after-1440.png`를 덮어씀(그 PR에 쓰려면 다시 찍기)
+- "UI 통일 2 · 다른 담당 폴더 적용" 마일스톤을 끝낼지 사람이 정함(조각 모두 끝, 2-O도 이번에 끝)
 
 - SCR-COM-002 스크롤 막대 겹침 팀 알림(PR 본문 + 팀 채널): 모두: 공용 `Modal` `isLarge` 모달(건강 일지 입력·일정·케어 항목 관리·건강기록 둘러보기·아이템 상점·반려동물 등록·수정 등)이 dialog 자체로는 스크롤하지 않고 본문만 스크롤(가장자리 막대 없어짐). YAY: `member/shared/TermsModal` 약관 본문의 `max-h-[50vh]` 안쪽 스크롤을 없애 모달 본문 스크롤 하나로. 모달 본문 안에 `max-h`+`overflow-y-auto` 목록을 새로 두면 막대가 둘이 되니 본문 스크롤에 맡기기(PC 두 칸 구조는 칸마다 하나)
 - SCR-COM-002 스크롤 막대 겹침 참고(검증 보고, 판정 밖): `ExpenseDuplicateDialog`(확인 창 안 목록이 유일한 막대)·`BloodResultList`(모달 아닌 화면 목록)는 코드로만 판정. PC 두 칸 모달(`ShortcutEditModal`·`CareManageModal`)은 1280×560에서 칸마다 막대 1개씩(사람 결정대로 그대로)

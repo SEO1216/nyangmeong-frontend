@@ -1480,12 +1480,14 @@
 - 버그 후보(담당자에게 먼저 알림): 78 펫이야기 상세 내 글에도 신고 버튼(`community/PostDetail.jsx`, KSJ), 82 `ZONES` 순서 반대(`health/CareChipPicker.jsx`·`CareItemFields.jsx`, JAJ)
 - 이번엔 안 함: 기준 미정 18행(55·57·61·63·64·65·67·70·77·81·85·88~91), 메모 "변경없음"·"잠시 패스"·"정하지 않음" 행(8·17·19·21·25·30·35·75·86·97)
 
-## SCR-COM-002 공통 ⋮ 메뉴 공통화 — 대기
+## SCR-COM-002 공통 ⋮ 메뉴 공통화 — 끝
 - 기능: (사람 지시 2026-11-08 "리팩토링 때 한번에", 명세 FN 추가 없음) A1 `components/KebabMenu.jsx` variant 추가, A2 `CareItemMenu`·A3 `ExpenseMenu`를 KebabMenu 껍데기로, A4 `MainShortcuts`의 `ShortcutMenu`를 KebabMenu로
 - 기다리는 것: 없음
 - 완료 조건: 네 곳(AI 사이드바·건강기록 3곳·가계부·메인 바로가기) ⋮ 메뉴가 전과 같은 항목·모양으로 열리고 닫힌다 / `MoreVertical`은 `KebabMenu`와 범위 밖 CommentSection·PetSlide에만 남는다
 - 순서: 남은 작업 중 맨 마지막(사람 2026-11-10 "메뉴 공통화는 제일 마지막으로")
 - 같이 할 것(사람 2026-11-19 "리팩토링 때 한번에"): UI 통일 2-O 남은 Tailwind 기본 분기점 정리. `components/Card` `sm:`, `adminTableStyles` `md:`, `layouts/AuthLayout`·`AuthSlider` `md:`·`lg:`, `pages/mypage/MyPageHomePage` `md:`를 760·1100으로 바꾸고(640~759·760~767·1024~1099px 모양이 바뀜, JAJ·YAY 알림), 주석 고침(`CareFilters`·`MissingFilters` "미만는", `AiChatModal` `useCloseWithMotion` 주석). 숫자 분기점 560·600·1000·1260은 그대로 두고 담당자 알림만
+- 완료 조건 결과: 검증 `통과`(2026-11-20, 회차 1, A1~A5·B1·B2), 사람 확인 2026-11-20. 건강기록 `CareItemMenu`는 지금 1곳(지속 관찰 상세)에서만 쓴다. `MoreVertical`은 KebabMenu·CommentSection·`pet/list/MoreMenu`에만
+- 연결 남음: 없음
 
 ## SCR-MAN-001 메인페이지 · 사진 용도 판단 AI 연결 — 끝
 - 기능: 명세 기능 ID 추가 없음(메인 개편 뒤 추가, 기능명세서·화면설계서 미반영). 걸치는 기능 FN-MAN-002, SCR-AIM-013. SCR-MAN-001 "검색창 이미지 첨부 → AI 대화창 의도 판단"의 연결 남음 A3
