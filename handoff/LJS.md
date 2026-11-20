@@ -2,9 +2,13 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 UI 통일 2-M · 남은 옛 분기점·삭제 확인 정리 (2026-11-19, M1~M4 검증 1회차 통과, 사람 확인). 커뮤니티 10개 파일 `761`·`1101` → `760`·`1100`, 가계부 전체 내역 `(width < 760px)`, AI 대화·라우팅 매핑 삭제 확인 `isDanger`, `ui.md` 예시 분기점
+끝남: SCR-COM-002 공용 확인 창 왼쪽 정렬·제목·설명 (2026-11-19, C1~C4 검증 1회차 통과, 사람 확인). 공용 `Modal isConfirm` 왼쪽 정렬·제목 18px 600·설명 16px, 760 이상 버튼 오른쪽 자기 너비·미만 반반, `isSpacious` 삭제, 제목만 있던 창에 설명, 두 문장 제목을 제목·설명으로
 
 ## 다음에 할 것
+
+- SCR-COM-002 공용 확인 창 팀 알림(PR 본문 + 팀 채널, 모두): 확인 창(`ConfirmModal`·`Modal isConfirm`)이 왼쪽 정렬·제목 18px 600·설명 16px 회색, 760px 이상은 버튼이 오른쪽에 자기 너비(최소 80px), 760 미만은 반반 꽉 참. 파일 수정 없이 전체 적용. `Modal`의 `isSpacious` 없어짐(SJM `pet/list` 4곳에서 지움). 문구: 로그아웃 "로그아웃할까요?"+설명, JAJ 건강기록 삭제 창 5곳 설명 추가·일정 삭제·반려동물 변경·다시 촬영 제목/설명 나눔, KSJ 댓글 삭제 설명 추가·게시글·돌봄·실종·문의 삭제·글쓰기 나가기 제목/설명 나눔, SJM 가계부 다시 촬영 제목/설명 나눔. 확인 창 제목은 질문 한 문장, 덧붙일 말은 `description`에 쓰기
+- 확인 창 참고(검증 보고·구현, 판정 밖): `components/ConfirmModal.jsx` 위 주석 "가운데 정렬, 버튼 꽉 참"이 이제 코드와 다름(다음에 이 파일을 고칠 때). `inquiry/InquiryForm.jsx` 나가기 창 제목에 두 문장이 붙어 있음(기획 목록 밖, KSJ). PC 프로필 메뉴로 연 로그아웃 창은 폭을 1100 아래로 줄이면 닫힘(헤더 드롭다운이 사라짐, 전부터)
+- 카카오 지도 키 도메인(2026-11-19 확인): `localhost:5180`·`127.0.0.1`은 등록되지 않아 `sdk.js` 401 `domain mismatched`(5173·5174는 됨). 검증(5180)에서 지도 확인이 필요하면 키 관리자가 카카오 개발자 콘솔 Web 사이트 도메인에 `http://localhost:5180`을 추가해야 함
 
 - SCR-COM-002 UI 통일 2-M 팀 알림(PR 본문 + 팀 채널, KSJ·SJM): 펫돌봄·실종센터·펫이야기 상세(`features/community`·`pages/community/CareListPage`) 분기점이 `min-[760px]`·`max-[1100px]`·`min-[1100px]`로 바뀌어 폭이 정확히 760·1100px일 때 PC 쪽 모양. 가계부 전체 내역(`ExpenseHistory`)도 760px부터 PC. AI 대화 삭제·관리자 라우팅 매핑 삭제 확인 버튼이 빨간색
 - 2-M 참고(검증 보고, 판정 밖): `care/CareFilters.jsx`·`missing/MissingFilters.jsx` 주석 "760px 미만는" 조사 오타(→ "미만은"). 다음에 이 파일을 고칠 때 같이. 2-M 범위 밖으로 남긴 옛 분기점: `components/Card` `sm:`, `adminTableStyles` `md:`, `AuthLayout`·`MyPageHomePage`, 랜딩 `LandingHeader` 768·`ProcessSection` 1280(랜딩 교체 SCR-MAN-002 때)

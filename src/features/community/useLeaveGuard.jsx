@@ -22,7 +22,8 @@ export default function useLeaveGuard() {
 
   const leaveModal = leaveTo && (
     <ConfirmModal
-      title="작성을 그만둘까요? 지금까지 쓴 내용은 저장되지 않아요"
+      title="작성을 그만둘까요?"
+      description="지금까지 쓴 내용은 저장되지 않아요."
       confirmLabel="나가기"
       cancelLabel="계속 쓰기"
       onConfirm={() => navigate(leaveTo)}

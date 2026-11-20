@@ -85,7 +85,6 @@ export default function PlacePage() {
         results={place.results}
         strayFavorites={strayFavorites}
         selectedPlace={place.selectedPlace}
-        isFavorite={(target) => place.bookmarkSnOf(target) !== null}
         fitKey={search.fitKey}
         homeArea={place.homeArea}
         isReady={place.query.isSuccess}

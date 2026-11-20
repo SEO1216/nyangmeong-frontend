@@ -254,7 +254,8 @@ export default function CareDetail({ post }) {
 
       {modal === 'delete' && (
         <ConfirmModal
-          title="돌봄 요청을 삭제할까요? 삭제한 글은 되돌릴 수 없어요. 이미 나눈 채팅 기록은 그대로 남아요"
+          title="돌봄 요청을 삭제할까요?"
+          description="삭제한 글은 되돌릴 수 없어요. 이미 나눈 채팅 기록은 그대로 남아요."
           confirmLabel="삭제하기"
           isDanger
           isPending={remove.isPending}

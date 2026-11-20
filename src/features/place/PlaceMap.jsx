@@ -24,7 +24,6 @@ export default function PlaceMap({
   results,
   strayFavorites,
   selectedPlace,
-  isFavorite,
   fitKey,
   homeArea,
   isReady,
@@ -177,7 +176,6 @@ export default function PlaceMap({
             <PlacePin
               place={place}
               label={String(index + 1)}
-              isFavorite={isFavorite(place)}
               isSelected={selectedPlace?.plcSn === place.plcSn}
               onSelect={onSelectPin}
             />

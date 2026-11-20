@@ -90,7 +90,8 @@ export function LogoutConfirm({ onClose }) {
 
   return (
     <ConfirmModal
-      title="로그아웃하시겠어요?"
+      title="로그아웃할까요?"
+      description="다시 이용하려면 로그인해 주세요."
       confirmLabel="로그아웃"
       errorMessage={
         logout.isError

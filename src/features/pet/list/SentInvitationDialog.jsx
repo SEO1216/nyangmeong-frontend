@@ -56,7 +56,6 @@ export default function SentInvitationDialog({
   return (
     <Modal
       isConfirm
-      isSpacious
       isPending={mutation.isPending}
       title={text.title(invitation.invtnTrgtEml)}
       description={`${petNames.join('·')} 초대예요. ${text.description}`}
