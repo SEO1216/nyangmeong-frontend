@@ -172,7 +172,7 @@ export default function AdminLayout() {
   const handleLogoutClose = () => setIsLogoutOpen(false);
 
   return (
-    <div className="min-h-screen bg-surface-2">
+    <div className="min-h-screen bg-page-bg">
       <ScrollToTop />
       {/** 상단 바 */}
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line bg-white px-4">
