@@ -70,3 +70,42 @@ export const isLeaveBlockedStage = (stage) =>
 /** 주소 공유는 매칭 완료 ~ 거래 중(매칭 완료·확인 대기·수령 대기)에만 (FN-CMU-005-05) */
 export const canShareAddress = (stage) =>
   [MTCH_STTS.MATCHED, MTCH_STTS.DONE_REQ, MTCH_STTS.PAYING].includes(stage);
+
+/** 거래 취소 요청 상태 PCAG06: 요청중·동의·거절·철회 (방 상세 cnclDmnd.dmndSttsCd) */
+export const CNCL_DMND_STTS = {
+  REQUESTING: 'PCAC0021',
+  APPROVED: 'PCAC0022',
+  REJECTED: 'PCAC0023',
+  WITHDRAWN: 'PCAC0024',
+};
+
+/**
+ * 이 방의 거래 취소 요청 상태 (cnclDmnd는 이 매칭의 가장 최근 요청 하나, 없으면 null)
+ * - requesting-mine 내가 요청해 응답 대기, requesting-theirs 상대가 요청해 내 응답 대기
+ * - rejected-mine 내 요청이 거절됨(이 거래에서 다시 요청 불가), approved 동의돼 거래 취소됨
+ */
+export const getDealCancelState = (room) => {
+  const demand = room.cnclDmnd;
+  if (!demand) return 'none';
+  switch (demand.dmndSttsCd) {
+    case CNCL_DMND_STTS.REQUESTING:
+      return demand.mineYn ? 'requesting-mine' : 'requesting-theirs';
+    case CNCL_DMND_STTS.REJECTED:
+      return demand.mineYn ? 'rejected-mine' : 'none';
+    case CNCL_DMND_STTS.APPROVED:
+      return 'approved';
+    default:
+      return 'none';
+  }
+};
+
+/** 거래 취소 요청이 걸려 있는 동안은 완료 요청·확인·수령 확인을 서버가 409로 막는다 */
+export const isDealCancelRequesting = (room) =>
+  getDealCancelState(room).startsWith('requesting');
+
+/** 거래 취소 요청 메뉴를 보일 단계: 나가기가 막히는 단계와 같다 */
+export const canRequestDealCancel = (room) =>
+  isLeaveBlockedStage(room.mtchDlngSttsCd);
+
+/** 펫돌봄 모집 상태 PCAG01: 모집중일 때만 매칭을 요청할 수 있다(서버도 아니면 409 CARE_RECRUITMENT_CLOSED) */
+export const RCRT_STTS_RECRUITING = 'PCAC0001';
