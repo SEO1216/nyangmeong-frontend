@@ -1,8 +1,10 @@
 import { Check, ChevronRight } from 'lucide-react';
+import { AUTH_BTN_PRIMARY } from '../shared/authStyles';
 import Checkbox from '@/components/Checkbox';
+import AuthActions from '../shared/AuthActions';
+import AuthBody from '../shared/AuthBody';
 import { hasTermsView } from '../shared/validate';
 import { SIGNUP_MESSAGES as MSG } from './signupMessages';
-import { AUTH_BTN_PRIMARY } from '../shared/authStyles';
 
 // 약관 목록과 모두 동의. 이메일 가입 1단계와 SNS 가입 확인 화면이 같이 쓴다.
 // lockedSn은 외부에서 이미 확인된 항목(만 14세)이라 체크 대신 "확인 완료"로 보이고 모두 동의로 바뀌지 않는다
@@ -101,18 +103,22 @@ export default function TermsStep({ form }) {
   }
   return (
     <>
-      <TermsChecklist form={form} isRoomy />
-      <p className="mt-2 text-sm leading-5 text-muted max-[760px]:mt-4">
-        필수 약관에 모두 동의하면 다음으로 넘어갈 수 있습니다.
-      </p>
-      <button
-        type="button"
-        disabled={!form.isTermsOk}
-        onClick={() => form.goStep('email')}
-        className={`${AUTH_BTN_PRIMARY} w-full mt-5 max-[760px]:mt-8`}
-      >
-        다음
-      </button>
+      <AuthBody>
+        <TermsChecklist form={form} isRoomy />
+        <p className="mt-2 text-sm leading-5 text-muted max-[760px]:mt-4">
+          필수 약관에 모두 동의하면 다음으로 넘어갈 수 있습니다.
+        </p>
+      </AuthBody>
+      <AuthActions>
+        <button
+          type="button"
+          disabled={!form.isTermsOk}
+          onClick={() => form.goStep('email')}
+          className={`${AUTH_BTN_PRIMARY} w-full`}
+        >
+          다음
+        </button>
+      </AuthActions>
     </>
   );
 }

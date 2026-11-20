@@ -1,4 +1,5 @@
 import StepMotion from '@/components/StepMotion';
+import AuthActions from '../shared/AuthActions';
 import AuthCard from '../shared/AuthCard';
 import AuthHeading from '../shared/AuthHeading';
 import AuthNotice from '../shared/AuthNotice';
@@ -24,8 +25,6 @@ const STEPS = {
     title: '이메일을 인증해 주세요',
     subtitle: '인증한 이메일 주소를 로그인 아이디로 사용합니다.',
     Body: EmailStep,
-    // 이메일 입력칸을 이메일 로그인의 아이디 칸과 같은 높이에 둔다(추가-8)
-    spacing: 'stepEmail',
   },
   phone: {
     no: 3,
@@ -45,7 +44,7 @@ const STEPS = {
 // form: direction, nickname, isNicknameOpen, openNickname, closeNickname, saveNickname
 export function SignupComplete({ form, onGoLogin }) {
   return (
-    <AuthCard className="flex flex-1 flex-col">
+    <AuthCard isCentered={false}>
       <StepMotion
         stepKey="complete"
         direction={form.direction}
@@ -71,13 +70,15 @@ export function SignupComplete({ form, onGoLogin }) {
             </button>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={onGoLogin}
-          className={`${AUTH_BTN_PRIMARY} w-full mt-8`}
-        >
-          로그인으로
-        </button>
+        <AuthActions>
+          <button
+            type="button"
+            onClick={onGoLogin}
+            className={`${AUTH_BTN_PRIMARY} w-full`}
+          >
+            로그인으로
+          </button>
+        </AuthActions>
       </StepMotion>
       {form.isNicknameOpen && (
         <NicknameModal
@@ -99,14 +100,21 @@ export default function SignupForm({ onBackToLogin, onGoLogin, onRecover }) {
     return <SignupComplete form={form} onGoLogin={onGoLogin} />;
   }
 
-  const { no, title, subtitle, Body, spacing = 'step' } = STEPS[form.step];
+  const { no, title, subtitle, Body } = STEPS[form.step];
   return (
-    <AuthCard onBack={form.goBack}>
+    <AuthCard
+      onBack={form.goBack}
+      spacing={form.step === 'phone' ? 'sparse' : 'normal'}
+    >
       <StepMotion stepKey={`${form.step}-head`} direction={form.direction}>
-        <AuthHeading title={title} subtitle={subtitle} spacing={spacing} />
+        <AuthHeading title={title} subtitle={subtitle} />
       </StepMotion>
       <SignupStepper current={no} />
-      <StepMotion stepKey={form.step} direction={form.direction}>
+      <StepMotion
+        stepKey={form.step}
+        direction={form.direction}
+        className="flex grow flex-col"
+      >
         {form.notice && !(form.step === 'email' && form.isCodeLocked) && (
           <AuthNotice type={form.notice.type} message={form.notice.message} />
         )}
