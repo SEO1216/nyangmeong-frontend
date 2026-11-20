@@ -3,8 +3,11 @@ import AuthCard from '../shared/AuthCard';
 import AuthField from '../shared/AuthField';
 import AuthHeading from '../shared/AuthHeading';
 import AuthNotice from '../shared/AuthNotice';
-import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
-import { TEXT_LINK } from '../shared/authStyles';
+import {
+  TEXT_LINK,
+  AUTH_BTN_PRIMARY,
+  AUTH_BTN_SECONDARY,
+} from '../shared/authStyles';
 import { PASSWORD_MESSAGES as MSG } from './passwordMessages';
 import usePasswordReset from './usePasswordReset';
 
@@ -29,7 +32,7 @@ export default function PasswordResetForm({
         <button
           type="button"
           onClick={onGoLogin}
-          className={`${BTN_PRIMARY} w-full mt-8`}
+          className={`${AUTH_BTN_PRIMARY} w-full mt-8`}
         >
           로그인으로
         </button>
@@ -49,14 +52,14 @@ export default function PasswordResetForm({
           <button
             type="button"
             onClick={onRetryAuth}
-            className={`${BTN_PRIMARY} w-full`}
+            className={`${AUTH_BTN_PRIMARY} w-full`}
           >
             이메일 인증 다시 하기
           </button>
           <button
             type="button"
             onClick={onGoLogin}
-            className={`${BTN_SECONDARY} w-full`}
+            className={`${AUTH_BTN_SECONDARY} w-full`}
           >
             로그인으로
           </button>
@@ -77,10 +80,7 @@ export default function PasswordResetForm({
         }
       />
       {form.notice && (
-        <AuthNotice
-          type={form.notice.type}
-          message={form.notice.message}
-        />
+        <AuthNotice type={form.notice.type} message={form.notice.message} />
       )}
       <form noValidate onSubmit={form.submit} className="flex flex-col gap-5">
         <AuthField
@@ -111,7 +111,7 @@ export default function PasswordResetForm({
         <button
           type="submit"
           disabled={!form.canSubmit || form.isPending}
-          className={`${BTN_PRIMARY} w-full mt-3`}
+          className={`${AUTH_BTN_PRIMARY} w-full mt-3`}
         >
           비밀번호 재설정
         </button>

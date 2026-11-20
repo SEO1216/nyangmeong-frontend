@@ -3,7 +3,7 @@ import AuthCard from '../shared/AuthCard';
 import AuthField from '../shared/AuthField';
 import AuthHeading from '../shared/AuthHeading';
 import AuthNotice from '../shared/AuthNotice';
-import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import { SIDE_BTN, AUTH_BTN_PRIMARY } from '../shared/authStyles';
 import { normalizePhone } from '../shared/validate';
 import { SNS_NAME } from '../shared/snsCodes';
 import TermsModal from '../shared/TermsModal';
@@ -29,10 +29,7 @@ export default function SnsSignupForm({ snsSignup, onCancel, onGoLogin }) {
         spacing="step"
       />
       {form.notice && (
-        <AuthNotice
-          type={form.notice.type}
-          message={form.notice.message}
-        />
+        <AuthNotice type={form.notice.type} message={form.notice.message} />
       )}
       <form onSubmit={form.submitJoin} noValidate>
         <div className="rounded-box bg-surface-2 p-4 leading-6 text-ink-2">
@@ -72,7 +69,7 @@ export default function SnsSignupForm({ snsSignup, onCancel, onGoLogin }) {
                   type="button"
                   onClick={form.submitPhoneCheck}
                   disabled={!normalizePhone(form.phone) || form.isPhoneChecking}
-                  className={`${BTN_SECONDARY} min-w-22 shrink-0 whitespace-nowrap`}
+                  className={SIDE_BTN}
                 >
                   중복확인
                 </button>
@@ -91,7 +88,7 @@ export default function SnsSignupForm({ snsSignup, onCancel, onGoLogin }) {
           <button
             type="button"
             onClick={onCancel}
-            className={`${BTN_PRIMARY} w-full mt-5`}
+            className={`${AUTH_BTN_PRIMARY} w-full mt-5`}
           >
             로그인으로
           </button>
@@ -99,7 +96,7 @@ export default function SnsSignupForm({ snsSignup, onCancel, onGoLogin }) {
           <button
             type="submit"
             disabled={!form.canJoin || form.isJoining}
-            className={`${BTN_PRIMARY} w-full mt-5`}
+            className={`${AUTH_BTN_PRIMARY} w-full mt-5`}
           >
             회원가입
           </button>

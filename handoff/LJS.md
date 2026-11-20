@@ -2,11 +2,14 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 공통 ⋮ 메뉴 공통화 (2026-11-20, 검증 1회차 통과, 사람 확인). 공용 `KebabMenu`에 `variant`(reveal·row), `CareItemMenu`·`ExpenseMenu`는 껍데기, 메인 바로가기 `ShortcutMenu` 삭제. 같이 Tailwind 기본 분기점 5개 파일 760·1100, 주석 3곳
+끝남: SCR-COM-002 로그인·가입 버튼·입력칸 높이 48 통일 (2026-11-20, 검증 통과, 사람 확인). 입력칸 옆 버튼 8개(B1)와 추가-1(로그인 50px 버튼·보안코드·가입·비밀번호 찾기·재설정·재가입 복구·탈퇴 완료·약관 창 큰 버튼)을 `authStyles`의 `AUTH_BTN_PRIMARY`·`AUTH_BTN_SECONDARY`·`SIDE_BTN`(48px·둥글기 12)로
 
 ## 다음에 할 것
 
-- 로그인·회원가입 화면 입력칸 옆 버튼 전수조사 후 높이를 입력칸에 맞추기(사람 요청 2026-11-20, 다음 작업). `/start`로 기획
+- SCR-COM-002 로그인·가입 버튼 48 팀 알림(PR 본문 + 팀 채널, YAY): `features/member` 로그인·가입·비밀번호 찾기·재설정·재가입 복구·탈퇴 완료·약관 창 버튼과 입력칸 옆 버튼이 `shared/authStyles`의 `AUTH_BTN_PRIMARY`·`AUTH_BTN_SECONDARY`·`SIDE_BTN`(공용 버튼 + 48px·둥글기 12)로 바뀜. 로그인 [이메일로 로그인하기]·[로그인]은 50px·15px 굵게·떠오름 → 48px·16px 600·떠오름 없음, 보안코드 그림 칸·새로고침·입력칸 40 → 48. 2-K 공용 규격(40·6)과 다름(입력칸 48에 맞춤). 회원정보·탈퇴 안내 화면(`profile/`·`withdraw/` 나머지)은 그대로 40
+- 검증 참고(판정 밖): 비밀번호 찾기·재설정·재가입 복구·닉네임 모달·SNS 가입·탈퇴 완료·약관 창은 코드로만 확인(SNS·탈퇴 계정 필요)
+
+
 - 버그 후보(JAJ, 사람이 처리 방법 정함): 관찰 입력 모달 사진 미리보기가 칸 안에 다 안 들어오고 잘림. `features/health/diary/ObservationModal.jsx:266` `grid h-40 place-items-center` 상자 안 `img.size-full object-contain`이 grid에서 높이 100%를 못 받아 원래 비율로 커짐(600×900 그림 → 618×927, 칸 160). 공용 모달 문제 아님. `flex items-center justify-center`면 618×158. 수정 모드(`ObservationPhoto`)도 같은 칸
 - SCR-COM-002 ⋮ 메뉴 공통화 팀 알림(PR 본문 + 팀 채널): JAJ `health/CareItemMenu`·SJM `expense/shared/ExpenseMenu`가 공용 `KebabMenu variant="row"` 껍데기(props 그대로, 아래 공간이 모자라면 위로 펼침이 새로 생김). JAJ·YAY·SJM: `components/Card`(`sm:`→760), `adminTableStyles`(`md:`→760), 로그인·가입 `AuthLayout`·`AuthSlider`(768→760, 1024→1100), 마이페이지 홈(768→760)이라 640~759·760~767·1024~1099px 모양이 바뀜. 숫자 분기점 560·600·1000·1260(`MissingListPage`·`MissingList`·`CareDealCard`·`PetSlide`·`HealthDashboard`·`DailyTrendCard`)은 그대로, 담당자 알림만
 - ⋮ 메뉴 참고(검증 보고, 판정 밖): AI 사이드바 ⋮ 메뉴를 Esc로 닫으면 AI 매니저 모달까지 닫힘(전부터, KebabMenu Esc가 막지 않음). 검증이 `.playwright-mcp/pr/LJS-20261120-SCR-MAN-001-after-1440.png`를 덮어씀(그 PR에 쓰려면 다시 찍기)

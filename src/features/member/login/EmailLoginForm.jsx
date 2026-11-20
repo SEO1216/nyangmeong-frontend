@@ -6,6 +6,7 @@ import AuthCard from '../shared/AuthCard';
 import AuthField from '../shared/AuthField';
 import AuthHeading from '../shared/AuthHeading';
 import AuthNotice from '../shared/AuthNotice';
+import { AUTH_BTN_PRIMARY } from '../shared/authStyles';
 import { LOGIN_MESSAGES as MSG } from './loginMessages';
 import useEmailLogin from './useEmailLogin';
 
@@ -21,10 +22,7 @@ export default function EmailLoginForm({ onBack, onSuccess, onSignup }) {
         spacing="wide"
       />
       {form.notice && (
-        <AuthNotice
-          type={form.notice.type}
-          message={form.notice.message}
-        />
+        <AuthNotice type={form.notice.type} message={form.notice.message} />
       )}
       <form noValidate onSubmit={form.submit} className="flex flex-col gap-5">
         <AuthField
@@ -72,7 +70,7 @@ export default function EmailLoginForm({ onBack, onSuccess, onSignup }) {
         <button
           type="submit"
           disabled={!form.isFilled || form.isPending}
-          className="mt-3 inline-flex h-[50px] w-full items-center justify-center rounded-xl bg-brand-500 text-[15px] font-bold text-white transition hover:enabled:-translate-y-px hover:enabled:bg-brand-600 disabled:cursor-not-allowed disabled:bg-surface-3 disabled:text-line-strong"
+          className={`${AUTH_BTN_PRIMARY} mt-3 w-full`}
         >
           로그인
         </button>

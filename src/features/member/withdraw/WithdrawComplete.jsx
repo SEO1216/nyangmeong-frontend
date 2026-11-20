@@ -1,6 +1,6 @@
 import { CircleCheck } from 'lucide-react';
 import AuthHeading from '../shared/AuthHeading';
-import { BTN_PRIMARY } from '@/components/buttonStyles';
+import { AUTH_BTN_PRIMARY } from '../shared/authStyles';
 
 /** 회원탈퇴 완료 1~2 */
 export default function WithdrawComplete({ onGoLanding }) {
@@ -21,7 +21,7 @@ export default function WithdrawComplete({ onGoLanding }) {
       <button
         type="button"
         onClick={onGoLanding}
-        className={`${BTN_PRIMARY} w-full`}
+        className={`${AUTH_BTN_PRIMARY} w-full`}
       >
         랜딩페이지로
       </button>

@@ -5,7 +5,11 @@ import Checkbox from '@/components/Checkbox';
 import AuthField from '../shared/AuthField';
 import AuthHeading from '../shared/AuthHeading';
 import AuthNotice from '../shared/AuthNotice';
-import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import {
+  SIDE_BTN,
+  AUTH_BTN_PRIMARY,
+  AUTH_BTN_SECONDARY,
+} from '../shared/authStyles';
 import { resendLabel } from '../shared/emailCert';
 import TermsModal from '../shared/TermsModal';
 import { hasTermsView } from '../shared/validate';
@@ -37,7 +41,7 @@ function VerifyStep({ form }) {
               type="button"
               onClick={form.sendCode}
               disabled={form.isSending || form.resendSeconds > 0}
-              className={`${BTN_SECONDARY} min-w-22 shrink-0 whitespace-nowrap`}
+              className={SIDE_BTN}
             >
               {form.isSent
                 ? resendLabel(form.resendSeconds)
@@ -71,7 +75,7 @@ function VerifyStep({ form }) {
               <button
                 type="submit"
                 disabled={form.isVerifying}
-                className={`${BTN_SECONDARY} min-w-22 shrink-0 whitespace-nowrap ${CONFIRM_BTN}`}
+                className={`${SIDE_BTN} ${CONFIRM_BTN}`}
               >
                 인증 확인
               </button>
@@ -164,7 +168,7 @@ function ConfirmStep({ form }) {
                 type="button"
                 onClick={form.submitPhoneCheck}
                 disabled={form.isPhoneChecking}
-                className={`${BTN_SECONDARY} min-w-22 shrink-0 whitespace-nowrap`}
+                className={SIDE_BTN}
               >
                 중복확인
               </button>
@@ -176,7 +180,7 @@ function ConfirmStep({ form }) {
         type="button"
         onClick={form.submitRecover}
         disabled={!form.canRecover || form.isRecovering}
-        className={`${BTN_PRIMARY} w-full mt-8`}
+        className={`${AUTH_BTN_PRIMARY} w-full mt-8`}
       >
         기존 정보 복구
       </button>
@@ -212,7 +216,7 @@ export default function RecoveryForm({
           <button
             type="button"
             onClick={onGoLogin}
-            className={`${BTN_PRIMARY} w-full mt-8`}
+            className={`${AUTH_BTN_PRIMARY} w-full mt-8`}
           >
             로그인으로
           </button>
@@ -242,7 +246,7 @@ export default function RecoveryForm({
               <button
                 type="button"
                 onClick={onRestartSignup}
-                className={`${BTN_SECONDARY} w-full -mt-2 mb-6`}
+                className={`${AUTH_BTN_SECONDARY} w-full -mt-2 mb-6`}
               >
                 새로 회원가입하기
               </button>
@@ -254,7 +258,7 @@ export default function RecoveryForm({
           type="button"
           onClick={form.cancel}
           disabled={form.isRecovering}
-          className={`${BTN_SECONDARY} w-full ${isConfirm ? 'mt-3' : 'mt-8'}`}
+          className={`${AUTH_BTN_SECONDARY} w-full ${isConfirm ? 'mt-3' : 'mt-8'}`}
         >
           취소
         </button>
