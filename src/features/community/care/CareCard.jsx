@@ -84,7 +84,7 @@ export default function CareCard({ post }) {
       {hasThumb && (
         <span
           aria-hidden="true"
-          className={`relative col-start-2 row-span-2 row-start-1 grid min-h-[132px] place-items-center self-stretch overflow-hidden rounded-[10px] bg-surface-2 ${dim} max-[760px]:order-1 max-[760px]:col-start-1 max-[760px]:row-span-1 max-[760px]:row-start-auto max-[760px]:aspect-[16/9] max-[760px]:min-h-0`}
+          className={`relative col-start-2 row-span-2 row-start-1 grid min-h-[150px] place-items-center self-stretch overflow-hidden rounded-[10px] bg-surface-2 ${dim} max-[760px]:order-1 max-[760px]:col-start-1 max-[760px]:row-span-1 max-[760px]:row-start-auto max-[760px]:aspect-[16/9] max-[760px]:min-h-0`}
         >
           <FileImage
             src={publicFileUrl(post.thumbnailAtchFileSn)}
