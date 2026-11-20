@@ -1,5 +1,4 @@
 import { api } from '@/api/axios';
-import { IS_DEV } from '@/api/env';
 
 /**
  * 메인 반려동물 바로가기 조회·저장 (LJS 백엔드)
@@ -15,32 +14,13 @@ export const saveMainShortcuts = (shortcuts) =>
   api.put('/pets/main-shortcuts', shortcuts);
 
 /**
- * [서비스 튜토리얼 봤음 가짜 API] (SCR-MAN-001, 백엔드 API 나오기 전까지)
- * - 나오면 본문만 api 요청으로 바꾼다. 미확정: 경로, 필드 이름(tutorialSeenYn)
- * - 처음은 안 봄, 저장하면 봄(새로고침하면 처음으로)
- * - 개발 환경에서 ?fake=tutorial-seen이면 봄, ?fake=tutorial-error면 조회 실패
+ * 서비스 튜토리얼 봤음 조회·저장 (LJS 백엔드, SCR-MAN-001)
+ * - 응답: { tutrlViewYn }. 신규 가입 회원만 false(false면 메인에서 튜토리얼 모달을 띄운다)
+ * - 저장은 본문 없음. 이미 봤어도 같은 응답(멱등)
  */
-let fakeTutorialSeenYn = false;
 
-const readFakeParam = () =>
-  IS_DEV ? new URLSearchParams(window.location.search).get('fake') : null;
+/** 서비스 튜토리얼 봤음 조회 GET /members/me/tutorial */
+export const getServiceTutorial = () => api.get('/members/me/tutorial');
 
-/** 서비스 튜토리얼 봤음 조회: { tutorialSeenYn } */
-export const getServiceTutorial = async () => {
-  const fake = readFakeParam();
-  if (fake === 'tutorial-error') {
-    throw {
-      code: 'SERVER_ERROR',
-      message: '튜토리얼 정보를 불러오지 못했어요.',
-      fields: null,
-      data: null,
-    };
-  }
-  return { tutorialSeenYn: fake === 'tutorial-seen' || fakeTutorialSeenYn };
-};
-
-/** 서비스 튜토리얼 봤음 저장: 조회와 같은 응답 */
-export const saveServiceTutorialSeen = async () => {
-  fakeTutorialSeenYn = true;
-  return { tutorialSeenYn: true };
-};
+/** 서비스 튜토리얼 봤음 저장 PUT /members/me/tutorial. 조회와 같은 응답 */
+export const saveServiceTutorialSeen = () => api.put('/members/me/tutorial');
