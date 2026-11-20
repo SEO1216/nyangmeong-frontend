@@ -440,7 +440,7 @@ function MobileInfo({ pet }) {
             <span className="text-badge font-medium text-subtle"> {range}</span>
           )}
         </MobileRow>
-        <MobileRow label="인식 번호" empty={!pet.chipNo} emptyText="미등록">
+        <MobileRow label="인식 번호" empty={!pet.chipNo} emptyText="-">
           {pet.chipNo}
         </MobileRow>
         <MobileList label="알레르기" value={pet.algyCn} isOpen={isOpen} />
@@ -448,7 +448,9 @@ function MobileInfo({ pet }) {
         {isOpen && (
           <>
             <MobileRow label="털색">{getColrName(pet)}</MobileRow>
-            <MobileRow label="특징">{pet.chrcCn}</MobileRow>
+            <MobileRow label="특징" empty={!pet.chrcCn} emptyText="-">
+              {pet.chrcCn}
+            </MobileRow>
           </>
         )}
       </dl>
@@ -484,7 +486,7 @@ function MobileList({ label, value, isOpen }) {
   const hiddenCount = items.length - VISIBLE_LIST_COUNT;
 
   return (
-    <MobileRow label={label} empty={items.length === 0} emptyText="없음">
+    <MobileRow label={label} empty={items.length === 0} emptyText="-">
       {isOpen ? (
         items.join(', ')
       ) : (
@@ -509,23 +511,19 @@ const ROW =
 const DT = 'w-20 shrink-0 text-subtle min-[760px]:max-[1260px]:w-16';
 const DD = 'relative m-0 flex min-w-0 flex-1 items-center gap-2 font-semibold';
 
-/** 인식 번호: 띄어쓰기 없이 이어 쓴다. 15자리는 국가번호(앞 3자리) 뒤에서만 줄이 바뀔 수 있고, 1100~1259px는 줄을 바꾸지 않는다(복사 때 공백 없음) */
+/** 빈 값 표시: PC·모바일 공통 흐린 "-" */
+function EmptyDash() {
+  return <span className="font-normal text-muted">-</span>;
+}
+
+/** 인식 번호: 띄어쓰기 없이 이어 쓰고 줄을 바꾸지 않는다(복사 때 공백 없음). 761~1099px는 글자를 한 단계 줄인다 */
 function ChipNo({ value }) {
-  if (!value) return null;
+  if (!value) return <EmptyDash />;
   const digits = value.replace(/\s/g, '');
-  const wrapClass = 'min-w-0 min-[760px]:max-[1100px]:text-sm';
-  if (digits.length !== 15) return <span className={wrapClass}>{digits}</span>;
   return (
-    <>
-      <span className={`${wrapClass} min-[1100px]:max-[1260px]:hidden`}>
-        {digits.slice(0, 3)}
-        <wbr />
-        {digits.slice(3)}
-      </span>
-      <span className="hidden whitespace-nowrap min-[1100px]:max-[1260px]:inline">
-        {digits}
-      </span>
-    </>
+    <span className="min-w-0 whitespace-nowrap min-[760px]:max-[1100px]:text-sm">
+      {digits}
+    </span>
   );
 }
 
@@ -567,6 +565,11 @@ function ChrcRow({ value }) {
   return (
     <div className={ROW}>
       <dt className={DT}>특징</dt>
+      {!value && (
+        <dd className={DD}>
+          <EmptyDash />
+        </dd>
+      )}
       {value && (
         <dd className={DD}>
           <span ref={textRef} className="min-w-0 truncate">
@@ -602,6 +605,11 @@ function ListRow({ label, value }) {
   return (
     <div className={ROW}>
       <dt className={DT}>{label}</dt>
+      {items.length === 0 && (
+        <dd className={DD}>
+          <EmptyDash />
+        </dd>
+      )}
       {items.length > 0 && (
         <dd className={DD}>
           <span className="min-w-0 truncate">

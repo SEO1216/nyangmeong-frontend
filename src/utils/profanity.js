@@ -1,8 +1,8 @@
 /** 서버가 금칙어가 든 입력을 거절할 때의 오류 코드. 검사는 서버가 한다(응답 data는 [{ field, message }]) */
 export const PROFANITY_CODE = 'PROFANITY_DETECTED';
 
-export const PROFANITY_MESSAGE =
-  '욕설이나 비속어가 포함되어 있어요. 표현을 바꿔 주세요';
+/** 서버 `ErrorCode.PROFANITY_DETECTED` 문구와 같다(화면 어디서나 같은 안내) */
+export const PROFANITY_MESSAGE = '부적절한 표현이 포함되어 있어요.';
 
 const NO_FIELDS = [];
 /** 렌더마다 새 배열이 생기지 않게 오류 하나당 한 번만 만든다(훅의 의존 값으로 쓰기 때문) */

@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, Check } from 'lucide-react';
-import Icon from '@/components/Icon';
+import { useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 import Modal from '@/components/Modal';
+import TocButton from '@/components/TocButton';
+import ZoomBox from '@/components/ZoomBox';
+import ZoomOverlay from '@/components/ZoomOverlay';
 import {
   BTN_PRIMARY,
   BTN_SECONDARY,
-  CHIP,
   TEXT_ACTION,
 } from '@/components/buttonStyles';
 import guide01PetCard from '@/assets/health-guide/guide-01-pet-card.png';
@@ -174,7 +175,6 @@ export default function HealthGuideModal({ onOpenDashboardEdit, onClose }) {
   const [index, setIndex] = useState(0);
   /** 확대 화면: null이면 닫힘. { image, label, trigger(포커스를 되돌릴 [크게 보기]) } */
   const [zoom, setZoom] = useState(null);
-  const closeRef = useRef(null);
 
   /** 장을 옮기면 확대 화면도 닫음 */
   const goTo = (nextIndex) => {
@@ -187,18 +187,6 @@ export default function HealthGuideModal({ onOpenDashboardEdit, onClose }) {
     setZoom(null);
   };
 
-  /** 열면 [닫기]에 포커스, Esc는 확대 화면만 닫음 */
-  useEffect(() => {
-    if (!zoom) return undefined;
-    closeRef.current.focus();
-    const handleKeyDown = (event) => {
-      if (event.key !== 'Escape') return;
-      zoom.trigger?.focus();
-      setZoom(null);
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [zoom]);
   const chapter = CHAPTERS[index];
   const isFirst = index === 0;
   const isLast = index === CHAPTERS.length - 1;
@@ -344,78 +332,8 @@ export default function HealthGuideModal({ onOpenDashboardEdit, onClose }) {
         </section>
       </div>
 
-      {zoom && (
-        <div
-          role="dialog"
-          aria-label={`${zoom.label} 사진 크게 보기`}
-          className="absolute inset-0 z-10 flex flex-col gap-3 rounded-modal bg-brand-900/80 p-6 max-[760px]:rounded-none max-[760px]:p-4"
-          onClick={(event) => {
-            if (event.target === event.currentTarget) closeZoom();
-          }}
-        >
-          <div className="flex items-center justify-between gap-3">
-            <p className="min-w-0 truncate font-semibold text-white">
-              {zoom.label}
-            </p>
-            <button
-              ref={closeRef}
-              type="button"
-              className={`${BTN_SECONDARY} shrink-0 text-ink-2`}
-              onClick={closeZoom}
-            >
-              <Icon name="close" className="text-lg" />
-              닫기
-            </button>
-          </div>
-          <div
-            className="flex min-h-0 flex-1 items-center justify-center"
-            onClick={(event) => {
-              if (event.target === event.currentTarget) closeZoom();
-            }}
-          >
-            <img
-              src={zoom.image.src}
-              alt={zoom.image.alt}
-              className="max-h-full max-w-full rounded-box bg-white object-contain"
-            />
-          </div>
-        </div>
-      )}
+      {zoom && <ZoomOverlay zoom={zoom} onClose={closeZoom} />}
     </Modal>
-  );
-}
-
-/** 목차 한 줄: 지금 장 흰 칸 + 초록 번호, 지난 장 체크, 남은 장 회색 번호 */
-function TocButton({ no, title, state, onClick }) {
-  const isCurrent = state === 'current';
-  return (
-    <button
-      type="button"
-      aria-current={isCurrent ? 'step' : undefined}
-      className={`flex w-full items-center gap-2 rounded-box px-2 py-1.5 text-left text-sm ${
-        isCurrent
-          ? 'bg-white font-bold text-ink'
-          : 'font-medium text-ink-2 hover:bg-surface-3'
-      }`}
-      onClick={onClick}
-    >
-      <span
-        className={`grid size-6 shrink-0 place-items-center rounded-full text-badge font-bold ${
-          isCurrent
-            ? 'bg-brand-500 text-white'
-            : state === 'done'
-              ? 'bg-brand-50 text-brand-500'
-              : 'bg-surface-3 text-muted'
-        }`}
-      >
-        {state === 'done' ? (
-          <Check className="size-3.5" aria-label="본 장" />
-        ) : (
-          no
-        )}
-      </span>
-      <span className="min-w-0 truncate">{title}</span>
-    </button>
   );
 }
 
@@ -467,37 +385,5 @@ function GuidePicture({ chapter, no, onZoom }) {
         />
       </figure>
     </div>
-  );
-}
-
-/**
- * 사진 칸 한 개(16:10): 오른쪽 아래 [크게 보기]. 칸 전체를 눌러도 같음
- * - [크게 보기]는 따로 처리하지 않고 칸의 클릭으로 올라감(키보드 Enter도 같음). 닫으면 이 버튼으로 포커스를 되돌림
- */
-function ZoomBox({ image, label, className = '', onZoom, children }) {
-  const buttonRef = useRef(null);
-  return (
-    <div
-      className={`relative aspect-[16/10] w-full cursor-zoom-in overflow-hidden rounded-box ${className}`}
-      onClick={() => onZoom({ image, label, trigger: buttonRef.current })}
-    >
-      {children}
-      <GuideImage image={image} />
-      <button
-        ref={buttonRef}
-        type="button"
-        aria-label={`${label} 사진 크게 보기`}
-        title="크게 보기"
-        className={`${CHIP} absolute right-2 bottom-2 cursor-zoom-in`}
-      >
-        <Icon name="zoom_in" className="text-base" />
-      </button>
-    </div>
-  );
-}
-
-function GuideImage({ image }) {
-  return (
-    <img src={image.src} alt={image.alt} className="size-full object-contain" />
   );
 }
