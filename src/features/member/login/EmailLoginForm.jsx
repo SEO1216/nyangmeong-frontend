@@ -2,6 +2,8 @@ import { Lock, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/routes/paths';
 import CaptchaBlock from './CaptchaBlock';
+import AuthActions from '../shared/AuthActions';
+import AuthBody from '../shared/AuthBody';
 import AuthCard from '../shared/AuthCard';
 import AuthField from '../shared/AuthField';
 import AuthHeading from '../shared/AuthHeading';
@@ -18,64 +20,64 @@ export default function EmailLoginForm({ onBack, onSuccess, onSignup }) {
       <AuthHeading
         title="이메일로 로그인하기"
         subtitle="이메일 아이디와 비밀번호를 입력해 주세요."
-        spacing="wide"
       />
       {form.notice && (
-        <AuthNotice
-          type={form.notice.type}
-          message={form.notice.message}
-        />
+        <AuthNotice type={form.notice.type} message={form.notice.message} />
       )}
-      <form noValidate onSubmit={form.submit} className="flex flex-col gap-5">
-        <AuthField
-          id="login-email"
-          icon={Mail}
-          label="아이디(이메일)"
-          value={form.email}
-          onChange={form.changeEmail}
-          onBlur={form.blurEmail}
-          placeholder="이메일 주소 입력"
-          autoComplete="username"
-          inputMode="email"
-          error={form.errors.email}
-        />
-        <AuthField
-          id="login-password"
-          icon={Lock}
-          label="비밀번호"
-          type="password"
-          value={form.password}
-          onChange={form.changePassword}
-          placeholder="비밀번호 입력"
-          autoComplete="current-password"
-          error={form.errors.password}
-        />
-        {form.isCaptchaOn && (
-          <CaptchaBlock
-            image={form.captchaImg}
-            isLoading={form.isCaptchaLoading}
-            value={form.captchaInput}
-            onChange={form.changeCaptcha}
-            onRefresh={form.refreshCaptcha}
-            error={form.errors.captcha}
+      <form noValidate onSubmit={form.submit} className="flex grow flex-col">
+        <AuthBody className="gap-5">
+          <AuthField
+            id="login-email"
+            icon={Mail}
+            label="아이디(이메일)"
+            value={form.email}
+            onChange={form.changeEmail}
+            onBlur={form.blurEmail}
+            placeholder="이메일 주소 입력"
+            autoComplete="username"
+            inputMode="email"
+            error={form.errors.email}
           />
-        )}
-        <div className="-mt-2 flex justify-end">
+          <AuthField
+            id="login-password"
+            icon={Lock}
+            label="비밀번호"
+            type="password"
+            value={form.password}
+            onChange={form.changePassword}
+            placeholder="비밀번호 입력"
+            autoComplete="current-password"
+            error={form.errors.password}
+          />
+          {form.isCaptchaOn && (
+            <CaptchaBlock
+              image={form.captchaImg}
+              isLoading={form.isCaptchaLoading}
+              value={form.captchaInput}
+              onChange={form.changeCaptcha}
+              onRefresh={form.refreshCaptcha}
+              error={form.errors.captcha}
+            />
+          )}
+          <div className="-mt-2 flex justify-end">
+            <button
+              type="button"
+              onClick={() => navigate(PATHS.PASSWORD_FIND)}
+              className="text-muted hover:underline hover:underline-offset-[3px]"
+            >
+              비밀번호 찾기
+            </button>
+          </div>
+        </AuthBody>
+        <AuthActions>
           <button
-            type="button"
-            onClick={() => navigate(PATHS.PASSWORD_FIND)}
-            className="text-muted hover:underline hover:underline-offset-[3px]"
+            type="submit"
+            disabled={!form.isFilled || form.isPending}
+            className="inline-flex h-[50px] w-full items-center justify-center rounded-xl bg-brand-500 text-[15px] font-bold text-white transition hover:enabled:-translate-y-px hover:enabled:bg-brand-600 disabled:cursor-not-allowed disabled:bg-surface-3 disabled:text-line-strong"
           >
-            비밀번호 찾기
+            로그인
           </button>
-        </div>
-        <button
-          type="submit"
-          disabled={!form.isFilled || form.isPending}
-          className="mt-3 inline-flex h-[50px] w-full items-center justify-center rounded-xl bg-brand-500 text-[15px] font-bold text-white transition hover:enabled:-translate-y-px hover:enabled:bg-brand-600 disabled:cursor-not-allowed disabled:bg-surface-3 disabled:text-line-strong"
-        >
-          로그인
-        </button>
+        </AuthActions>
       </form>
       <div className="mt-6 flex justify-center gap-2 text-muted">
         아직 회원이 아니신가요?

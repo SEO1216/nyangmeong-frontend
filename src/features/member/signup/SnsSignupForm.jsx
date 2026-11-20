@@ -1,4 +1,6 @@
 import { Phone } from 'lucide-react';
+import AuthActions from '../shared/AuthActions';
+import AuthBody from '../shared/AuthBody';
 import AuthCard from '../shared/AuthCard';
 import AuthField from '../shared/AuthField';
 import AuthHeading from '../shared/AuthHeading';
@@ -26,84 +28,90 @@ export default function SnsSignupForm({ snsSignup, onCancel, onGoLogin }) {
       <AuthHeading
         title="가입 정보를 확인해 주세요"
         subtitle="냥멍케어 이용에 필요한 동의를 확인해 주세요."
-        spacing="step"
       />
       {form.notice && (
-        <AuthNotice
-          type={form.notice.type}
-          message={form.notice.message}
-        />
+        <AuthNotice type={form.notice.type} message={form.notice.message} />
       )}
-      <form onSubmit={form.submitJoin} noValidate>
-        <div className="rounded-box bg-surface-2 p-4 leading-6 text-ink-2">
-          <div className="flex justify-between gap-3">
-            <span className="text-muted">가입 계정 확인</span>
-            <strong className="min-w-0 truncate font-semibold text-ink">
-              {SNS_NAME[form.snsOffrCd]} · {form.acntEml}
-            </strong>
+      <form
+        onSubmit={form.submitJoin}
+        noValidate
+        className="flex grow flex-col"
+      >
+        <AuthBody>
+          <div className="rounded-box bg-surface-2 p-4 leading-6 text-ink-2">
+            <div className="flex justify-between gap-3">
+              <span className="text-muted">가입 계정 확인</span>
+              <strong className="min-w-0 truncate font-semibold text-ink">
+                {SNS_NAME[form.snsOffrCd]} · {form.acntEml}
+              </strong>
+            </div>
+            <p className="mt-1 text-sm text-muted">
+              SNS와 이메일은 변경할 수 없습니다.
+            </p>
           </div>
-          <p className="mt-1 text-sm text-muted">
-            SNS와 이메일은 변경할 수 없습니다.
+          <div className="mt-5">
+            <AuthField
+              id="sns-signup-phone"
+              icon={Phone}
+              label="휴대전화번호"
+              value={form.phone}
+              onChange={form.changePhone}
+              placeholder="01012345678"
+              autoComplete="tel"
+              inputMode="tel"
+              readOnly={form.isPhoneProvided}
+              error={form.errors.phone}
+              success={form.isPhoneChecked ? MSG.phoneAvailable : ''}
+              help={
+                form.isPhoneProvided
+                  ? MSG.snsPhoneProvided
+                  : normalizePhone(form.phone)
+                    ? MSG.phoneNeedCheck
+                    : MSG.snsPhoneMissing
+              }
+              action={
+                !form.isPhoneProvided && (
+                  <button
+                    type="button"
+                    onClick={form.submitPhoneCheck}
+                    disabled={
+                      !normalizePhone(form.phone) || form.isPhoneChecking
+                    }
+                    className={`${BTN_SECONDARY} min-w-22 shrink-0 whitespace-nowrap`}
+                  >
+                    중복확인
+                  </button>
+                )
+              }
+            />
+          </div>
+          <div className="mt-6">
+            <TermsChecklist form={form} lockedSn={form.lockedSn} />
+          </div>
+          <p className="mt-2 text-sm leading-5 text-muted">
+            필수 동의·연령 확인과 휴대전화번호 중복확인을 마치면 가입할 수
+            있습니다. 휴대전화번호는 가입 정보 관리와 중복확인에만 씁니다.
           </p>
-        </div>
-        <div className="mt-5">
-          <AuthField
-            id="sns-signup-phone"
-            icon={Phone}
-            label="휴대전화번호"
-            value={form.phone}
-            onChange={form.changePhone}
-            placeholder="01012345678"
-            autoComplete="tel"
-            inputMode="tel"
-            readOnly={form.isPhoneProvided}
-            error={form.errors.phone}
-            success={form.isPhoneChecked ? MSG.phoneAvailable : ''}
-            help={
-              form.isPhoneProvided
-                ? MSG.snsPhoneProvided
-                : normalizePhone(form.phone)
-                  ? MSG.phoneNeedCheck
-                  : MSG.snsPhoneMissing
-            }
-            action={
-              !form.isPhoneProvided && (
-                <button
-                  type="button"
-                  onClick={form.submitPhoneCheck}
-                  disabled={!normalizePhone(form.phone) || form.isPhoneChecking}
-                  className={`${BTN_SECONDARY} min-w-22 shrink-0 whitespace-nowrap`}
-                >
-                  중복확인
-                </button>
-              )
-            }
-          />
-        </div>
-        <div className="mt-6">
-          <TermsChecklist form={form} lockedSn={form.lockedSn} />
-        </div>
-        <p className="mt-2 text-sm leading-5 text-muted">
-          필수 동의·연령 확인과 휴대전화번호 중복확인을 마치면 가입할 수
-          있습니다. 휴대전화번호는 가입 정보 관리와 중복확인에만 씁니다.
-        </p>
-        {form.isExpired ? (
-          <button
-            type="button"
-            onClick={onCancel}
-            className={`${BTN_PRIMARY} w-full mt-5`}
-          >
-            로그인으로
-          </button>
-        ) : (
-          <button
-            type="submit"
-            disabled={!form.canJoin || form.isJoining}
-            className={`${BTN_PRIMARY} w-full mt-5`}
-          >
-            회원가입
-          </button>
-        )}
+        </AuthBody>
+        <AuthActions>
+          {form.isExpired ? (
+            <button
+              type="button"
+              onClick={onCancel}
+              className={`${BTN_PRIMARY} w-full`}
+            >
+              로그인으로
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={!form.canJoin || form.isJoining}
+              className={`${BTN_PRIMARY} w-full`}
+            >
+              회원가입
+            </button>
+          )}
+        </AuthActions>
       </form>
       {form.termsView && (
         <TermsModal trmsSn={form.termsView} onClose={form.closeTerms} />

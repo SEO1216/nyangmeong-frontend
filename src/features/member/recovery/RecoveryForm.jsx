@@ -1,5 +1,7 @@
 import { Check, ChevronRight, Mail, Phone, ShieldCheck } from 'lucide-react';
 import StepMotion from '@/components/StepMotion';
+import AuthActions from '../shared/AuthActions';
+import AuthBody from '../shared/AuthBody';
 import AuthCard from '../shared/AuthCard';
 import Checkbox from '@/components/Checkbox';
 import AuthField from '../shared/AuthField';
@@ -172,14 +174,6 @@ function ConfirmStep({ form }) {
           />
         )}
       </div>
-      <button
-        type="button"
-        onClick={form.submitRecover}
-        disabled={!form.canRecover || form.isRecovering}
-        className={`${BTN_PRIMARY} w-full mt-8`}
-      >
-        기존 정보 복구
-      </button>
     </>
   );
 }
@@ -196,7 +190,7 @@ export default function RecoveryForm({
 
   if (form.step === 'complete') {
     return (
-      <AuthCard className="flex flex-1 flex-col">
+      <AuthCard isCentered={false}>
         <StepMotion
           stepKey="complete"
           direction={form.direction}
@@ -209,13 +203,15 @@ export default function RecoveryForm({
             </div>
             <AuthHeading title={MSG.done} subtitle={MSG.doneHelp} />
           </div>
-          <button
-            type="button"
-            onClick={onGoLogin}
-            className={`${BTN_PRIMARY} w-full mt-8`}
-          >
-            로그인으로
-          </button>
+          <AuthActions>
+            <button
+              type="button"
+              onClick={onGoLogin}
+              className={`${BTN_PRIMARY} w-full`}
+            >
+              로그인으로
+            </button>
+          </AuthActions>
         </StepMotion>
       </AuthCard>
     );
@@ -234,7 +230,11 @@ export default function RecoveryForm({
           }
         />
       </StepMotion>
-      <StepMotion stepKey={form.step} direction={form.direction}>
+      <StepMotion
+        stepKey={form.step}
+        direction={form.direction}
+        className="flex grow flex-col"
+      >
         {form.notice && !(form.step === 'verify' && form.isCodeLocked) && (
           <>
             <AuthNotice type={form.notice.type} message={form.notice.message} />
@@ -249,15 +249,29 @@ export default function RecoveryForm({
             )}
           </>
         )}
-        {isConfirm ? <ConfirmStep form={form} /> : <VerifyStep form={form} />}
-        <button
-          type="button"
-          onClick={form.cancel}
-          disabled={form.isRecovering}
-          className={`${BTN_SECONDARY} w-full ${isConfirm ? 'mt-3' : 'mt-8'}`}
-        >
-          취소
-        </button>
+        <AuthBody>
+          {isConfirm ? <ConfirmStep form={form} /> : <VerifyStep form={form} />}
+        </AuthBody>
+        <AuthActions className="flex flex-col gap-3">
+          {isConfirm && (
+            <button
+              type="button"
+              onClick={form.submitRecover}
+              disabled={!form.canRecover || form.isRecovering}
+              className={`${BTN_PRIMARY} w-full`}
+            >
+              기존 정보 복구
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={form.cancel}
+            disabled={form.isRecovering}
+            className={`${BTN_SECONDARY} w-full`}
+          >
+            취소
+          </button>
+        </AuthActions>
       </StepMotion>
       {form.termsView && (
         <TermsModal trmsSn={form.termsView} onClose={form.closeTerms} />
