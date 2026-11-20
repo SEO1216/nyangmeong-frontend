@@ -20,10 +20,16 @@ import {
   useReadChatRoom,
   useViewingChatRoom,
 } from '../queries';
-import { MSG_TYPE, ROOM_STTS, isEndedRoom } from '../shared/chatCodes';
+import {
+  MSG_TYPE,
+  ROOM_STTS,
+  getDealCancelState,
+  isEndedRoom,
+} from '../shared/chatCodes';
 import AddressMessage from './AddressMessage';
 import CareDealCard from './CareDealCard';
 import ChatMessageInput from './ChatMessageInput';
+import DealCancelModal from './DealCancelModal';
 import ChatRoomHeader from './ChatRoomHeader';
 import PhotoViewer from './PhotoViewer';
 import { getLeaveText } from './dealSteps';
@@ -165,6 +171,7 @@ function MessageItem({
 /** 채팅 목록으로 돌아가며 onBack(없으면 ‹ 없음: 목록이 옆에 있는 두 칸), 나가기 끝나면 onLeft */
 export default function ChatConversation({ otoChatRoomSn, onBack, onLeft }) {
   const [isLeaveOpen, setIsLeaveOpen] = useState(false);
+  const [isCancelOpen, setIsCancelOpen] = useState(false);
   /** 사진 보기에서 처음 보여 줄 사진(없으면 닫힘) */
   const [viewerPhotoSn, setViewerPhotoSn] = useState(null);
   const {
@@ -271,8 +278,12 @@ export default function ChatConversation({ otoChatRoomSn, onBack, onLeft }) {
             room={room}
             onBack={onBack}
             onLeaveAsk={() => setIsLeaveOpen(true)}
+            onCancelAsk={() => setIsCancelOpen(true)}
           />
-          <CareDealCard key={room.mtchDlngSttsCd} room={room} />
+          <CareDealCard
+            key={`${room.mtchDlngSttsCd}-${getDealCancelState(room)}`}
+            room={room}
+          />
         </>
       )}
 
@@ -356,6 +367,10 @@ export default function ChatConversation({ otoChatRoomSn, onBack, onLeft }) {
           otoChatRoomSn={otoChatRoomSn}
           onClose={() => setViewerPhotoSn(null)}
         />
+      )}
+
+      {isCancelOpen && room && (
+        <DealCancelModal room={room} onClose={() => setIsCancelOpen(false)} />
       )}
 
       {isLeaveOpen && (
