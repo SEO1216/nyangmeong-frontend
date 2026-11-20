@@ -2,10 +2,12 @@
 
 ## 지금 하는 것
 
-끝남: SCR-MAN-001 서비스 튜토리얼 봤음 서버 연결 (2026-11-20, 검증 1회차 통과, 사람 확인). `features/dashboard/api.js` 가짜를 `GET·PUT /members/me/tutorial`로, 필드 `tutrlViewYn`
+끝남: SCR-MYP-011 아이템 상점 구매 멱등키 재사용 409 처리 (2026-11-20, 검증 1회차 통과, 사람 확인). 409 `IDEMPOTENCY_KEY_REUSED`면 새 `idmptDmndId`를 만들고 캐릭터·상점 목록·포인트를 다시 읽으며 모달은 닫지 않음. 문구 "구매하지 못했어요. 다시 시도해 주세요"
 
 ## 다음에 할 것
 
+- SCR-MYP-011 구매 409 팀 알림(PR 본문, SJM): `features/pet/character/ItemShopModal.jsx`(멱등키를 409 때 새로 만듦, `PURCHASE_ERRORS` 문구 추가)·`features/pet/queries.js` `usePurchaseItems` `onError`(409 때 상세·상점·포인트 무효화)를 고침
+- SCR-MYP-011 참고(검증 보고, 판정 밖): 검증 계정 아이템 미리보기 `POST /ai/characters/3/preview` 400("미리보기를 불러오지 못했어요" 토스트, 이번 변경과 무관)
 - SCR-COM-002 피드백 묶음 팀 알림(PR 본문 + 팀 채널): 모두: 760~1099px에서 서브 화면(SubPageLayout) 왼쪽에 사이드 메뉴 180px가 생겨 본문이 좁아짐(제목 옆 ▾ 메뉴 없어짐, 768에서 반려동물 카드 값이 말줄임). 공용 `TimeSelect` 시·분은 직접 입력 가능, 오전/오후는 빈 칸 없이 오전부터(시간 비운 칸도 오전으로 보임). KSJ: `features/community/useLeaveGuard`가 `@/hooks/useLeaveGuard`로 옮겨짐(커뮤니티 글쓰기·수정 6곳 import, `InquiryForm` 나가기 확인이 공용 훅으로, 문의 확인 창 제목/설명 나눔). SJM: `useSetRepresentativePet`이 `healthKeys.myPets`도 무효화. 아래 F4 표의 가계부 메모·초대 이메일 상한 없음
 - SCR-COM-002 피드백 묶음 참고(검증 보고, 판정 밖): 시 칸에 13을 치면 1이 남아 벗어날 때 01, 분 75는 07이 됨(둘째 글자만 막음). 빈 시·분 칸 안내 글자는 "--"(칸 폭이 좁음)
 - F4 사용자 화면 모달 입력 상한 현황(2026-11-20 분석, 코드 수정 없음. 서버 = 백엔드 요청 DTO `@Size`). 담당자에게 알리고 고칠지는 사람이 정함
