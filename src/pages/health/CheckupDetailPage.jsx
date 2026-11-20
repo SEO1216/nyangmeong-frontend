@@ -34,6 +34,8 @@ const LAYOUT_PROPS = {
   title: '검진상세',
   back: true,
   backTo: `${PATHS.HEALTH_DIARY}#hlt002-exam`,
+  /** 뒤로 가기 글자: 건강 일지 검진기록 탭으로 가므로 「검진기록으로」 (※신규 정책) */
+  backLabel: '검진기록으로',
   description: '병원에서 받은 검사 결과와 처방을 한곳에서 확인해요',
 };
 

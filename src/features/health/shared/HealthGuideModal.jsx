@@ -166,7 +166,8 @@ const GROUPS = [...new Set(CHAPTERS.map((chapter) => chapter.group))];
  * - 사이드 아이 말풍선 [같이 둘러보기]로 1장부터 엶. 반려동물과 상관없이 같은 내용 8장
  * - 760px 이상: 왼쪽 회색 목차(화면별 3묶음, 지금 장 흰 칸 + 초록 번호, 지난 장 체크, 남은 장 회색 번호, 누르면 그 장으로), 오른쪽 장 내용
  * - 760px 미만: 목차 대신 맨 위 「n / 8」과 진행 점, 그림 2장은 위아래로 쌓음
- * - 장 내용: 묶음 이름 → 제목 → 그림 → 설명 → TIP 상자. 마지막 장은 footer 왼쪽 회색 안내 + [시작해 볼게요]로 닫음
+ * - 메인 서비스 둘러보기(ServiceTutorialModal)와 같은 틀: 1040×660 고정, 목차는 본문 높이를 꽉 채우고 오른쪽은 위에 붙임 (※신규 정책, 2026-11-20)
+ * - 장 내용: 묶음 이름 → 제목 → 설명 → TIP 상자 → 그림(남은 높이를 모두 차지) (※신규 정책, 2026-11-20). 마지막 장은 footer 왼쪽 회색 안내 + [시작해 볼게요]로 닫음
  * - onOpenDashboardEdit이 있으면(종합 건강기록) 3장 TIP 상자 오른쪽 「대시보드 편집 바로 열기 ›」: 이 모달을 닫고 대시보드 편집을 엶. 없으면 3장 TIP 상자를 숨김
  * - 사진 [크게 보기] → 모달 안 확대 화면, [닫기]·바깥 누르면 닫힘 (※신규 정책)
  *   열린 동안은 Modal isDismissDisabled로 Esc·배경이 둘러보기를 닫지 않게 하고, Esc는 확대 화면만 닫음. 장을 옮기면 닫힘
@@ -232,16 +233,15 @@ export default function HealthGuideModal({ onOpenDashboardEdit, onClose }) {
       isTitleHidden
       isHeaderBorderHidden
       isLarge
-      isAutoHeight
       width={1040}
       footer={footer}
       isDismissDisabled={zoom !== null}
       onClose={onClose}
     >
-      <div className="flex min-h-0 flex-1 gap-6 px-6 pb-5 max-[760px]:flex-col max-[760px]:gap-4">
+      <div className="flex min-h-0 flex-1 gap-6 px-6 pb-5 text-left max-[760px]:flex-col max-[760px]:gap-4">
         <nav
           aria-label="둘러보기 목차"
-          className="flex w-64 shrink-0 flex-col gap-5 self-start rounded-card bg-surface-2 p-4 max-[760px]:hidden"
+          className="flex w-64 shrink-0 flex-col gap-5 rounded-card bg-surface-2 p-4 max-[760px]:hidden"
         >
           <div>
             <p className="text-lg font-bold text-ink">건강기록 둘러보기</p>
@@ -301,16 +301,15 @@ export default function HealthGuideModal({ onOpenDashboardEdit, onClose }) {
 
         <section
           aria-live="polite"
-          className="flex min-w-0 flex-1 flex-col gap-3 min-[760px]:self-center"
+          className="flex min-h-0 min-w-0 flex-1 flex-col gap-3"
         >
           <p className="text-badge font-semibold text-subtle">
             {chapter.group}
           </p>
           <h3 className="text-lg font-bold text-ink">{chapter.title}</h3>
-
-          <GuidePicture chapter={chapter} no={index + 1} onZoom={setZoom} />
-
-          <p className="leading-[1.6] break-keep text-ink-2">{chapter.desc}</p>
+          <p className="leading-[1.6] break-keep whitespace-pre-line text-ink-2">
+            {chapter.desc}
+          </p>
 
           {hasTip && (
             <div className="flex items-center gap-2 rounded-box bg-brand-50 px-3.5 py-3 text-sm break-keep text-ink-2">
@@ -329,6 +328,8 @@ export default function HealthGuideModal({ onOpenDashboardEdit, onClose }) {
               )}
             </div>
           )}
+
+          <GuidePicture chapter={chapter} no={index + 1} onZoom={setZoom} />
         </section>
       </div>
 
@@ -337,50 +338,51 @@ export default function HealthGuideModal({ onOpenDashboardEdit, onClose }) {
   );
 }
 
-/** 그림 칸: 사진 칸은 16:10 비율 고정(사진 1132×706). 1장이면 가운데 max-w-md, 2장이면 「여기를 누르면」 → 「이 화면이 열려요」(760px 미만 위아래) */
+/**
+ * 그림 칸: 남은 높이를 모두 차지하고 그림은 비율을 지켜 칸을 채움(ZoomBox isFill, 메인 서비스 둘러보기와 같음) (※신규 정책, 2026-11-20)
+ * - 2장이면 「여기를 누르면」 → 「이 화면이 열려요」(760px 미만 위아래). 초록 번호 배지는 「여기를 누르면」 글자 바로 왼쪽
+ */
 function GuidePicture({ chapter, no, onZoom }) {
   const [from, to] = chapter.images;
   if (!to) {
     return (
-      <div className="grid place-items-center rounded-card bg-surface-2 p-4">
-        <ZoomBox
-          image={from}
-          label={chapter.title}
-          className="max-w-md"
-          onZoom={onZoom}
-        />
+      <div className="flex min-h-0 flex-1 rounded-card bg-surface-2 p-4">
+        <ZoomBox image={from} label={chapter.title} isFill onZoom={onZoom} />
       </div>
     );
   }
   const fromLabel = chapter.fromLabel ?? FROM_LABEL;
   const toLabel = chapter.toLabel ?? TO_LABEL;
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 rounded-card bg-surface-2 p-4 max-[760px]:grid-cols-1">
-      <figure className="flex min-w-0 flex-col gap-2">
-        <figcaption className="text-badge font-semibold text-subtle">
+    <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 rounded-card bg-surface-2 p-4 max-[760px]:grid-cols-1">
+      <figure className="flex h-full min-h-0 min-w-0 flex-col gap-2">
+        <figcaption className="flex items-center gap-1.5 text-badge font-semibold text-subtle">
+          <span className="grid size-6 shrink-0 place-items-center rounded-full bg-brand-500 text-badge font-bold text-white">
+            {no}
+          </span>
           {fromLabel}
         </figcaption>
         <ZoomBox
           image={from}
           label={`${fromLabel} · ${chapter.title}`}
+          isFill
+          className="min-h-0 flex-1"
           onZoom={onZoom}
-        >
-          <span className="absolute top-2 left-2 z-1 grid size-6 place-items-center rounded-full bg-brand-500 text-badge font-bold text-white">
-            {no}
-          </span>
-        </ZoomBox>
+        />
       </figure>
       <ArrowRight
         aria-hidden="true"
         className="size-5 text-subtle max-[760px]:mx-auto max-[760px]:rotate-90"
       />
-      <figure className="flex min-w-0 flex-col gap-2">
+      <figure className="flex h-full min-h-0 min-w-0 flex-col gap-2">
         <figcaption className="text-badge font-semibold text-subtle">
           {toLabel}
         </figcaption>
         <ZoomBox
           image={to}
           label={`${toLabel} · ${chapter.title}`}
+          isFill
+          className="min-h-0 flex-1"
           onZoom={onZoom}
         />
       </figure>
