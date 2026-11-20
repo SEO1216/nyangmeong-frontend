@@ -1,9 +1,9 @@
 import { Lock } from 'lucide-react';
 import { formatPhone, normalizePhone } from '../shared/validate';
-import { BTN_PRIMARY } from '@/components/buttonStyles';
 import AuthField from '../shared/AuthField';
 import SignupSummary from './SignupSummary';
 import { SIGNUP_MESSAGES as MSG } from './signupMessages';
+import { AUTH_BTN_PRIMARY } from '../shared/authStyles';
 
 export default function PasswordStep({ form }) {
   return (
@@ -51,7 +51,7 @@ export default function PasswordStep({ form }) {
       <button
         type="submit"
         disabled={!form.canJoin || form.isJoining}
-        className={`${BTN_PRIMARY} w-full mt-1 max-[760px]:mt-3`}
+        className={`${AUTH_BTN_PRIMARY} w-full mt-1 max-[760px]:mt-3`}
       >
         회원가입
       </button>

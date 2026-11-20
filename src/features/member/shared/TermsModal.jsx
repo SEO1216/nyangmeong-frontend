@@ -1,7 +1,7 @@
 import Modal from '@/components/Modal';
 import { useTerms } from '../queries';
-import { BTN_SECONDARY } from '@/components/buttonStyles';
 import { TERMS_MESSAGES as MSG } from './termsMessages';
+import { AUTH_BTN_SECONDARY } from './authStyles';
 
 // 가입·복구 확인 화면에서 동의받는 약관의 전문을 서버에서 받아 보여 준다(자르지 않는다)
 export default function TermsModal({ trmsSn, onClose }) {
@@ -15,7 +15,7 @@ export default function TermsModal({ trmsSn, onClose }) {
         <button
           type="button"
           onClick={onClose}
-          className={`${BTN_SECONDARY} w-full`}
+          className={`${AUTH_BTN_SECONDARY} w-full`}
         >
           닫기
         </button>

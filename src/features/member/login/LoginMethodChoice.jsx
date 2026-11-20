@@ -2,6 +2,7 @@ import { Mail } from 'lucide-react';
 import AuthCard from '../shared/AuthCard';
 import AuthHeading from '../shared/AuthHeading';
 import AuthNotice from '../shared/AuthNotice';
+import { AUTH_BTN_PRIMARY } from '../shared/authStyles';
 import { LOGIN_MESSAGES as MSG } from './loginMessages';
 import SnsLoginButtons from './SnsLoginButtons';
 
@@ -28,10 +29,7 @@ export default function LoginMethodChoice({
       )}
       {isSnsPending && <AuthNotice type="info" message={MSG.snsPending} />}
       {snsNotice && (
-        <AuthNotice
-          type={snsNotice.type}
-          message={snsNotice.message}
-        />
+        <AuthNotice type={snsNotice.type} message={snsNotice.message} />
       )}
       <SnsLoginButtons disabled={isSnsPending} />
       <div className="my-6 flex items-center gap-4 text-subtle before:h-px before:flex-1 before:bg-line after:h-px after:flex-1 after:bg-line">
@@ -40,7 +38,7 @@ export default function LoginMethodChoice({
       <button
         type="button"
         onClick={onSelectEmail}
-        className="inline-flex h-[50px] w-full items-center justify-center gap-1.5 rounded-xl bg-brand-500 text-[15px] font-bold text-white transition hover:-translate-y-px hover:bg-brand-600"
+        className={`${AUTH_BTN_PRIMARY} w-full`}
       >
         <Mail className="size-5" />
         이메일로 로그인하기

@@ -1,8 +1,8 @@
 import { Check, ChevronRight } from 'lucide-react';
 import Checkbox from '@/components/Checkbox';
-import { BTN_PRIMARY } from '@/components/buttonStyles';
 import { hasTermsView } from '../shared/validate';
 import { SIGNUP_MESSAGES as MSG } from './signupMessages';
+import { AUTH_BTN_PRIMARY } from '../shared/authStyles';
 
 // 약관 목록과 모두 동의. 이메일 가입 1단계와 SNS 가입 확인 화면이 같이 쓴다.
 // lockedSn은 외부에서 이미 확인된 항목(만 14세)이라 체크 대신 "확인 완료"로 보이고 모두 동의로 바뀌지 않는다
@@ -18,7 +18,7 @@ export function TermsChecklist({ form, lockedSn, isRoomy = false }) {
         <button
           type="button"
           onClick={form.retryTerms}
-          className={`${BTN_PRIMARY} w-full`}
+          className={`${AUTH_BTN_PRIMARY} w-full`}
         >
           다시 시도
         </button>
@@ -109,7 +109,7 @@ export default function TermsStep({ form }) {
         type="button"
         disabled={!form.isTermsOk}
         onClick={() => form.goStep('email')}
-        className={`${BTN_PRIMARY} w-full mt-5 max-[760px]:mt-8`}
+        className={`${AUTH_BTN_PRIMARY} w-full mt-5 max-[760px]:mt-8`}
       >
         다음
       </button>
