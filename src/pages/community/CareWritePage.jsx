@@ -3,7 +3,7 @@ import { showToast } from '@/components/toastStore';
 import CareForm from '@/features/community/care/CareForm';
 import { EMPTY_FORM } from '@/features/community/care/careUtils';
 import { useCreateCare } from '@/features/community/careQueries';
-import useLeaveGuard from '@/features/community/useLeaveGuard';
+import useLeaveGuard from '@/hooks/useLeaveGuard';
 import SubPageLayout from '@/layouts/SubPageLayout';
 import { PATHS } from '@/routes/paths';
 

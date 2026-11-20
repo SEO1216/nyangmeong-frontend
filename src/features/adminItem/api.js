@@ -22,7 +22,7 @@ export const getItemParts = async () => {
 
 /**
  * 아이템 목록: 판매 중지 포함, 뺀 부위 제외
- * [{ itemSn, itemNm, itemRegnCd, itemRegnCdNm, needPnt, ntslYn, sortSeq, atchFileSn, bakeHint, bakeImgRefYn, hldMbrCnt }]
+ * [{ itemSn, itemNm, itemRegnCd, itemRegnCdNm, needPnt, ntslYn, sortSeq, atchFileSn, bakeImgRefYn, hldMbrCnt }]
  */
 export const getAdminItems = async ({ itemRegnCd } = {}) => {
   const [items, parts] = await Promise.all([

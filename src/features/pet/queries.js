@@ -5,6 +5,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
+import { healthKeys } from '@/features/health/queries';
 import { pointKeys } from '@/features/point/queries';
 import {
   pixelCharacterKeys,
@@ -287,13 +288,20 @@ export const usePurchaseItems = () => {
       qc.invalidateQueries({ queryKey: characterKeys.shopItems(pixelCharSn) });
       qc.invalidateQueries({ queryKey: pointKeys.balance() });
     },
-    /** 이미 보유한 아이템이 있으면 상점을 다시 읽어 보유중을 맞춘다 */
+    /**
+     * 이미 보유한 아이템이 있으면 상점을 다시 읽어 보유중을 맞춘다.
+     * 멱등키 재사용(409)이면 앞 구매가 이미 처리됐을 수 있어 포인트도 다시 읽는다
+     */
     onError: (error, { pixelCharSn }) => {
-      if (error.code === 'ITEM_ALREADY_HELD') {
+      const isKeyReused = error.code === 'IDEMPOTENCY_KEY_REUSED';
+      if (error.code === 'ITEM_ALREADY_HELD' || isKeyReused) {
         qc.invalidateQueries({ queryKey: characterKeys.detail(pixelCharSn) });
         qc.invalidateQueries({
           queryKey: characterKeys.shopItems(pixelCharSn),
         });
+      }
+      if (isKeyReused) {
+        qc.invalidateQueries({ queryKey: pointKeys.balance() });
       }
     },
   });
@@ -322,7 +330,11 @@ export const useSetRepresentativePet = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: setRepresentativePet,
-    onSuccess: () => qc.invalidateQueries({ queryKey: petKeys.all }),
+    /** 플로팅 AI 버튼 캐릭터는 healthKeys.myPets로 대표를 읽으므로 같이 무효화해 바로 바뀌게 한다 */
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: petKeys.all });
+      qc.invalidateQueries({ queryKey: healthKeys.myPets });
+    },
   });
 };
 

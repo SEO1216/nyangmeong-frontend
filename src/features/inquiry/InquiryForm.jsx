@@ -1,10 +1,10 @@
 import { flushSync } from 'react-dom';
+import useLeaveGuard from '@/hooks/useLeaveGuard';
 import useProfanityErrors from '@/hooks/useProfanityErrors';
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useOutletContext } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import AutoTextarea from '@/components/AutoTextarea';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
-import ConfirmModal from '@/components/ConfirmModal';
 import DropdownSelect from '@/components/DropdownSelect';
 import FieldError, { Required } from '@/components/FieldError';
 import { INPUT, LABEL } from '@/components/formStyles';
@@ -55,7 +55,6 @@ export default function InquiryForm({
   characterImage = null,
   onSubmit,
 }) {
-  const navigate = useNavigate();
   const { leaveRef } = useOutletContext() ?? {};
   const [type, setType] = useState(initial.inqryTypeCd);
   const [title, setTitle] = useState(initial.inqryTtl);
@@ -68,7 +67,6 @@ export default function InquiryForm({
   );
   const [errors, setErrors] = useState({});
   useProfanityErrors(profanityFields, PROFANITY_FIELDS, setErrors);
-  const [leaveTo, setLeaveTo] = useState(null);
 
   const isEdit = mode === 'edit';
   const hasCharacterImage =
@@ -88,11 +86,11 @@ export default function InquiryForm({
     return () => window.removeEventListener('beforeunload', warn);
   }, [isDirty]);
 
-  /** 목록으로·취소: 고친 것이 있으면 먼저 확인 */
-  const handleLeave = (target) => {
-    if (isDirty) setLeaveTo(target);
-    else navigate(target);
-  };
+  /** 목록으로·취소: 고친 것이 있으면 먼저 확인(공용 나가기 확인 창) */
+  const { onLeave: handleLeave, leaveModal } = useLeaveGuard({
+    isDirty,
+    mode: isEdit ? 'edit' : 'write',
+  });
 
   /** 고객센터 틀의 사이드 메뉴·머리 이동도 같은 확인을 거치도록 설정 */
   useEffect(() => {
@@ -315,19 +313,7 @@ export default function InquiryForm({
         </button>
       </div>
 
-      {leaveTo && (
-        <ConfirmModal
-          title={
-            isEdit
-              ? '수정을 그만둘까요? 고친 내용은 저장되지 않고 원래 문의가 그대로 남아요'
-              : '작성을 그만둘까요? 지금까지 쓴 내용은 저장되지 않아요'
-          }
-          confirmLabel="나가기"
-          cancelLabel={isEdit ? '계속 수정' : '계속 쓰기'}
-          onConfirm={() => navigate(leaveTo)}
-          onCancel={() => setLeaveTo(null)}
-        />
-      )}
+      {leaveModal}
     </section>
   );
 }
