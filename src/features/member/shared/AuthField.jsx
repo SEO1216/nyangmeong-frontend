@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowBigUpDash, Eye, EyeOff } from 'lucide-react';
-import AiErrorGuide from '@/components/AiErrorGuide';
+import FieldError from '@/components/FieldError';
 import useCapsLock from '@/hooks/useCapsLock';
 
 // 포커스 링은 상태별로 하나만 붙인다(초록·빨강 링이 겹치면 초록이 이김, 추가-2)
@@ -24,7 +24,6 @@ export default function AuthField({
   endAdornment,
   action,
   readOnly,
-  hasGuide,
   icon,
 }) {
   const [isVisible, setIsVisible] = useState(false);
@@ -93,25 +92,13 @@ export default function AuthField({
           Caps Lock이 켜져 있습니다.
         </p>
       )}
-      {/* AI 안내가 붙으면 같은 문구가 두 번 보이지 않게 말풍선만 보인다. 말풍선은 aria-hidden이라 이 문구를 화면 읽기용으로 남긴다 */}
-      {error && (
-        <p
-          id={`${id}-error`}
-          role="alert"
-          className={
-            hasGuide ? 'sr-only' : 'mt-2 text-sm leading-5 text-danger'
-          }
-        >
-          {error}
-        </p>
-      )}
+      <FieldError id={`${id}-error`}>{error}</FieldError>
       {!error && success && (
         <p className="mt-2 text-sm leading-5 text-tone-green-fg">{success}</p>
       )}
       {!error && !success && help && (
         <p className="mt-2 text-sm leading-5 text-muted">{help}</p>
       )}
-      {error && hasGuide && <AiErrorGuide message={error} />}
     </div>
   );
 }

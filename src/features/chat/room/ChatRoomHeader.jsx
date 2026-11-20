@@ -1,6 +1,6 @@
 /**
  * [채팅방 상단 바]
- * - ‹ 목록으로, 상대 프로필·이름, 돌봄 글 제목, [⋮] 돌봄 글 보기·채팅방 나가기 (FN-CMU-005-01·11)
+ * - ‹ 목록으로, 상대 프로필·이름, 돌봄 글 제목, [⋮] 돌봄 글 보기·거래 취소 요청·채팅방 나가기 (FN-CMU-005-01·11)
  */
 import { useEffect, useRef, useState } from 'react';
 import { generatePath } from 'react-router-dom';
@@ -8,13 +8,25 @@ import Avatar from '@/components/Avatar';
 import Icon from '@/components/Icon';
 import { PATHS } from '@/routes/paths';
 import { publicFileUrl } from '@/utils/fileUrl';
-import { isLeaveBlockedStage } from '../shared/chatCodes';
+import {
+  canRequestDealCancel,
+  getDealCancelState,
+  isLeaveBlockedStage,
+} from '../shared/chatCodes';
 
 const menuItem =
   'flex h-11 w-full items-center gap-2.5 px-4 text-left text-ink-2 hover:bg-surface-2';
 
-export default function ChatRoomHeader({ room, onBack, onLeaveAsk }) {
+export default function ChatRoomHeader({ room, onBack, onLeaveAsk, onCancelAsk }) {
   const isLeaveBlocked = isLeaveBlockedStage(room.mtchDlngSttsCd);
+  const cancelState = getDealCancelState(room);
+  const canCancelDeal = canRequestDealCancel(room);
+  /** 요청중이거나 내 요청이 거절됐으면 다시 요청할 수 없다(서버도 409 CARE_DEAL_CANCEL_REJECTED) */
+  const cancelBlockedNote = {
+    'requesting-mine': '상대의 응답을 기다리고 있어요',
+    'requesting-theirs': '상대가 보낸 취소 요청에 먼저 답해 주세요',
+    'rejected-mine': '상대가 거절해 이 거래에서는 다시 요청할 수 없어요',
+  }[cancelState];
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -99,6 +111,29 @@ export default function ChatRoomHeader({ room, onBack, onLeaveAsk }) {
               돌봄 글 보기
             </a>
             <hr className="my-1 border-line" />
+            {canCancelDeal && (
+              <>
+                <button
+                  type="button"
+                  role="menuitem"
+                  aria-disabled={Boolean(cancelBlockedNote)}
+                  className={`${menuItem} ${cancelBlockedNote ? 'text-line-strong' : ''}`}
+                  onClick={() => {
+                    if (cancelBlockedNote) return;
+                    setIsMenuOpen(false);
+                    onCancelAsk();
+                  }}
+                >
+                  <Icon name="event_busy" />
+                  거래 취소 요청
+                </button>
+                {cancelBlockedNote && (
+                  <p className="px-4 pt-1 pb-2 text-sm leading-normal text-subtle">
+                    {cancelBlockedNote}
+                  </p>
+                )}
+              </>
+            )}
             <button
               type="button"
               role="menuitem"
@@ -114,8 +149,8 @@ export default function ChatRoomHeader({ room, onBack, onLeaveAsk }) {
               채팅방 나가기
             </button>
             {isLeaveBlocked && (
-              <p className="px-4 pt-1 pb-2 text-xs leading-normal text-subtle">
-                거래가 완료된 뒤에 나갈 수 있어요
+              <p className="px-4 pt-1 pb-2 text-sm leading-normal text-subtle">
+                거래를 마치거나 취소한 뒤에 나갈 수 있어요
               </p>
             )}
           </div>

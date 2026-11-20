@@ -1,21 +1,20 @@
 import FadeIn from './FadeIn';
+import SectionTitle from './SectionTitle';
 import { BANNER_CARDS } from './landingData';
 
 export default function PartnersSection() {
   return (
     <section
       id="partners"
-      className="relative flex w-full scroll-mt-20 flex-col items-center justify-center overflow-hidden bg-[#fdfcfb] min-h-[calc(100dvh-5rem)] py-20 lg:min-h-[max(870px,calc(100dvh-5rem))] lg:py-0"
+      className="relative flex w-full scroll-mt-20 flex-col items-center justify-center overflow-hidden bg-white min-h-[calc(100dvh-5rem)] py-20 lg:min-h-[max(870px,calc(100dvh-5rem))] lg:py-0"
     >
       <div className="flex w-full flex-col items-center px-4">
-        <FadeIn delay={100} className="mb-12 text-center lg:mb-20">
-          <h2 className="text-[28px] leading-[150%] font-bold text-ink lg:text-[40px]">
-            함께하는 반려생활
-          </h2>
-          <p className="mt-2 text-[16px] leading-[150%] font-normal text-ink lg:text-[24px]">
-            수첩, 메모장, 영수증에 흩어진 기록들을 쉽고 재미있게 관리해요.
-          </p>
-        </FadeIn>
+        <SectionTitle
+          label="With pawever"
+          title="함께하는 반려생활"
+          desc="수첩, 메모장, 영수증에 흩어진 기록들을 쉽고 재미있게 관리해요."
+          className="mb-12 lg:mb-20"
+        />
 
         <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:gap-6">
           {BANNER_CARDS.map((card, index) => (

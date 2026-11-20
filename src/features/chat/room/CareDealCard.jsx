@@ -6,7 +6,13 @@
 import { useEffect, useRef, useState } from 'react';
 import Icon from '@/components/Icon';
 import { useCareMatch, useDealAction } from '../queries';
-import { ROOM_STTS } from '../shared/chatCodes';
+import {
+  MTCH_STTS,
+  RCRT_STTS_RECRUITING,
+  ROOM_STTS,
+  getDealCancelState,
+  isDealCancelRequesting,
+} from '../shared/chatCodes';
 import DealBadge from './DealBadge';
 import {
   CANCEL_REASONS,
@@ -14,6 +20,7 @@ import {
   DEAL_STEPS,
   OTHER_REASON,
   OTHER_REASON_MAX_LENGTH,
+  getDealCancelGuide,
   getDealGuide,
   getStepProgress,
 } from './dealSteps';
@@ -240,7 +247,12 @@ export default function CareDealCard({ room }) {
   const dealAction = useDealAction(room);
   const { data: careMatch } = useCareMatch(room.petPrtcMtchSn);
   const isActiveRoom = room.chatRoomSttsCd === ROOM_STTS.ACTIVE;
-  const guide = getDealGuide(stage, myRole);
+  const guide = getDealCancelGuide(room) ??
+    getDealGuide(stage, myRole, room.rcrtSttsCd === RCRT_STTS_RECRUITING);
+  const isCancelRequesting = isDealCancelRequesting(room);
+  /** 상대가 동의해 거래가 취소된 방: 방이 읽기 전용이어도 취소 안내와 구분되는 배지를 보인다 */
+  const isDealCanceled =
+    getDealCancelState(room) === 'approved' && stage === MTCH_STTS.CANCELED;
   const mainAction = guide.actions.find(
     (action) => action.variant === 'primary',
   );
@@ -298,13 +310,21 @@ export default function CareDealCard({ room }) {
         }`}
       >
         <p className="order-1 flex min-w-0 flex-1 items-center gap-2">
-          <DealBadge stage={stage} />
+          {isCancelRequesting && (
+            <DealBadge label="취소 요청중" tone="amber" />
+          )}
+          {isDealCanceled && <DealBadge label="거래 취소" tone="gray" />}
+          {!isCancelRequesting && !isDealCanceled && (
+            <DealBadge stage={stage} />
+          )}
           <span
             className={`min-w-0 text-sm @max-[559px]:line-clamp-2 @min-[560px]:truncate ${
               mainAction ? 'font-semibold text-ink' : 'text-muted'
             }`}
           >
-            {isActiveRoom ? guide.title : '대화가 종료된 채팅방이에요'}
+            {isActiveRoom || isDealCanceled
+              ? guide.title
+              : '대화가 종료된 채팅방이에요'}
           </span>
         </p>
         {mainAction && !isOpen && isActiveRoom && (

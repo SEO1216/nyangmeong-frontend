@@ -175,17 +175,6 @@ export default function useEmailLogin(onSuccess) {
     );
   };
 
-  // 입력칸 오류가 있으면 그 칸을, 없으면 폼 위 알림을 AI가 안내한다
-  const guideTarget = errors.email
-    ? 'email'
-    : errors.password
-      ? 'password'
-      : errors.captcha
-        ? 'captcha'
-        : notice
-          ? 'notice'
-          : null;
-
   return {
     email,
     password,
@@ -201,7 +190,6 @@ export default function useEmailLogin(onSuccess) {
       Boolean(email.trim()) &&
       Boolean(password) &&
       (!isCaptchaOn || Boolean(captchaInput)),
-    guideTarget,
     changeEmail,
     changePassword,
     changeCaptcha,

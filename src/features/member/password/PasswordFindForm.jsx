@@ -19,12 +19,10 @@ export default function PasswordFindForm({
   onRecover,
 }) {
   const form = usePasswordFind(onVerified);
-  const target = form.guideTarget;
   const notice = form.notice && (
     <AuthNotice
       type={form.notice.type}
       message={form.notice.message}
-      hasGuide={target === 'notice'}
     />
   );
 
@@ -97,7 +95,6 @@ export default function PasswordFindForm({
               maxLength={6}
               error={form.errors.code}
               help={form.isSent ? MSG.sent : ''}
-              hasGuide={target === 'code'}
               endAdornment={
                 <span className="font-semibold text-danger tabular-nums">
                   {form.countdown.text}
@@ -169,7 +166,6 @@ export default function PasswordFindForm({
           autoComplete="username"
           inputMode="email"
           error={form.errors.email}
-          hasGuide={target === 'email'}
         />
         <button
           type="submit"

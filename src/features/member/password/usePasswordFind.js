@@ -141,7 +141,7 @@ export default function usePasswordFind(onVerified) {
     }
   };
 
-  /** 인증번호 오류: 오답은 칸을 닫고 공통 알림(AI 말풍선), 만료·사용 완료는 칸 아래 서버 문구 */
+  /** 인증번호 오류: 오답은 칸을 닫고 공통 알림, 만료·사용 완료는 칸 아래 서버 문구 */
   const handleVerifyError = (error) => {
     if (error.code === 'INVALID_INPUT_VALUE') {
       const next = {};
@@ -180,14 +180,6 @@ export default function usePasswordFind(onVerified) {
     );
   };
 
-  const guideTarget = errors.email
-    ? 'email'
-    : errors.code
-      ? 'code'
-      : notice
-        ? 'notice'
-        : null;
-
   return {
     step,
     email,
@@ -200,7 +192,6 @@ export default function usePasswordFind(onVerified) {
     isPending: send.isPending || verify.isPending,
     isCodeLocked,
     resendSeconds: resendWait.seconds,
-    guideTarget,
     changeEmail,
     changeCode,
     submitEmail,
