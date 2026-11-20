@@ -131,7 +131,7 @@ export default function useSignup({ onBackToLogin, onRecover }) {
     setErrors({});
   };
 
-  /** 오답 처리: 인증번호 칸을 닫고 공통 알림(AI 말풍선)으로 재발송 안내 */
+  /** 오답 처리: 인증번호 칸을 닫고 공통 알림으로 재발송 안내 */
   const lockCode = (message) => {
     setIsCodeLocked(true);
     setCode('');
@@ -351,20 +351,6 @@ export default function useSignup({ onBackToLogin, onRecover }) {
     );
   };
 
-  const guideTarget = errors.email
-    ? 'email'
-    : errors.code
-      ? 'code'
-      : errors.phone
-        ? 'phone'
-        : passwordError
-          ? 'password'
-          : confirmError
-            ? 'confirm'
-            : notice
-              ? 'notice'
-              : null;
-
   return {
     step,
     direction,
@@ -401,7 +387,6 @@ export default function useSignup({ onBackToLogin, onRecover }) {
     resendSeconds: resendWait.seconds,
     isPhoneChecking: checkPhone.isPending,
     isJoining: join.isPending,
-    guideTarget,
     goBack,
     goStep,
     goLoginMethods: onBackToLogin,

@@ -172,7 +172,7 @@ export default function useRecovery(email, { onCancel }) {
     );
   };
 
-  /** 인증번호 오류: 오답은 칸을 닫고 공통 알림(AI 말풍선), 만료·사용 완료는 칸 아래 서버 문구 */
+  /** 인증번호 오류: 오답은 칸을 닫고 공통 알림, 만료·사용 완료는 칸 아래 서버 문구 */
   const handleVerifyError = (error) => {
     if (error.code === 'INVALID_INPUT_VALUE') {
       setErrors(toFieldErrors(error.fields));
@@ -276,16 +276,6 @@ export default function useRecovery(email, { onCancel }) {
     onCancel();
   };
 
-  const guideTarget = errors.code
-    ? 'code'
-    : errors.phone
-      ? 'phone'
-      : errors.email
-        ? 'email'
-        : notice
-          ? 'notice'
-          : null;
-
   return {
     step,
     direction,
@@ -309,7 +299,6 @@ export default function useRecovery(email, { onCancel }) {
     resendSeconds: resendWait.seconds,
     isPhoneChecking: checkPhone.isPending,
     isRecovering: recover.isPending,
-    guideTarget,
     changeCode,
     sendCode,
     submitVerify,

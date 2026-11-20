@@ -32,7 +32,6 @@ export default function SnsSignupForm({ snsSignup, onCancel, onGoLogin }) {
         <AuthNotice
           type={form.notice.type}
           message={form.notice.message}
-          hasGuide={form.guideTarget === 'notice'}
         />
       )}
       <form onSubmit={form.submitJoin} noValidate>
@@ -67,7 +66,6 @@ export default function SnsSignupForm({ snsSignup, onCancel, onGoLogin }) {
                   ? MSG.phoneNeedCheck
                   : MSG.snsPhoneMissing
             }
-            hasGuide={form.guideTarget === 'phone'}
             action={
               !form.isPhoneProvided && (
                 <button

@@ -100,7 +100,6 @@ export default function NicknameModal({ savedNickname, onSaved, onClose }) {
           error={error}
           success={status === 'available' ? MSG.nickAvailable : ''}
           help={help}
-          hasGuide
           endAdornment={
             <span className="text-sm text-subtle tabular-nums">
               {value.length} / {NICKNAME_MAX}

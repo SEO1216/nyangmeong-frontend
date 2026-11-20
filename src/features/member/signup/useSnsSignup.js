@@ -181,8 +181,6 @@ export default function useSnsSignup({ snsSignup }) {
     );
   };
 
-  const guideTarget = errors.phone ? 'phone' : notice ? 'notice' : null;
-
   return {
     step,
     direction: 'forward',
@@ -213,7 +211,6 @@ export default function useSnsSignup({ snsSignup }) {
     canJoin,
     isJoining: join.isPending,
     submitJoin,
-    guideTarget,
     nickname,
     isNicknameOpen,
     openNickname: () => setIsNicknameOpen(true),
