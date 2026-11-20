@@ -90,7 +90,7 @@ function VersionDetail({ summary, onBack }) {
       );
     }
     return (
-      <div className="max-h-[50vh] overflow-y-auto rounded-[10px] border border-line bg-surface-2 p-4 text-base leading-6 whitespace-pre-wrap text-ink-2">
+      <div className="rounded-[10px] border border-line bg-surface-2 p-4 text-base leading-6 whitespace-pre-wrap text-ink-2">
         {detail.data.trmsCn}
       </div>
     );

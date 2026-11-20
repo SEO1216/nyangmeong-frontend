@@ -27,7 +27,8 @@ const WIDTH_CLASSES = {
  * isTitleSmall: 제목을 18px(확인 창 제목과 같은 크기)로 줄인다. 기본은 22px
  * isDismissDisabled: 배경 클릭·ESC로 닫지 않는다(입력 유실 방지). ✕·푸터 버튼으로만 닫힌다
  * 열려 있는 동안 페이지 스크롤을 잠근다(useScrollLock, 창이 겹쳐도 마지막이 닫힐 때 풀린다)
- * 길어지면(isLarge·isTop이 아닐 때) 제목 줄·푸터는 두고 본문만 안쪽에서 스크롤한다(막대가 모서리 밖으로 나가지 않게)
+ * 길어지면(isTop이 아닐 때) 제목 줄·푸터는 두고 본문만 안쪽에서 스크롤한다(막대가 모서리 밖으로 나가지 않게).
+ *   dialog 자체는 overflow-hidden이라 브라우저 기본값(dialog:modal overflow auto)으로 막대가 하나 더 생기지 않는다
  * isTop: 가운데 대신 화면 위에서 80px 떨어져 고정. 내용 높이가 바뀌어도(검색 결과 등) 위치가 고정.
  *        dialog를 화면 전체 투명 스크롤 영역으로 두고 흰 판을 그 안에 놓아, 길어지면 모달 안이 아니라 화면 전체 스크롤
  */
@@ -218,7 +219,7 @@ export default function Modal({
               isAutoHeight
                 ? 'max-h-[calc(100dvh-2rem)] min-[760px]:h-fit'
                 : 'h-[min(660px,calc(100dvh-2rem))] max-h-none'
-            } ${WIDTH_CLASSES[width] ?? 'w-[min(760px,calc(100vw-2rem))]'} max-w-none flex-col rounded-modal open:flex ${
+            } ${WIDTH_CLASSES[width] ?? 'w-[min(760px,calc(100vw-2rem))]'} max-w-none flex-col overflow-hidden rounded-modal open:flex ${
               isSheet
                 ? ''
                 : 'max-[760px]:h-dvh max-[760px]:max-h-none max-[760px]:w-screen max-[760px]:rounded-none'
