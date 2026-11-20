@@ -4,40 +4,38 @@
 
 끝남: SCR-CMU-005 거래 취소 요청과 나가기 차단 + 거래 취소 재요청 제한 안내 (2026-11-20, 검증 3회차 `확인 못 함 있음`(연결 남음만), 사람 확인, `yarn -s lint` 0·`yarn -s build` 0). 채팅방 메뉴 「거래 취소 요청」·요청 창(`DealCancelModal.jsx`)·요청한/받은 쪽 카드·동의 뒤 「거래 취소」 표시, 나가기 안내. 추가-1 메뉴 안내 문구 14px, 추가-2 모집중이 아닌 글의 채팅에서 [매칭 요청하기] 숨김(대화는 열어 둠, 사람 결정 2026-11-20). 근거는 `milestones/KSJ.md`
 
-
-끝남: SCR-CMU-001 커뮤니티 정리 (2026-11-19, 사람 확인, `yarn -s lint` 0·`yarn -s build` 0). 추가-3~27: 채팅·상세 화면 보정, 글자 수 초과 입력 차단(한글 조합 중 포함), 댓글 입력창 자동 높이, 이미지 뷰어 스와이프, 서버 금칙어(`PROFANITY_DETECTED`) 안내(화면 쪽 단어 목록 삭제), 채팅 주소 메시지 지도 SDK 준비 판단(`StaticMap is not a constructor`), 펫뉴스·펫이야기·펫돌봄 목록 썸네일 위·아래 여백을 글과 같게(최소 150px, 칸이 카드 높이를 채움), 금칙어 안내 문구를 서버 문구로 통일, 이미지 뷰어 화살표를 터치 기기에서 숨김, `/dev/chat` 삭제. 근거는 `milestones/KSJ.md`와 PR #438·#439·#443·#446·#449·#451·#454·#456(추가-26·27은 다음 PR)
-
-
 ## 다음에 할 것
 
 ### 내가 할 것(프론트)
+
 - 이미지 뷰어 하단 썸네일 줄은 이번엔 하지 않기로 함(2026-11-20). 필요해지면 `ImageViewer.jsx`가 이미 받는 `images`·`index`·`onChange`로 줄을 그리면 되고 모바일에서 보일지 정한다
 - SCR-CMU-001: 기능명세서 FN-CMU-001-11·002-07 「삭제된 댓글은 문구로 대체」를 새 삭제 정책으로 고친다(사람). `TC_커뮤니티.md`에서 TC-CMU-001-11-18 행이 11-17 위에 있다(순서만)
 - 수집 기사로 펫뉴스 상세·목록 높이 기준을 운영 데이터에서 다시 확인한다(로컬은 수집 기사가 없고 시드 썸네일이 가짜 주소)
+- SCR-CMU-002: FN-CMU-002-10·13 서버는 품종 없는 요청을 받는다(develop 확인). 프론트에서 품종 없는 글의 상세(「강아지」만)·카드(품종 줄 없음)·수정 폼(미선택으로 열림)을 확인하고 프론트 PR을 합친다
 
 ### 남을 기다리는 것(연결 남음)
-- SCR-CMU-005 거래 취소 재요청 제한(기능 7): 백엔드 KSJ 브랜치 후속(내 요청이 거절된 거래의 재요청 409 `CARE_DEAL_CANCEL_REJECTED`)이 들어간 빌드로 실제 409 문구 토스트를 확인한다. 로컬 백엔드는 후속 이전 빌드라 재요청을 201로 받았다. 프론트 표시(흐린 메뉴·거절 안내·토스트)는 응답을 가로채 확인됨
+
+- SCR-CMU-005 거래 취소 재요청 제한(기능 7): 백엔드 후속은 develop에 병합됨(2026-11-20 확인). 로컬 백엔드를 최신 develop으로 갱신·재시작한 뒤 내 요청이 거절된 거래의 재요청 409 `CARE_DEAL_CANCEL_REJECTED` 문구 토스트를 실제로 확인한다. 프론트 표시(흐린 메뉴·거절 안내·토스트)는 응답을 가로채 확인됨
 - SCR-CMU-001: LJS에 TC-ADM-020-06-04(관리자 삭제 뒤 회원 화면 「삭제된 댓글입니다」)를 「답글이 남은 댓글이면」 조건으로 고쳤다고 알린다
-- SCR-CMU-004·005 서버(백엔드 KSJ 브랜치에 구현됨, develop 병합 전. 같은 PR이 병합돼야 운영 데이터에서 「모집 종료」·409 문구가 나옴): 일정 기한 검증, 지난 글 자동 마감(`matched`), 거래완료 글 7일 공개 목록 숨김, 종료 방 메시지 차단. 아직 없는 것: 거래 취소 요청과 나가기 차단(`docs/backend-request-care-chat.md` 5번, 백엔드 저장소에서 /start), 지원자 수 `aplcntCnt` 나간 방 제외(4번). 거래 취소 요청 화면은 프론트에서 끝냈다. 일정 지난 매칭완료 글 안내(프론트 완료)는 서버와 무관
-- SCR-ADM-110: 「거래완료 글 숨김 기준 일수」 입력칸은 LJS가 develop에 넣음(`settingFields.js`). 서버 필드 `community.dlngCmptnHideCrtrDayCnt`가 병합된 뒤 저장이 되는지만 LJS와 확인한다
+- SCR-CMU-004·005 서버: 일정 기한 검증·지난 글 자동 마감(`matched`)·거래완료 글 7일 공개 목록 숨김·종료 방 메시지 차단·거래 취소 요청이 백엔드 develop에 병합됨(2026-11-20 확인). 운영·공용 데이터에서 「모집 종료」·409 문구가 나오는지만 본다. 거래 취소 요청 화면과 일정 지난 매칭완료 글 안내는 프론트에서 끝냈다
+- SCR-ADM-110: 「거래완료 글 숨김 기준 일수」 입력칸은 LJS가 develop에 넣었고(`settingFields.js`) 서버 필드 `community.dlngCmptnHideCrtrDayCnt`도 develop에 있다. 저장이 실제로 되는지만 LJS와 확인한다
 - SCR-CMU-001: 서버 자동 댓글에 붙는 🎉는 화면에서 가렸고 서버(`LostReportService.FOUND_COMMENT`)에서도 뺄지는 선택
 - SCR-CMU-002: 실종센터 검색 안내 문구를 「제목, 지역, 품종, 특징으로 검색」으로 바꾸는 것은 백엔드 `GET /lost-reports` 검색에 제목(`PST_TTL`)이 들어간 뒤에 한다(백엔드 저장소에서 /start)
-- 채팅 API 연결은 LJS가 끝냄(`features/chat/api.js`가 실제 API). SCR-CMU-004 FN-CMU-004-05 [내 채팅 보기]·[채팅하기]가 기존 방을 여는지 확인(회원 152 글 3 → 방 8). 같이 남은 것: 헤더 안 읽은 수 배지(COM-002-11), 004-09 펫돌봄 알림이 채팅방을 여는 방 식별자(`otoChatRoomSn`, YAY), 마지막에 본 방을 새로고침 뒤에도 기억할지. `/dev/chat`은 지웠고(추가-27) `/dev/sub-page`(고객센터 이관 끝)는 지워도 되는지 LJS에 알린다
-- SCR-CMU-001: 댓글 알림 저장(FN-CMU-001-11, YAY `notification`)
-- SCR-CMU-002: 장소 검색을 YAY `GET /places`로 교체(FN-CMU-002-11, YAY), 종료 알림(FN-CMU-002-09, YAY). 읍·면·동 필터는 DB `RGN` 전주시 아래 행이 생기면 다시 본다
+- 채팅: SCR-CMU-004 FN-CMU-004-05 [내 채팅 보기]·[채팅하기]가 기존 방을 여는지 확인(회원 152 글 3 → 방 8). 004-09 펫돌봄 알림은 서버가 채팅방 경로를 실어 보내므로(`CareMatchService.notifyReceiver`, develop) LJS 알림 화면에서 눌렀을 때 그 방이 열리는지 확인한다. 헤더 안 읽은 수 배지(COM-002-11)는 `UserHeader.jsx`에 들어가 있다. 마지막에 본 방을 새로고침 뒤에도 기억할지는 정하지 않았다. `/dev/sub-page`(고객센터 이관 끝)는 지워도 되는지 LJS에 알린다
+- SCR-CMU-001: 댓글 알림 저장(FN-CMU-001-11, YAY `notification`): 미구현(2026-11-20 확인). `NotificationType.COMMUNITY`만 정의돼 있고 발행하는 곳이 없다. YAY에게 전달함(2026-11-20), 구현을 기다린다
+- SCR-CMU-002: 장소 검색 교체(FN-CMU-002-11): 서버 `GET /places`는 develop에 있다(YAY). 프론트는 아직 카카오 검색(`utils/placeSearch`)을 쓰니 응답 형태를 비교해 교체한다(새 기획). 종료 알림(FN-CMU-002-09)은 서버가 `LOST_EXPIRY`로 발행한다(develop). 읍·면·동 필터는 DB `RGN` 전주시 아래 행이 생기면 다시 본다
 - SCR-CMU-003: FN-CMU-003-04 관리자 글 첨부 이미지 실제 표시(시드 첨부 4061~4074가 공개 주소에서 404, LJS 관리자 뉴스 등록이 공개 파일로 저장하는지). 비공개 파일이면 `NewsDetail.jsx`를 `useFileImage`로 바꾼다
-- SCR-CSC-003: FN-CSC-003-14 답변 알림(YAY). 003-10 `charPhotoSn`은 SJM 캐릭터 화면이 넘기면 `createInquiry`에 더한다(서버 선택 값)
+- SCR-CSC-003: FN-CSC-003-14 답변 알림은 서버가 `INQUIRY_ANSWER`로 발행한다(develop). LJS 알림 화면에 뜨는지만 확인한다
 - 375px 페이지 가로 스크롤은 공용 푸터가 원인(`UserFooter.jsx`, LJS). LJS 반응형 작업이 들어오면 다시 본다(CSC 추가-4). 푸터 일러스트와 내용 사이 여백도 LJS가 정한다
 
 ### 백엔드(백엔드 저장소에서 /start)
-- SCR-CMU-002: FN-CMU-002-10·13 `POST·PATCH /lost-reports`가 `vrtySn`·`vrtyDrctInptNm` 둘 다 없는 요청을 받게(`LostReportService` 「둘 중 하나만」 검사). 이것이 들어간 뒤 품종 없는 글의 상세(「강아지」만)·카드(품종 줄 없음)·수정 폼(미선택으로 열림)을 확인하고 프론트 PR을 합친다
+
 - 관리자 설정 `dscvAutoCmntCn`(찾았어요 자동 댓글)이 저장만 되고 댓글에는 반영되지 않는다. `LostReportService.FOUND_COMMENT` 상수가 쓰인다. 설정값을 쓰게 하면 프론트 미리보기(`missingCodes.js` `foundCommentText`)도 설정값을 받아야 한다
-- 펫돌봄 완료 사진 관리자 열람(SCR-ADM-022, 진행): 관리자 전용 `GET /api/admin/care-matches/{petPrtcRcrtSn}/images/{atchFileSn}` 구현은 로컬에 있고 커밋 전. 끝나면 LJS에 `CareMatchDetailModal.jsx` `publicFileUrl` → `useFileImage` 전달. 채팅 실시간 제안(`docs/api/community.md` 「실시간」) 검토는 따로
-- 파기 회원이 게시글·댓글에 `탈퇴회원#번호`로 보인다. 커뮤니티 조회에서 파기 회원은 `mbrNcnm`을 「탈퇴한 회원」, `mbrAtchFileSn`을 null로 준다(프론트는 고칠 것 없음)
-- SCR-CMU-002: FN-CMU-002-10·11 전북 밖 좌표 거절(`POST·PATCH /lost-reports`, 낮은 우선순위)
+- 채팅 실시간 제안(`docs/api/community.md` 「실시간」) 검토는 따로(펫돌봄 완료 사진 관리자 열람 API는 develop에 병합, 관리자 모달은 `useFileImage`로 이미 연결됨)
 - 펫뉴스 데이터: 시드 뉴스 썸네일이 `news.example.com` 가짜 주소라 자리 표시로 나옴, 수집 기사 요약에 `&#39;` 같은 HTML 엔티티가 남음(100번). 공용 DB에 v0.11 (7)·(8) 뉴스 제외 키워드가 들어갔는지 확인 뒤 수집
 
 ### 사람이 할 것(DB·파일·문서)
+
 - 검증 데이터 삭제: 방 270(매칭 104)의 거래 취소 요청 6~8번(`MTCH_CNCL_DMND`)과 그 시스템 메시지(`OTO_CHAT_MSG`)
 - SCR-CSC-003: SJM에 캐릭터 생성 완료 창 「오류 문의」 링크에 `pixelCharSn` 한 줄을 KSJ가 추가했다고 알리기. 검증 중 만든 문의 226·227(캐릭터 문의)이 남아 있다(접수 상태가 아니라 화면 삭제 불가, DB·관리자 화면에서 정리). 로컬 AI 서버가 꺼져 있어 완료 창은 실제 생성으로 못 봤다(요청 가로채기로 확인)
 - SCR-CMU-005: LJS에 이번 정리와 주소 지도 카드·사진 보기·격자(채팅 아바타·역할 글자 삭제·거래 카드 한 줄·주소 공유 검색형, 공용 `Modal` 옵션 3개) 알리기. 기능명세서 FN-CMU-005-02(역할 표시·「안 읽음만」)·005-04·005-05(「처음에는 돌봄 글 동네 근처 장소」)와 화면설계서 SCR-CMU-005-01·02·주소공유모달을 변경에 맞춰 고치기. 검증 중 방 271에 생긴 주소 공유 테스트 메시지(`OTO_CHAT_MSG`) 삭제
@@ -55,6 +53,7 @@
 - 화면설계서: SCR-CSC-003-03에 [삭제] 버튼·확인 모달 추가와 ③ 「[문의 수정] 비활성」 문구, SCR-CSC-001-01 ② 검색 문구
 
 ### 참고
+
 - CMU 화면은 `SubPageLayout`(`section="community"`)으로 만든다(2026-10-22): 상세는 `title` 없이 제목이 메뉴 이름이고 「목록으로」는 본문 하단, 글쓰기·수정은 `title="글쓰기"`와 `onLeave`로 「작성을 그만둘까요?」 확인, 본문 위 여백은 모든 CMU 목록·고객센터 포함 `SubPageLayout` 기본값 24px(2026-11-18 통일, 덮어쓰기 없음). 고객센터는 LJS 088ec11에서 `CustomerCenterLayout` → `SubPageLayout`(`section="support"`)으로 옮겨짐
 - 문의 첨부는 `useInquiryImageUrls`(object URL + 해제)를 그대로 쓴다. 공용 `hooks/useFileImage`는 data URL 캐시용이고, 그 주석에 한 화면 전용 큰 사진은 문의 방식으로 둔다고 적혀 있다
 - 장소 찾기 모달의 스크롤바를 끌어도 닫히지 않는지는 스크롤바가 보이는 실제 브라우저에서만 확인됐다. 다른 OS·브라우저에서 이상하면 `Modal.jsx` `handleMouseDown`을 본다
