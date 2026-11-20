@@ -26,7 +26,7 @@ export default function TermsModal({ trmsSn, onClose }) {
       {terms.data && (
         <>
           <p className="mb-3 text-sm text-muted">버전 {terms.data.trmsVerId}</p>
-          <div className="max-h-[50vh] overflow-y-auto leading-6 whitespace-pre-wrap text-ink-2">
+          <div className="leading-6 whitespace-pre-wrap text-ink-2">
             {terms.data.trmsCn || MSG.termsEmpty}
           </div>
         </>

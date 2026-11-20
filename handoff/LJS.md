@@ -2,11 +2,12 @@
 
 ## 지금 하는 것
 
-끝남: SCR-ADM-070 아이템 순서 저장 400 칸 이름 표시 (2026-11-20, 검증 1회차 통과, 사람 확인). 순서 저장 400의 `itemSns`·`itemRegnCd`를 칸별 문구로 보여 주고, `itemSns`면 목록을 다시 읽어 편집 목록을 서버 순서로 새로 채움(`pages/admin/AdminItemsPage.jsx`)
+끝남: SCR-COM-002 공용 Modal 스크롤 막대 겹침 전수조사 (2026-11-20, 검증 1회차 통과, 사람 확인). 공용 `Modal` `isLarge` dialog에 `overflow-hidden`(브라우저 기본 dialog 스크롤로 막대가 하나 더 생기던 것), 약관·약관 이력·포인트 조정 모달 본문 안 고정 높이 목록을 없애 본문 스크롤 하나로
 
 ## 다음에 할 것
 
-- 스크롤 중복 전수조사(사람 요청 2026-11-20 "다음 작업에 스크롤 중복되는 애들 전수조사 가자"): 모달 안에 세로 스크롤 막대가 두 개 겹쳐 보이는 곳을 모두 찾는다. 예: 건강 일지 영수증 [인식 결과 확인] 모달(SCR-HLT-002, JAJ)에서 본문 안쪽 막대와 모달 가장자리 막대가 같이 보임. 공용 `Modal`·바텀시트와 각 모달 본문의 `overflow-y-auto`·`max-h`가 겹치는 곳을 표로 정리하고(파일·담당·원인), 공용에서 고칠지 각 파일에서 고칠지 기획한다
+- SCR-COM-002 스크롤 막대 겹침 팀 알림(PR 본문 + 팀 채널): 모두: 공용 `Modal` `isLarge` 모달(건강 일지 입력·일정·케어 항목 관리·건강기록 둘러보기·아이템 상점·반려동물 등록·수정 등)이 dialog 자체로는 스크롤하지 않고 본문만 스크롤(가장자리 막대 없어짐). YAY: `member/shared/TermsModal` 약관 본문의 `max-h-[50vh]` 안쪽 스크롤을 없애 모달 본문 스크롤 하나로. 모달 본문 안에 `max-h`+`overflow-y-auto` 목록을 새로 두면 막대가 둘이 되니 본문 스크롤에 맡기기(PC 두 칸 구조는 칸마다 하나)
+- SCR-COM-002 스크롤 막대 겹침 참고(검증 보고, 판정 밖): `ExpenseDuplicateDialog`(확인 창 안 목록이 유일한 막대)·`BloodResultList`(모달 아닌 화면 목록)는 코드로만 판정. PC 두 칸 모달(`ShortcutEditModal`·`CareManageModal`)은 1280×560에서 칸마다 막대 1개씩(사람 결정대로 그대로)
 
 - SCR-MYP-011 구매 409 팀 알림(PR 본문, SJM): `features/pet/character/ItemShopModal.jsx`(멱등키를 409 때 새로 만듦, `PURCHASE_ERRORS` 문구 추가)·`features/pet/queries.js` `usePurchaseItems` `onError`(409 때 상세·상점·포인트 무효화)를 고침
 - SCR-MYP-011 참고(검증 보고, 판정 밖): 검증 계정 아이템 미리보기 `POST /ai/characters/3/preview` 400("미리보기를 불러오지 못했어요" 토스트, 이번 변경과 무관)
