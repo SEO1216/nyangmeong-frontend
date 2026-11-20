@@ -47,10 +47,7 @@ function VerifyStep({ form }) {
         />
         {/** 오답 안내: 이메일 칸 바로 아래 */}
         {form.isCodeLocked && form.notice && (
-          <AuthNotice
-            type={form.notice.type}
-            message={form.notice.message}
-          />
+          <AuthNotice type={form.notice.type} message={form.notice.message} />
         )}
         {form.isSent && !form.isCodeLocked && (
           <AuthField
@@ -199,11 +196,18 @@ export default function RecoveryForm({
 
   if (form.step === 'complete') {
     return (
-      <AuthCard>
-        <StepMotion stepKey="complete" direction={form.direction}>
-          <AuthHeading title={MSG.done} subtitle={MSG.doneHelp} />
-          <div className="mx-auto grid size-16 place-items-center rounded-full bg-tone-green-bg text-tone-green-fg">
-            <Check className="size-8" />
+      <AuthCard className="flex flex-1 flex-col">
+        <StepMotion
+          stepKey="complete"
+          direction={form.direction}
+          className="flex flex-1 flex-col"
+        >
+          {/* 체크·제목 묶음은 칸 가운데, 버튼은 맨 아래 */}
+          <div className="flex flex-1 flex-col justify-center text-center">
+            <div className="mx-auto mb-5 grid size-16 place-items-center rounded-full bg-tone-green-bg text-tone-green-fg">
+              <Check className="size-8" />
+            </div>
+            <AuthHeading title={MSG.done} subtitle={MSG.doneHelp} />
           </div>
           <button
             type="button"
@@ -233,10 +237,7 @@ export default function RecoveryForm({
       <StepMotion stepKey={form.step} direction={form.direction}>
         {form.notice && !(form.step === 'verify' && form.isCodeLocked) && (
           <>
-            <AuthNotice
-              type={form.notice.type}
-              message={form.notice.message}
-            />
+            <AuthNotice type={form.notice.type} message={form.notice.message} />
             {form.notice.isExpired && (
               <button
                 type="button"

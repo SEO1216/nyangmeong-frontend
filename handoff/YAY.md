@@ -2,6 +2,8 @@
 
 ## 지금 하는 것
 
+회원가입 완료·재가입 복구 완료 화면 · 내용이 위에 몰려 있던 것을 제목 묶음은 세로·가로 가운데, [로그인으로] 버튼은 맨 아래로 — 진행 중 (직접 요청 2026-11-20, 사람 확인 남음). `features/member/signup/SignupForm.jsx` `SignupComplete`, `recovery/RecoveryForm.jsx` 완료 단계, `shared/AuthCard.jsx`·`components/StepMotion.jsx`에 `className` prop(칸 높이를 채우려고). 복구 완료의 체크 원은 제목 위로 옮김
+
 랜딩 서비스 섹션(두 번째 섹션) · 개인 브랜치 `YAY-landing-cards`의 커버플로 카드를 YAY에 적용 — 진행 중 (직접 요청 2026-11-20, 사람 확인 남음). `features/landing/ServiceSection.jsx`·`landingData.js`·`assets/landing/service/card1~7.webp`를 그 브랜치(4a729ab) 그대로 가져옴. 같은 날 요청으로 초록 뱃지 문구를 영어 "All-in-one Pet Care"로, 굵기를 semibold → normal로. 이어서 랜딩 섹션 머리를 통일: `features/landing/SectionTitle.jsx` 새로 만들어 서비스·과정·파트너·데이터·FAQ가 같은 영어 대문자 라벨(#2c6669)·제목(28/40/48px normal)·설명(14/18/20px)을 씀(서비스 알약 뱃지 → 글자 라벨, 파트너 라벨 "With pawever"·FAQ 라벨 "FAQ"와 제목 "자주 묻는 질문" 새로 넣음). 배경은 흰색과 #f7f7f4 두 가지를 번갈아(서비스 흰·과정 #f7f7f4·파트너 흰·데이터 #f7f7f4·FAQ 흰, FAQ 항목 바탕도 흰색)
 
 로그인·회원가입 · 유효성 검사 오류를 AI 말풍선 대신 다른 화면과 같은 글자 안내로 — 진행 중 (직접 요청 2026-11-20, 사람 확인 남음). `features/member/shared/AuthField.jsx`(오류를 공용 `FieldError`로)·`AuthNotice.jsx`·`login/CaptchaBlock.jsx`에서 `AiErrorGuide`를 빼고 `hasGuide`·`guideTarget`을 지움(같은 부품을 쓰는 비밀번호 찾기·재설정·재가입 복구·탈퇴 확인 모달도 같이 바뀜). 마이페이지 탈퇴 안내(`WithdrawNotice`·`WithdrawResult`)의 말풍선은 그대로
