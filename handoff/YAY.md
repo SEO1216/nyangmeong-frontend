@@ -2,6 +2,10 @@
 
 ## 지금 하는 것
 
+랜딩 서비스 섹션(두 번째 섹션) · 개인 브랜치 `YAY-landing-cards`의 커버플로 카드를 YAY에 적용 — 진행 중 (직접 요청 2026-11-20, 사람 확인 남음). `features/landing/ServiceSection.jsx`·`landingData.js`·`assets/landing/service/card1~7.webp`를 그 브랜치(4a729ab) 그대로 가져옴. 같은 날 요청으로 초록 뱃지 문구를 영어 "All-in-one Pet Care"로, 굵기를 semibold → normal로. 이어서 랜딩 섹션 머리를 통일: `features/landing/SectionTitle.jsx` 새로 만들어 서비스·과정·파트너·데이터·FAQ가 같은 영어 대문자 라벨(#2c6669)·제목(28/40/48px normal)·설명(14/18/20px)을 씀(서비스 알약 뱃지 → 글자 라벨, 파트너 라벨 "With pawever"·FAQ 라벨 "FAQ"와 제목 "자주 묻는 질문" 새로 넣음). 배경은 흰색과 #f7f7f4 두 가지를 번갈아(서비스 흰·과정 #f7f7f4·파트너 흰·데이터 #f7f7f4·FAQ 흰, FAQ 항목 바탕도 흰색)
+
+로그인·회원가입 · 유효성 검사 오류를 AI 말풍선 대신 다른 화면과 같은 글자 안내로 — 진행 중 (직접 요청 2026-11-20, 사람 확인 남음). `features/member/shared/AuthField.jsx`(오류를 공용 `FieldError`로)·`AuthNotice.jsx`·`login/CaptchaBlock.jsx`에서 `AiErrorGuide`를 빼고 `hasGuide`·`guideTarget`을 지움(같은 부품을 쓰는 비밀번호 찾기·재설정·재가입 복구·탈퇴 확인 모달도 같이 바뀜). 마이페이지 탈퇴 안내(`WithdrawNotice`·`WithdrawResult`)의 말풍선은 그대로
+
 SCR-HOS-001 플레이스 · [이 지도 영역에서 다시 검색] 때 핀이 잠깐 별 핀으로 바뀌었다가 초록 번호 핀으로 돌아오는 깜빡임 — 진행 중 (직접 요청 2026-11-20, 사람 확인 남음). 새 영역 결과를 받는 동안 결과가 비어 영역 안 즐겨찾기가 모두 별 핀(`strayFavorites`)으로 그려지던 것. `pages/place/PlacePage.jsx`에서 결과를 받기 전(`query.isSuccess` 아님)에는 별 핀을 그리지 않고 고른 즐겨찾기만 남김. 같은 날 요청으로 검색 결과에 든 즐겨찾기도 처음 디자인 그대로(흰 테두리·가로 100%) 연노랑 바탕·초록 번호 핀으로(고르면 다른 핀처럼 짙은 색). `PlacePin.jsx` `isFavorite` prop, `PlaceMap.jsx`, `PlacePage.jsx`가 `bookmarkSnOf`로 넘김
 
 SCR-HOS-001 플레이스 · 다시 검색한 영역 밖 즐겨찾기를 누르면 그 업체 핀이 안 뜸 — 진행 중 (직접 요청 2026-11-19, 사람 확인 남음). `pages/place/PlacePage.jsx` `strayFavorites`가 재검색 영역 밖 즐겨찾기를 빼서 지도만 옮겨 가고 핀이 없었음. 고른 즐겨찾기는 영역 밖이어도 별 핀으로 보이게 함. 2026-11-19 요청으로 아래 핀 디자인 변경(노란색 통일·가로 75%·별 16px·결과 속 즐겨찾기 노란 번호)은 모두 전으로 되돌림(`PlacePin.jsx`·`PlaceMap.jsx` 원래대로, 버그 수정만 남김). 이어서 11-16 추가-4·5(핀 흰 테두리 제거·가로 85%)도 되돌려 `PlacePin.jsx`를 11-03(5c37998) 모습(흰 테두리·가로 100%)으로. 되돌리기 전 기록: 같은 날 요청으로 즐겨찾기 별 핀은 골라도 짙은 색으로 바꾸지 않고 노란색 그대로 크게만 보이게 함(`features/place/PlacePin.jsx`). 이어서 즐겨찾기 핀을 노란색으로만: 바탕을 목록 별과 같은 #f5c518, 별을 흰색으로(초록 별 뺌). 핀 물방울 가로를 85% → 75%로 더 좁힘(세로·글자 그대로, 번호 핀·즐겨찾기 핀 모두). 즐겨찾기 핀 안 별을 20px → 16px로 줄임. 검색 결과에 있는 즐겨찾기도 번호 핀을 노란색(흰 번호)으로, 골라도 노란색 그대로(`PlaceMap.jsx` `isFavorite`, `PlacePage.jsx`가 `bookmarkSnOf`로 넘김)

@@ -83,3 +83,16 @@ export const confirmCareCompletion = ({ petPrtcMtchSn }) =>
 
 export const confirmCareReceipt = ({ petPrtcMtchSn }) =>
   api.post(`/care-matches/${petPrtcMtchSn}/confirm-receipt`, { rcvYn: true });
+
+/** 거래 취소 요청(매칭 완료~수령 대기): 사유는 칩 문구 또는 직접 입력 문자열 하나 */
+export const requestDealCancel = ({ petPrtcMtchSn, cnclRsn }) =>
+  api.post(`/care-matches/${petPrtcMtchSn}/cancel-request`, { cnclRsn });
+
+export const approveDealCancel = ({ petPrtcMtchSn }) =>
+  api.post(`/care-matches/${petPrtcMtchSn}/cancel-request/approve`);
+
+export const rejectDealCancel = ({ petPrtcMtchSn }) =>
+  api.post(`/care-matches/${petPrtcMtchSn}/cancel-request/reject`);
+
+export const withdrawDealCancel = ({ petPrtcMtchSn }) =>
+  api.post(`/care-matches/${petPrtcMtchSn}/cancel-request/withdraw`);

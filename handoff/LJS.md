@@ -2,9 +2,37 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 공용 확인 창 왼쪽 정렬·제목·설명 (2026-11-19, C1~C4 검증 1회차 통과, 사람 확인). 공용 `Modal isConfirm` 왼쪽 정렬·제목 18px 600·설명 16px, 760 이상 버튼 오른쪽 자기 너비·미만 반반, `isSpacious` 삭제, 제목만 있던 창에 설명, 두 문장 제목을 제목·설명으로
+끝남: SCR-ADM-070 아이템 그림 교체 뒤 전체 굽기 다시 시작 (2026-11-20, 검증 1회차 통과, 사람 확인). 수정 모달에서 굽기 대상 아이템의 그림을 새로 골라 저장하면 등록 때처럼 전체 굽기가 자동 시작(그림 없이 저장하면 시작 안 함), `canBakeItem`·주석에서 `bakeHint` 뺌
 
 ## 다음에 할 것
+
+- SCR-MYP-011 구매 409 팀 알림(PR 본문, SJM): `features/pet/character/ItemShopModal.jsx`(멱등키를 409 때 새로 만듦, `PURCHASE_ERRORS` 문구 추가)·`features/pet/queries.js` `usePurchaseItems` `onError`(409 때 상세·상점·포인트 무효화)를 고침
+- SCR-MYP-011 참고(검증 보고, 판정 밖): 검증 계정 아이템 미리보기 `POST /ai/characters/3/preview` 400("미리보기를 불러오지 못했어요" 토스트, 이번 변경과 무관)
+- SCR-COM-002 피드백 묶음 팀 알림(PR 본문 + 팀 채널): 모두: 760~1099px에서 서브 화면(SubPageLayout) 왼쪽에 사이드 메뉴 180px가 생겨 본문이 좁아짐(제목 옆 ▾ 메뉴 없어짐, 768에서 반려동물 카드 값이 말줄임). 공용 `TimeSelect` 시·분은 직접 입력 가능, 오전/오후는 빈 칸 없이 오전부터(시간 비운 칸도 오전으로 보임). KSJ: `features/community/useLeaveGuard`가 `@/hooks/useLeaveGuard`로 옮겨짐(커뮤니티 글쓰기·수정 6곳 import, `InquiryForm` 나가기 확인이 공용 훅으로, 문의 확인 창 제목/설명 나눔). SJM: `useSetRepresentativePet`이 `healthKeys.myPets`도 무효화. 아래 F4 표의 가계부 메모·초대 이메일 상한 없음
+- SCR-COM-002 피드백 묶음 참고(검증 보고, 판정 밖): 시 칸에 13을 치면 1이 남아 벗어날 때 01, 분 75는 07이 됨(둘째 글자만 막음). 빈 시·분 칸 안내 글자는 "--"(칸 폭이 좁음)
+- F4 사용자 화면 모달 입력 상한 현황(2026-11-20 분석, 코드 수정 없음. 서버 = 백엔드 요청 DTO `@Size`). 담당자에게 알리고 고칠지는 사람이 정함
+  | 모달·폼 | 칸 | 프론트 상한 | 서버 상한 | 담당 | 결과 |
+  | --- | --- | --- | --- | --- | --- |
+  | 가계부 직접 입력(`expense/shared/ExpenseForm.jsx`)·영수증 확인(`ExpenseReceiptReview.jsx`) | 메모 `dtlMttr` | 없음 | 1000 | SJM | 다름: 1000자 넘기면 서버 400 |
+  | 공동양육 초대(`pet/list/InviteModal.jsx`) | 이메일 `invtnTrgtEml` | 없음 | 254 | SJM | 다름: 254자 넘기면 서버 400 |
+  | 반려동물 등록·수정(`pet/list/PetFormModal.jsx`) | 품종 검색 칸(`BreedCombo`) | 없음 | 직접 입력 `vrtyDrctInptNm` 40(직접 입력 칸은 40으로 맞음) | SJM | 검색 칸이라 저장 안 됨, 확인만 |
+  | 반려동물 등록·수정 | 이름 20·직접 입력 품종 40·직접 입력 색 20·인식칩 15·성격·알레르기·질병 1000 | 같음 | 같음(칩은 12 또는 15자리 패턴) | SJM | 맞음 |
+  | 신고(`components/ReportModal.jsx`) | 상세 `dclrDtlCn` | 500 | 500 | 공용 | 맞음 |
+  | 채팅 주소 공유(`chat/room/AddressShareModal.jsx`) | 상세 주소 30·공유 주소 200(잘라서 보냄) | 같음 | 30·200 | KSJ | 맞음(검색어 칸은 저장 안 됨) |
+  | 펫돌봄 거래 취소(`chat/room/CareDealCard.jsx`) | 직접 입력 사유 | 50 | 50 | KSJ | 맞음 |
+  | 처방(`health/checkup/PrescriptionModal.jsx`) | 약 이름 | 40 | 40 | JAJ | 맞음 |
+  | 기타 검사(`EtcInspectionModal.jsx`) | 검사명 100·결과 500·메모 200 | 같음 | 같음 | JAJ | 맞음 |
+  | 일정(`health/ScheduleModal.jsx`) | 병원 80·일정 이름 40·메모 500 | 같음 | 같음 | JAJ | 맞음 |
+  | 검진(`health/diary/CheckupModal.jsx`) | 병원 80·내용 500·메모 200 | 같음 | 같음 | JAJ | 맞음 |
+  | 관찰(`health/diary/ObservationModal.jsx`) | 항목 이름 40·세부 위치 40·메모 200 | 같음 | 같음 | JAJ | 맞음 |
+  | 케어 항목(`health/CareItemFields.jsx`) | 항목 이름 | 40 | 40 | JAJ | 맞음 |
+  | 가계부 | 사용처 `expndPlcusNm` | 80 | 80 | SJM | 맞음 |
+  | 파일·숫자만 있는 모달(영수증 올리기·첨부·캐릭터 만들기·예방·하루 기록·지출 한도) | - | - | - | - | 글자 칸 없음, 대상 아님 |
+- 모바일 바텀 네비 구조(사람과 이야기 2026-11-20, 팀 논의 필요): 지금은 섹션 서브 메뉴를 바텀 네비에 두어 화면마다 내용이 바뀜. 흔한 방식은 최상위 메뉴(홈·건강기록·커뮤니티·마이페이지 등) 고정. 모든 사용자 화면·다른 담당 화면에 걸쳐 팀 결정 뒤 따로 기획
+- SCR-MAN-001 튜토리얼 커밋 전 사람 확인: `src/assets/tutorial/` 스크린샷 5장 개인정보(로컬 테스트 데이터 닉네임·반려동물 이름·포인트·지출, 커뮤니티 인기 포토의 다른 회원 사진·닉네임). 플레이스는 지도를 뺀 472×520 그대로(사람 결정)
+- SCR-MAN-001 튜토리얼 팀 알림(PR 본문 + 팀 채널, JAJ): 건강기록 둘러보기 모달(`features/health/shared/HealthGuideModal.jsx`)의 목차 한 줄·사진 칸·확대 화면이 `components/TocButton`·`ZoomBox`(새 `isFill`)·`ZoomOverlay`로 옮겨짐(모양·동작 그대로). 모두: 튜토리얼 문구가 각 담당 기능을 한 줄씩 소개하므로 메뉴 이름·기능이 바뀌면 LJS에게 알림
+- SCR-MAN-001 사람이 고치는 문서: 메인페이지 기능명세서에 서비스 튜토리얼 기능 ID(FN-MAN-0xx) 추가, 화면설계서 SCR-MAN-001에 튜토리얼 모달·왼쪽 아래 [?]
+- SCR-MAN-001 튜토리얼 참고(검증 보고, 판정 밖): 연출 상수 4개를 `pages/ai/AiChatModal.jsx`에서 복사(features는 pages를 import 못 함, AI 쪽만 바꾸면 두 연출이 달라짐). 390에서 그림 상자가 세로로 길어 [크게 보기]가 그림과 떨어진 상자 모서리에 있음. 메인 [AI 매니저] 버튼 글자는 760 미만에서 `sr-only`(`HeroAsk.jsx:161`)라 설명 문구와 모바일 모양이 다를 수 있음
 
 - SCR-COM-002 공용 확인 창 팀 알림(PR 본문 + 팀 채널, 모두): 확인 창(`ConfirmModal`·`Modal isConfirm`)이 왼쪽 정렬·제목 18px 600·설명 16px 회색, 760px 이상은 버튼이 오른쪽에 자기 너비(최소 80px), 760 미만은 반반 꽉 참. 파일 수정 없이 전체 적용. `Modal`의 `isSpacious` 없어짐(SJM `pet/list` 4곳에서 지움). 문구: 로그아웃 "로그아웃할까요?"+설명, JAJ 건강기록 삭제 창 5곳 설명 추가·일정 삭제·반려동물 변경·다시 촬영 제목/설명 나눔, KSJ 댓글 삭제 설명 추가·게시글·돌봄·실종·문의 삭제·글쓰기 나가기 제목/설명 나눔, SJM 가계부 다시 촬영 제목/설명 나눔. 확인 창 제목은 질문 한 문장, 덧붙일 말은 `description`에 쓰기
 - 확인 창 참고(검증 보고·구현, 판정 밖): `components/ConfirmModal.jsx` 위 주석 "가운데 정렬, 버튼 꽉 참"이 이제 코드와 다름(다음에 이 파일을 고칠 때). `inquiry/InquiryForm.jsx` 나가기 창 제목에 두 문장이 붙어 있음(기획 목록 밖, KSJ). PC 프로필 메뉴로 연 로그아웃 창은 폭을 1100 아래로 줄이면 닫힘(헤더 드롭다운이 사라짐, 전부터)

@@ -1,5 +1,4 @@
 import { RefreshCw } from 'lucide-react';
-import AiErrorGuide from '@/components/AiErrorGuide';
 import FieldError, { Required } from '@/components/FieldError';
 import { INPUT, LABEL } from '@/components/formStyles';
 
@@ -13,7 +12,6 @@ export default function CaptchaBlock({
   onChange,
   onRefresh,
   error,
-  hasGuide,
 }) {
   return (
     <div className="relative">
@@ -53,14 +51,7 @@ export default function CaptchaBlock({
         aria-describedby={error ? 'login-captcha-error' : undefined}
         className={INPUT}
       />
-      {/* AI 안내가 붙으면 같은 문구가 두 번 보이지 않게 말풍선만 보인다. 말풍선은 aria-hidden이라 이 문구를 화면 읽기용으로 남긴다 */}
-      {error && hasGuide && (
-        <p id="login-captcha-error" role="alert" className="sr-only">
-          {error}
-        </p>
-      )}
-      {!hasGuide && <FieldError id="login-captcha-error">{error}</FieldError>}
-      {error && hasGuide && <AiErrorGuide message={error} />}
+      <FieldError id="login-captcha-error">{error}</FieldError>
     </div>
   );
 }

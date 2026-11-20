@@ -11,6 +11,7 @@ import useKakaoMap from '@/hooks/useKakaoMap';
 import { searchPlaces } from '@/utils/placeSearch';
 import {
   acceptCareMatch,
+  approveDealCancel,
   cancelCareMatch,
   chatImageUrl,
   confirmCareCompletion,
@@ -24,8 +25,11 @@ import {
   getChatUnreadCount,
   leaveChatRoom,
   readChatRoom,
+  rejectDealCancel,
   requestCareCompletion,
   requestCareMatch,
+  requestDealCancel,
+  withdrawDealCancel,
 } from './api';
 import { retainChatRealtime, setViewingChatRoom } from './realtime';
 import { CHAT_ROOM_CLOSED, MSG_TYPE } from './shared/chatCodes';
@@ -244,6 +248,10 @@ const DEAL_API = {
   doneRequest: requestCareCompletion,
   confirm: confirmCareCompletion,
   receive: confirmCareReceipt,
+  dealCancel: requestDealCancel,
+  dealCancelApprove: approveDealCancel,
+  dealCancelReject: rejectDealCancel,
+  dealCancelWithdraw: withdrawDealCancel,
 };
 
 /** 거래 단계 변경 { action, cnclRsn }: 서버가 방·대화에 반영하므로 끝나면 다시 조회 */
@@ -299,6 +307,12 @@ export const useLeaveChatRoom = (otoChatRoomSn) => {
   return useMutation({
     mutationFn: () => leaveChatRoom(otoChatRoomSn),
     onSuccess: () => invalidateSummaries(queryClient),
-    onError: (error) => showToast(error.message, { type: 'error' }),
+    onError: (error) => {
+      showToast(error.message, { type: 'error' });
+      /** 409 CHAT_LEAVE_IN_DEAL 등: 방 상태가 화면과 다르니 다시 조회 */
+      queryClient.invalidateQueries({
+        queryKey: chatKeys.detail(otoChatRoomSn),
+      });
+    },
   });
 };

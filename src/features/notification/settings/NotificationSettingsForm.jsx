@@ -48,13 +48,14 @@ const isSameLeadTimes = (a, b) =>
 function SettingRow({ title, description, children }) {
   return (
     <div className="flex items-center justify-between gap-4 border-b border-line-soft px-5 py-4 last:border-b-0">
-      <div>
+      {/** 좁은 화면에서 낱말 중간이 끊기지 않게 하고, 오른쪽 토글·배지는 줄지 않게 둔다 */}
+      <div className="min-w-0 break-keep">
         <p className="text-base font-semibold text-ink">{title}</p>
         {description && (
           <p className="mt-0.5 text-sm text-muted">{description}</p>
         )}
       </div>
-      {children}
+      {children && <div className="shrink-0">{children}</div>}
     </div>
   );
 }
@@ -140,13 +141,13 @@ export default function NotificationSettingsForm({ settings }) {
             미리 알림 시점{' '}
             <span className="text-xs font-normal text-muted">여러 개 선택</span>
           </p>
-          <div className="mt-3 flex gap-2">
+          <div className="mt-3 flex flex-wrap gap-2">
             {BEFORE_DAYS.map(({ key, label }) => (
               <button
                 key={key}
                 type="button"
                 aria-pressed={draft.leadTimes.includes(key)}
-                className={`h-9 rounded-full border px-4 text-sm ${
+                className={`h-9 shrink-0 rounded-full border px-4 text-sm whitespace-nowrap ${
                   draft.leadTimes.includes(key)
                     ? 'border-brand-500 bg-brand-500 text-white'
                     : 'border-input-line bg-white text-ink-2'
@@ -157,7 +158,7 @@ export default function NotificationSettingsForm({ settings }) {
               </button>
             ))}
           </div>
-          <p className="mt-3 flex items-center gap-2 rounded-lg bg-surface-2 px-4 py-3 text-sm text-muted">
+          <p className="mt-3 flex items-center gap-2 rounded-lg bg-surface-2 px-4 py-3 text-sm break-keep text-muted">
             <Clock size={16} className="shrink-0" aria-hidden="true" />
             사전 알림은 매일 오전 9시에 발송돼요. 이후에 등록·변경한 오늘 알림은
             발송되지 않아요.
@@ -215,7 +216,7 @@ export default function NotificationSettingsForm({ settings }) {
         {needsLimit && (
           <p
             role="status"
-            className="border-b border-line-soft bg-warn-soft px-5 py-3 text-sm text-warn"
+            className="border-b border-line-soft bg-warn-soft px-5 py-3 text-sm break-keep text-warn"
           >
             월 한도를 아직 정하지 않았어요. 가계부에서 한도를 먼저 정해 주세요.
           </p>
@@ -232,7 +233,7 @@ export default function NotificationSettingsForm({ settings }) {
       <SettingsCard icon={Lock} title="항상 받는 알림">
         {ALWAYS_ON.map((name) => (
           <SettingRow key={name} title={name}>
-            <span className="rounded-full bg-surface-3 px-2.5 py-1 text-xs text-muted">
+            <span className="rounded-full bg-surface-3 px-2.5 py-1 text-xs whitespace-nowrap text-muted">
               끌 수 없음
             </span>
           </SettingRow>
