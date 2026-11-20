@@ -156,11 +156,7 @@ export default function ObservationDetail({
           />
         </div>
       )}
-      {cycles.length === 1 && (
-        <p className="mb-4 text-sm/[1.6] text-subtle">
-          회차가 2개 이상 쌓이면 크기 변화 그래프로 보여요
-        </p>
-      )}
+      {/** 「회차가 2개 이상 쌓이면…」 문구는 카드 제목 ⓘ 안내로 옮김 (※신규 정책, 2026-11-20) */}
 
       <div className="rounded-[10px] bg-surface-2 p-4">
         <div className="flex items-center justify-between gap-2">

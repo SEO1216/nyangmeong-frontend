@@ -16,6 +16,7 @@ export default function SubPageLayout({
   title,
   back,
   backTo,
+  backLabel = '목록으로',
   description,
   pixel = true,
   headAction,
@@ -53,15 +54,21 @@ export default function SubPageLayout({
       <div
         className={`flex min-w-0 flex-col min-[760px]:col-start-2 min-[760px]:row-start-3 ${contentClassName}`}
       >
-        {hasBack && <BackLink to={backTo ?? activeItem.to} onLeave={onLeave} />}
+        {hasBack && (
+          <BackLink
+            to={backTo ?? activeItem.to}
+            label={backLabel}
+            onLeave={onLeave}
+          />
+        )}
         {children}
       </div>
     </div>
   );
 }
 
-/** 상세·글쓰기·수정 화면의 ‹ 목록으로 */
-function BackLink({ to, onLeave }) {
+/** 상세·글쓰기·수정 화면의 ‹ 목록으로. label: 뒤로 가기 글자(backLabel, 기본 「목록으로」) (※신규 정책) */
+function BackLink({ to, label, onLeave }) {
   const handleClick = (event) => {
     if (!onLeave) return;
     event.preventDefault();
@@ -75,7 +82,7 @@ function BackLink({ to, onLeave }) {
       className="-mt-1 mb-4 inline-flex h-6 items-center gap-2 self-start text-base leading-none font-medium text-muted transition-colors hover:text-ink"
     >
       <ArrowLeft size={18} aria-hidden="true" />
-      목록으로
+      {label}
     </Link>
   );
 }
