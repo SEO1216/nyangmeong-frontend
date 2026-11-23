@@ -607,6 +607,7 @@ function PetForm({
                 value={form.petBrdt}
                 onChange={(value) => setField('petBrdt', value)}
                 max={today}
+                monthSelect
                 invalid={Boolean(errors.petBrdt)}
                 describedBy="pet-brdt-e"
               />

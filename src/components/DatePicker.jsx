@@ -3,7 +3,6 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  ChevronUp,
 } from 'lucide-react';
 import { useEffect, useId, useImperativeHandle, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -67,9 +66,9 @@ const clamp = (ymd, min, max) => {
  * - 팝오버는 포털(모달 안이면 그 dialog, 아니면 body)에 fixed로 띄워 모달 본문 끝에 잘리지 않는다. 열린 동안 바깥 스크롤은 막는다
  * - 팝오버 너비: 데스크톱 296px, 모바일(760px 이하)은 칸 너비(최소 280px). 화면 좌우 16px 안으로 당겨 연다.
  *   연 채로 스크롤·창 크기를 바꾸면 위·아래 방향과 위치를 다시 잰다
+ * - monthSelect: true면 헤더 "yyyy년 M월"을 눌러 연도 ◀▶ + 12개월 칸으로 보이는 달을 바로 옮긴다(기본 꺼짐).
+ *   월을 골라도 value는 바뀌지 않고, 날짜를 눌렀을 때만 onChange가 불린다
  * - 키보드: ←→ 하루, ↑↓ 한 주 이동, Enter·Space 선택, Esc·Tab 닫기. 아래 공간이 모자라면 위로 열림
- * - 위 "YYYY년 M월"을 누르면 월 고르기 보기(연도 ◀ ▶ + 12달). 달을 고르면 그 달 날짜 보기로 돌아간다.
- *   월 보기 키보드: ←→ 한 달, ↑↓ 석 달, Enter·Space 그 달 날짜 보기, Esc 날짜 보기로
  */
 export default function DatePicker({
   ref,
@@ -84,6 +83,7 @@ export default function DatePicker({
   id,
   describedBy,
   disabled = false,
+  monthSelect = false,
   className = '',
 }) {
   const dialogId = useId();
@@ -97,8 +97,9 @@ export default function DatePicker({
   const [offsetX, setOffsetX] = useState(0);
   const [popoverWidth, setPopoverWidth] = useState(POPOVER_WIDTH);
   const [activeYmd, setActiveYmd] = useState('');
-  /** 'day' 날짜 보기 / 'month' 월 고르기 보기 */
-  const [mode, setMode] = useState('day');
+  /** monthSelect가 켜졌을 때 달력 대신 연·월 칸을 보이는 중인지 */
+  const [isMonthView, setIsMonthView] = useState(false);
+  const [pickerYear, setPickerYear] = useState(0);
 
   useImperativeHandle(ref, () => buttonRef.current, []);
 
@@ -127,7 +128,7 @@ export default function DatePicker({
     setPortalTarget(getPortalTarget(buttonRef.current));
     measure();
     setActiveYmd(clamp(value || today, min, max));
-    setMode('day');
+    setIsMonthView(false);
     setIsOpen(true);
   };
 
@@ -181,30 +182,14 @@ export default function DatePicker({
       }
       return;
     }
-    if (mode === 'month') {
-      const monthSteps = {
-        ArrowLeft: -1,
-        ArrowRight: 1,
-        ArrowUp: -3,
-        ArrowDown: 3,
-      };
-      if (event.key in monthSteps) {
-        event.preventDefault();
-        moveMonth(monthSteps[event.key]);
-      } else if (
-        event.key === 'Enter' ||
-        event.key === ' ' ||
-        event.key === 'Escape'
-      ) {
-        event.preventDefault();
-        setMode('day');
-      } else if (event.key === 'Tab') {
-        close();
-      }
-      return;
-    }
     const steps = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
-    if (event.key in steps) {
+    if (isMonthView && event.key in steps) {
+      // 연·월 칸에서는 날짜를 옮기지 않는다
+      event.preventDefault();
+    } else if (isMonthView && (event.key === 'Enter' || event.key === ' ')) {
+      // 값은 날짜를 눌렀을 때만 바뀐다
+      event.preventDefault();
+    } else if (event.key in steps) {
       event.preventDefault();
       moveActive(steps[event.key]);
     } else if (event.key === 'Enter' || event.key === ' ') {
@@ -232,17 +217,25 @@ export default function DatePicker({
   const moveMonth = (months) =>
     setActiveYmd(clamp(addMonths(activeYmd, months), min, max));
 
-  /** 월 보기: 그 달이 통째로 min·max 밖이면 고를 수 없다 */
-  const isMonthOut = (year, month) =>
-    (Boolean(min) && toYmd(new Date(year, month + 1, 0)) < min) ||
-    (Boolean(max) && toYmd(new Date(year, month, 1)) > max);
-  const isPrevYearDisabled = Boolean(min) && `${viewYear - 1}-12-31` < min;
-  const isNextYearDisabled = Boolean(max) && `${viewYear + 1}-01-01` > max;
+  const minYear = min ? parseYmd(min).getFullYear() : null;
+  const maxYear = max ? parseYmd(max).getFullYear() : null;
 
+  const openMonthView = () => {
+    setPickerYear(viewYear);
+    setIsMonthView(true);
+  };
+
+  /** 보이는 달만 옮긴다. onChange를 부르지 않으므로 value는 그대로다 */
   const pickMonth = (month) => {
-    if (isMonthOut(viewYear, month)) return;
-    setActiveYmd(clamp(addMonths(activeYmd, month - viewMonth), min, max));
-    setMode('day');
+    const diff = (pickerYear - viewYear) * 12 + (month - viewMonth);
+    setActiveYmd(clamp(addMonths(activeYmd, diff), min, max));
+    setIsMonthView(false);
+  };
+
+  const isMonthOutOfRange = (year, month) => {
+    const first = toYmd(new Date(year, month, 1));
+    const last = toYmd(new Date(year, month + 1, 0));
+    return (min && last < min) || (max && first > max);
   };
 
   const borderClass = invalid
@@ -306,128 +299,129 @@ export default function DatePicker({
             <div className="mb-2 flex items-center justify-between">
               <button
                 type="button"
-                aria-label={mode === 'month' ? '이전 해' : '이전 달'}
+                aria-label={isMonthView ? '이전 연도' : '이전 달'}
                 disabled={
-                  mode === 'month' ? isPrevYearDisabled : isPrevDisabled
+                  isMonthView
+                    ? minYear !== null && pickerYear <= minYear
+                    : isPrevDisabled
                 }
-                onClick={() => moveMonth(mode === 'month' ? -12 : -1)}
+                onClick={() =>
+                  isMonthView ? setPickerYear(pickerYear - 1) : moveMonth(-1)
+                }
                 className={NAV_BUTTON}
               >
                 <ChevronLeft size={18} aria-hidden="true" />
               </button>
+              {isMonthView ? (
+                <span
+                  aria-live="polite"
+                  className="text-base leading-tight font-semibold tracking-[-0.03em] text-ink"
+                >
+                  {pickerYear}년
+                </span>
+              ) : monthSelect ? (
+                <button
+                  type="button"
+                  aria-haspopup="true"
+                  aria-expanded={false}
+                  aria-label={`${viewYear}년 ${viewMonth + 1}월, 연·월 선택`}
+                  onClick={openMonthView}
+                  className="inline-flex h-8 cursor-pointer items-center gap-1 rounded-md px-2 text-base leading-tight font-semibold tracking-[-0.03em] text-ink hover:bg-surface-2"
+                >
+                  {viewYear}년 {viewMonth + 1}월
+                  <ChevronDown size={16} aria-hidden="true" />
+                </button>
+              ) : (
+                <span
+                  aria-live="polite"
+                  className="text-base leading-tight font-semibold tracking-[-0.03em] text-ink"
+                >
+                  {viewYear}년 {viewMonth + 1}월
+                </span>
+              )}
               <button
                 type="button"
-                aria-live="polite"
-                aria-expanded={mode === 'month'}
-                aria-label={
-                  mode === 'month'
-                    ? `${viewYear}년, 날짜 보기로`
-                    : `${viewYear}년 ${viewMonth + 1}월, 월 고르기`
-                }
-                onClick={() => setMode(mode === 'month' ? 'day' : 'month')}
-                className="flex h-8 items-center gap-1 rounded-md px-2 text-base leading-tight font-semibold tracking-[-0.03em] text-ink hover:bg-surface-2"
-              >
-                {mode === 'month'
-                  ? `${viewYear}년`
-                  : `${viewYear}년 ${viewMonth + 1}월`}
-                {mode === 'month' ? (
-                  <ChevronUp
-                    size={16}
-                    aria-hidden="true"
-                    className="text-muted"
-                  />
-                ) : (
-                  <ChevronDown
-                    size={16}
-                    aria-hidden="true"
-                    className="text-muted"
-                  />
-                )}
-              </button>
-              <button
-                type="button"
-                aria-label={mode === 'month' ? '다음 해' : '다음 달'}
+                aria-label={isMonthView ? '다음 연도' : '다음 달'}
                 disabled={
-                  mode === 'month' ? isNextYearDisabled : isNextDisabled
+                  isMonthView
+                    ? maxYear !== null && pickerYear >= maxYear
+                    : isNextDisabled
                 }
-                onClick={() => moveMonth(mode === 'month' ? 12 : 1)}
+                onClick={() =>
+                  isMonthView ? setPickerYear(pickerYear + 1) : moveMonth(1)
+                }
                 className={NAV_BUTTON}
               >
                 <ChevronRight size={18} aria-hidden="true" />
               </button>
             </div>
-            {mode === 'month' && (
-              <div className="grid grid-cols-4 gap-1 py-1">
-                {Array.from({ length: 12 }, (_, month) => {
-                  const isDisabled = isMonthOut(viewYear, month);
-                  const isSelected =
-                    Boolean(value) &&
-                    value.slice(0, 7) ===
-                      toYmd(new Date(viewYear, month, 1)).slice(0, 7);
-                  const isActive = month === viewMonth;
+            {isMonthView ? (
+              <div className="grid grid-cols-4 gap-1">
+                {Array.from({ length: 12 }, (_, index) => {
+                  const isCurrent =
+                    pickerYear === viewYear && index === viewMonth;
                   return (
                     <button
-                      key={month}
+                      key={index}
+                      type="button"
+                      tabIndex={-1}
+                      disabled={isMonthOutOfRange(pickerYear, index)}
+                      aria-pressed={isCurrent}
+                      onClick={() => pickMonth(index)}
+                      className={`h-10 rounded-md text-sm tracking-[-0.03em] hover:enabled:bg-surface-2 disabled:cursor-not-allowed disabled:text-line-strong ${
+                        isCurrent
+                          ? 'bg-brand-500 font-bold text-white hover:enabled:bg-brand-500'
+                          : 'text-ink-2'
+                      }`}
+                    >
+                      {index + 1}월
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="grid grid-cols-7 text-center">
+                {[...WEEKDAYS].map((weekday) => (
+                  <span
+                    key={weekday}
+                    className="flex h-8 items-center justify-center text-xs leading-tight tracking-[-0.01em] text-placeholder"
+                  >
+                    {weekday}
+                  </span>
+                ))}
+                {Array.from({ length: firstWeekday }, (_, index) => (
+                  <span key={`blank-${index}`} aria-hidden="true" />
+                ))}
+                {Array.from({ length: dayCount }, (_, index) => {
+                  const day = index + 1;
+                  const ymd = toYmd(new Date(viewYear, viewMonth, day));
+                  const isSelected = ymd === value;
+                  const isActive = ymd === activeYmd;
+                  const isToday = ymd === today;
+                  const isDisabled = isOutOfRange(ymd);
+                  return (
+                    <button
+                      key={ymd}
                       type="button"
                       tabIndex={-1}
                       disabled={isDisabled}
+                      aria-label={formatDate(ymd, { weekday: true })}
                       aria-pressed={isSelected}
-                      onClick={() => pickMonth(month)}
-                      className={`flex h-14 items-center justify-center rounded-md text-sm leading-tight tracking-[-0.03em] disabled:cursor-not-allowed disabled:text-line-strong ${
+                      aria-current={isToday ? 'date' : undefined}
+                      onClick={() => pick(ymd)}
+                      onMouseEnter={() => setActiveYmd(ymd)}
+                      className={`mx-auto flex size-9 items-center justify-center rounded-md text-sm leading-tight tracking-[-0.03em] disabled:cursor-not-allowed disabled:text-line-strong ${
                         isSelected
                           ? 'bg-brand-50 font-semibold text-brand-600'
-                          : `text-ink hover:enabled:bg-surface-2 ${isActive && !isDisabled ? 'ring-1 ring-line-strong ring-inset' : ''}`
-                      }`}
+                          : `text-ink ${isActive && !isDisabled ? 'bg-surface-2' : ''}`
+                      } ${isToday && !isSelected ? 'font-semibold ring-1 ring-line-strong ring-inset' : ''}`}
                     >
-                      {month + 1}월
+                      {day}
                     </button>
                   );
                 })}
               </div>
             )}
-            <div
-              className={`grid grid-cols-7 text-center ${mode === 'month' ? 'hidden' : ''}`}
-            >
-              {[...WEEKDAYS].map((weekday) => (
-                <span
-                  key={weekday}
-                  className="flex h-8 items-center justify-center text-xs leading-tight tracking-[-0.01em] text-placeholder"
-                >
-                  {weekday}
-                </span>
-              ))}
-              {Array.from({ length: firstWeekday }, (_, index) => (
-                <span key={`blank-${index}`} aria-hidden="true" />
-              ))}
-              {Array.from({ length: dayCount }, (_, index) => {
-                const day = index + 1;
-                const ymd = toYmd(new Date(viewYear, viewMonth, day));
-                const isSelected = ymd === value;
-                const isActive = ymd === activeYmd;
-                const isToday = ymd === today;
-                const isDisabled = isOutOfRange(ymd);
-                return (
-                  <button
-                    key={ymd}
-                    type="button"
-                    tabIndex={-1}
-                    disabled={isDisabled}
-                    aria-label={formatDate(ymd, { weekday: true })}
-                    aria-pressed={isSelected}
-                    aria-current={isToday ? 'date' : undefined}
-                    onClick={() => pick(ymd)}
-                    onMouseEnter={() => setActiveYmd(ymd)}
-                    className={`mx-auto flex size-9 items-center justify-center rounded-md text-sm leading-tight tracking-[-0.03em] disabled:cursor-not-allowed disabled:text-line-strong ${
-                      isSelected
-                        ? 'bg-brand-50 font-semibold text-brand-600'
-                        : `text-ink ${isActive && !isDisabled ? 'bg-surface-2' : ''}`
-                    } ${isToday && !isSelected ? 'font-semibold ring-1 ring-line-strong ring-inset' : ''}`}
-                  >
-                    {day}
-                  </button>
-                );
-              })}
-            </div>
           </div>,
           portalTarget,
         )}

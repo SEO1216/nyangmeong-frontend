@@ -1,16 +1,18 @@
 import { Info } from 'lucide-react';
 import { BTN_SECONDARY } from '@/components/buttonStyles';
 import MonthNav from '@/components/MonthNav';
-import { formatYm } from '@/utils/yearMonth';
+import MonthPicker from '@/components/MonthPicker';
 import { formatWon } from '../shared/expenseFormat';
 import { getRatio } from '../shared/expenseStats';
 import { CARD, CARD_BODY, CARD_HEAD } from '../shared/expenseStyles';
 
-/** prevTotalAmt null: 증감 배지 숨김 */
+/** prevTotalAmt null: 증감 배지 숨김, enabledYms: 월 선택 창에서 고를 수 있는 연월 */
 export default function ExpenseSummary({
   ym,
-  isNextDisabled,
+  maxYm,
+  enabledYms,
   onChangeMonth,
+  onSelectMonth,
   totalAmt,
   count,
   prevTotalAmt,
@@ -24,21 +26,27 @@ export default function ExpenseSummary({
 
   return (
     <section aria-label="이번달 총 지출" className={`${CARD} flex flex-col`}>
-      <div className={`${CARD_HEAD} max-[390px]:gap-2 max-[390px]:px-3.5`}>
+      <div className={`${CARD_HEAD} max-[400px]:relative max-[400px]:gap-2 max-[400px]:px-3.5`}>
         <MonthNav
           onPrev={() => onChangeMonth(-1)}
           onNext={() => onChangeMonth(1)}
-          isNextDisabled={isNextDisabled}
+          isNextDisabled={ym >= maxYm}
         >
-          <b className="min-w-28 text-center text-lg max-[390px]:min-w-0 max-[390px]:px-1">
-            {formatYm(ym)}
-          </b>
+          {/* 좁은 폭: 선택 창을 연월 버튼이 아니라 헤더 가운데 기준으로 열어 화면 밖으로 나가지 않게 한다 */}
+          <div className="contents max-[400px]:[&>div]:static">
+            <MonthPicker
+              ym={ym}
+              maxYm={maxYm}
+              enabledYms={enabledYms}
+              onSelect={onSelectMonth}
+            />
+          </div>
         </MonthNav>
         {hasLimit && (
           <button
             type="button"
             onClick={onOpenLimit}
-            className={`${BTN_SECONDARY} shrink-0 whitespace-nowrap max-[390px]:px-3`}
+            className={`${BTN_SECONDARY} shrink-0 whitespace-nowrap max-[400px]:px-3`}
           >
             한도 설정
           </button>

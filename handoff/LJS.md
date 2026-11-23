@@ -4,6 +4,12 @@
 
 끝남: SCR-COM-002 사람 확인 피드백 묶음 2 (2026-11-23, 검증 통과, 사람 확인). G2 모바일 입력칸 16px(터치 기기), G3 플로팅 버튼 z-20·접힘 탭 누르는 영역 44px·펼침 창 z-30, G4 DatePicker 월 고르기 보기, G5 공용 `FieldFoot`(오류 왼쪽·글자 수 오른쪽 한 줄), G6 AI·채팅 모달 열리면 흰 헤더, G7 사이드 메뉴 '›' 오른쪽 끝. 추가-1 달력·셀렉트·시간 목록 포털 + 열린 동안 바깥 스크롤 잠금(`hooks/useFloatingLayer.js`). G1은 디자인 필요로 뺌
 
+### 추가 요청
+
+| 번호 | 바꿀 파일 | 완료 조건 | 요청 |
+| --- | --- | --- | --- |
+| 추가-2 | `components/DatePicker.jsx`(develop 병합 충돌 해결) | `명령:` lint·build. `화면:` 월 고르기 보기는 `monthSelect`를 넘긴 칸(반려동물 생년월일)에서만 열리고 다른 날짜 칸(일정 모달)은 헤더가 글자만, 두 경우 모두 달력이 포털·fixed로 떠 잘리지 않고 열린 동안 바깥 스크롤 막힘 | 요청 2026-11-23 15:12 "develop의 SJM `monthSelect` 방식(켠 칸만)으로 맞추기(2번)" |
+
 ## 다음에 할 것
 
 - SCR-COM-002 피드백 묶음 2 팀 알림(PR 본문 + 팀 채널, 모두): ① 터치 기기에서 `input`·`textarea`·`select` 글자가 16px(iOS 확대 막기, `assets/index.css` 레이어 밖 규칙이라 `text-sm`보다 앞섬) ② 공용 `DatePicker` 위 "YYYY년 M월 ▾"로 월 고르기 보기 ③ `DatePicker`·`DropdownSelect` 펼침 창이 포털(모달 안이면 그 dialog, 아니면 body) + fixed로 뜨고, `TimeSelect` 포함 열린 동안 바깥 휠·터치 스크롤이 막힘(`hooks/useFloatingLayer.js`). 펼침 창 안에 스크롤 목록을 새로 두면 `overscroll-contain` ④ 플로팅 버튼 z-30 → z-20, `KebabMenu`·`MonthPicker` 펼침 창 z-30 ⑤ 사이드 메뉴 '›'가 줄 오른쪽 끝. JAJ·KSJ·YAY·SJM: 새 공용 `components/FieldFoot`(왼쪽 오류, 오른쪽 "n / 최대")으로 바뀜 — JAJ 일정·검진·관찰·기타 검사·처방·케어 항목(라벨 줄 글자 수가 칸 아래로)·검사 수치 입력, `health/shared/CharCount.jsx` 삭제, KSJ `AddressShareModal`, YAY `NicknameModal`(칸 안 글자 수가 칸 아래로), SJM `PetFormModal`(라벨 줄 글자 수가 칸 아래로). `FieldError`에 `className` prop. 모달에 글자 수 칸을 새로 만들면 `FieldFoot`
