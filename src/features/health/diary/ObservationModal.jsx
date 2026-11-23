@@ -26,7 +26,7 @@ import FormModal from './FormModal';
 import { INPUT, LABEL, TEXTAREA } from '@/components/formStyles';
 import ObservationPhoto from './ObservationPhoto';
 import { formatPart } from './observationUtils';
-import CharCount from '../shared/CharCount';
+import FieldFoot from '@/components/FieldFoot';
 
 const MAX_ITEM_NAME_LENGTH = 40;
 const MAX_PART_DETAIL_LENGTH = 40;
@@ -204,10 +204,11 @@ export default function ObservationModal({
           className={INPUT}
           onChange={(event) => setName(event.target.value)}
         />
-        {isCreateItem && <CharCount value={name} max={MAX_ITEM_NAME_LENGTH} />}
-        {isInvalid('name') && (
-          <FieldError>관찰 항목을 입력해 주세요</FieldError>
-        )}
+        <FieldFoot
+          value={name}
+          max={isCreateItem ? MAX_ITEM_NAME_LENGTH : undefined}
+          error={isInvalid('name') && '관찰 항목을 입력해 주세요'}
+        />
       </label>
 
       <div className="flex flex-col gap-1.5">
@@ -236,7 +237,7 @@ export default function ObservationModal({
                 className={INPUT}
                 onChange={(event) => setPartDetail(event.target.value)}
               />
-              <CharCount value={partDetail} max={MAX_PART_DETAIL_LENGTH} />
+              <FieldFoot value={partDetail} max={MAX_PART_DETAIL_LENGTH} />
             </div>
           </div>
         ) : (
@@ -393,7 +394,7 @@ export default function ObservationModal({
           className={TEXTAREA}
           onChange={(event) => setMemo(event.target.value)}
         />
-        <CharCount value={memo} max={MAX_MEMO_LENGTH} />
+        <FieldFoot value={memo} max={MAX_MEMO_LENGTH} />
       </label>
     </FormModal>
   );

@@ -343,3 +343,16 @@
     transform: translateX(-50%);
   }
 }
+
+/*
+ * 모바일 입력칸 확대 막기(사람 피드백 2026-11-23): iOS는 글자가 16px보다 작은 칸에 초점이 가면 화면을 키운다.
+ * 터치 기기에서만 입력칸 글자를 16px로 둔다. 레이어 밖 규칙이라 text-sm 같은 유틸리티보다 앞선다.
+ * viewport maximum-scale은 손가락 확대까지 막아 쓰지 않는다
+ */
+@media (pointer: coarse) {
+  input:not([type='checkbox'], [type='radio'], [type='range']),
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
