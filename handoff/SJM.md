@@ -2,21 +2,26 @@
 
 ## 지금 하는 것
 
-SCR-MYP-001 마이페이지 홈 · 한눈에 보기 P 아이콘·3칸 배치 경계 — 끝 (2026-11-23, 검증 `통과`, lint·build 0, 사람 확인 완료, 추가-1·2 포함. 정리 없음)
+SCR-MYP-020 포인트 관리/케어미션 · 포인트 내역 월 선택 창을 내역이 있는 달로 — 끝 (2026-11-23, 검증 `통과`(3회차), lint·build 0, 사람 확인 완료, 추가-1 포함. 정리 없음)
 
-- 디자인: 없음(Figma 토큰 없음, `html/`에 SCR-MYP-001 파일 없음). 요청 문구 기준으로 간다
-- FN-MYP-001-03 포인트·지출 한눈에 보기(걸치는 기능 FN-MYP-001-04)
-  - 바꿀 파일: `src/components/StatLink.jsx`에 선택 prop `iconDesktopOnly`(기본 `false`)를 더해 `true`일 때만 아이콘 칸을 `hidden min-[760px]:grid`로 둔다. `src/features/point/home/PointSummaryCard.jsx`만 `iconDesktopOnly`를 넘긴다. 이번달 지출액·오늘의 케어미션 카드와 `StatSkeleton`은 고치지 않는다
-  - API: 없음(기존 `usePointBalance` 그대로)
+- 디자인: 없음(Figma 토큰 없음, `html/`에 SCR-MYP-020 파일 없음). 가계부 전체 내역(30-2) `ExpenseHistory`의 ◀ MonthPicker ▶ 모양을 그대로 따른다
+- 기준 문서: 기능명세서 v0.5(캐시) FN-MYP-020-02는 "◀▶로 이전달·다음달(미래는 비활성) 이동"만 있고 월 선택 창은 없다. 명세 보완은 "내 문서 작업"에 남긴다
+- FN-MYP-020-02 적립·사용 내역
+  - 바꿀 파일:
+    - `src/components/MonthPicker.jsx`: 선택 prop `emptyNotice`(기본값 "지출이 없는 달은 선택할 수 없어요")를 받아 선택 창 아래 안내에 쓴다. 다른 동작은 그대로. `ExpenseHistory`는 고치지 않는다
+    - `src/features/point/api.js`: `getPointMonths` = `GET /point-ledgers/months`, 가계부 `getExpenseMonths`처럼 `yearMonth` 값 배열(`['2026-11', ...]`)로 돌려준다
+    - `src/features/point/queries.js`: `pointKeys.months()` = `['points', 'months']`(건강 일지의 `pointKeys.all` 무효화에 함께 걸린다), `usePointMonths`
+    - `src/features/point/history/PointHistory.jsx`: ◀▶ 사이 `<b>{formatYm(ym)}</b>`를 `<MonthPicker ym maxYm enabledYms={months ?? []} emptyNotice="포인트 내역이 없는 달은 선택할 수 없어요" onSelect>`로 바꾼다. 선택·◀▶ 모두 기존 `moveYm`과 같이 [더보기] 펼침을 접는다. 연월 목록을 받는 중이거나 실패해도 내역 카드는 그대로 보이고(선택 창의 달만 모두 비활성), ◀▶는 지금처럼 동작, 이번 달에서 ▶ 비활성
+  - API: `GET /api/point-ledgers/months`(SJM, 백엔드 #287 머지됨). 로컬 백엔드는 이 커밋이 들어간 develop으로 띄운다
   - 완료 조건:
     - 명령: `yarn -s lint`, `yarn -s build` 종료 코드 0
-    - 화면: `/mypage`(tester 로그인) 390·759px에서 P 아이콘이 안 보이고 포인트·이번달 지출액·오늘의 케어미션 이름의 왼쪽 끝 x좌표가 같다. 760·1440px에서는 P 아이콘(48px)이 지금처럼 보이고 배치가 바뀌지 않는다. 모바일 줄 높이(로딩 스켈레톤 72px와 맞춤)가 눈에 띄게 달라지지 않는다
+    - 화면: `/mypage/points`(tester 로그인) 포인트 내역 헤더에 ◀ "yyyy년 M월 ⌄" ▶. 연월을 누르면 선택 창이 열리고 months API가 준 달만 고를 수 있으며(그 밖·이번 달 이후는 비활성, 연도 ◀▶는 가장 오래된 달 연도~올해), 아래 안내가 "포인트 내역이 없는 달은 선택할 수 없어요". 달을 고르면 그 달 내역·적립/사용 합계로 바뀌고 창이 닫힌다. 바깥 클릭·Esc로 변경 없이 닫힌다. ◀▶는 한 달씩 이동, 이번 달에서 ▶ 비활성. 390·760·1100·1440px에서 헤더가 겹치거나 넘치지 않고 선택 창이 화면 밖으로 나가지 않는다(나가면 `PointHistory` 헤더 배치에서 고치고 `MonthPicker` 위치는 바꾸지 않는다)
+    - 화면: `/mypage/expenses/all` 전체 내역(30-2) 월 선택 창 안내가 "지출이 없는 달은 선택할 수 없어요" 그대로, 동작 그대로
 - 새 의존성: 없음
 
 ### 추가 요청
 
-| 추가-1 | `src/components/StatLink.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 390·759px에서 포인트 줄과 이번달 지출액 줄 높이가 같고(스켈레톤 72px와 8px 안팎 차이는 허용), 760·1440px는 그대로 | 요청 2026-11-23 "포인트 줄에 붙인 min-h-[72px] 빼기, 모바일 포인트·이번달 지출액 줄 높이 같게" |
-| 추가-2 | `src/pages/mypage/MyPageHomePage.jsx`, `src/components/StatLink.jsx`, `src/features/point/home/StatSkeleton.jsx`, `src/features/expense/home/ExpenseSummaryCard.jsx`(자체 스켈레톤) | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 한눈에 보기 3칸 가로 배치·StatLink PC 모양·P 아이콘·스켈레톤 경계가 760→1100px. 390·759·760·1099px는 세로 3줄에 P 아이콘 없음, 1100·1440px는 3칸 가로에 P 아이콘 보임 | 요청 2026-11-23 "760px에서 3칸이 너무 좁다. PC 모양과 3칸 배치를 1100px부터, 760~1099는 모바일처럼 세로 3줄, P 아이콘·스켈레톤도 같은 경계" |
+| 추가-1 | `src/features/point/shared/pointFormat.js` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 내역이 없는 달에서 적립·사용 합계가 "0P"(부호 없음), 0이 아니면 +·− 그대로. 포인트 요약(`PointSummary`) 이번 달 적립·사용도 0이면 "0"으로 나오는지 확인 | 요청 2026-11-23 "내역 없는 달 합계가 +0P로 보임, formatSignedPoint가 0이면 부호 없이 0P, 다른 사용처도 확인" |
 
 ## 다음에 할 것
 
@@ -28,6 +33,7 @@ SCR-MYP-001 마이페이지 홈 · 한눈에 보기 P 아이콘·3칸 배치 경
 
 ### 내 문서 작업(설계서·명세)
 
+- FN-MYP-020-02·화면설계서 SCR-MYP-020 5번: ◀▶ 사이 연월을 누르면 월 선택 창이 열리고 포인트 내역이 있는 달만 고를 수 있다("포인트 내역이 없는 달은 선택할 수 없어요")를 더한다(가계부 30-2와 같은 방식)
 - FN-MYP-040-09·13: 가입 제공자 표시를 텍스트 배지에서 SNS 로고 칩으로(SNS 회원 6-3, "카카오 간편 가입" 문구는 유지). 화면설계서 6-3 그림도 맞춘다
 - FN-MYP-020-04: "그날 획득 포인트·남은 미션 수(남은 포인트)를 표시"에 "남은 미션 수와 자정 정산 안내는 오늘만, 지난 날짜는 그날 획득만"을 더한다. 화면설계서 SCR-MYP-020 요약·안내도 맞춘다. v0.7은 날짜 구분 없이 남은 미션 수를 표시하게 되어 있어 이번 변경과 다르다
 - FN-MYP-010-02·03·07·23·화면설계서 10-1: 카드 그림 규칙을 명세에 쓴다. 안 만든·만드는 중 = 실루엣+"?", 만든 카드 이미지 실패 = 컬러 기본 전신, 오류 확인 중 = 흑백·흐림. 지금 문서는 "종별 기본 캐릭터가 들어간 점선 카드"
