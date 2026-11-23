@@ -53,7 +53,7 @@ export default function MissingFilters({ filters, search, onChange, onReset }) {
           value={search.value}
           onChange={search.onChange}
           onSubmit={search.onSubmit}
-          placeholder="지역, 품종, 특징으로 검색"
+          placeholder="제목, 지역, 품종, 특징으로 검색"
         />
       </FilterField>
       <FilterToggle

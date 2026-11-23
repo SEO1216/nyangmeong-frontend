@@ -262,6 +262,10 @@ export default function AiChatScreen({
   };
 
   const selectedPet = pets?.find((pet) => pet.petSn === selectedPetSn);
+  /** AI 말풍선 얼굴: 열린 방이면 그 방 펫 태그, 새 대화면 고른 칩의 반려동물(없으면 기본 강아지 얼굴) */
+  const avatarPetSn =
+    selectedRoomSn !== null ? conversation?.petSn : selectedPetSn;
+  const avatarPet = pets?.find((pet) => pet.petSn === avatarPetSn) ?? null;
   /** 분석·생성할 반려동물: 고른 칩, 1마리면 그 아이, 아니면 되묻기(null) */
   const autoPet = selectedPet ?? (pets?.length === 1 ? pets[0] : null);
 
@@ -745,6 +749,7 @@ export default function AiChatScreen({
                 isChoiceDisabled={isAnswering}
                 onChoosePet={(pet) => handleSend(pet.petNm, pet.petSn)}
                 onRetryAction={(key) => actions.retrySave(selectedRoomSn, key)}
+                avatarPet={avatarPet}
               >
                 {hasAnswerBubble && (
                   <AnswerBubble
@@ -752,6 +757,7 @@ export default function AiChatScreen({
                     text={answer.text}
                     shortcuts={answer.shortcuts}
                     onRetry={() => handleAnswerAgain()}
+                    avatarPet={avatarPet}
                     onRegenerate={() =>
                       handleAnswerAgain(answer.hiddenMsgSns.at(-1))
                     }
@@ -762,10 +768,15 @@ export default function AiChatScreen({
                     text={FALLBACK_MESSAGE}
                     hasActions
                     hasFaqGuide={false}
+                    avatarPet={avatarPet}
                   />
                 )}
                 {notice === 'receipt' && (
-                  <AnswerBubble status="done" text={RECEIPT_GUIDE} />
+                  <AnswerBubble
+                    status="done"
+                    text={RECEIPT_GUIDE}
+                    avatarPet={avatarPet}
+                  />
                 )}
                 {image && (
                   <ImageIntentBubble
@@ -779,6 +790,7 @@ export default function AiChatScreen({
                     onCancelCharacter={resetImage}
                     onOpenCharacters={() => onOpenMain(PATHS.MYPAGE_CHARACTERS)}
                     onOpenExpenses={() => onOpenMain(PATHS.MYPAGE_EXPENSES)}
+                    avatarPet={avatarPet}
                   />
                 )}
                 {receipt.receipt && (
@@ -791,6 +803,7 @@ export default function AiChatScreen({
                       onOpenMain(receiptResultPath(receipt.receipt.result))
                     }
                     onDismiss={receipt.dismiss}
+                    avatarPet={avatarPet}
                     onRetry={handleRetryReceipt}
                     onManualInput={() =>
                       onOpenMain(
@@ -806,6 +819,7 @@ export default function AiChatScreen({
                     status={route.status}
                     onCancel={() => setRoute({ ...route, status: 'cancelled' })}
                     onElapsed={handleRouteElapsed}
+                    avatarPet={avatarPet}
                   />
                 )}
               </ConversationMessages>

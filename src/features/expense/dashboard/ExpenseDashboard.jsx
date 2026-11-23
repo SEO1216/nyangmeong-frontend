@@ -3,9 +3,10 @@ import { useState } from 'react';
 import { BTN_PRIMARY } from '@/components/buttonStyles';
 import EmptyResult from '@/components/EmptyResult';
 import MonthNav from '@/components/MonthNav';
+import MonthPicker from '@/components/MonthPicker';
 import Skeleton from '@/components/Skeleton';
 import SkeletonCard from '@/components/SkeletonCard';
-import { formatYm, getCurrentYm, shiftYm } from '@/utils/yearMonth';
+import { getCurrentYm, shiftYm } from '@/utils/yearMonth';
 import ExpenseAddModal from './ExpenseAddModal';
 import ExpenseCalendar from './ExpenseCalendar';
 import ExpenseCategoryChart from './ExpenseCategoryChart';
@@ -24,12 +25,17 @@ import {
   sumAmt,
 } from '../shared/expenseStats';
 import { CARD, CARD_BODY, CARD_HEAD } from '../shared/expenseStyles';
-import { useExpensePets, useExpenseStatistics, useExpenses } from '../queries';
+import {
+  useExpenseMonths,
+  useExpensePets,
+  useExpenseStatistics,
+  useExpenses,
+} from '../queries';
 
 /** 하루 지출 상세는 한 번에 최대 건수(서버 한 쪽 최대) */
 const DAY_SIZE = 50;
 
-/** 첫 로딩 자리: 본문과 같은 격자(1440px·390px에서 잰 카드 높이) */
+/** 첫 로딩 자리: 본문과 같은 격자. 카드 높이는 구간별 본문 높이(390·760·1440px에서 잰 값): 760 미만·760~1099·1100 이상 */
 function ExpenseDashboardSkeleton() {
   return (
     <div
@@ -37,15 +43,15 @@ function ExpenseDashboardSkeleton() {
       className="grid gap-5 min-[1100px]:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)]"
     >
       <div className="min-[1100px]:col-start-1 min-[1100px]:row-start-1 min-[1100px]:grid">
-        <SkeletonCard className="h-[234px]" />
+        <SkeletonCard className="h-[258px] min-[760px]:h-[240px] min-[1100px]:h-[234px]" />
       </div>
-      <SkeletonCard className="h-[594px] max-[760px]:h-[343px] min-[1100px]:col-start-1 min-[1100px]:row-start-2" />
+      <SkeletonCard className="h-[363px] min-[760px]:h-[594px] min-[1100px]:col-start-1 min-[1100px]:row-start-2" />
       <div className="min-[1100px]:col-start-2 min-[1100px]:row-start-1 min-[1100px]:grid">
-        <SkeletonCard className="h-[135px] min-[1100px]:h-auto" />
+        <SkeletonCard className="h-[367px] min-[760px]:h-[259px] min-[1100px]:h-auto" />
       </div>
       <div className="contents min-[1100px]:col-start-2 min-[1100px]:row-start-2 min-[1100px]:flex min-[1100px]:flex-col min-[1100px]:gap-5">
         <SkeletonCard className="h-[349px]" />
-        <SkeletonCard className="h-[135px] min-[1100px]:flex-1" />
+        <SkeletonCard className="h-[327px] min-[760px]:h-[266px] min-[1100px]:h-[135px] min-[1100px]:flex-1" />
       </div>
       <Skeleton className="h-[60px] rounded-card min-[1100px]:hidden" />
     </div>
@@ -68,6 +74,8 @@ export default function ExpenseDashboard({ onViewAll }) {
   const [isPetsExpanded, setIsPetsExpanded] = useState(false);
 
   const statsQuery = useExpenseStatistics(ym);
+  const { data: months } = useExpenseMonths();
+  const enabledYms = months ?? [];
   const petsQuery = useExpensePets();
   const { data: stats, isPlaceholderData } = statsQuery;
   const { data: pets } = petsQuery;
@@ -83,17 +91,24 @@ export default function ExpenseDashboard({ onViewAll }) {
     { enabled: Boolean(selectedYmd), placeholderData: undefined },
   );
 
-  const handleChangeMonth = (delta) => {
-    setYm(shiftYm(ym, delta));
+  /** 달이 바뀌면 날짜 선택과 더보기 펼침을 닫는다 */
+  const changeYm = (nextYm) => {
+    setYm(nextYm);
     setSelectedYmd(null);
+    setIsPetsExpanded(false);
   };
+  const handleChangeMonth = (delta) => changeYm(shiftYm(ym, delta));
   const handleSelectDay = (expndYmd) =>
     setSelectedYmd(expndYmd === selectedYmd ? null : expndYmd);
   /** 저장 날짜로 달력 이동·상세 펼침(영수증 날짜는 다른 달 가능) */
   const handleSaved = (expndYmd) => {
     setAddingYmd(null);
     setEditingExpense(null);
-    setYm(expndYmd.slice(0, 7));
+    const savedYm = expndYmd.slice(0, 7);
+    if (savedYm !== ym) {
+      setYm(savedYm);
+      setIsPetsExpanded(false);
+    }
     setSelectedYmd(expndYmd);
   };
 
@@ -111,7 +126,12 @@ export default function ExpenseDashboard({ onViewAll }) {
             onNext={() => handleChangeMonth(1)}
             isNextDisabled={ym >= maxYm}
           >
-            <b className="min-w-28 text-center text-lg">{formatYm(ym)}</b>
+            <MonthPicker
+              ym={ym}
+              maxYm={maxYm}
+              enabledYms={enabledYms}
+              onSelect={changeYm}
+            />
           </MonthNav>
         </section>
         <EmptyResult title="가계부를 불러오지 못했어요">
@@ -142,8 +162,10 @@ export default function ExpenseDashboard({ onViewAll }) {
       <div className="min-w-0 min-[1100px]:col-start-1 min-[1100px]:row-start-1 min-[1100px]:grid">
         <ExpenseSummary
           ym={ym}
-          isNextDisabled={ym >= maxYm}
+          maxYm={maxYm}
+          enabledYms={enabledYms}
           onChangeMonth={handleChangeMonth}
+          onSelectMonth={changeYm}
           totalAmt={stats.totalExpndAmt}
           count={totalCount}
           prevTotalAmt={stats.lastMonthTotalExpndAmt}

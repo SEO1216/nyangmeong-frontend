@@ -1,9 +1,9 @@
 import { ReceiptText } from 'lucide-react';
-import aiCharacter from '@/assets/ai-character.png';
 import { formatDate } from '@/utils/formatDate';
 import { callName } from '@/utils/josa';
 import { FAILURE } from '../receipt/receiptFailure';
 import PetChoiceChips from './PetChoiceChips';
+import AiAvatar from './AiAvatar';
 
 const EMPTY_MARK = '—';
 const AI_NOTICE =
@@ -54,16 +54,10 @@ const buildRows = (ocr, pet) => {
 };
 
 /** AI 아바타 + 내용 */
-function AiRow({ children }) {
+function AiRow({ avatarPet, children }) {
   return (
     <div className="flex min-w-0 items-start gap-3">
-      <img
-        src={aiCharacter}
-        alt=""
-        width="36"
-        height="36"
-        className="size-9 shrink-0 rounded-full border border-line bg-brand-50 object-contain p-1"
-      />
+      <AiAvatar pet={avatarPet} />
       <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
         {children}
       </div>
@@ -126,6 +120,7 @@ export default function ReceiptAnalysisBubble({
   onDismiss,
   onRetry,
   onManualInput,
+  avatarPet,
 }) {
   const { status, pet, result, failure } = receipt;
 
@@ -148,7 +143,7 @@ export default function ReceiptAnalysisBubble({
 
       {status === 'choosing' && (
         <>
-          <AiRow>
+          <AiRow avatarPet={avatarPet}>
             <p className={bubbleClass}>어느 반려동물의 영수증인가요?</p>
           </AiRow>
           <PetChoiceChips
@@ -160,7 +155,7 @@ export default function ReceiptAnalysisBubble({
       )}
 
       {(status === 'analyzing' || status === 'cancelled') && (
-        <AiRow>
+        <AiRow avatarPet={avatarPet}>
           <div role="status" className={bubbleClass}>
             <p>{callName(pet.petNm)}의 영수증을 분석하고 있어요…</p>
             {status === 'cancelled' && <p className={noteClass}>취소됨</p>}
@@ -174,7 +169,7 @@ export default function ReceiptAnalysisBubble({
       )}
 
       {(status === 'result' || status === 'dismissed') && (
-        <AiRow>
+        <AiRow avatarPet={avatarPet}>
           <ResultCard
             result={result}
             pet={pet}
@@ -186,7 +181,7 @@ export default function ReceiptAnalysisBubble({
       )}
 
       {status === 'failed' && (
-        <AiRow>
+        <AiRow avatarPet={avatarPet}>
           <div role="alert" className={bubbleClass}>
             <p className="font-semibold">{FAILURE[failure].title}</p>
             <p>{FAILURE[failure].message}</p>

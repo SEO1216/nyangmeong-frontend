@@ -40,9 +40,10 @@ export default function FloatingButtons({ hasBottomNav = false }) {
   if (isMain) return null;
 
   return (
-    /** 바텀 네비(60px)가 있으면 그 위로 올림. 모바일에서 접히면 우측 가장자리에 붙임 */
+    /** 바텀 네비(60px)가 있으면 그 위로 올림. 모바일에서 접히면 우측 가장자리에 붙임.
+     * z-20: 페이지 안 펼침 창(달력·셀렉트·⋮ 메뉴, z-30)이 겹치면 펼침 창이 위. 헤더·모달·드로워보다 아래 */
     <div
-      className={`fixed bottom-6 z-30 flex flex-col items-center gap-3 ${
+      className={`fixed bottom-6 z-20 flex flex-col items-center gap-3 ${
         dock.folded ? '-right-1' : 'right-6'
       } ${
         hasBottomNav
@@ -73,8 +74,9 @@ export default function FloatingButtons({ hasBottomNav = false }) {
         {dock.folded ? (
           <button
             type="button"
-            className="flex h-16 w-8 items-center justify-center rounded-l-[32px] border border-r-0 border-fab-line bg-fab text-brand-500 drop-shadow-[0_4px_4px_rgba(0,0,0,0.05)]"
+            className="relative flex h-16 w-8 items-center justify-center rounded-l-[32px] after:absolute after:inset-y-0 after:-left-3 after:right-0 after:content-[''] border border-r-0 border-fab-line bg-fab text-brand-500 drop-shadow-[0_4px_4px_rgba(0,0,0,0.05)]"
             aria-label="AI 매니저 펼치기"
+            /** 보이는 탭은 32px, 누르는 영역은 왼쪽으로 12px 넓혀 44px */
             onClick={dock.expand}
           >
             <img src={arrow} alt="" width={7} height={13} />
