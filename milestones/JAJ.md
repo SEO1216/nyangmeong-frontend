@@ -610,6 +610,16 @@
 - 결과: 2026-11-23 lint·build 0, 토큰 위반 0(새 대괄호 값은 분기점 `min-[760px]`·`max-[760px]`·`min-[1100px]`과 지시의 `rounded-[10px]`뿐). Playwright 확인: 튜토리얼 390 단계 막대 scrollWidth=clientWidth, 관찰 모달 세 모드, 사진 칸 1440 160·390 144, 검진상세 추이 보기 0·▲▼ 색, 최근 건강기록 Tab→Enter 모달, 둘러보기 8장 1440·390 잘림 없음. 범위 초과 예시와 영수증 구역 이름 칩은 응답을 바꿔 확인(저장 요청 막음). 사람 확인 2026-11-23
 - 연결 남음: 없음
 
+## SCR-HLT-005·002·003 건강기록 · 수정 모음 2026-11-23 오후(검진상세 ⋮ 메뉴·검진기록 수정 잠금·일정 삭제 안내·목록 삭제 빼기·오늘 할 케어 자리 고정) — 끝
+
+- 기능: 명세 기능 ID 추가 없음. FN-HLT-005-01·FN-HLT-002-14·26~31·FN-HLT-003-32~37·FN-HLT-003-12에 걸침(사람 요청으로 받음)
+- 기다리는 것: 백엔드 `schdlDelYn`(검진상세)·`ckupRcdSn`(일정 목록). 없어도 동작(첫 문구·건강 일지로 이동)
+- 완료 조건: 명령: `yarn -s lint`·`yarn -s build` 0, 새 px·HEX 0 / 화면: 사람 지시 1~5의 확인 항목(1440·1024·390)
+- 1~5: ① 검진상세 기본정보 ⋮(CareItemMenu) [수정]=모달·[삭제]=확인창, 삭제 뒤 `건강 일지?petSn=#hlt002-exam` replace 이동, 인라인 수정 삭제 ② 수정 모달 반려동물·검진일 disabled, 안내 2종(schdlDelYn이면 event_busy), body는 hsptlNm·ckupTypeCd·ckupCn·ckupMemoCn만, 반려동물 이동 확인창·onSaved 삭제 ③ 일정 수정 조건 A(병원·연결 검진기록) 안내상자, 삭제 확인창 설명·「검진기록 보기 ›」(ckupRcdSn이면 검진상세, 아니면 건강 일지), ConfirmModal 선택 prop children ④ 검진기록 목록 [삭제] 삭제 ⑤ 오늘 할 케어 체크해도 자리 그대로, 오늘 예정 정기관리는 `careTodayKept:{petSn}:{오늘}` localStorage로 오늘 하루 남김
+- 결정: 삭제 뒤 지운 상세는 무효화하지 않고 removeQueries(`useDeleteCheckup` 전용 onSuccess). ※신규 정책(문서는 나중에): 위 1~5
+- 결과: 2026-11-23 lint·build 0, 새 px·HEX 0. 검증 1회차 실패(삭제 뒤 404 오류 화면) → 2회차 확인 못 함 있음(연결 남음뿐). 삭제는 가짜 응답(DELETE 200·GET 404)으로, schdlDelYn·ckupRcdSn은 응답을 바꿔 확인. 사람 확인 2026-11-23
+- 연결 남음: FN-HLT-005-01·002-26~29 (백엔드 연결 검진상세 `schdlDelYn`, 백엔드 저장소에서 /start — `SCR-HLT-002 검진기록 일정 연동 정리` 진행 중), FN-HLT-003-32~37 (백엔드 연결 일정 목록 `ckupRcdSn`, 같은 백엔드 마일스톤)
+
 ## 제외
 
 - AI매니저 FN-AIM-008 참조 대상 반려동물 선택: 화면 SCR-AIM-008 영수증 업로드는 LJS(분배 표 "AIM-008 영수증 업로드")
