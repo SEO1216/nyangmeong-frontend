@@ -1,10 +1,10 @@
 import { ArrowRight, CircleCheck, CircleX, Info } from 'lucide-react';
-import aiCharacter from '@/assets/ai-character.png';
 import { PATHS } from '@/routes/paths';
 import { actionFieldName } from '../shared/actionFields';
 import { useOpenMain } from './aiHost';
 import { CARE_ITEM_TOOL, hasPetChoice } from './actionForm';
 import PetChoiceChips from './PetChoiceChips';
+import AiAvatar from './AiAvatar';
 
 /**
  * 등록한 반려동물로 케어 캘린더 열기: 캘린더가 `?petSn=`을 보고 있는 아이로 고름
@@ -61,6 +61,7 @@ export default function ActionCard({
   isChoiceDisabled,
   onChoosePet,
   onRetrySave,
+  avatarPet,
 }) {
   const { card, input, status, isBusy, fieldErrors } = item;
   const isCareItem = card.tool === CARE_ITEM_TOOL;
@@ -72,13 +73,7 @@ export default function ActionCard({
   if (item.resultText) {
     return (
       <div className="flex min-w-0 items-start gap-3">
-        <img
-          src={aiCharacter}
-          alt=""
-          width="36"
-          height="36"
-          className="size-9 shrink-0 rounded-full border border-line bg-brand-50 object-contain p-1"
-        />
+        <AiAvatar pet={avatarPet} />
         <div className="max-w-[592px] rounded-[4px_18px_18px_18px] border border-line bg-white px-4 py-3 tracking-[-0.03em]">
           <ResultLine
             status={status}

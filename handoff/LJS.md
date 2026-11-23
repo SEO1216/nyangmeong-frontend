@@ -2,11 +2,11 @@
 
 ## 지금 하는 것
 
-끝남: SCR-ADM-112 외부 API 사용량 API 연결 (2026-11-23, 검증 1회차 통과, 사람 확인). 가짜 응답을 `GET /admin/external-api-usage`·`/daily`·`/tokens`·`/failures`로 바꿈, 실패율 `failRate`·평균 응답 null "-"·실패 사유 null "-", 종류 코드 SYSC0024·SYSC0025, 종류 이름은 서버 `extlApiNm` 먼저, 기간 92일 넘으면 요청 없이 안내
+끝남: SCR-AIM-011 AI 대화창 답변 아이콘을 반려동물 캐릭터 얼굴로 (2026-11-23, 검증 1회차 통과, 사람 확인). 새 `features/ai/chat/AiAvatar.jsx`로 말풍선 6개 얼굴을 방 태그 반려동물(새 대화는 고른 칩) `PetFace`로, "전체"·반려동물 없음은 기본 강아지 얼굴. 탈퇴 화면 `components/AiErrorGuide`는 그대로
 
 ## 다음에 할 것
 
-- AI 대화창 답변 아이콘을 반려동물 캐릭터 얼굴로(사람 요청 2026-11-23, 기획 전): 지금은 `features/ai/chat/` 말풍선 6개(`AnswerBubble`·`FallbackBubble`·`RouteGuideBubble`·`ActionCard`·`ReceiptAnalysisBubble`·`ImageIntentBubble`)가 고정 `assets/ai-character.png`. 공용 `components/PetFace`로 바꿀 수 있음(새 API 없음). 사람이 정할 것: 누구 얼굴인지(방 태그 반려동물 추천 / 대표 반려동물), 방이 "전체"·반려동물 없음일 때(지금 그림 추천), 범위(6개 추천, `components/AiErrorGuide`는 방 정보가 없어 그대로)
+- SCR-AIM-011 참고(검증 보고, 판정 밖): 오류 확인 중(`bscCharSbstYn`) 흑백 얼굴은 검증 계정에 그런 방이 없어 화면으로 못 봄(PetFace 공용 규칙). 검증이 8081 공용 DB 취두부 방에 "[검증] 고마워" 메시지·답변 하나를 남김(메시지 삭제 기능 없음)
 - SCR-ADM-112 참고(검증 보고, 판정 밖): 8081에 사유 null·21건 이상 실패·토큰 데이터가 없어 Playwright route로만 확인. 회원 계정으로 `/admin/...`에 가면 `ProtectedRoute`가 `/main`으로 보내 `AdminForbidden`은 화면에서 안 보임(전부터)
 - SCR-COM-002 피드백 묶음 2 팀 알림(PR 본문 + 팀 채널, 모두): ① 터치 기기에서 `input`·`textarea`·`select` 글자가 16px(iOS 확대 막기, `assets/index.css` 레이어 밖 규칙이라 `text-sm`보다 앞섬) ② 공용 `DatePicker` 위 "YYYY년 M월 ▾"로 월 고르기 보기 ③ `DatePicker`·`DropdownSelect` 펼침 창이 포털(모달 안이면 그 dialog, 아니면 body) + fixed로 뜨고, `TimeSelect` 포함 열린 동안 바깥 휠·터치 스크롤이 막힘(`hooks/useFloatingLayer.js`). 펼침 창 안에 스크롤 목록을 새로 두면 `overscroll-contain` ④ 플로팅 버튼 z-30 → z-20, `KebabMenu`·`MonthPicker` 펼침 창 z-30 ⑤ 사이드 메뉴 '›'가 줄 오른쪽 끝. JAJ·KSJ·YAY·SJM: 새 공용 `components/FieldFoot`(왼쪽 오류, 오른쪽 "n / 최대")으로 바뀜 — JAJ 일정·검진·관찰·기타 검사·처방·케어 항목(라벨 줄 글자 수가 칸 아래로)·검사 수치 입력, `health/shared/CharCount.jsx` 삭제, KSJ `AddressShareModal`, YAY `NicknameModal`(칸 안 글자 수가 칸 아래로), SJM `PetFormModal`(라벨 줄 글자 수가 칸 아래로). `FieldError`에 `className` prop. 모달에 글자 수 칸을 새로 만들면 `FieldFoot`
 - 피드백 묶음 2 참고(검증 보고, 판정 밖): G2 실제 iOS 확대는 검증이 못 봄(에뮬레이션은 계산 글자 크기만). 사람이 휴대폰으로 LAN 접속해 확인. [반려동물 등록] 플로팅 버튼은 검증 계정 등록 한도라 route로만 확인

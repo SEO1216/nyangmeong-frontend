@@ -73,7 +73,10 @@ const placeCards = (messages, cards) => {
   return { replaced, after, atEnd, afterChildren };
 };
 
-/** 저장된 메시지 목록 */
+/**
+ * 저장된 메시지 목록
+ * - avatarPet: AI 말풍선 얼굴로 쓸 방 태그 반려동물(없으면 기본 강아지 얼굴)
+ */
 export default function ConversationMessages({
   messages,
   fallbackCount,
@@ -84,6 +87,7 @@ export default function ConversationMessages({
   onRegenerate,
   onChoosePet,
   onRetryAction,
+  avatarPet,
   children,
 }) {
   const lastSn = messages.at(-1)?.aiCnvrsMsgSn;
@@ -106,6 +110,7 @@ export default function ConversationMessages({
         isChoiceDisabled={isChoiceDisabled}
         onChoosePet={onChoosePet}
         onRetrySave={() => onRetryAction(item.key)}
+        avatarPet={avatarPet}
       />
     </li>
   );
@@ -121,6 +126,7 @@ export default function ConversationMessages({
             text={message.cnvrsCn}
             hasActions={message.aiCnvrsMsgSn === lastSn}
             hasFaqGuide={fallbackCount >= FAQ_FAIL_COUNT}
+            avatarPet={avatarPet}
           />
         </li>
       );
@@ -137,6 +143,7 @@ export default function ConversationMessages({
                 ? () => onRegenerate(message)
                 : undefined
             }
+            avatarPet={avatarPet}
           />
         </li>
       );
