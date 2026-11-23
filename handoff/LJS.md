@@ -2,16 +2,12 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 사람 확인 피드백 묶음 2 (2026-11-23, 검증 통과, 사람 확인). G2 모바일 입력칸 16px(터치 기기), G3 플로팅 버튼 z-20·접힘 탭 누르는 영역 44px·펼침 창 z-30, G4 DatePicker 월 고르기 보기, G5 공용 `FieldFoot`(오류 왼쪽·글자 수 오른쪽 한 줄), G6 AI·채팅 모달 열리면 흰 헤더, G7 사이드 메뉴 '›' 오른쪽 끝. 추가-1 달력·셀렉트·시간 목록 포털 + 열린 동안 바깥 스크롤 잠금(`hooks/useFloatingLayer.js`). G1은 디자인 필요로 뺌
-
-### 추가 요청
-
-| 번호 | 바꿀 파일 | 완료 조건 | 요청 |
-| --- | --- | --- | --- |
-| 추가-2 | `components/DatePicker.jsx`(develop 병합 충돌 해결) | `명령:` lint·build. `화면:` 월 고르기 보기는 `monthSelect`를 넘긴 칸(반려동물 생년월일)에서만 열리고 다른 날짜 칸(일정 모달)은 헤더가 글자만, 두 경우 모두 달력이 포털·fixed로 떠 잘리지 않고 열린 동안 바깥 스크롤 막힘 | 요청 2026-11-23 15:12 "develop의 SJM `monthSelect` 방식(켠 칸만)으로 맞추기(2번)" |
+끝남: SCR-ADM-112 외부 API 사용량 API 연결 (2026-11-23, 검증 1회차 통과, 사람 확인). 가짜 응답을 `GET /admin/external-api-usage`·`/daily`·`/tokens`·`/failures`로 바꿈, 실패율 `failRate`·평균 응답 null "-"·실패 사유 null "-", 종류 코드 SYSC0024·SYSC0025, 종류 이름은 서버 `extlApiNm` 먼저, 기간 92일 넘으면 요청 없이 안내
 
 ## 다음에 할 것
 
+- AI 대화창 답변 아이콘을 반려동물 캐릭터 얼굴로(사람 요청 2026-11-23, 기획 전): 지금은 `features/ai/chat/` 말풍선 6개(`AnswerBubble`·`FallbackBubble`·`RouteGuideBubble`·`ActionCard`·`ReceiptAnalysisBubble`·`ImageIntentBubble`)가 고정 `assets/ai-character.png`. 공용 `components/PetFace`로 바꿀 수 있음(새 API 없음). 사람이 정할 것: 누구 얼굴인지(방 태그 반려동물 추천 / 대표 반려동물), 방이 "전체"·반려동물 없음일 때(지금 그림 추천), 범위(6개 추천, `components/AiErrorGuide`는 방 정보가 없어 그대로)
+- SCR-ADM-112 참고(검증 보고, 판정 밖): 8081에 사유 null·21건 이상 실패·토큰 데이터가 없어 Playwright route로만 확인. 회원 계정으로 `/admin/...`에 가면 `ProtectedRoute`가 `/main`으로 보내 `AdminForbidden`은 화면에서 안 보임(전부터)
 - SCR-COM-002 피드백 묶음 2 팀 알림(PR 본문 + 팀 채널, 모두): ① 터치 기기에서 `input`·`textarea`·`select` 글자가 16px(iOS 확대 막기, `assets/index.css` 레이어 밖 규칙이라 `text-sm`보다 앞섬) ② 공용 `DatePicker` 위 "YYYY년 M월 ▾"로 월 고르기 보기 ③ `DatePicker`·`DropdownSelect` 펼침 창이 포털(모달 안이면 그 dialog, 아니면 body) + fixed로 뜨고, `TimeSelect` 포함 열린 동안 바깥 휠·터치 스크롤이 막힘(`hooks/useFloatingLayer.js`). 펼침 창 안에 스크롤 목록을 새로 두면 `overscroll-contain` ④ 플로팅 버튼 z-30 → z-20, `KebabMenu`·`MonthPicker` 펼침 창 z-30 ⑤ 사이드 메뉴 '›'가 줄 오른쪽 끝. JAJ·KSJ·YAY·SJM: 새 공용 `components/FieldFoot`(왼쪽 오류, 오른쪽 "n / 최대")으로 바뀜 — JAJ 일정·검진·관찰·기타 검사·처방·케어 항목(라벨 줄 글자 수가 칸 아래로)·검사 수치 입력, `health/shared/CharCount.jsx` 삭제, KSJ `AddressShareModal`, YAY `NicknameModal`(칸 안 글자 수가 칸 아래로), SJM `PetFormModal`(라벨 줄 글자 수가 칸 아래로). `FieldError`에 `className` prop. 모달에 글자 수 칸을 새로 만들면 `FieldFoot`
 - 피드백 묶음 2 참고(검증 보고, 판정 밖): G2 실제 iOS 확대는 검증이 못 봄(에뮬레이션은 계산 글자 크기만). 사람이 휴대폰으로 LAN 접속해 확인. [반려동물 등록] 플로팅 버튼은 검증 계정 등록 한도라 route로만 확인
 - 우측 아래 AI 플로팅 버튼 아이콘을 AI 매니저 말풍선 아이콘으로(사람 피드백 2026-11-23, 디자인이 오면 기획. `layouts/FloatingButtons.jsx`)
@@ -31,7 +27,6 @@
 - 버그 후보(JAJ, 사람이 처리 방법 정함): 관찰 입력 모달 사진 미리보기가 칸 안에 다 안 들어오고 잘림. `features/health/diary/ObservationModal.jsx:266` `grid h-40 place-items-center` 상자 안 `img.size-full object-contain`이 grid에서 높이 100%를 못 받아 원래 비율로 커짐(600×900 그림 → 618×927, 칸 160). 공용 모달 문제 아님. `flex items-center justify-center`면 618×158. 수정 모드(`ObservationPhoto`)도 같은 칸
 - SCR-COM-002 ⋮ 메뉴 공통화 팀 알림(PR 본문 + 팀 채널): JAJ `health/CareItemMenu`·SJM `expense/shared/ExpenseMenu`가 공용 `KebabMenu variant="row"` 껍데기(props 그대로, 아래 공간이 모자라면 위로 펼침이 새로 생김). JAJ·YAY·SJM: `components/Card`(`sm:`→760), `adminTableStyles`(`md:`→760), 로그인·가입 `AuthLayout`·`AuthSlider`(768→760, 1024→1100), 마이페이지 홈(768→760)이라 640~759·760~767·1024~1099px 모양이 바뀜. 숫자 분기점 560·600·1000·1260(`MissingListPage`·`MissingList`·`CareDealCard`·`PetSlide`·`HealthDashboard`·`DailyTrendCard`)은 그대로, 담당자 알림만
 - ⋮ 메뉴 참고(검증 보고, 판정 밖): AI 사이드바 ⋮ 메뉴를 Esc로 닫으면 AI 매니저 모달까지 닫힘(전부터, KebabMenu Esc가 막지 않음). 검증이 `.playwright-mcp/pr/LJS-20261120-SCR-MAN-001-after-1440.png`를 덮어씀(그 PR에 쓰려면 다시 찍기)
-- "UI 통일 2 · 다른 담당 폴더 적용" 마일스톤을 끝낼지 사람이 정함(조각 모두 끝, 2-O도 이번에 끝)
 
 - SCR-COM-002 스크롤 막대 겹침 팀 알림(PR 본문 + 팀 채널): 모두: 공용 `Modal` `isLarge` 모달(건강 일지 입력·일정·케어 항목 관리·건강기록 둘러보기·아이템 상점·반려동물 등록·수정 등)이 dialog 자체로는 스크롤하지 않고 본문만 스크롤(가장자리 막대 없어짐). YAY: `member/shared/TermsModal` 약관 본문의 `max-h-[50vh]` 안쪽 스크롤을 없애 모달 본문 스크롤 하나로. 모달 본문 안에 `max-h`+`overflow-y-auto` 목록을 새로 두면 막대가 둘이 되니 본문 스크롤에 맡기기(PC 두 칸 구조는 칸마다 하나)
 - SCR-COM-002 스크롤 막대 겹침 참고(검증 보고, 판정 밖): `ExpenseDuplicateDialog`(확인 창 안 목록이 유일한 막대)·`BloodResultList`(모달 아닌 화면 목록)는 코드로만 판정. PC 두 칸 모달(`ShortcutEditModal`·`CareManageModal`)은 1280×560에서 칸마다 막대 1개씩(사람 결정대로 그대로)
@@ -103,7 +98,6 @@
 
 - 2-L 팀 알림(PR 본문 + 팀 채널, YAY): ① 플레이스 분기점 768·1024 → 760·1100(760~767px이 PC 3칸 배치로, 1024~1099px은 레일 64·목록 340), JS `(width < 760px)` ② 검색창이 공용 `SearchInput`(높이 48 → 40, 둥글기 6, 오른쪽 돋보기 버튼), 모바일 지도 위 지역 표시·다시 검색 버튼이 8px 위로 ③ 팝업 [상세보기]·[길찾기] `BTN_PRIMARY`·`BTN_SECONDARY`, 조회 실패 `LoadError`, 로딩 `Skeleton` 3줄, 결과 없음 `EmptyResult isCompact` ④ "현재 지도 밖" 공용 `Badge tone="amber"` ⑤ 팝업 장소명 20 → 18px(H1 24px 그대로, 사람 결정) ⑥ 모바일 장소 종류 칩 흰 바탕+테두리·그림자 없음(미끄러지는 배경 유지) ⑦ 지도 위 요소 그림자 `shadow-depth-sm` 하나(바텀시트·핀은 그대로) ⑧ 4px 간격, 760 미만 팝업 ✕·즐겨찾기 ☆ 44px
 - 2-L 참고(판정 밖): 팝업 [상세보기]·[길찾기]는 `<a>`라 공용 버튼의 `hover:enabled:` hover 모양이 걸리지 않음(2-C 칩과 같은 현상). 1회차 검증은 로컬 `.env.local`에 카카오 지도 키가 없어 지도 확인 3건(L2·L5·L8)을 못 봐 실패, 키를 넣고 2회차 통과(코드 변경 없음)
-- 다음 2 조각 후보(2-L 뒤): 없음. 담당 폴더 조각(2-A~2-L)이 모두 끝나 `UI 통일 2 · 다른 담당 폴더 적용` 마일스톤을 끝낼지 사람이 정한다
 - 2-J 팀 알림(PR 본문 + 팀 채널, YAY): ① 회원정보 카드 그림자 삭제, 섹션 제목 20 → 18px, 줄 오른쪽 [수정]·[변경]·[연동하기]가 `BTN_SECONDARY`(높이 32 → 40) ② `shared/profileStyles.js`에서 `INPUT`·`LABEL`·`HELP`·`ROW_BTN` 없어짐(입력칸은 `components/formStyles`), `FieldMessage`의 `ErrorText` 없어지고 오류 문구는 공용 `FieldError`(위 여백 6px 생김), `OkText`는 남음 ③ 탈퇴 화면 버튼 `BTN_PRIMARY`·`BTN_SECONDARY`(높이 50 → 40, 둥글기 12 → 6), "안내 닫기" → "닫기", 확인 체크가 공용 `Checkbox` ④ 분기점 640·768 → 760 ⑤ 회원 정보 조회 실패 `LoadError`([다시 시도]) ⑥ 4px 간격, 편집 줄 라벨 `pt-[18px]` → `pt-4`
 - 2-J 참고(검증 보고, 판정 밖): 탈퇴 안내 체크 오류는 체크 전 [계속]이 비활성이라 화면에서 못 띄움(Playwright route로 400을 돌려 확인). `WithdrawResult`는 코드로만 확인. 탈퇴 버튼 반반 폭은 PC만(`min-[760px]:flex-1`)
 - 2-K 팀 알림(PR 본문 + 팀 채널, YAY): ① 로그인·가입·비밀번호 찾기·재설정·재가입 복구·탈퇴 완료 버튼이 `BTN_PRIMARY`·`BTN_SECONDARY` + `w-full`(높이 50 → 40, 둥글기 12 → 6, 15px 굵게 → 16px 600, 떠오르는 hover 없음), 입력칸 옆 버튼도 40px `BTN_SECONDARY` ② `shared/authStyles.js`에서 `PRIMARY_BTN`·`OUTLINE_BTN`·`SIDE_BTN` 없어지고 `TEXT_LINK`만 남음, `shared/AuthCheckBox.jsx` 삭제(공용 `Checkbox`) ③ `AuthField`·보안코드 칸 48px·둥글기 12 → 40px·6px(공용 `INPUT` 값), 라벨 13px → 공용 `LABEL`, `*` → `Required`, 오류 문구 → 공용 `FieldError`(아이콘, 위 여백 6px) ④ 제목 26px → 24px, `AuthNotice` 14px·여백 12 ⑤ 약관 › 누르는 영역 PC 24·모바일 44 ⑥ 문구 "로그인 화면으로"·"로그인 방법 선택으로" → "로그인으로", "인증번호 발송" → "인증번호 보내기", "중복 확인" → "중복확인", SNS 가입 "회원가입 완료" → "회원가입" ⑦ 분기점 768 → 760
@@ -128,14 +122,12 @@
 - 2-D 참고(판정 밖): 초대 수락 "나중에 하기"는 맞는 공용 버튼 상수가 없어 그대로. 오류 문구가 공용 `FieldError`의 위 여백으로 칸과 6px 더 떨어짐. 초대 모달에서 고를 수 없는 줄이 반투명(공용 `Checkbox` 비활성). "선택" 표시(`Optional`)는 공용에 없어 남김. 가족 "더보기 +N"·공동양육 배지는 검증 계정 데이터가 없어 코드로만 확인
 - 2-C 팀 알림(PR 본문 + 팀 채널, SJM): ① 가계부 버튼 문구: 지출 등록 "등록하기"·수정 "저장하기", 영수증 "등록하기", 중복 "그래도 등록하기", 한도 "저장하기", 삭제 확인 "삭제하기"(⋮ 메뉴·편집 막대 [삭제]는 그대로) ② 폼이 `components/formStyles`(`LABEL`·`INPUT`)·`components/FieldError`(`Required`·`FieldError`)를 씀, `shared/ExpenseRequired`에는 `MissingNotice`만 남음 ③ 카테고리 칩 `CHIP`·`CHIP_ON`, 줄·전체 선택 체크박스 공용 `Checkbox`(전체 선택의 일부 선택 − 표시 없앰, 사람 결정), 영수증 안내 `NoticeBox` ④ 분기점 `lg:`(1024) → 1100이라 1024~1099px에서 대시보드 1열 ⑤ 카드 여백 22·18px → 24·20px, 색 막대 들여쓰기 14 → 16px
 - 2-C 참고(검증 보고, 판정 밖): 카테고리 칩 hover 표시가 없어짐(공용 `CHIP`의 `hover:enabled:`가 `<span>`에는 안 걸림). 같은 병원비 안내가 지출 입력 모달은 `FieldError`, 영수증 확인은 `NoticeBox`(기획대로). 채팅 목록 편집 [전체 선택](`chat/room/ChatRoomList.jsx`)은 아직 기본 체크박스
-- 다음 /start: `UI 통일 2 · 다른 담당 폴더 적용`의 다음 조각(SJM·KSJ·YAY 도메인 하나씩). 기준은 `docs/ui-checklist.csv`의 "결정된 기준"만. 회원 `profileStyles.js`는 `components/formStyles.js`로, 다른 도메인 삭제 확인 창 9개 파일(AI 대화 삭제·커뮤니티 글·댓글·문의·관리자 라우팅 등)은 `ConfirmModal isDanger`로
 - 2-B 팀 알림(PR 본문 + 팀 채널): ① 전체: 공용 `Modal` 입력 모달 제목 22px·제목 줄 위아래 12px, 확인 창 제목 18px, isLarge가 아닌 모달은 본문만 안쪽 스크롤(제목 줄·푸터 고정) ② 전체: 공용 차트가 건강 일지 차트로 바뀜(`components/BarChart` props `points`·`formatValue`·`ariaLabel`, `CurveChart` → `LineChart`), 새 `components/formStyles.js`(INPUT·LABEL·TEXTAREA·HELP), `UnderlineTabs` `isLineHidden`·`isScrollable`, `Checkbox` `ariaLabel`, `NoticeBox` `role`, `EmptyResult` `isCompact`, `ConfirmModal` `isDanger`(삭제 등은 빨간 확인 버튼), `Badge` 톤 7개 추가 ③ JAJ: 지운 파일 `diary/BarChart`·`LineChart`·`useElementWidth`·`DiaryTabs`·`FieldError`·`formStyles`·`EmptyBox`, `checkupStyles` `TAG`, 입력 모달 머리 아이콘 없어짐, 760 이하 입력 모달은 화면 전체 ④ `docs/ui-checklist.csv`가 UI 통일 기준
 - 2-B 사람이 정할 것: 모달 제목 22px는 체크리스트 글자 단계(12·13·14·15·16·18·24·28px) 밖이라 단계에 넣을지 팀이 정한다
 - 2-B 참고(검증 보고, 판정 밖): `/health` 체중 위젯 차트 위 빈 공간이 큼. `/admin` 막대 그래프는 최소 상한 60이라 값 0~2면 막대가 거의 안 보임(옛 차트도 같음). 일정 모달 입력칸은 `aria-invalid`가 없어 서버 오류 때 빨간 테두리가 안 생김
 - 2-A 팀 알림(PR 본문 + 팀 채널, JAJ): ① 건강기록 640~759px 폭이 모바일 배치로 바뀜(`sm:`·`lg:` → 760·1100) ② 칩이 공용 `CHIP`·`FILTER_CHIP`, 작은 버튼이 높이 40px ③ 버튼 문구 등록하기·저장하기·삭제하기 ④ 버그 후보 82 `ZONES` 순서는 그대로 둠
 - 2-A 사람이 정할 것(검증 보고, 판정 밖): 줄 안 글자형 [삭제] 6곳(`diary/CheckupListCard`·`DayRecordEditModal`, `checkup/PrescriptionForm`·`AttachmentTab`·`EtcResultList`, ⋮ 메뉴 `CareItemMenu`)은 "삭제" 그대로. 확인 창 버튼은 "삭제하기". 규칙에 넣을지 정한다
 - 2-A 참고(판정 밖): `ui.md` "로딩 표시" 예시 코드에 옛 분기점 `min-[1101px]`이 남음. 콘솔의 `GET /api/pets/1/character-image?part=face` 404는 `PetFace` 데이터 문제(/main에서도 남)
-- 이전 메모: `UI 통일 2 · 다른 담당 폴더 적용`(마일스톤 대기, 도메인 하나씩, 담당자 알림). 분기점은 `ui.md` "화면 폭 분기점"대로 `min-[761px]`→`min-[760px]`, `min-[1101px]`→`min-[1100px]`, JS `(width < 760px)`. 결정: 글자 단계는 체크리스트 V1(12·13·14·15·16·18·24·28px, 짝수 규칙보다 우선), 분기점 390·760·1100, 칩은 항목 선택 `CHIP`(1번 채움)·필터 `FILTER_CHIP`(2번 연한 바탕+연한 테두리, 건강기록·케어미션), 랜딩 항목(17px·굵기 800·색·H1·PAWEVER·푸터 대비)은 랜딩 교체(SCR-MAN-002) 때
 - 팀 알림(PR 본문 + 팀 채널): ① `ConfirmModal`이 공용 `Modal isConfirm` 모양(440px·[취소][확인] 꽉 참)으로 바뀌어 커뮤니티·건강기록·가계부·고객센터·회원 확인 창이 파일 수정 없이 같이 바뀜 ② 토큰 값 변경: `--color-subtle` #5f6b6c, `--color-cat-hosp-fg` #496f97, `--color-tone-gray-bg` #f4f6f6, 알림 배지 #d4411c ③ 새 공용 부품·칩 규격을 2단계에서 쓴다 ④ SJM: `routes/paths.js` `MYPAGE_CAREGIVERS`(화면 없음, `docs/routes.md` MYP-004)는 그대로 두고 AI 바로가기만 `/mypage/pets`로 보냄. 상수·문서·AI 서버 매핑 정리 여부는 SJM이 정함
 - 버그 후보 알림: KSJ `community/PostDetail.jsx` 내 글에도 신고 버튼(체크리스트 78), JAJ `health/CareChipPicker.jsx`·`CareItemFields.jsx` `ZONES` 순서 반대(82)
 - 1-B 팀 알림(PR 본문 + 팀 채널): ① components·layouts의 `min-[761px]`·`min-[1101px]`이 `760`·`1100`으로, JS 조건이 `(width < 760px)`·`(width >= 1100px)`로 바뀌어 폭이 정확히 760·1100px일 때 PC 모양이 나옴 ② 분기점 규칙이 `docs/convention/ui.md`에 들어감 ③ 메인 검색창 [AI 매니저] 버튼은 760 미만에서 아이콘만(전에는 480 이하)
@@ -196,7 +188,6 @@ SCR-MAN-002 랜딩 · SCR-MAN-001 메인 픽셀 디자인 시안(2026-11-17, 기
 - SCR-MYP-010 팀 알림(2026-11-16): `utils/fileUrl.js` `publicFileUrl`(25개 파일이 씀, 이름 그대로)이 `/api/files/{번호}`를 준다. 이제 로그인해야 열리는 주소라 비로그인 화면(`/chat`은 `auth: 'public'`)에서 쓰면 401로 그림이 깨진다(추정, 확인 안 함)
 - SCR-MYP-010 검증 데이터 정리(2026-11-16, 공용 DB): 검증 때 공지 [이미지 넣기]로 올린 첨부 4612(공지는 저장 안 함, 어디에도 연결 안 됨). 지우려면 DB 첨부파일 행과 백엔드 업로드 폴더의 그 파일을 지운다
 - 로컬 서버 메모(2026-11-16): 노트북 네트워크(IP)가 바뀌면 떠 있던 백엔드의 공용 DB 연결이 죽은 채 남아 DB를 읽는 API(`/api/terms`·로그인)가 500이다. 같은 쿼리를 DB에 직접 보내면 성공했다. 백엔드를 재시작하면 풀린다(2026-11-16 재시작 뒤 200)
-- SCR-MAN-001 바로가기 조회 400 원인 확인은 사람이 넘김(2026-11-14 "이건 넘어가자", 마일스톤 `대기`)
 - SCR-HLT-011 AI 건강분석 리포트 팀 알림(2026-11-14, 사람 결정 "추천안대로"): ① JAJ에게 PR 본문·팀 채널로 `features/health/` 4파일(`dashboardApi.js` 리포트 조회·새로고침, `queries.js` `healthKeys.healthReport`·`useHealthReport`·`useRefreshHealthReport`, `dashboard/DashboardCard.jsx` `AiReportCard`·`AiReportBand`, `dashboard/HealthDashboard.jsx` `<AiReportCard key pet>`)을 고쳤다고 알린다 ② 문서 담당에게 건강기록 명세 v1.4 FN-HLT-011-12 "리포트 내용·산출 기준은 미정·준비 중 안내만"을 AI 계약(ai `docs/api/healthreport.md`)대로 채워 달라고 알린다: 제목 줄 "{이름}은/는 지금 {rptTtl}", 팁 1~3개, 고정 안내, 만든 시각, 최근 기록 미반영 안내, 데이터 부족이면 팁 안내만, [새로고침] 하루 1회, 640px 미만 띠는 제목 줄 한 줄
 - SCR-HLT-011 검증 참고(2026-11-14, 판정 밖): 검증 브라우저 콘솔 오류는 `/api/pets/*/character-image` 404·500이 대부분(이번 변경과 무관). 로컬 반려동물 누리(petSn 20)에서 [새로고침]을 누르면 그날 새로고침 1회를 쓴다
 - SCR-AIM-011 develop 재확인 검증 데이터 정리(2026-11-14, 8080 백엔드·반려동물 여러 마리 회원 계정): AI 대화방 522·523·524·525·526은 AI 창 ⋮ [삭제], 코코(petSn 14) 건강 일지 체중 2026-11-14 14:53 4.2kg는 건강 일지에서 지운다. 참고: Java 400 칸 오류는 실제 값으로 못 일으켜(AI가 거절·반올림) 응답을 가로채 확인했다
@@ -239,13 +230,12 @@ SCR-MAN-002 랜딩 · SCR-MAN-001 메인 픽셀 디자인 시안(2026-11-17, 기
 - SCR-MAN-001 사진 용도 판단 연결 검증 데이터(2026-11-10, 8081 DB·tester 계정): AI 대화방 393("진료 영수증")·395("탄이 진료 영수증이야")는 AI 창 [삭제]. 영수증 결과는 저장하지 않았다
 - SCR-MAN-001 사진 용도 판단 사람이 볼 것(판정 밖, 2026-11-10): ① 판단 요청의 `petSn`은 글에 나온 반려동물이 아니라 칩 값을 보낸다(AI 서버는 판단에 쓰지 않음) ② 부르는 이름(`callName`)은 대화창 캐릭터·영수증 분석 말풍선에만 넣었다
 - SCR-ADM-080 매핑표 API 연결 정할 것(2026-11-10, 8081 DB): 검증 전부터 있던 sn 47 "확인용 매핑(수정)"(사용 안 함, 순위 1)을 지울지 사람이 정한다. 검증 때 만든 sn 48·49는 지웠다
-- 프론트에 남은 가짜 응답(2026-11-10 조사): `adminProcessing` 검사결과지 탭(SCR-ADM-082 대기; `adminAiKeyword`는 2026-11-16 화면째 없앰), `features/apiUsage/api.js`(SCR-ADM-112, 연결 마일스톤 없음), `features/chat/api.js` `searchChatPlaces`(장소 검색 API 담당 미정), `features/community/missingCodes.js` `DONG_BY_REGION`(주로 KSJ)
+- 프론트에 남은 가짜 응답(2026-11-10 조사): `features/apiUsage/api.js`(SCR-ADM-112, 연결 마일스톤 없음), `features/chat/api.js` `searchChatPlaces`(장소 검색 API 담당 미정), `features/community/missingCodes.js` `DONG_BY_REGION`(주로 KSJ)
 - SCR-COM-007 모바일 AI 모달 검증 데이터 정리(2026-11-10, 8081 DB·tester 계정): 까미(petSn 1) 일정 2026-11-11 10:00 "[검증] 까미 미용"(케어 캘린더에서 삭제), 건강 일지 체중 2026-11-10 09:40 4.5kg(건강 일지에서 삭제), AI 대화 "까미 미용 일정 등록"·사진 대화·"반려동물 케어 AI 첫 인사"·"까미 귀 청소 주간 케어 등록"(대화 목록에서 삭제)
 - SCR-COM-007 사람이 볼 것(판정 밖, 2026-11-10): ① 로그아웃·탈퇴 때 AI 모달 닫기는 코드로만 확인 ② 검증 중 AI 확인 카드로 케어 항목 등록 시 8081 `POST /api/pets/1/care-items` 500(이번 변경과 무관해 보임, 원인 안 봄) ③ 명세(공통레이아웃 기능명세서 v0.10 FN-COM-007-01)는 아직 "새 창, 모달 아님"이라 모바일 모달을 문서에 반영해 달라고 문서 담당에 알린다
 - SCR-ADM-001 대시보드 사람이 볼 것(판정 밖, 2026-11-10): ① 알림 실패·배치 실패는 검증 때 0건이라 링크 목록 건수와 대조 못 함(알림 실패는 최근 24시간 기준이라 날짜 필터 발송 이력과 다를 수 있다) ② 종·품종·즐겨찾기 빈 문구와 서버 오류 문구는 코드로만 확인
 - SCR-ADM-110 검증 데이터 정리(2026-11-10, 8081 DB): 운영 설정 읽은 알림 숨김 기준(`notiHideCrtrDayCnt`)이 8로 남았다(처음 7, 12:31 변경). 관리자 `/admin/settings`에서 7로 되돌린다. 감사 로그 354·355 등 검증 기록은 지우는 API가 없다
 - SCR-ADM-110 사람이 볼 것(판정 밖, 2026-11-10): ① 시드 설정 행은 수정자가 `SEED`라 아무도 저장 안 한 DB에서는 "관리자 #SEED"로 보인다 ② 검증용 8081 백엔드가 SYS_STNG 컬럼 삭제 커밋 전 코드라 500이 났었다. 사람용 8080도 11:52 전에 띄웠으면 재시작 ③ 입력 자릿수는 기획의 두 항목 말고도 개수 3자리·파일 크기 2자리로 줄였다(서버 범위 안)
-- 넘긴 것(사람 2026-11-10): AI 매니저·AI 운영 쪽 SCR-ADM-080 매핑표·081 키워드 사전·082 검사결과지 API 연결은 `대기`로 두고 넘김
 - SCR-ADM-082 연결 남음(2026-11-10): 추가-1 캐릭터 생성 탭 기간 필터 (백엔드 연결 `GET /api/admin/processing/character-jobs` `fromYmd`·`toYmd`, 백엔드 저장소에서 /start). 백엔드 세션에 알렸고 SCR-ADM-110 다음에 하기로 답함. 프론트는 이미 보내므로 끝나면 화면에서 기간 조회만 확인
 - SCR-ADM-072 연결 남음(2026-11-10): FN-ADM-072-03 회원 포인트 내역(`/mypage/points`)에 관리자 조정 사유 `memoCn`을 보일지 SJM과 정한다. 지금은 `features/point/history/PointHistory.jsx` `getTitle`이 일부러 "관리자 조정" 고정 문구만 보인다(SJM, SCR-MYP-020)
 - SCR-ADM-072 검증 데이터(2026-11-10, 8081 DB): 회원 #1(tester)에 원장 2줄 "+10 [검증] 포인트 지급"·"-10 [검증] 되돌림"이 남았다(잔액은 처음과 같은 2,209, 원장 삭제 API 없음)
@@ -289,7 +279,6 @@ SCR-MAN-002 랜딩 · SCR-MAN-001 메인 픽셀 디자인 시안(2026-11-17, 기
 - 다음 추천(2026-11-04): 백엔드 PR #149(backend-a9) 연결 남은 1건 — FN-MYP-010-16 착용 확정(`PUT /api/pixel-characters/{pixelCharSn}/equipped-items` 200) 뒤 Python `/ai/characters/{pixelCharSn}/equipped-image` 합성 요청, 끝나면 `character-image` 캐시 무효화, 409 `EQUIPPED_ITEMS_CHANGED`는 무시(꾸미기 화면). 마일스톤 절이 생기면 `/start`. 그 밖에 백엔드 API가 develop에 있는데 프론트가 가짜인 화면: 외부 API 사용량(112)·운영 설정(110)·노출 콘텐츠(023)
 - SCR-ADM-070 사람이 볼 것(2026-11-05): ① 이 PC의 ai `.env.local`이 `CHARACTER_BAKE_ENABLED=true`라 실제 [굽기]는 이미지 API가 과금된다. 반복 호출·[멈춤]·화면 떠나기는 Playwright 가짜 응답으로만 확인했다 ② 본문 없는 502(AI 서버 꺼짐 등)는 "일시적인 오류가 발생했어요."로 보인다 ③ 390폭에서 굽기 칸이 늘어 이름 칸이 좁다
 - SCR-ADM-070 다음에(결정 2026-11-05): 굽기 지시를 고친 뒤 이미 구운 캐릭터 다시 굽기는 넣지 않았다. AI 서버는 안 구운 캐릭터만 굽는다(다시 굽기는 ai·백엔드 몫 포함)
-- SCR-ADM-070 새 아이템 등록 도구(마일스톤 `대기`, 사람 2026-11-05): 범위·흐름이 정해지면 `/start`
 - SCR-ADM-101 사람이 볼 것(판정 밖, 2026-11-04): ① 강아지 "확인용품종"(정렬 5) 등 로컬 DB 확인용 품종은 [수정]에서 사용을 끈다(삭제 API 없음) ② 400 `fields`에 `vrtyNm`·`sortSeq` 밖 칸만 오면 문구가 안 보인다(약관 폼과 같음)
 - SCR-ADM-001 사람이 볼 것(판정 밖): ② 실패한 배치는 배치 화면에 실패 필터가 없어 필터 없이 간다 ③ 스켈레톤은 검증에서 코드로만 확인했다
 
@@ -299,7 +288,7 @@ SCR-MAN-002 랜딩 · SCR-MAN-001 메인 픽셀 디자인 시안(2026-11-17, 기
 - SCR-ADM-080 사람이 볼 것(판정 밖): ① 화면 ID 선택지에 `docs/routes.md` ✓가 아닌 `SCR-COM-009`·`SCR-MYP-031`을 더했다(부록 A 행이 씀) ② 저장 토스트는 기획 문구 그대로 "~했습니다" 말투라 다른 관리자 화면("~했어요")과 다르다 ③ `routes/paths.js`에 `ADMIN_AI_ROUTES`를 기능 커밋에 같이 넣었다 ④ 스켈레톤 높이(3330px)는 45행 어림값
 - SCR-ADM-072 사람이 볼 것(판정 밖): ① 기획의 `nickNm`·`keyword=` 대신 서버 키 `mbrNcnm`·`q`를 썼다 ② 가짜 원장에 없는 실제 회원의 현재 잔액은 회원 상세 포인트 탭 API의 마지막 잔액으로 읽는다 ③ `routes/paths.js`에 `ADMIN_POINTS`를 기능 커밋에 같이 넣었다
 - SCR-ADM-071 사람이 볼 것(판정 밖): ① `routes/paths.js`에 `ADMIN_CARE_MISSIONS`를 기능 커밋에 같이 넣었다 ② 스켈레톤 높이는 행 높이로 계산한 값(풀마다 21·9·12행, `AdminCareMissionsPage.jsx`) ③ 조회 오류·저장 실패 문구는 가짜가 실패하지 않아 검증에서 응답을 바꿔서만 봤다 ④ 백엔드 마일스톤 SCR-ADM-071의 "`pet` 케어미션 협의 (SJM)"는 사람이 맞춘다
-- 대기 순서(사람 결정 2026-11-03): SCR-ADM-060 장소는 없앰(사람 결정 2026-11-04, 메뉴·`docs/routes.md` 행 삭제, 마일스톤 제외 절). 백엔드 `milestones/LJS.md`의 SCR-ADM-060 절도 백엔드 저장소에서 제외로 옮긴다. SCR-ADM-001 페이지 틀·조회 오류 정리는 남은 관리자 화면 구현 뒤 맨 마지막
+- 대기 순서(사람 결정 2026-11-03): SCR-ADM-060 장소는 없앰(사람 결정 2026-11-04, 메뉴·`docs/routes.md` 행 삭제, 마일스톤 제외 절). 백엔드 `milestones/LJS.md`의 SCR-ADM-060 절도 백엔드 저장소에서 제외로 옮긴다.
 - SCR-ADM-051 사람이 볼 것(판정 밖): ① 같은 버전 값은 확인 모달을 누른 뒤에 막힌다 ② 로컬 DB `TRMS`의 `MARKETING`에 검증용 `v9.9-check`·`v9.9-verify`가 남아 있다(삭제 API 없음, 지우려면 두 행 삭제 후 `v1.0` 사용 여부를 되돌린다) ③ 기능별 동의 2종이 `TRMS`에 생기면 `termsKinds.js`에 다시 넣는다
 
 - SCR-ADM-101 사람이 볼 것(판정 밖): ① 기능명세서 FN-ADM-101-02 지역 조회·화면설계서 SCR-ADM-101 지역 부분을 DMS에서 빼는 것은 문서 담당 몫(2026-11-03 결정) ② URL 변경(`docs/routes.md`·`routes/paths.js` `ADMIN_BREEDS`)은 `shared-files.md`상 따로 PR 대상이라 PR 본문에 팀 알림을 넣는다(2026-11-03 결정) ③ 옛 URL `/admin/breeds-regions` 리다이렉트는 두지 않았다 ④ 품종 이름 50자·중복 검사(공백 무시)는 가정
@@ -501,6 +490,3 @@ SCR-MAN-002 랜딩 · SCR-MAN-001 메인 픽셀 디자인 시안(2026-11-17, 기
 - 범위 밖에서 본 것(말만): 공통레이아웃 기능명세서 FN-COM-004-07의 케어 일정 알림 이동 대상(건강상태관리 정기관리)이 AI매니저 FN-AIM-006-13(케어 캘린더 SCR-HLT-003)과 다름
 - SCR-COM-006 연결 남음: 006-07 터치 동작 명세 확정(반응형 범위는 ≤1100px·≤760px로 정해졌다. 명세 작성자가 문구를 갱신하면 구현할 내용을 정한다)
 - SCR-COM-002 연결 남음: 002-02 `ProtectedRoute`로 감싸기(user 레이아웃은 끝, ai·chat·place·main bare는 위 SCR-COM-003 연결 남음), 002-06 GNB 대상 페이지를 `UserLayout` 아래 라우트로 붙이기(각 담당), 002-09 알림 미확인 수 API(LJS 백엔드), 002-11 채팅 안 읽은 수 조회 위치를 KSJ와 맞추고 연결(KSJ), 002-15 회원 프로필 이미지, 002-24 세션 만료 토스트(SCR-COM-003과 함께)
-- SCR-ADM-090 검증 오류 메시지 구체화(마일스톤 `대기`, 사람 결정 2026-11-03: 맨 마지막에 한다, 사람 요청 2026-11-03): 모르는 치환 변수를 넣으면 "입력값이 올바르지 않습니다."만 보여 무엇이 문제인지 알 수 없다. 저장 전에 칸·변수 이름을 보이게 한다
-- SCR-COM-007·SCR-AIM-011 모바일 AI 매니저를 모달로(후순위, 사람 결정 2026-11-09 "펫돌봄 채팅이랑 동일하게", 마일스톤 `대기`): 모바일에서 플로팅 AI·메인 검색창이 새 탭 대신 채팅 모달(`layouts/ChatModal.jsx`, 760px 이하 헤더 아래 전체 화면)처럼 연다. `pages/ai/AiChatPage.jsx`(691줄) 본문을 모달·새 창이 같이 쓰는 판으로 나누고, 사진 넘기기(`useAiWindow` BroadcastChannel)와 `features/ai/chat/openInMainWindow.js`(본창 이동·창 닫기)를 모달용으로 맞춘다. 명세 FN-COM-007-01·FN-AIM-011-01 "새 창(탭)·모달 아님"과 달라 문서 담당에 알린다. 정할 것: PC는 새 창 그대로인지, 모달에 [새 창으로 띄우기]를 둘지
-- SCR-COM-002 ⋮ 메뉴 공통화(사람 2026-11-08 "리팩토링 때 한번에", 2026-11-10 기획했다가 관리자 연결 먼저로 미룸, 마일스톤 `대기`, 사람 2026-11-10 "제일 마지막으로"): A1 `components/KebabMenu.jsx`에 `variant`(`reveal` 기본=지금, `inline`=항상 보임·32px 버튼·아이콘 18px·`min-w-24`), A2 `features/health/CareItemMenu.jsx`·A3 `features/expense/shared/ExpenseMenu.jsx`는 props 그대로 KebabMenu 껍데기(쓰는 파일 안 바뀜, JAJ·SEO1216 알림), A4 `MainShortcuts.jsx`의 `ShortcutMenu`를 KebabMenu로
