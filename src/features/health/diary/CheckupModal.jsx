@@ -16,7 +16,7 @@ import { CHECKUP_TYPES } from '../scheduleTypes';
 import FieldError, { Required } from '@/components/FieldError';
 import FormModal from './FormModal';
 import NearScheduleModal from './NearScheduleModal';
-import CharCount from '../shared/CharCount';
+import FieldFoot from '@/components/FieldFoot';
 import { INPUT, LABEL, TEXTAREA } from '@/components/formStyles';
 
 const MAX_HOSPITAL_NAME_LENGTH = 80;
@@ -234,10 +234,11 @@ export default function CheckupModal({
                   className={INPUT}
                   onChange={(event) => setHsptlNm(event.target.value)}
                 />
-                <CharCount value={hsptlNm} max={MAX_HOSPITAL_NAME_LENGTH} />
-                {isInvalid('hosp') && (
-                  <FieldError>병원명을 입력해 주세요</FieldError>
-                )}
+                <FieldFoot
+                  value={hsptlNm}
+                  max={MAX_HOSPITAL_NAME_LENGTH}
+                  error={isInvalid('hosp') && '병원명을 입력해 주세요'}
+                />
               </label>
               <label className="flex flex-col gap-1.5">
                 <span className={LABEL}>검진 종류{REQUIRED}</span>
@@ -266,7 +267,7 @@ export default function CheckupModal({
                 className={TEXTAREA}
                 onChange={(event) => setCkupCn(event.target.value)}
               />
-              <CharCount value={ckupCn} max={MAX_CONTENT_LENGTH} />
+              <FieldFoot value={ckupCn} max={MAX_CONTENT_LENGTH} />
             </label>
 
             <label className="flex flex-col gap-1.5">
@@ -278,7 +279,7 @@ export default function CheckupModal({
                 className={INPUT}
                 onChange={(event) => setCkupMemoCn(event.target.value)}
               />
-              <CharCount value={ckupMemoCn} max={MAX_MEMO_LENGTH} />
+              <FieldFoot value={ckupMemoCn} max={MAX_MEMO_LENGTH} />
             </label>
 
             <NoticeBox className="flex gap-2">

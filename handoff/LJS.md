@@ -2,10 +2,19 @@
 
 ## 지금 하는 것
 
-끝남: SCR-COM-002 공용 Modal · 모바일 전체 바텀시트 (2026-11-23, 검증 통과 4회차, 사람 확인). 760px 미만에서 확인 창을 뺀 모든 공용 Modal이 아래 시트(손잡이·위 모서리만 둥글게·화면 − 2rem·safe-area·올라오는 움직임·제목 줄 끌어 닫기·버튼 반반), `isSheet` prop 없앰. 추가-1 바로가기 편집 남은 개수 칸 64px 고정, 추가-2 서비스 둘러보기 모바일 시트 연출
+끝남: SCR-COM-002 사람 확인 피드백 묶음 2 (2026-11-23, 검증 통과, 사람 확인). G2 모바일 입력칸 16px(터치 기기), G3 플로팅 버튼 z-20·접힘 탭 누르는 영역 44px·펼침 창 z-30, G4 DatePicker 월 고르기 보기, G5 공용 `FieldFoot`(오류 왼쪽·글자 수 오른쪽 한 줄), G6 AI·채팅 모달 열리면 흰 헤더, G7 사이드 메뉴 '›' 오른쪽 끝. 추가-1 달력·셀렉트·시간 목록 포털 + 열린 동안 바깥 스크롤 잠금(`hooks/useFloatingLayer.js`). G1은 디자인 필요로 뺌
+
+### 추가 요청
+
+| 번호 | 바꿀 파일 | 완료 조건 | 요청 |
+| --- | --- | --- | --- |
+| 추가-2 | `components/DatePicker.jsx`(develop 병합 충돌 해결) | `명령:` lint·build. `화면:` 월 고르기 보기는 `monthSelect`를 넘긴 칸(반려동물 생년월일)에서만 열리고 다른 날짜 칸(일정 모달)은 헤더가 글자만, 두 경우 모두 달력이 포털·fixed로 떠 잘리지 않고 열린 동안 바깥 스크롤 막힘 | 요청 2026-11-23 15:12 "develop의 SJM `monthSelect` 방식(켠 칸만)으로 맞추기(2번)" |
 
 ## 다음에 할 것
 
+- SCR-COM-002 피드백 묶음 2 팀 알림(PR 본문 + 팀 채널, 모두): ① 터치 기기에서 `input`·`textarea`·`select` 글자가 16px(iOS 확대 막기, `assets/index.css` 레이어 밖 규칙이라 `text-sm`보다 앞섬) ② 공용 `DatePicker` 위 "YYYY년 M월 ▾"로 월 고르기 보기 ③ `DatePicker`·`DropdownSelect` 펼침 창이 포털(모달 안이면 그 dialog, 아니면 body) + fixed로 뜨고, `TimeSelect` 포함 열린 동안 바깥 휠·터치 스크롤이 막힘(`hooks/useFloatingLayer.js`). 펼침 창 안에 스크롤 목록을 새로 두면 `overscroll-contain` ④ 플로팅 버튼 z-30 → z-20, `KebabMenu`·`MonthPicker` 펼침 창 z-30 ⑤ 사이드 메뉴 '›'가 줄 오른쪽 끝. JAJ·KSJ·YAY·SJM: 새 공용 `components/FieldFoot`(왼쪽 오류, 오른쪽 "n / 최대")으로 바뀜 — JAJ 일정·검진·관찰·기타 검사·처방·케어 항목(라벨 줄 글자 수가 칸 아래로)·검사 수치 입력, `health/shared/CharCount.jsx` 삭제, KSJ `AddressShareModal`, YAY `NicknameModal`(칸 안 글자 수가 칸 아래로), SJM `PetFormModal`(라벨 줄 글자 수가 칸 아래로). `FieldError`에 `className` prop. 모달에 글자 수 칸을 새로 만들면 `FieldFoot`
+- 피드백 묶음 2 참고(검증 보고, 판정 밖): G2 실제 iOS 확대는 검증이 못 봄(에뮬레이션은 계산 글자 크기만). 사람이 휴대폰으로 LAN 접속해 확인. [반려동물 등록] 플로팅 버튼은 검증 계정 등록 한도라 route로만 확인
+- 우측 아래 AI 플로팅 버튼 아이콘을 AI 매니저 말풍선 아이콘으로(사람 피드백 2026-11-23, 디자인이 오면 기획. `layouts/FloatingButtons.jsx`)
 - SCR-COM-002 모바일 바텀시트 팀 알림(PR 본문 + 팀 채널, 모두): 760px 미만에서 공용 `Modal`(확인 창 `isConfirm`·`ConfirmModal`은 가운데 카드 그대로)이 모두 아래 시트. 손잡이·제목 줄을 끌어 80px 넘게 내리면 닫힘(`isPending`·`isDismissDisabled`면 제자리), 열 때 200ms 올라옴(동작 줄이기면 없음). JAJ: 건강기록 입력(`FormModal`)·일정·케어 항목 관리·건강기록 둘러보기가 화면 전체 → 시트(고정 높이 창은 화면 − 32px). 관리자 `isTop` 입력 창도 모바일은 시트. SJM: `isSheet` prop 없어짐(가계부 6곳·하루 기록 수정·가족 초대·반려동물 등록에서 지움). 모바일 `isWide` 푸터 버튼 반반, `isLarge` 푸터는 `<p>` 안내가 버튼 위 한 줄·버튼 둘 묶음 반반. 모달 안에서 모바일 화면 전체를 가정한 코드를 새로 쓰지 말 것
 - 바텀시트 참고(검증 보고, 판정 밖): 반반 규칙은 버튼이 둘일 때만이라 가족 초대(`InviteModal` 자체 `justify-end`)는 자기 너비, 케어 항목 관리 [저장하기] 하나는 89px. 건강기록 둘러보기(`HealthGuideModal`, JAJ)는 서비스 둘러보기와 같은 스케일 연출을 쓰는지 안 봄(쓰면 모바일 시트 연출과 겹침). 반려동물 등록 창은 검증 계정 등록 한도라 수정 창·route로 확인
 - 헤더 알림 참고(2026-11-23 코드 확인, 말만): 알림은 지우지 않고 `AUTO_HIDE_DT`(생성 + 운영 설정 일수, 기본 7일) 지나면 목록에서 숨김. 숨긴 행을 지우는 배치 없음(`INAPP_NOTI` 쌓임), 일수 변경은 새 알림부터
