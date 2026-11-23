@@ -29,7 +29,7 @@ import { useExpensePets, useExpenseStatistics, useExpenses } from '../queries';
 /** 하루 지출 상세는 한 번에 최대 건수(서버 한 쪽 최대) */
 const DAY_SIZE = 50;
 
-/** 첫 로딩 자리: 본문과 같은 격자(1440px·390px에서 잰 카드 높이) */
+/** 첫 로딩 자리: 본문과 같은 격자. 카드 높이는 구간별 본문 높이(390·760·1440px에서 잰 값): 760 미만·760~1099·1100 이상 */
 function ExpenseDashboardSkeleton() {
   return (
     <div
@@ -37,15 +37,15 @@ function ExpenseDashboardSkeleton() {
       className="grid gap-5 min-[1100px]:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)]"
     >
       <div className="min-[1100px]:col-start-1 min-[1100px]:row-start-1 min-[1100px]:grid">
-        <SkeletonCard className="h-[234px]" />
+        <SkeletonCard className="h-[258px] min-[760px]:h-[240px] min-[1100px]:h-[234px]" />
       </div>
-      <SkeletonCard className="h-[594px] max-[760px]:h-[343px] min-[1100px]:col-start-1 min-[1100px]:row-start-2" />
+      <SkeletonCard className="h-[363px] min-[760px]:h-[594px] min-[1100px]:col-start-1 min-[1100px]:row-start-2" />
       <div className="min-[1100px]:col-start-2 min-[1100px]:row-start-1 min-[1100px]:grid">
-        <SkeletonCard className="h-[135px] min-[1100px]:h-auto" />
+        <SkeletonCard className="h-[367px] min-[760px]:h-[259px] min-[1100px]:h-auto" />
       </div>
       <div className="contents min-[1100px]:col-start-2 min-[1100px]:row-start-2 min-[1100px]:flex min-[1100px]:flex-col min-[1100px]:gap-5">
         <SkeletonCard className="h-[349px]" />
-        <SkeletonCard className="h-[135px] min-[1100px]:flex-1" />
+        <SkeletonCard className="h-[327px] min-[760px]:h-[266px] min-[1100px]:h-[135px] min-[1100px]:flex-1" />
       </div>
       <Skeleton className="h-[60px] rounded-card min-[1100px]:hidden" />
     </div>
