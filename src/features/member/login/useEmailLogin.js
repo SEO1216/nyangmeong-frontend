@@ -118,7 +118,7 @@ export default function useEmailLogin(onSuccess) {
     setCaptchaInput('');
     switch (error.code) {
       case 'LOGIN_FAILED':
-        setNotice({ type: 'error', message: error.message });
+        setNotice({ type: 'error', message: MSG.loginFailed });
         if (isCaptchaOn) issueCaptcha(acntEml);
         return;
       case 'LOGIN_CAPTCHA_REQUIRED':

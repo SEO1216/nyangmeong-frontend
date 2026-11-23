@@ -2,11 +2,11 @@
 
 ## 지금 하는 것
 
-SCR-MYP-010 캐릭터 없음 카드 "?" 위치·크기 (FN-MYP-010-02·07, 명세 v0.8) — 끝 (2026-11-20, 검증 `통과` 2회차 보고, lint·build 0, 사람 확인 완료)
+SCR-MYP-031 가계부 등록/수정 · 영수증 [촬영하기]를 터치 기기에서만 — 끝 (2026-11-23, 검증 `통과` 2회차, lint·build 0, 사람 확인 완료)
 
-- `src/features/pet/character/CharacterCard.jsx` 한 파일. 실루엣 영역을 `@container` 바깥 래퍼로 두고 효과는 안쪽 span에만 걸었다. "?"는 `isNone`에만, left 50%·top 41%·`text-[46cqw]`·bold·`text-muted`. 무대도 `@container`라 [캐릭터 만들기]는 `whitespace-nowrap`, 좁으면 `px-2!`·`text-xs`(180px 미만), 180~240px `px-3!`·`text-sm`. 새 API·새 의존성 없음
-- 추가 요청(모두 사람이 요청, 통과): 추가-1 좁은 카드에서 [캐릭터 만들기] 한 줄 유지, 추가-2 오류 확인 중 카드 가로채기 확인(코드 변경 없음)
-- 정리(공용 DB): 없음. 응답 가로채기와 GET 조회만 했다
+- 변경: `ExpenseReceiptUpload.jsx`의 [촬영하기]에 `not-pointer-coarse:hidden`(주 입력이 손가락일 때만 보임, 화면 폭은 안 봄). 마우스 PC는 창을 좁혀도 [파일 선택]만 가운데에 보인다. 추가-1: 빈 상태 아이콘 `Receipt`를 `ImagePlus` `size-8`로(AI `ReceiptUploadModal`과 같음). 새 API·새 의존성 없음
+- 알려 둘 점: 터치스크린 노트북(주 입력이 마우스)은 터치로 써도 [촬영하기]가 숨는다. [다시 촬영] 흐름은 코드를 안 고쳤고 확인에서 뺐다
+- 정리(공용 DB): 없음. [분석 요청]을 누르지 않았다
 
 ## 다음에 할 것
 
