@@ -226,7 +226,6 @@ export default function PetFormModal({ petSn = null, onClose, onCreated }) {
       title={isEdit ? '반려동물 수정' : '반려동물 등록'}
       isLarge
       isAutoHeight
-      isSheet
       width={720}
       isDismissDisabled
       isPending={isPending}
