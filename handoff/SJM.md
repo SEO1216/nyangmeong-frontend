@@ -2,11 +2,21 @@
 
 ## 지금 하는 것
 
-SCR-MYP-031 가계부 등록/수정 · 영수증 [촬영하기]를 터치 기기에서만 — 끝 (2026-11-23, 검증 `통과` 2회차, lint·build 0, 사람 확인 완료)
+SCR-MYP-001 마이페이지 홈 · 한눈에 보기 P 아이콘·3칸 배치 경계 — 끝 (2026-11-23, 검증 `통과`, lint·build 0, 사람 확인 완료, 추가-1·2 포함. 정리 없음)
 
-- 변경: `ExpenseReceiptUpload.jsx`의 [촬영하기]에 `not-pointer-coarse:hidden`(주 입력이 손가락일 때만 보임, 화면 폭은 안 봄). 마우스 PC는 창을 좁혀도 [파일 선택]만 가운데에 보인다. 추가-1: 빈 상태 아이콘 `Receipt`를 `ImagePlus` `size-8`로(AI `ReceiptUploadModal`과 같음). 새 API·새 의존성 없음
-- 알려 둘 점: 터치스크린 노트북(주 입력이 마우스)은 터치로 써도 [촬영하기]가 숨는다. [다시 촬영] 흐름은 코드를 안 고쳤고 확인에서 뺐다
-- 정리(공용 DB): 없음. [분석 요청]을 누르지 않았다
+- 디자인: 없음(Figma 토큰 없음, `html/`에 SCR-MYP-001 파일 없음). 요청 문구 기준으로 간다
+- FN-MYP-001-03 포인트·지출 한눈에 보기(걸치는 기능 FN-MYP-001-04)
+  - 바꿀 파일: `src/components/StatLink.jsx`에 선택 prop `iconDesktopOnly`(기본 `false`)를 더해 `true`일 때만 아이콘 칸을 `hidden min-[760px]:grid`로 둔다. `src/features/point/home/PointSummaryCard.jsx`만 `iconDesktopOnly`를 넘긴다. 이번달 지출액·오늘의 케어미션 카드와 `StatSkeleton`은 고치지 않는다
+  - API: 없음(기존 `usePointBalance` 그대로)
+  - 완료 조건:
+    - 명령: `yarn -s lint`, `yarn -s build` 종료 코드 0
+    - 화면: `/mypage`(tester 로그인) 390·759px에서 P 아이콘이 안 보이고 포인트·이번달 지출액·오늘의 케어미션 이름의 왼쪽 끝 x좌표가 같다. 760·1440px에서는 P 아이콘(48px)이 지금처럼 보이고 배치가 바뀌지 않는다. 모바일 줄 높이(로딩 스켈레톤 72px와 맞춤)가 눈에 띄게 달라지지 않는다
+- 새 의존성: 없음
+
+### 추가 요청
+
+| 추가-1 | `src/components/StatLink.jsx` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 390·759px에서 포인트 줄과 이번달 지출액 줄 높이가 같고(스켈레톤 72px와 8px 안팎 차이는 허용), 760·1440px는 그대로 | 요청 2026-11-23 "포인트 줄에 붙인 min-h-[72px] 빼기, 모바일 포인트·이번달 지출액 줄 높이 같게" |
+| 추가-2 | `src/pages/mypage/MyPageHomePage.jsx`, `src/components/StatLink.jsx`, `src/features/point/home/StatSkeleton.jsx`, `src/features/expense/home/ExpenseSummaryCard.jsx`(자체 스켈레톤) | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 한눈에 보기 3칸 가로 배치·StatLink PC 모양·P 아이콘·스켈레톤 경계가 760→1100px. 390·759·760·1099px는 세로 3줄에 P 아이콘 없음, 1100·1440px는 3칸 가로에 P 아이콘 보임 | 요청 2026-11-23 "760px에서 3칸이 너무 좁다. PC 모양과 3칸 배치를 1100px부터, 760~1099는 모바일처럼 세로 3줄, P 아이콘·스켈레톤도 같은 경계" |
 
 ## 다음에 할 것
 
