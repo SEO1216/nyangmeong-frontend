@@ -87,7 +87,11 @@ export default function LoginPage() {
 
   return (
     <>
-      <StepMotion stepKey={isEmail ? 'email' : 'choice'} direction={direction}>
+      <StepMotion
+        stepKey={isEmail ? 'email' : 'choice'}
+        direction={direction}
+        className="flex flex-1 flex-col"
+      >
         {isEmail ? (
           <EmailLoginForm
             onBack={backToChoice}

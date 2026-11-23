@@ -1,6 +1,7 @@
-import { MoreVertical, Plus } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { Plus } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import KebabMenu from '@/components/KebabMenu';
 import PetFace from '@/components/PetFace';
 import Skeleton from '@/components/Skeleton';
 import { useMainShortcuts, useSaveMainShortcuts } from './queries';
@@ -211,10 +212,20 @@ export default function MainShortcuts({ pets, mbrSn }) {
                   {TYPE_BY_CD[cd].tileLabel ?? TYPE_BY_CD[cd].label}
                 </span>
               </Link>
-              <ShortcutMenu
+              <KebabMenu
                 label={`${pet.petNm} ${TYPE_BY_CD[cd].label} 바로가기 메뉴`}
-                onEdit={() => setForm({ petSn: pet.petSn })}
-                onDelete={() => handleDelete(pet.petSn, cd)}
+                items={[
+                  {
+                    label: '바로가기 편집',
+                    onSelect: () => setForm({ petSn: pet.petSn }),
+                  },
+                  {
+                    label: '삭제',
+                    isDanger: true,
+                    onSelect: () => handleDelete(pet.petSn, cd),
+                  },
+                ]}
+                className="absolute top-1 right-1"
               />
             </li>
           );
@@ -237,81 +248,6 @@ export default function MainShortcuts({ pets, mbrSn }) {
         />
       )}
     </>
-  );
-}
-
-/**
- * [바로가기 ⋮ 메뉴] 건강기록 케어 항목 ⋮ 메뉴(CareItemMenu)와 같은 방식·모양
- * - 바깥을 누르거나 Esc·항목을 고르면 닫힘
- */
-function ShortcutMenu({ label, onEdit, onDelete }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const rootRef = useRef(null);
-
-  useEffect(() => {
-    if (!isOpen) return undefined;
-    const handlePointerDown = (event) => {
-      if (!rootRef.current.contains(event.target)) setIsOpen(false);
-    };
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') setIsOpen(false);
-    };
-    document.addEventListener('pointerdown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('pointerdown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen]);
-
-  const choose = (action) => {
-    setIsOpen(false);
-    action();
-  };
-
-  return (
-    <div
-      ref={rootRef}
-      className={`absolute top-1 right-1 ${
-        isOpen
-          ? ''
-          : '[@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-focus-within:opacity-100 [@media(hover:hover)]:group-hover:opacity-100'
-      }`}
-    >
-      <button
-        type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
-        aria-label={label}
-        aria-haspopup="menu"
-        aria-expanded={isOpen}
-        className="grid size-6 place-items-center rounded-full text-subtle hover:text-ink"
-      >
-        <MoreVertical className="size-4" aria-hidden="true" />
-      </button>
-      {isOpen && (
-        <div
-          role="menu"
-          className="absolute top-full right-0 z-10 mt-1 flex min-w-28 flex-col rounded-box border border-line bg-white py-1 text-sm shadow-depth-md"
-        >
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => choose(onEdit)}
-            className="h-9 px-4 text-left whitespace-nowrap hover:bg-surface-2"
-          >
-            바로가기 편집
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => choose(onDelete)}
-            className="h-9 px-4 text-left text-danger hover:bg-surface-2"
-          >
-            삭제
-          </button>
-        </div>
-      )}
-    </div>
   );
 }
 

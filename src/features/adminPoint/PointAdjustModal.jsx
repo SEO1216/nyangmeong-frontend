@@ -96,7 +96,7 @@ function MemberPicker({ id, member, error, onSelect }) {
       );
     }
     return (
-      <ul className="max-h-[200px] overflow-y-auto">
+      <ul>
         {search.data.map((candidate) => (
           <li key={candidate.mbrSn}>
             <button

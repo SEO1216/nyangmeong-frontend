@@ -29,23 +29,25 @@ import { useExpensePets, useExpenseStatistics, useExpenses } from '../queries';
 /** 하루 지출 상세는 한 번에 최대 건수(서버 한 쪽 최대) */
 const DAY_SIZE = 50;
 
-/** 첫 로딩 자리: 실제 배치(1440px·390px에서 잰 카드 높이) */
+/** 첫 로딩 자리: 본문과 같은 격자. 카드 높이는 구간별 본문 높이(390·760·1440px에서 잰 값): 760 미만·760~1099·1100 이상 */
 function ExpenseDashboardSkeleton() {
   return (
     <div
       aria-busy="true"
-      className="grid gap-5 min-[1100px]:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)] min-[1100px]:items-start"
+      className="grid gap-5 min-[1100px]:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)]"
     >
-      <div className="flex min-w-0 flex-col gap-5">
-        <SkeletonCard className="h-[234px]" />
-        <SkeletonCard className="h-[594px] max-[760px]:h-[343px]" />
+      <div className="min-[1100px]:col-start-1 min-[1100px]:row-start-1 min-[1100px]:grid">
+        <SkeletonCard className="h-[258px] min-[760px]:h-[240px] min-[1100px]:h-[234px]" />
       </div>
-      <div className="flex min-w-0 flex-col gap-5">
-        <SkeletonCard className="h-[135px]" />
+      <SkeletonCard className="h-[363px] min-[760px]:h-[594px] min-[1100px]:col-start-1 min-[1100px]:row-start-2" />
+      <div className="min-[1100px]:col-start-2 min-[1100px]:row-start-1 min-[1100px]:grid">
+        <SkeletonCard className="h-[367px] min-[760px]:h-[259px] min-[1100px]:h-auto" />
+      </div>
+      <div className="contents min-[1100px]:col-start-2 min-[1100px]:row-start-2 min-[1100px]:flex min-[1100px]:flex-col min-[1100px]:gap-5">
         <SkeletonCard className="h-[349px]" />
-        <SkeletonCard className="h-[135px]" />
-        <Skeleton className="h-[60px] rounded-card" />
+        <SkeletonCard className="h-[327px] min-[760px]:h-[266px] min-[1100px]:h-[135px] min-[1100px]:flex-1" />
       </div>
+      <Skeleton className="h-[60px] rounded-card min-[1100px]:hidden" />
     </div>
   );
 }
@@ -62,6 +64,8 @@ export default function ExpenseDashboard({ onViewAll }) {
   const [editingExpense, setEditingExpense] = useState(null);
   /** 앱 지출 상세 시트: 보고 있는 지출 번호(편집 중에는 시트를 잠시 숨기고 저장하면 다시 표시) */
   const [detailSn, setDetailSn] = useState(null);
+  /** 반려동물별 지출 더보기 펼침: 펼치면 달력은 늘지 않고 오른쪽만 길어진다 */
+  const [isPetsExpanded, setIsPetsExpanded] = useState(false);
 
   const statsQuery = useExpenseStatistics(ym);
   const petsQuery = useExpensePets();
@@ -124,6 +128,8 @@ export default function ExpenseDashboard({ onViewAll }) {
   }
 
   const selectedItems = selectedYmd ? (dayPage?.content ?? []) : [];
+  /** 더보기 펼침이나 날짜 내역이 열리면 두 열이 따로 길어진다(달력은 기본 높이) */
+  const isDetached = isPetsExpanded || selectedItems.length > 0;
   const detailExpense = [...selectedItems, ...stats.topExpenses].find(
     (expense) => expense.expndSn === detailSn,
   );
@@ -131,9 +137,9 @@ export default function ExpenseDashboard({ onViewAll }) {
 
   return (
     <div
-      className={`grid gap-5 min-[1100px]:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)] min-[1100px]:items-start ${isPlaceholderData ? 'opacity-60' : ''}`}
+      className={`grid gap-5 min-[1100px]:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)] ${isPlaceholderData ? 'opacity-60' : ''}`}
     >
-      <div className="flex min-w-0 flex-col gap-5">
+      <div className="min-w-0 min-[1100px]:col-start-1 min-[1100px]:row-start-1 min-[1100px]:grid">
         <ExpenseSummary
           ym={ym}
           isNextDisabled={ym >= maxYm}
@@ -144,40 +150,55 @@ export default function ExpenseDashboard({ onViewAll }) {
           mmExpndLimAmt={stats.mmExpndLimAmt}
           onOpenLimit={() => setIsLimitOpen(true)}
         />
-        <section aria-label="월간 달력" className={`${CARD} ${CARD_BODY}`}>
-          <ExpenseCalendar
-            ym={ym}
-            cells={getCalendarCells(ym, stats.days)}
-            selectedYmd={selectedYmd}
-            onSelectDay={handleSelectDay}
-            onEmptyDay={setAddingYmd}
+      </div>
+      <section
+        aria-label="월간 달력"
+        className={`${CARD} ${CARD_BODY} min-[1100px]:col-start-1 min-[1100px]:row-start-2 min-[1100px]:flex min-[1100px]:flex-col ${isDetached ? 'min-[1100px]:self-start' : ''}`}
+      >
+        <ExpenseCalendar
+          ym={ym}
+          cells={getCalendarCells(ym, stats.days)}
+          selectedYmd={selectedYmd}
+          onSelectDay={handleSelectDay}
+          onEmptyDay={setAddingYmd}
+        />
+        {selectedItems.length > 0 && (
+          <ExpenseDayDetail
+            expndYmd={selectedYmd}
+            items={selectedItems}
+            totalAmt={sumAmt(selectedItems)}
+            onAdd={() => setAddingYmd(selectedYmd)}
+            onEdit={setEditingExpense}
+            onDelete={setDeletingExpense}
+            onOpenDetail={(expense) => setDetailSn(expense.expndSn)}
           />
-          {selectedItems.length > 0 && (
-            <ExpenseDayDetail
-              expndYmd={selectedYmd}
-              items={selectedItems}
-              totalAmt={sumAmt(selectedItems)}
-              onAdd={() => setAddingYmd(selectedYmd)}
-              onEdit={setEditingExpense}
-              onDelete={setDeletingExpense}
-              onOpenDetail={(expense) => setDetailSn(expense.expndSn)}
-            />
-          )}
-        </section>
-      </div>
-      <div className="flex min-w-0 flex-col gap-5">
+        )}
+      </section>
+      <div className="min-w-0 min-[1100px]:col-start-2 min-[1100px]:row-start-1 min-[1100px]:grid">
         <ExpenseCategoryChart stats={getCategoryStats(stats.categories)} />
-        <ExpensePetChart stats={getPetStats(stats, pets)} />
-        <ExpenseTopList expenses={stats.topExpenses} />
-        <button
-          type="button"
-          onClick={() => onViewAll(ym)}
-          className={`${CARD} flex items-center justify-between px-6 py-4 font-semibold hover:border-brand-100`}
-        >
-          이번달 전체 내역 보기
-          <ChevronRight className="size-5 text-subtle" aria-hidden="true" />
-        </button>
       </div>
+      <div
+        className={`contents min-[1100px]:col-start-2 min-[1100px]:row-start-2 min-[1100px]:flex min-[1100px]:min-w-0 min-[1100px]:flex-col min-[1100px]:gap-5 ${isDetached ? 'min-[1100px]:self-start' : ''}`}
+      >
+        <ExpensePetChart
+          stats={getPetStats(stats, pets)}
+          isExpanded={isPetsExpanded}
+          onToggle={() => setIsPetsExpanded(!isPetsExpanded)}
+        />
+        <ExpenseTopList
+          expenses={stats.topExpenses}
+          onViewAll={() => onViewAll(ym)}
+          isGrow={!isDetached}
+        />
+      </div>
+      <button
+        type="button"
+        onClick={() => onViewAll(ym)}
+        className={`${CARD} flex items-center justify-between px-6 py-4 font-semibold hover:border-brand-100 min-[1100px]:hidden`}
+      >
+        이번달 전체 내역 보기
+        <ChevronRight className="size-5 text-subtle" aria-hidden="true" />
+      </button>
       {isLimitOpen && (
         <ExpenseLimitModal
           mmExpndLimAmt={stats.mmExpndLimAmt}

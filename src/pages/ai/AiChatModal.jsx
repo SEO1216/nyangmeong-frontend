@@ -224,7 +224,7 @@ const playReturnToInput = (panel, backdrop, onDone) => {
  * 닫기([✕]·Esc)
  * - 플로팅 버튼에서 열었으면 오른쪽 아래로 작아지며 닫힘(사람 2026-11-11 "복귀할 때 스케일 다운")
  * - 메인 검색창에서 열었으면 검색창 자리로 돌아가며 닫힘(playReturnToInput)
- * - 그 밖·동작 줄이기면 바로 닫힘. 화면 이동으로 닫을 때는 이 함수를 쓰지 않는다
+ * - 그 밖·동작 줄이기면 바로 닫힘. 페이지 이동으로 닫을 때(아래 location.key 효과)도 이 함수를 쓴다
  */
 function useCloseWithMotion(panelRef, backdropRef, origin, closeNow) {
   const isClosingRef = useRef(false);

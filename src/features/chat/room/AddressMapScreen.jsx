@@ -34,7 +34,7 @@ export default function AddressMapScreen({ address, detail, point, onBack }) {
   }, [kakao, point.lat, point.lng]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-surface-2">
+    <div className="fixed inset-0 z-50 flex flex-col bg-page-bg">
       <div className="relative min-h-0 flex-1">
         <div
           ref={containerRef}

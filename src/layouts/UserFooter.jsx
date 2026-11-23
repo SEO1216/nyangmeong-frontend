@@ -1,19 +1,24 @@
 import { Link } from 'react-router-dom';
+import logo from '@/assets/nm_logo.svg';
 import footerMoIllust from '@/assets/footer_mo_illust.svg';
 import footerPixel from '@/assets/footer_pixel.svg';
 import { PATHS } from '@/routes/paths';
 
-const DEV_TEAM = ['이진성', '안인철', '정애진', '서정민', '김선진', '윤아연'];
-/** 디자인 임시 값(실제 주소는 공개 저장소에 두지 않음) */
-const EMAIL_PLACEHOLDER = '0000@gmail.com';
-/** 대표전화·팩스 디자인 임시 값(실제 번호는 공개 저장소에 두지 않음) */
-const TEL_PLACEHOLDER = '000-0000-0000';
-const FAX_PLACEHOLDER = '02-0000-0000';
+/** 팀원 이름·연락 이메일(사람 요청 2026-11-20) */
+const DEV_TEAM = [
+  { name: '이진성', email: 'pro047@naver.com' },
+  { name: '정애진', email: 'jdw152412@naver.com' },
+  { name: '서정민', email: 'cjstk4426@naver.com' },
+  { name: '김선진', email: 'qoop1017@gmail.com' },
+  { name: '윤아연', email: 'yay315@naver.com' },
+];
+const TEL = '063-717-1008';
+const FAX = '063-717-1122';
 
 export default function UserFooter({ className = '' }) {
   return (
     <footer
-      className={`relative border-t border-line bg-footer text-muted ${className}`}
+      className={`relative border-t border-footer-line bg-footer text-muted ${className}`}
     >
       {/** 푸터 윗선 위 장식 띠, 760px 이하는 모바일 전용 그림 */}
       <picture>
@@ -26,10 +31,10 @@ export default function UserFooter({ className = '' }) {
         />
       </picture>
       <div className="mx-auto max-w-[1440px] px-8 py-10 max-[1100px]:pt-0 max-[760px]:px-5">
-        {/** 1100px 이하: 링크 줄이 맨 위로 올라가고 세로로 쌓임 */}
-        <div className="flex items-start gap-8 max-[1100px]:flex-col max-[1100px]:gap-6">
+        {/** 1100px 이상: 소개 칸과 Dev Team 칸 아래끝을 맞춤. 1100px 이하: 링크 줄이 맨 위로 올라가고 세로로 쌓임 */}
+        <div className="flex items-start gap-8 min-[1100px]:items-end max-[1100px]:flex-col max-[1100px]:gap-6">
           <div className="w-[344px] shrink-0 space-y-1 text-[15px] max-[1100px]:w-auto max-[760px]:space-y-2.5 max-[760px]:text-sm">
-            <p className="text-lg font-bold">냥멍케어</p>
+            <img src={logo} alt="냥멍케어" className="block h-8 w-[121px]" />
             {/** 한 묶음: 줄 사이 간격 없음 */}
             <div>
               <p>우리 아이의 건강한 하루를 기록하세요.</p>
@@ -38,23 +43,23 @@ export default function UserFooter({ className = '' }) {
             <div>
               <p>(54888) 전북특별자치도 전주시 덕진구 기린대로 499</p>
               <p>
-                대표전화 : {TEL_PLACEHOLDER}
-                <span className="ml-4">팩스 : {FAX_PLACEHOLDER}</span>
+                대표전화 : {TEL}
+                <span className="ml-4">FAX : {FAX}</span>
               </p>
             </div>
           </div>
           <div>
             <p className="font-bold">Dev Team</p>
             <ul className="mt-1 grid grid-cols-2 gap-x-6 text-[15px] max-[1100px]:grid-cols-3 max-[1100px]:gap-x-12 max-[1100px]:gap-y-1.5 max-[760px]:grid-cols-2 max-[760px]:gap-x-6 max-[760px]:gap-y-3 max-[760px]:text-sm">
-              {DEV_TEAM.map((name) => (
+              {DEV_TEAM.map(({ name, email }) => (
                 <li key={name}>
                   <span className="font-bold max-[760px]:block">{name}</span>{' '}
-                  {EMAIL_PLACEHOLDER}
+                  {email}
                 </li>
               ))}
             </ul>
           </div>
-          <nav className="ml-auto flex items-center gap-8 font-bold max-[1100px]:order-first max-[1100px]:-mx-8 max-[1100px]:w-[calc(100%+4rem)] max-[1100px]:justify-between max-[1100px]:border-b max-[1100px]:border-footer-line max-[1100px]:px-24 max-[1100px]:py-5 max-[1100px]:text-lg max-[760px]:-mx-5 max-[760px]:w-[calc(100%+2.5rem)] max-[760px]:gap-3 max-[760px]:px-5 max-[760px]:text-base">
+          <nav className="ml-auto flex items-center self-start gap-8 font-bold max-[1100px]:order-first max-[1100px]:-mx-8 max-[1100px]:w-[calc(100%+4rem)] max-[1100px]:justify-between max-[1100px]:border-b max-[1100px]:border-footer-line max-[1100px]:px-24 max-[1100px]:py-5 max-[1100px]:text-lg max-[760px]:-mx-5 max-[760px]:w-[calc(100%+2.5rem)] max-[760px]:gap-3 max-[760px]:px-5 max-[760px]:text-base">
             <Link to={PATHS.NOTICES}>공지사항</Link>
             <i className="h-4 w-px bg-line-strong" />
             <Link to={PATHS.FAQS}>자주하는 질문</Link>

@@ -2,11 +2,26 @@
 
 ## 지금 하는 것
 
-SCR-MYP-010 캐릭터 없음 카드 "?" 위치·크기 (FN-MYP-010-02·07, 명세 v0.8) — 끝 (2026-11-20, 검증 `통과` 2회차 보고, lint·build 0, 사람 확인 완료)
+SCR-MYP-020 포인트 관리/케어미션 · 포인트 내역 월 선택 창을 내역이 있는 달로 — 끝 (2026-11-23, 검증 `통과`(3회차), lint·build 0, 사람 확인 완료, 추가-1 포함. 정리 없음)
 
-- `src/features/pet/character/CharacterCard.jsx` 한 파일. 실루엣 영역을 `@container` 바깥 래퍼로 두고 효과는 안쪽 span에만 걸었다. "?"는 `isNone`에만, left 50%·top 41%·`text-[46cqw]`·bold·`text-muted`. 무대도 `@container`라 [캐릭터 만들기]는 `whitespace-nowrap`, 좁으면 `px-2!`·`text-xs`(180px 미만), 180~240px `px-3!`·`text-sm`. 새 API·새 의존성 없음
-- 추가 요청(모두 사람이 요청, 통과): 추가-1 좁은 카드에서 [캐릭터 만들기] 한 줄 유지, 추가-2 오류 확인 중 카드 가로채기 확인(코드 변경 없음)
-- 정리(공용 DB): 없음. 응답 가로채기와 GET 조회만 했다
+- 디자인: 없음(Figma 토큰 없음, `html/`에 SCR-MYP-020 파일 없음). 가계부 전체 내역(30-2) `ExpenseHistory`의 ◀ MonthPicker ▶ 모양을 그대로 따른다
+- 기준 문서: 기능명세서 v0.5(캐시) FN-MYP-020-02는 "◀▶로 이전달·다음달(미래는 비활성) 이동"만 있고 월 선택 창은 없다. 명세 보완은 "내 문서 작업"에 남긴다
+- FN-MYP-020-02 적립·사용 내역
+  - 바꿀 파일:
+    - `src/components/MonthPicker.jsx`: 선택 prop `emptyNotice`(기본값 "지출이 없는 달은 선택할 수 없어요")를 받아 선택 창 아래 안내에 쓴다. 다른 동작은 그대로. `ExpenseHistory`는 고치지 않는다
+    - `src/features/point/api.js`: `getPointMonths` = `GET /point-ledgers/months`, 가계부 `getExpenseMonths`처럼 `yearMonth` 값 배열(`['2026-11', ...]`)로 돌려준다
+    - `src/features/point/queries.js`: `pointKeys.months()` = `['points', 'months']`(건강 일지의 `pointKeys.all` 무효화에 함께 걸린다), `usePointMonths`
+    - `src/features/point/history/PointHistory.jsx`: ◀▶ 사이 `<b>{formatYm(ym)}</b>`를 `<MonthPicker ym maxYm enabledYms={months ?? []} emptyNotice="포인트 내역이 없는 달은 선택할 수 없어요" onSelect>`로 바꾼다. 선택·◀▶ 모두 기존 `moveYm`과 같이 [더보기] 펼침을 접는다. 연월 목록을 받는 중이거나 실패해도 내역 카드는 그대로 보이고(선택 창의 달만 모두 비활성), ◀▶는 지금처럼 동작, 이번 달에서 ▶ 비활성
+  - API: `GET /api/point-ledgers/months`(SJM, 백엔드 #287 머지됨). 로컬 백엔드는 이 커밋이 들어간 develop으로 띄운다
+  - 완료 조건:
+    - 명령: `yarn -s lint`, `yarn -s build` 종료 코드 0
+    - 화면: `/mypage/points`(tester 로그인) 포인트 내역 헤더에 ◀ "yyyy년 M월 ⌄" ▶. 연월을 누르면 선택 창이 열리고 months API가 준 달만 고를 수 있으며(그 밖·이번 달 이후는 비활성, 연도 ◀▶는 가장 오래된 달 연도~올해), 아래 안내가 "포인트 내역이 없는 달은 선택할 수 없어요". 달을 고르면 그 달 내역·적립/사용 합계로 바뀌고 창이 닫힌다. 바깥 클릭·Esc로 변경 없이 닫힌다. ◀▶는 한 달씩 이동, 이번 달에서 ▶ 비활성. 390·760·1100·1440px에서 헤더가 겹치거나 넘치지 않고 선택 창이 화면 밖으로 나가지 않는다(나가면 `PointHistory` 헤더 배치에서 고치고 `MonthPicker` 위치는 바꾸지 않는다)
+    - 화면: `/mypage/expenses/all` 전체 내역(30-2) 월 선택 창 안내가 "지출이 없는 달은 선택할 수 없어요" 그대로, 동작 그대로
+- 새 의존성: 없음
+
+### 추가 요청
+
+| 추가-1 | `src/features/point/shared/pointFormat.js` | 명령: `yarn -s lint`·`yarn -s build` 0. 화면: 내역이 없는 달에서 적립·사용 합계가 "0P"(부호 없음), 0이 아니면 +·− 그대로. 포인트 요약(`PointSummary`) 이번 달 적립·사용도 0이면 "0"으로 나오는지 확인 | 요청 2026-11-23 "내역 없는 달 합계가 +0P로 보임, formatSignedPoint가 0이면 부호 없이 0P, 다른 사용처도 확인" |
 
 ## 다음에 할 것
 
@@ -18,6 +33,7 @@ SCR-MYP-010 캐릭터 없음 카드 "?" 위치·크기 (FN-MYP-010-02·07, 명�
 
 ### 내 문서 작업(설계서·명세)
 
+- FN-MYP-020-02·화면설계서 SCR-MYP-020 5번: ◀▶ 사이 연월을 누르면 월 선택 창이 열리고 포인트 내역이 있는 달만 고를 수 있다("포인트 내역이 없는 달은 선택할 수 없어요")를 더한다(가계부 30-2와 같은 방식)
 - FN-MYP-040-09·13: 가입 제공자 표시를 텍스트 배지에서 SNS 로고 칩으로(SNS 회원 6-3, "카카오 간편 가입" 문구는 유지). 화면설계서 6-3 그림도 맞춘다
 - FN-MYP-020-04: "그날 획득 포인트·남은 미션 수(남은 포인트)를 표시"에 "남은 미션 수와 자정 정산 안내는 오늘만, 지난 날짜는 그날 획득만"을 더한다. 화면설계서 SCR-MYP-020 요약·안내도 맞춘다. v0.7은 날짜 구분 없이 남은 미션 수를 표시하게 되어 있어 이번 변경과 다르다
 - FN-MYP-010-02·03·07·23·화면설계서 10-1: 카드 그림 규칙을 명세에 쓴다. 안 만든·만드는 중 = 실루엣+"?", 만든 카드 이미지 실패 = 컬러 기본 전신, 오류 확인 중 = 흑백·흐림. 지금 문서는 "종별 기본 캐릭터가 들어간 점선 카드"
