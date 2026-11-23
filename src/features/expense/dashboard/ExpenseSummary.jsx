@@ -23,7 +23,7 @@ export default function ExpenseSummary({
     prevTotalAmt == null ? 0 : getRatio(totalAmt - prevTotalAmt, prevTotalAmt);
 
   return (
-    <section aria-label="이번달 총 지출" className={CARD}>
+    <section aria-label="이번달 총 지출" className={`${CARD} flex flex-col`}>
       <div className={`${CARD_HEAD} max-[390px]:gap-2 max-[390px]:px-3.5`}>
         <MonthNav
           onPrev={() => onChangeMonth(-1)}
@@ -44,7 +44,7 @@ export default function ExpenseSummary({
           </button>
         )}
       </div>
-      <div className={CARD_BODY}>
+      <div className={`${CARD_BODY} flex flex-1 flex-col`}>
         <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-muted">이번달 총 지출</p>
@@ -67,7 +67,7 @@ export default function ExpenseSummary({
           )}
         </div>
         {hasLimit ? (
-          <>
+          <div className="mt-auto">
             <div
               role="progressbar"
               aria-label="한도 사용률"
@@ -85,9 +85,9 @@ export default function ExpenseSummary({
               <span>한도의 {usageRatio}% 사용</span>
               <span>총 {count}건</span>
             </div>
-          </>
+          </div>
         ) : (
-          <div className="flex flex-wrap items-center gap-3 rounded-box bg-surface-2 px-4 py-3">
+          <div className="mt-auto flex flex-wrap items-center gap-3 rounded-box bg-surface-2 px-4 py-3">
             <Info className="size-4 shrink-0 text-subtle" aria-hidden="true" />
             <span className="min-w-0 flex-1 text-muted">
               한도를 설정하면 지출을 관리할 수 있어요

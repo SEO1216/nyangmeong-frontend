@@ -231,7 +231,7 @@ export const useCancelCareRecord = () => useCareMutation(cancelCareRecord);
 
 export const useCreateCareItem = () => useCareMutation(createCareItem);
 
-/** 튜토리얼의 케어 고르기 저장 (※신규 정책) */
+/** 튜토리얼의 케어리스트 항목 저장 (※신규 정책) */
 export const useSaveCareIndications = () =>
   useCareMutation(saveCareIndications);
 
