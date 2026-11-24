@@ -1,16 +1,30 @@
 import { ChevronRight, Lock } from 'lucide-react';
 import { useState } from 'react';
+import { publicFileUrl } from '@/utils/fileUrl';
 import { CARD_ROWS, SECTION_TITLE } from '../shared/profileStyles';
-import { SNS_NAME } from '../shared/snsCodes';
+import SnsLogoChip from '../shared/SnsLogoChip';
+import { JOIN_PATH_EMAIL, SNS_NAME } from '../shared/snsCodes';
 import AccountInfoCard from './AccountInfoCard';
 import NicknameField from './NicknameField';
 import PasswordChangeCard from './PasswordChangeCard';
 import PhoneField from './PhoneField';
 import ProfileImageField from './ProfileImageField';
-import SnsBadge from './SnsBadge';
+import SnsLinkCard from './SnsLinkCard';
 
-export default function ProfileEditForm({ profile, onWithdraw }) {
-  const { snsTyCd, acntEml, mbrNcnm, mbrTelno, prflImgUrl } = profile;
+export default function ProfileEditForm({ profile, hidePassword, onWithdraw }) {
+  const {
+    acntEml,
+    mbrNcnm,
+    mblTelno,
+    atchFileSn,
+    joinPathCd,
+    snsAcntLinks,
+    joinDt,
+    lastLgnDt,
+  } = profile;
+  // 이메일 가입(USRC0006)이 아니면 SNS 회원: 가입경로 코드가 곧 SNS 종류
+  const snsTyCd = joinPathCd === JOIN_PATH_EMAIL ? null : joinPathCd;
+  const prflImgUrl = atchFileSn ? publicFileUrl(atchFileSn) : null;
   // 한 번에 한 항목만 펼친다. 다른 항목을 열면 열려 있던 항목은 입력을 버리고 닫힌다
   const [editingKey, setEditingKey] = useState(null);
 
@@ -33,8 +47,8 @@ export default function ProfileEditForm({ profile, onWithdraw }) {
           <ProfileImageField prflImgUrl={prflImgUrl} mbrNcnm={mbrNcnm}>
             {snsTyCd ? (
               <>
-                <span>
-                  <SnsBadge snsTyCd={snsTyCd} />
+                <span className="inline-flex items-center gap-2">
+                  <SnsLogoChip snsOffrCd={snsTyCd} />
                   {SNS_NAME[snsTyCd]} 계정으로 로그인 중
                 </span>
                 <small className="text-sm text-subtle">
@@ -52,8 +66,10 @@ export default function ProfileEditForm({ profile, onWithdraw }) {
             )}
           </ProfileImageField>
           <NicknameField mbrNcnm={mbrNcnm} {...rowProps('nickname')} />
-          <PhoneField mbrTelno={mbrTelno} {...rowProps('phone')} />
-          {!snsTyCd && <PasswordChangeCard {...rowProps('password')} />}
+          <PhoneField mblTelno={mblTelno ?? ''} {...rowProps('phone')} />
+          {!snsTyCd && !hidePassword && (
+            <PasswordChangeCard {...rowProps('password')} />
+          )}
         </div>
       </section>
       <section
@@ -66,10 +82,18 @@ export default function ProfileEditForm({ profile, onWithdraw }) {
         <div className={CARD_ROWS}>
           <AccountInfoCard
             snsTyCd={snsTyCd}
-            mbrJoinPathCd={profile.mbrJoinPathCd}
-            mbrRegDt={profile.mbrRegDt}
-            mbrLastLgnDt={profile.mbrLastLgnDt}
+            joinPathCd={joinPathCd}
+            joinDt={joinDt}
+            lastLgnDt={lastLgnDt}
           />
+        </div>
+      </section>
+      <section aria-labelledby="sns-link-title" className="flex flex-col gap-5">
+        <h2 id="sns-link-title" className={SECTION_TITLE}>
+          SNS 계정 연동
+        </h2>
+        <div className={CARD_ROWS}>
+          <SnsLinkCard joinPathCd={joinPathCd} snsAcntLinks={snsAcntLinks} />
         </div>
       </section>
       <div className="-mt-6">

@@ -10,6 +10,8 @@
 2. `html/<SCR-ID>.html` 디자인 파일
 3. DMS 화면설계서
 
+관리자 화면(`pages/admin/`)은 디자인 파일이 없어도 묻지 않는다. 화면설계서를 기준으로 하고 스타일은 기존 관리자 화면에 맞춘다.
+
 ## AI 슬롭을 넣지 않는다
 
 AI 도구가 기준 없이 채우면 어느 서비스에서나 본 듯한 화면이 된다. 디자인 기준에 없으면 아래를 쓰지 않는다.
@@ -34,7 +36,7 @@ AI 도구가 기준 없이 채우면 어느 서비스에서나 본 듯한 화면
   - `Skeleton`: 카드가 아닌 작은 요소(검색창·버튼·탭 글자·쪽 번호·구역 제목)나 카드 안 한 구역. `className`으로 크기·모양, `lines`로 여러 줄이다.
 - **모든 페이지는 실제 배치대로 만든다.** 큰 카드 1장(`<PageSkeleton />`)은 배치를 정하기 전 임시값이다.
   1. 다 불러온 화면을 1440px·390px로 띄워 카드마다 개수·칸·높이를 잰다(Playwright로 `getBoundingClientRect`).
-  2. 같은 그리드 클래스(`min-[1101px]:grid-cols-…`)에 `SkeletonCard`를 같은 순서로 놓고, 높이는 잰 값을 `h-[…px]`로 쓴다. 모바일에서 높이가 크게 다르면 `max-[760px]:h-[…px]`을 더한다.
+  2. 같은 그리드 클래스(`min-[1100px]:grid-cols-…`)에 `SkeletonCard`를 같은 순서로 놓고, 높이는 잰 값을 `h-[…px]`로 쓴다. 모바일에서 높이가 크게 다르면 `max-[760px]:h-[…px]`을 더한다.
   3. 카드 밖 요소(검색 줄·작성 버튼·쪽 번호·구역 제목)도 같은 자리에 `Skeleton`으로 둔다.
   4. 배치는 그 페이지 파일 안의 작은 함수(`XxxSkeleton`)로 둔다. 로딩 분기가 둘이면 같은 함수를 쓴다. 한 페이지에서만 쓰므로 `components/`로 올리지 않는다.
   5. 확인: 1440px·390px에서 로딩 중 본문 높이가 다 불러온 화면의 ±20% 안이고, 가로 스크롤이 없다. 가짜 API는 바로 응답하므로 확인할 때만 `queryFn`에 지연을 넣었다가 커밋 전에 지운다.
@@ -65,7 +67,7 @@ if (
 function CalendarSkeleton() {
   return (
     <PageSkeleton>
-      <div className="grid gap-5 min-[1101px]:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="grid gap-5 min-[1100px]:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <SkeletonCard className="h-[624px]" />
         <div className="flex flex-col gap-5">
           <SkeletonCard className="h-[262px]" />
@@ -83,6 +85,14 @@ function CalendarSkeleton() {
 </PageSkeleton>;
 ```
 
+## 화면 폭 분기점
+
+화면 폭 분기점은 390·760·1100px 셋만 쓴다(UI 체크리스트 42, 2026-11-18). 760 미만이 모바일, 1100 이상이 넓은 PC다.
+
+- Tailwind 4의 `max-[N]`은 N 미만, `min-[N]`은 N 이상이다. 짝은 같은 숫자로 쓴다: `max-[760px]:…`와 `min-[760px]:…`. `min-[761px]`처럼 1px 올리면 760px 폭이 어느 쪽에도 들지 않는다.
+- JS(`matchMedia`·`useMediaQuery`)도 같은 경계로 쓴다: `'(width < 760px)'`, `'(width >= 1100px)'`. `(max-width: 760px)`는 760을 포함해 CSS와 1px 어긋난다.
+- 카드 안 배치처럼 부모 폭을 보는 컨테이너 쿼리(`@max-[…]`·`@min-[…]`)는 화면 분기점이 아니라 이 규칙 밖이다.
+
 ## 모바일 바텀 네비
 
 760px 미만에서 메인(랜딩 포함)·플레이스를 뺀 사용자 화면은 푸터를 두지 않고 하단에 바텀 네비를 둔다.
@@ -90,6 +100,7 @@ function CalendarSkeleton() {
 - 항목은 그 화면이 속한 메뉴의 서브 메뉴다. 글자만 쓴다.
 - AI 플로팅 버튼은 바텀 네비 위에 둔다.
 - `layouts/bottomNavMenus.js`의 `paths`는 하위 경로까지 포함한다(`/mypage`면 `/mypage/pets`도). 새 메뉴 영역을 만들면 `{ label, paths, items }`를 추가한다. `UserLayout`이 이 목록으로 푸터를 숨기고 바텀 네비를 둔다.
+- 관리자 화면에는 공통 바텀 네비가 없다. 예외로 운영 설정(`features/setting/admin/SettingForm.jsx`)은 760px 미만에서 묶음을 하단 버튼으로 나눠 고른 묶음만 보인다.
 
 ## html/ 디자인 파일
 

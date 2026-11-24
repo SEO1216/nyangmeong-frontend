@@ -9,7 +9,7 @@ import ChatConversation from './ChatConversation';
 import ChatRoomList from './ChatRoomList';
 
 /** Tailwind max-[760px]와 같은 기준 */
-const NARROW_QUERY = '(max-width: 760px)';
+const NARROW_QUERY = '(width < 760px)';
 
 const subscribeNarrow = (onChange) => {
   const media = window.matchMedia(NARROW_QUERY);
@@ -26,7 +26,6 @@ export default function ChatPanes({
   onSelect,
   onBack,
   onLeft,
-  onClearPost,
 }) {
   const isNarrow = useSyncExternalStore(subscribeNarrow, getIsNarrow);
   const hasRoom = otoChatRoomSn !== null;
@@ -36,15 +35,15 @@ export default function ChatPanes({
     <div className="flex min-h-0 flex-1">
       <section
         aria-label="채팅 목록"
-        className={`w-[380px] shrink-0 flex-col border-r border-line max-[760px]:w-full max-[760px]:border-r-0 ${
+        className={`w-[356px] shrink-0 flex-col border-r border-line max-[760px]:w-full max-[760px]:border-r-0 ${
           isNarrow && isRoomPane ? 'hidden' : 'flex'
         }`}
       >
         <ChatRoomList
           isHidden={isNarrow && isRoomPane}
+          pstSn={pstSn}
           listPstSn={listPstSn}
           selectedRoomSn={otoChatRoomSn}
-          onClearPost={onClearPost}
           onSelect={onSelect}
         />
       </section>
@@ -65,9 +64,11 @@ export default function ChatPanes({
         ) : (
           <p
             role="status"
-            className="flex flex-1 items-center justify-center bg-[#fdfcfb] text-subtle"
+            className="flex flex-1 items-center justify-center bg-page-bg text-subtle"
           >
-            {pstSn !== null ? '채팅방을 여는 중이에요' : '채팅방을 골라 주세요'}
+            {pstSn !== null
+              ? '채팅방을 여는 중이에요'
+              : '대화할 채팅을 골라 주세요'}
           </p>
         )}
       </section>

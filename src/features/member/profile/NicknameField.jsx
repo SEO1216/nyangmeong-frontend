@@ -1,15 +1,22 @@
 import { useId, useState } from 'react';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import FieldError from '@/components/FieldError';
 import { showToast } from '@/components/toastStore';
-import { useCheckNickname, useUpdateNickname } from '../queries';
-import { ACT_BTN, HELP, INPUT, SIDE_BTN } from '../shared/profileStyles';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  memberKeys,
+  useCheckNicknameAvailability,
+  useSetupNickname,
+} from '../queries';
+import { HELP, INPUT } from '@/components/formStyles';
+import { ACT_BTN, SIDE_BTN } from '../shared/profileStyles';
 import {
   NICKNAME_MAX,
   isValidNickname,
   sanitizeNickname,
 } from '../shared/validate';
 import AccountRow from './AccountRow';
-import { ErrorText, OkText } from './FieldMessage';
+import { OkText } from './FieldMessage';
 
 const MSG = {
   duplicate: '이미 사용 중인 닉네임입니다.',
@@ -31,14 +38,15 @@ export default function NicknameField({ mbrNcnm, isEditing, onEdit, onClose }) {
   );
 }
 
-/** 펼쳐졌을 때만 그려진다. 닫히면 입력과 확인 결과가 함께 사라진다 */
+/** 펼쳐졌을 때만 렌더. 닫히면 입력과 확인 결과가 함께 사라짐 */
 function NicknameEdit({ mbrNcnm, onClose }) {
   const inputId = useId();
   const [value, setValue] = useState(mbrNcnm);
   // idle | available | duplicate | failed
   const [status, setStatus] = useState('idle');
-  const check = useCheckNickname();
-  const save = useUpdateNickname();
+  const qc = useQueryClient();
+  const check = useCheckNicknameAvailability();
+  const save = useSetupNickname();
 
   const isBusy = check.isPending || save.isPending;
   const hasError = status === 'duplicate' || status === 'failed';
@@ -52,8 +60,8 @@ function NicknameEdit({ mbrNcnm, onClose }) {
     check.mutate(
       { mbrNcnm: value },
       {
-        onSuccess: ({ dplctYn }) =>
-          setStatus(dplctYn ? 'duplicate' : 'available'),
+        onSuccess: ({ available }) =>
+          setStatus(available ? 'available' : 'duplicate'),
         onError: () => setStatus('failed'),
       },
     );
@@ -63,11 +71,14 @@ function NicknameEdit({ mbrNcnm, onClose }) {
       { mbrNcnm: value },
       {
         onSuccess: () => {
-          showToast('닉네임을 저장했어요');
+          qc.invalidateQueries({ queryKey: memberKeys.profile });
+          showToast('닉네임을 저장했어요', { type: 'success' });
           onClose();
         },
         onError: (error) =>
-          setStatus(error.code === 'DUPLICATE' ? 'duplicate' : 'failed'),
+          setStatus(
+            error.code === 'NICKNAME_ALREADY_USED' ? 'duplicate' : 'failed',
+          ),
       },
     );
 
@@ -94,7 +105,7 @@ function NicknameEdit({ mbrNcnm, onClose }) {
           중복확인
         </button>
       </div>
-      {hasError && <ErrorText>{MSG[status]}</ErrorText>}
+      {hasError && <FieldError>{MSG[status]}</FieldError>}
       {status === 'available' && <OkText>{MSG.available}</OkText>}
       {status === 'idle' && (
         <p className={HELP}>최대 10글자 · 한글·영문·숫자</p>

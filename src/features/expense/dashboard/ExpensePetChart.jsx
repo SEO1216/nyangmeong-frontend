@@ -1,13 +1,17 @@
 import { ChevronDown } from 'lucide-react';
-import { useState } from 'react';
 import { formatWon } from '../shared/expenseFormat';
-import { CARD, CARD_BODY, CARD_HEAD, CARD_TITLE } from '../shared/expenseStyles';
+import {
+  CARD,
+  CARD_BODY,
+  CARD_HEAD,
+  CARD_TITLE,
+} from '../shared/expenseStyles';
 
 /** 초기 노출 마릿수 */
 const VISIBLE_PET_COUNT = 4;
 
-export default function ExpensePetChart({ stats }) {
-  const [isExpanded, setIsExpanded] = useState(false);
+/** isExpanded·onToggle: 펼침 여부는 대시보드가 쥔다(격자가 달력 높이를 정할 때 쓴다) */
+export default function ExpensePetChart({ stats, isExpanded, onToggle }) {
   const hiddenCount = stats.pets.length - VISIBLE_PET_COUNT;
   const visiblePets = isExpanded
     ? stats.pets
@@ -34,7 +38,7 @@ export default function ExpensePetChart({ stats }) {
         {hiddenCount > 0 && (
           <button
             type="button"
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={onToggle}
             aria-expanded={isExpanded}
             className="flex h-10 items-center justify-center gap-1 rounded-md border border-dashed border-line-strong bg-white font-semibold text-muted hover:border-brand-500 hover:text-brand-600"
           >
@@ -64,7 +68,7 @@ function PetBar({ label, totalAmt, ratio }) {
     <li>
       <p className="mb-1 flex justify-between gap-2 text-sm">
         <span>{label}</span>
-        <span className="text-subtle">
+        <span className="text-subtle tabular-nums">
           {formatWon(totalAmt)} · {ratio}%
         </span>
       </p>

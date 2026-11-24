@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { Outlet, useLocation, useMatch, useNavigate } from 'react-router-dom';
+import { useInquiries } from '@/features/inquiry/queries';
 import { PATHS } from '@/routes/paths';
 import SubPageLayout from './SubPageLayout';
 
@@ -14,7 +15,7 @@ const DESCRIPTIONS = {
 /**
  * [고객센터 틀]
  * - 공지사항·FAQ·1:1 문의가 한 틀을 공유한다(라우트의 부모 틀, 화면은 Outlet)
- * - 경로·사이드 메뉴·페이지 머리는 공용 SubPageLayout. 여기서는 선택 메뉴·제목·부제만 정한다
+ * - 경로·사이드 메뉴·페이지 머리는 공용 SubPageLayout. 여기서는 선택 메뉴·제목·부제만 지정
  * - 작성·수정 폼이 Outlet context의 leaveRef에 나가기 확인 함수를 걸어 두면,
  *   사이드 메뉴·머리 이동도 그 확인을 거친다(걸린 게 없으면 바로 이동)
  */
@@ -29,22 +30,32 @@ export default function CustomerCenterLayout() {
   const outletContext = useMemo(() => ({ leaveRef }), []);
   /** 상세·작성·수정도 소속 메뉴를 선택 상태로 */
   const menu = Object.keys(DESCRIPTIONS).find((to) => pathname.startsWith(to));
-  /** 1:1 문의 작성·수정은 경로에 한 단계 더 붙는다 */
+  /** 1:1 문의 작성·수정은 경로에 한 단계 추가 */
   const isInquiryNew = useMatch(PATHS.INQUIRY_NEW);
   const isInquiryEdit = useMatch(PATHS.INQUIRY_EDIT);
+  /** 문의 이력이 하나도 없으면 돌아갈 목록이 없으니 작성 화면의 ← 목록으로를 숨긴다 */
+  const { data: firstPage } = useInquiries(
+    { page: 1, size: 1, status: '' },
+    { enabled: Boolean(isInquiryNew) },
+  );
+  const hasNoInquiry = firstPage?.totalElements === 0;
   let title;
   if (isInquiryNew) title = '문의 작성';
   if (isInquiryEdit) title = '문의 수정';
+  /** 공지·1:1 문의 상세와 문의 작성은 본문 박스 위에 ← 목록으로(수정은 없음, 문의 이력이 없으면 작성에도 없음) */
+  const isNoticeDetail = useMatch(PATHS.NOTICE_DETAIL);
+  const isInquiryDetail = useMatch(PATHS.INQUIRY_DETAIL) && !isInquiryNew;
 
   return (
     <SubPageLayout
       section="support"
       menu={menu}
       title={title}
-      back={false}
+      back={Boolean(
+        (isInquiryNew && !hasNoInquiry) || isNoticeDetail || isInquiryDetail,
+      )}
       description={DESCRIPTIONS[menu]}
       onLeave={onLeave}
-      contentClassName="min-[1101px]:pt-4"
     >
       <Outlet context={outletContext} />
     </SubPageLayout>

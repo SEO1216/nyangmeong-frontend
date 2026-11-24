@@ -1,10 +1,11 @@
-/** 원 단위 금액 입력: 숫자 문자열 값 */
+/** 원 단위 금액 입력: 숫자 문자열 값. isRequired: 필수 입력(aria-required) */
 export default function AmountInput({
   id,
   value,
   onChange,
   label,
   maxDigits = 13,
+  isRequired = false,
   className = '',
 }) {
   const handleChange = (event) =>
@@ -20,11 +21,12 @@ export default function AmountInput({
       <input
         id={id}
         aria-label={label}
+        aria-required={isRequired || undefined}
         inputMode="numeric"
         autoComplete="off"
         value={value === '' ? '' : Number(value).toLocaleString('ko-KR')}
         onChange={handleChange}
-        className="block h-10 w-full rounded-md border border-input-line bg-white pr-9 pl-3 text-right hover:border-line-strong focus:border-brand-500 focus:ring-focus focus:outline-none"
+        className="block h-10 w-full rounded-md border border-input-line bg-white pr-9 pl-3 text-right tabular-nums hover:border-line-strong focus:border-brand-500 focus:ring-focus focus:outline-none"
       />
       <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-subtle">
         원

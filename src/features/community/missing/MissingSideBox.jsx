@@ -1,16 +1,16 @@
 import { CalendarDays, MapPin, MessageCircle, PartyPopper } from 'lucide-react';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import { formatDate } from '@/utils/formatDate';
-import { EXTEND_BEFORE_DAYS, isFound } from '../missingCodes';
+import { EXTEND_BEFORE_DAYS, isExpired, isFound } from '../missingCodes';
 import CheckList from './CheckList';
 import {
   formatArea,
   formatSeenAtShort,
+  getRemainDays,
   MISSING_COMMENT_INPUT_ID,
 } from './missingUtils';
 
-const BOX_CLASS =
-  'rounded-[14px] border border-line bg-white px-[22px] pt-[22px] pb-5 shadow-sm';
+const BOX_CLASS = 'rounded-[14px] border border-line bg-white px-6 pt-6 pb-5';
 
 const GUIDE_OWNER = [
   ['반경 500m 먼저 찾기', '놀란 아이는 대부분 멀리 못 가고 근처에 숨어 있어요'],
@@ -34,7 +34,7 @@ const GUIDE_VISITOR = [
 function Guide({ title, items }) {
   return (
     <section aria-label={title}>
-      <h2 className="pb-3 text-lg leading-[1.4] font-bold text-ink">{title}</h2>
+      <h2 className="pb-3 text-lg font-bold text-ink">{title}</h2>
       <CheckList items={items} />
     </section>
   );
@@ -52,10 +52,8 @@ export function VisitorSide({ post }) {
     <>
       <aside aria-label="연락하기" className={BOX_CLASS}>
         <p className="text-sm text-muted">{post.petNm}를 보셨나요?</p>
-        <p className="mt-0.5 text-2xl font-bold tracking-[0.01em]">
-          {post.cnpl}
-        </p>
-        <ul className="mt-3.5 border-t border-line pt-3.5 text-sm text-ink-2">
+        <p className="mt-1 text-2xl font-bold tracking-[0.01em]">{post.cnpl}</p>
+        <ul className="mt-4 border-t border-line pt-4 text-sm text-ink-2">
           <li className="flex items-start gap-2 py-1">
             <CalendarDays
               size={18}
@@ -70,18 +68,21 @@ export function VisitorSide({ post }) {
               aria-hidden="true"
               className="shrink-0 text-subtle"
             />
-            {formatArea(post)} {post.wtnsPlcNm}
+            {/* 장소 이름이 지역으로 시작하면(「전주시 근린공원」) 지역을 다시 붙이지 않음 */}
+            {post.wtnsPlcNm?.startsWith(formatArea(post))
+              ? post.wtnsPlcNm
+              : `${formatArea(post)} ${post.wtnsPlcNm}`}
           </li>
         </ul>
         <button
           type="button"
           onClick={goComment}
-          className={`${BTN_PRIMARY} mt-[18px] w-full`}
+          className={`${BTN_PRIMARY} mt-4 w-full`}
         >
           <MessageCircle size={16} aria-hidden="true" />
           댓글로 제보하기
         </button>
-        <p className="mt-2.5 text-center text-sm leading-[1.6] text-muted">
+        <p className="mt-3 text-center text-sm leading-[1.6] text-muted">
           본 장소와 시간을 함께 알려 주세요
         </p>
       </aside>
@@ -91,21 +92,23 @@ export function VisitorSide({ post }) {
 }
 
 /**
- * 작성자 오른쪽: 「○○를 찾으셨나요?」 카드(게시 종료일 · 남은 일수 · [찾았어요] · [30일 더 게시하기]) + 실종 Check 가이드
- * - 연장은 게시 종료 7일 전부터. 연장하면 종료일이 늘어나 버튼이 사라진다
+ * 작성자 오른쪽: 「○○를 찾으셨나요?」 카드(게시 종료일 · 남은 일수 · [찾았어요] · [30일 더 게시하기]) + 실종 체크 가이드
+ * - 연장은 게시 종료 7일 전부터. 연장하면 종료일이 늘어 버튼 사라짐
  */
 export function OwnerSide({ post, onFound, onExtend }) {
   const found = isFound(post);
-  const canExtend = !found && post.rmndDayCnt <= EXTEND_BEFORE_DAYS;
+  const expired = isExpired(post);
+  const remainDays = found || expired ? null : getRemainDays(post);
+  const canExtend = remainDays !== null && remainDays <= EXTEND_BEFORE_DAYS;
 
   return (
     <>
       <aside
         aria-label="찾았어요 처리"
-        className={`${BOX_CLASS} ${found ? 'border-[#cfe3d6] bg-tone-green-bg' : ''}`}
+        className={`${BOX_CLASS} ${found ? 'border-tone-green-fg/12 bg-tone-green-bg' : ''}`}
       >
         {found ? (
-          <div className="flex flex-col items-center gap-1.5 py-2 text-center font-semibold">
+          <div className="flex flex-col items-center gap-2 py-2 text-center font-semibold">
             <PartyPopper
               size={36}
               aria-hidden="true"
@@ -116,17 +119,24 @@ export function OwnerSide({ post, onFound, onExtend }) {
               관심 가져 주셔서 감사해요
             </p>
           </div>
+        ) : expired ? (
+          <div className="flex flex-col items-center gap-2 py-2 text-center font-semibold">
+            게시 기간이 끝났어요
+            <p className="text-sm font-normal text-ink-2">
+              다른 사용자에게는 이 글이 보이지 않아요
+            </p>
+          </div>
         ) : (
           <>
             <p className="text-sm text-muted">{post.petNm}를 찾으셨나요?</p>
             <p className="mt-2 text-sm text-muted">
               게시 종료 {formatDate(post.expryCrtrDt)} ·{' '}
-              <b className="font-bold text-warn">{post.rmndDayCnt}일 남음</b>
+              <b className="font-bold text-warn">{remainDays}일 남음</b>
             </p>
             <button
               type="button"
               onClick={onFound}
-              className={`${BTN_PRIMARY} mt-[18px] w-full`}
+              className={`${BTN_PRIMARY} mt-4 w-full`}
             >
               <PartyPopper size={16} aria-hidden="true" />
               찾았어요
@@ -140,14 +150,14 @@ export function OwnerSide({ post, onFound, onExtend }) {
                 30일 더 게시하기
               </button>
             )}
-            <p className="mt-2.5 text-center text-sm leading-[1.6] text-muted">
+            <p className="mt-3 text-center text-sm leading-[1.6] text-muted">
               &apos;찾았어요&apos;를 누르면 본문 · 사진 · 연락처 · 위치 · 댓글이
               다른 사용자에게 공개되지 않아요
             </p>
           </>
         )}
       </aside>
-      <Guide title="실종 Check 가이드" items={GUIDE_OWNER} />
+      <Guide title="실종 체크 가이드" items={GUIDE_OWNER} />
     </>
   );
 }

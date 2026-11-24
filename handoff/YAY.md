@@ -2,54 +2,68 @@
 
 ## 지금 하는 것
 
-SCR-ACC-002 로그인 · 로그인·로그아웃 API 연결 — 진행 중 (승인 2026-10-27 09:35). 구현 끝, 검증 3회차 실패(로그인 성공·로그아웃 화면 확인 못 함)로 보관. PR은 진행 상태로 올림
+SNS 로그인·마이페이지 연동 · 네이버 제외(사업자 번호가 있어야 검수 가능) — 진행 중 (직접 요청 2026-11-23, 사람 확인 남음). 로그인 버튼(`login/SnsLoginButtons.jsx`)과 마이페이지 SNS 계정 연동 줄(`profile/SnsLinkCard.jsx`)에서 네이버를 빼고, 인가 설정(`login/snsAuth.js`)·`api/env.js`·`.env.example`의 `VITE_NAVER_CLIENT_ID`, 연동 요청의 네이버 전용 state(`api.js` `linkSns`)를 지움. 탈퇴 완료 안내 문구는 "카카오·구글 자체 계정"으로, `docs/routes.md` 콜백 provider에서 naver 뺌. 이미 있는 네이버 가입 회원 표시(`shared/snsCodes.js`·`SnsLogoChip`·`NaverLogo`·관리자 가입 경로 필터)는 서버 코드가 남아 있어 그대로 둠. 남은 일: TC 문서(`docs/tc/TC_로그인·회원가입.md` FN-ACC-002-09 등, `TC_마이페이지.md` TC-MYP-040-14-01)의 네이버 행 정리, 백엔드 `app.sns.naver` 정리는 백엔드 저장소에서
 
-기준: 백엔드 `docs/api/member.md`(LoginRequest·LoginResponse·LoginAttemptLimitResponse·CaptchaCreateRequest·CaptchaResponse), 백엔드 SCR-ACC-002 절 "프론트 연결". 명세 기능 ID 추가 없음(연결 작업)
-디자인: 기존 로그인 화면 그대로. 보안코드만 서버가 그린 이미지로 바꾼다
+로그인·회원가입·비밀번호 찾기 화면 피드백 반영 — 진행 중 (직접 요청 2026-11-20, 사람 확인 남음). (1) 비밀번호 찾기·재설정도 이메일 로그인처럼 넓은 칸(`layouts/AuthLayout.jsx` `isWide`)으로 해 입력칸 너비 통일 (2) 비밀번호 찾기 "이메일 아이디"·회원가입 "이메일 (로그인 아이디)" 칸 이름을 "아이디(이메일)"로 (3) 비밀번호 찾기에 뒤로가기(이메일 단계 → 로그인, 인증번호·SNS 단계 → 이메일 다시 입력) (4) 회원가입 이메일 단계에서 이미 가입된 이메일이면 칸 아래 오류·새 버튼 대신 기존 안내 문구 자리에 오류 문구, [다음] 자리에 [기존 가입 방법으로 로그인], "이미 회원이신가요? 로그인" 줄 숨김 (5) 비밀번호 찾기 인증번호 단계의 "인증할 이메일" 요약 상자 대신 읽기 전용 이메일 칸 + [이메일 변경] 버튼(줄바꿈 문제도 해결) (6) [다시 보내기]·[인증번호 확인] 같은 너비 (7) 로그인 실패(LOGIN_FAILED) 문구를 "이메일 또는 비밀번호를 확인해 주세요."로(프론트에서 덮어씀)
 
-- FN-ACC-002-03·22 보안코드 요구 확인: `getLoginStatus`를 `GET /auth/login-attempt-limits?email=`로 바꾼다. 응답 `scrtyCdRqtYn`이 true면 보안코드 영역을 연다. 조회 실패는 폼 위 알림과 AI로 `error.message`를 보인다
-- FN-ACC-002-18·19 보안코드 발급·새로고침: `getCaptcha({ acntEml })`를 `POST /auth/captchas`로 바꾼다. `CaptchaBlock`은 글자를 CSS로 그리던 것을 `captchaImg`(data URI) `<img>`로 바꾼다. 가짜 코드 생성(`makeCaptchaCode` 등)은 지운다
-- FN-ACC-002-05·16·20 로그인: `login({ acntEml, pswd, scrtyCd })`를 `POST /auth/login`으로 바꾼다(보안코드 영역이 열렸을 때만 `scrtyCd`). 성공 응답은 `{ ncnmReguide, mbrNcnm }`, 실패는 오류 코드로 가른다
-  - `LOGIN_FAILED`: 폼 위 불일치 알림(서버 `message`). 보안코드 영역이 열려 있으면 새 코드를 받는다
-  - `LOGIN_CAPTCHA_REQUIRED`(429, 5회째 실패·보안코드 없음): 보안코드 영역을 열고 서버 `message`로 안내, 새 코드를 받는다
-  - `CAPTCHA_MISMATCH`: 보안코드 칸 아래 오류(서버 `message`)와 새 코드
-  - `MEMBER_WITHDRAWN`·`MEMBER_INACTIVE`: 폼 위 알림(서버 `message`). `MEMBER_INACTIVE`는 결정 1로 랜딩 이동 없이 보인다
-  - `INVALID_INPUT_VALUE`: `fields`의 `acntEml`·`pswd`·`scrtyCd`를 각 입력칸 오류로
-  - 그 밖(`NETWORK_ERROR` 등): 폼 위 알림
-  - 어느 실패든 비밀번호·보안코드 입력은 비우고 이메일은 둔다(지금과 같다)
-  - 화면 문구는 서버 `message`를 쓰고 `loginMessages.js`에서 서버와 겹치는 문구(불일치·보안코드 필요·보안코드 불일치)는 지운다. 입력 전 검사 문구(미입력·형식)는 그대로 둔다
-- 로그인 성공: `memberKeys.me`를 무효화해 헤더가 로그인 상태가 되게 하고 `getRedirectPath`로 이동한다
-- FN-ACC-001-22 첫 로그인 닉네임 재안내: `ncnmReguide`가 true면 이동 전에 `features/member/signup/NicknameModal`을 `mbrNcnm`으로 띄우고, 저장하거나 닫으면 이동한다. 닉네임 확인·저장은 지금의 가짜(`checkNickname`·`updateNickname`) 그대로(백엔드 `PATCH /members/me/nickname` 대기)
-- FN-COM-005-07·08, FN-AIM-011-17 로그아웃: `logout`을 `POST /auth/logout`으로 바꾼다. 쓰는 곳(`layouts/ProfileDropdown.jsx`, `pages/mypage/InvitationPage.jsx`)은 그대로
-- 바꿀 파일: `features/member/api.js`, `features/member/queries.js`(인자 이름), `features/member/login/{useEmailLogin.js,CaptchaBlock.jsx,EmailLoginForm.jsx,loginMessages.js}`, `pages/auth/LoginPage.jsx`(닉네임 모달·캐시 무효화), `docs/convention/api.md`(skipAuthRedirect 줄, 결정 1)
-- 완료 조건 `명령:` `yarn -s lint`, `yarn -s build`
-- 완료 조건 `화면:` (백엔드 8080, 테스트 계정 기준) `/login?method=email`에서 올바른 계정으로 로그인하면 메인으로 가고 헤더가 로그인 상태가 된다. 틀린 비밀번호 1~4번은 "일치하는 회원정보를 찾을 수 없습니다.", 5번째는 보안코드 안내와 서버 보안코드 이미지가 나온다. 새로고침 버튼을 누르면 이미지가 바뀐다. 틀린 보안코드는 "보안코드가 일치하지 않습니다. 다시 입력해 주세요."와 새 이미지. 다른 탭에서 `/login?method=email`을 다시 열고 같은 이메일을 입력하고 칸을 벗어나면 보안코드 영역이 바로 나온다. 로그아웃하면 랜딩으로 가고 `/auth/me`가 401이다
-- 연결 남음(이 절에서 하지 않음): 닉네임 확인·저장 API(백엔드 SCR-ACC-001), 백엔드 `DevTokenController` 삭제(이 연결 뒤 백엔드에서), 메인·마이페이지 라우트 `auth: 'member'` 전환(AGENTS.md 2번, 다른 담당 라우트라 팀과 정한 뒤)
+로그인·회원가입·비밀번호 찾기/재설정·재가입 복구 · 화면마다 위치가 다르던 주 버튼을 모두 카드 맨 아래로 — 진행 중 (직접 요청 2026-11-20, 사람 확인 남음). `features/member/shared/AuthActions.jsx` 새로 만듦(`mt-auto`), `AuthCard`가 칸 높이를 채움(`flex-1 flex-col`), 각 폼·단계·`StepMotion`(`pages/auth/LoginPage.jsx` 포함)을 `flex-1 flex-col`로 이어 주 버튼과 그 아래 링크 줄을 맨 아래에 둠. 로그인 방법 선택은 SNS·이메일 버튼 묶음 전체를 아래로. 같은 날 요청(가운데 여백이 너무 많음)으로 `shared/AuthBody.jsx`(위아래 `my-auto`)를 만들어 제목 아래 내용을 제목과 버튼 사이 가운데로 옮기고 `AuthActions`의 `mt-auto`는 뺌. 로그인 방법 선택은 SNS·이메일 버튼을 내용으로 보고 가운데에, 회원가입 링크 줄만 아래에. 이어서 "타이틀까지 가운데" 요청으로 제목+내용 묶음을 버튼 위 공간 가운데로: `AuthCard`가 제목 위에 `grow` 빈칸을 두고(`isCentered`, 완료 화면 3개는 false), `AuthBody`와 폼·단계 `StepMotion`을 `flex grow flex-col`로 해 남는 칸을 반씩 나눔. 이제 필요 없어진 `AuthHeading`의 모바일 제목 아래 여백(`spacing` wide·step·stepEmail, 12vh)을 지움. 모바일은 "너무 가운데" 요청으로 위 빈칸 비율을 줄여(`max-md:grow-[0.25]`, 위:아래 1:4) 묶음을 위쪽에 가깝게(PC는 정가운데 그대로). 이어서 요청: 모바일 제목 아래 간격 20px → 36px(`AuthHeading` `max-md:mb-9`), 로그인 방법 선택의 [이메일로 로그인하기](초록)와 "또는"을 모바일에서만 맨 아래(PC는 SNS·이메일 한 묶음 가운데 그대로, `AuthBody md:grow-0`·`AuthActions md:grow`), 로그인 방법 선택은 모바일에서 정가운데(`AuthCard spacing="center"`, 다른 화면은 `spacing` normal·sparse). 모바일 제목 위 빈칸은 남는 칸 비율이 아니라 화면 높이 비율로 고정(normal 6dvh, sparse·center 16dvh)해서 [인증번호 보내기]로 칸이 생겨도 제목이 올라가지 않고 아래로만 늘어남. 회원가입 이메일 인증은 인증번호 칸이 생기면 꽉 차서 sparse에서 빼 위쪽(normal)으로. (그 뒤 단계 표시를 모바일 제목 위로 올린 것과 참고 이미지처럼 모바일 제목을 위에 붙인 것은 "전전으로 되돌려줘" 요청으로 되돌림), 이메일 인증·휴대전화·비밀번호 찾기는 모바일에서 제목과 입력칸 사이 32px 더(`AuthBody max-md:pt-8`), 내용이 적은 회원가입 이메일·휴대전화 단계와 비밀번호 찾기(이메일·인증번호 단계)는 `AuthCard isSparse`로 모바일 위 빈칸 비율 0.6(조금 더 가운데)
 
-질문:
-1. 정지 회원(`MEMBER_INACTIVE`, 403)은 `api/axios.js`가 랜딩으로 새로고침 이동시킨다. 로그인 화면에서는 이동 없이 서버 문구("이용할 수 없는 계정입니다. 고객센터에 문의해 주세요.")를 보여야 한다. `login` 요청에만 `skipAuthRedirect: true`를 붙이고 `docs/convention/api.md`의 "getMe에만 붙인다" 줄을 "getMe와 login에만"으로 고칠까요? (추천: 그렇게 한다. 공유 문서라 PR 본문 Breaking Changes에 적는다)
-2. 화면 확인용 테스트 계정: 가입 API가 아직 없어 화면으로 계정을 만들 수 없다. 로컬 DB에 쓸 이메일 계정(비밀번호 포함)을 알려 주시거나, 없으면 백엔드 저장소에서 넣어 주세요. (추천: 계정을 알려 주시면 그것으로 확인, 없으면 로그인 성공·로그아웃 조건은 "확인 못 함"으로 보고)
-결정:
-1. 추천안대로: `login` 요청에만 `skipAuthRedirect: true`를 붙이고 `docs/convention/api.md`를 고친다. PR Breaking Changes에 적는다
-2. 백엔드 시드 계정 `tester@nyangmeong.dev`로 확인한다(비밀번호는 백엔드 설정 `app.seed.password`, 여기 적지 않음)
+회원가입 완료·재가입 복구 완료 화면 · 내용이 위에 몰려 있던 것을 제목 묶음은 세로·가로 가운데, [로그인으로] 버튼은 맨 아래로 — 진행 중 (직접 요청 2026-11-20, 사람 확인 남음). `features/member/signup/SignupForm.jsx` `SignupComplete`, `recovery/RecoveryForm.jsx` 완료 단계, `shared/AuthCard.jsx`·`components/StepMotion.jsx`에 `className` prop(칸 높이를 채우려고). 복구 완료의 체크 원은 제목 위로 옮김
 
-새 의존성: 없음
+랜딩 서비스 섹션(두 번째 섹션) · 개인 브랜치 `YAY-landing-cards`의 커버플로 카드를 YAY에 적용 — 진행 중 (직접 요청 2026-11-20, 사람 확인 남음). `features/landing/ServiceSection.jsx`·`landingData.js`·`assets/landing/service/card1~7.webp`를 그 브랜치(4a729ab) 그대로 가져옴. 같은 날 요청으로 초록 뱃지 문구를 영어 "All-in-one Pet Care"로, 굵기를 semibold → normal로. 이어서 랜딩 섹션 머리를 통일: `features/landing/SectionTitle.jsx` 새로 만들어 서비스·과정·파트너·데이터·FAQ가 같은 영어 대문자 라벨(#2c6669)·제목(28/40/48px normal)·설명(14/18/20px)을 씀(서비스 알약 뱃지 → 글자 라벨, 파트너 라벨 "With pawever"·FAQ 라벨 "FAQ"와 제목 "자주 묻는 질문" 새로 넣음). 배경은 흰색과 #f7f7f4 두 가지를 번갈아(서비스 흰·과정 #f7f7f4·파트너 흰·데이터 #f7f7f4·FAQ 흰, FAQ 항목 바탕도 흰색)
 
-SCR-ACC-002 로그인 — 끝남 (승인 2026-10-21, 검증 통과 회차 2, 사람 확인 2026-10-22). FN-ACC-002-01~05·07~11·13~16·18~20·22. 방법 선택, 이메일 입력, 입력 오류, 불일치(1~4회), 5회 실패 보안코드, AI 오류 안내, Caps Lock 안내
+로그인·회원가입 · 유효성 검사 오류를 AI 말풍선 대신 다른 화면과 같은 글자 안내로 — 진행 중 (직접 요청 2026-11-20, 사람 확인 남음). `features/member/shared/AuthField.jsx`(오류를 공용 `FieldError`로)·`AuthNotice.jsx`·`login/CaptchaBlock.jsx`에서 `AiErrorGuide`를 빼고 `hasGuide`·`guideTarget`을 지움(같은 부품을 쓰는 비밀번호 찾기·재설정·재가입 복구·탈퇴 확인 모달도 같이 바뀜). 마이페이지 탈퇴 안내(`WithdrawNotice`·`WithdrawResult`)의 말풍선은 그대로
 
-SCR-ACC-011 비밀번호 찾기, SCR-ACC-012 비밀번호 재설정 — 끝남 (승인 2026-10-22, 검증 통과, 사람 확인 2026-10-22). FN-ACC-011-01~03·05~11, FN-ACC-012-01~09, FN-ACC-002-07. 이메일 인증 후 일반 계정은 재설정, SNS 전용은 안내, 미가입·탈퇴는 알림. 재설정은 본인확인이 없으면 만료 안내
+SCR-HOS-001 플레이스 · [이 지도 영역에서 다시 검색] 때 핀이 잠깐 별 핀으로 바뀌었다가 초록 번호 핀으로 돌아오는 깜빡임 — 진행 중 (직접 요청 2026-11-20, 사람 확인 남음). 새 영역 결과를 받는 동안 결과가 비어 영역 안 즐겨찾기가 모두 별 핀(`strayFavorites`)으로 그려지던 것. `pages/place/PlacePage.jsx`에서 결과를 받기 전(`query.isSuccess` 아님)에는 별 핀을 그리지 않고 고른 즐겨찾기만 남김. 같은 날 요청으로 검색 결과에 든 즐겨찾기도 처음 디자인 그대로(흰 테두리·가로 100%) 연노랑 바탕·초록 번호 핀으로(고르면 다른 핀처럼 짙은 색). `PlacePin.jsx` `isFavorite` prop, `PlaceMap.jsx`, `PlacePage.jsx`가 `bookmarkSnOf`로 넘김
+
+SCR-HOS-001 플레이스 · 다시 검색한 영역 밖 즐겨찾기를 누르면 그 업체 핀이 안 뜸 — 진행 중 (직접 요청 2026-11-19, 사람 확인 남음). `pages/place/PlacePage.jsx` `strayFavorites`가 재검색 영역 밖 즐겨찾기를 빼서 지도만 옮겨 가고 핀이 없었음. 고른 즐겨찾기는 영역 밖이어도 별 핀으로 보이게 함. 2026-11-19 요청으로 아래 핀 디자인 변경(노란색 통일·가로 75%·별 16px·결과 속 즐겨찾기 노란 번호)은 모두 전으로 되돌림(`PlacePin.jsx`·`PlaceMap.jsx` 원래대로, 버그 수정만 남김). 이어서 11-16 추가-4·5(핀 흰 테두리 제거·가로 85%)도 되돌려 `PlacePin.jsx`를 11-03(5c37998) 모습(흰 테두리·가로 100%)으로. 되돌리기 전 기록: 같은 날 요청으로 즐겨찾기 별 핀은 골라도 짙은 색으로 바꾸지 않고 노란색 그대로 크게만 보이게 함(`features/place/PlacePin.jsx`). 이어서 즐겨찾기 핀을 노란색으로만: 바탕을 목록 별과 같은 #f5c518, 별을 흰색으로(초록 별 뺌). 핀 물방울 가로를 85% → 75%로 더 좁힘(세로·글자 그대로, 번호 핀·즐겨찾기 핀 모두). 즐겨찾기 핀 안 별을 20px → 16px로 줄임. 검색 결과에 있는 즐겨찾기도 번호 핀을 노란색(흰 번호)으로, 골라도 노란색 그대로(`PlaceMap.jsx` `isFavorite`, `PlacePage.jsx`가 `bookmarkSnOf`로 넘김)
+
+비밀번호 찾기 · [로그인으로]를 누르면 로그인 첫 화면(방법 선택)으로 — 진행 중 (직접 요청 2026-11-19, 사람 확인 남음). `pages/auth/PasswordFindPage.jsx` `onBackToLogin`을 `?method=email` 추가 이동에서 `PATHS.LOGIN` replace 이동으로 바꿔, 뒤로가기가 비밀번호 찾기로 돌아오는 반복을 없앰
+
+파비콘 · 브라우저 탭 아이콘을 냥멍케어 발자국 로고로 — 진행 중 (직접 요청 2026-11-18, 사람 확인 남음). `public/favicon.svg`(Vite 기본 번개 아이콘)를 받은 발자국 로고 SVG(밝은 초록 #20915C 원 + 흰 발가락 4개 발자국, 메인 로고와 같은 초록)로 바꿈(앞서 넣은 첫 로고·발가락 3개 판·v2를 이 판으로 대체). `index.html`은 이미 `/favicon.svg`를 가리켜 그대로. 같은 날 요청으로 `src/assets/nm_logo.svg`(사용자 헤더·랜딩 헤더·인증·관리자 로고)를 받은 "pawever." 글자 로고(ever. 초록 #20915C 판)로 바꿈(viewBox만 글자 둘레로 잘라 냄). 흰 로고 `logo-white.svg`(랜딩 헤더 어두운 배경·인증 화면 사진 칸)도 받은 흰색 "pawever." 로고로 바꿈(viewBox 잘라 냄). 랜딩 푸터 왼쪽 로고는 대체 없이 뺐고(`LandingFooter.jsx`, 반려동물 그림·안내 문구만 가운데), `MainLogo.svg`는 이제 아무 데서도 안 쓴다. 플레이스 모바일 [이 지도 영역에서 다시 검색]이 두 줄로 꺾일 때 "다/시"가 갈라지지 않게 단어 단위로 꺾음(`PlaceMap.jsx` `break-keep`). 랜딩 섹션(서비스·과정·파트너·데이터·FAQ)을 화면 높이에서 헤더 80px를 뺀 높이 이상으로 늘림(`min-h-[calc(100dvh-5rem)]`, PC는 원래 높이와 큰 쪽). 데이터 섹션 영어 제목 "The NYANGMUNGCARE DATA" → "The PAWEVER DATA". 랜딩 헤더 메뉴로 섹션을 옮길 때는 헤더를 숨기지 않음(`LandingHeader.jsx` `goTo`, scrollend·휠·터치·키 입력에서 다시 숨김 켬. PC 메뉴도 `goTo`를 거치게 함). 랜딩 헤더 로고를 누르면 맨 위 히어로로 부드럽게 올라가고 슬라이드가 첫 장부터 다시 시작(`LandingHeader.jsx` `onHome`, `pages/landing/LandingPage.jsx` `HeroSlider key`). 랜딩(`features/landing/`)의 글자 "냥멍케어"·"냥멍 데이터"를 "pawever"·"pawever 데이터"로 바꿈(문구·alt·aria-label 18곳)
+
+SCR-HOS-001 플레이스 · 지도 범위 한 번에 받고 목록 안에서 거르기 — 끝남 (승인 2026-11-16 11:50, 검증 통과, 사람 확인 2026-11-16, PR #386). `whole=true`로 범위 전체를 한 번 받고 상호명·주소 거르기와 거리순·이름순은 받은 목록 안에서([검색]도 서버를 부르지 않음). 추가-1 목록 항목을 누르면 지도 이동·팝업, 추가-2 업체 사진 칸 제거, 추가-3 즐겨찾기 별을 노란 별만, 추가-4·5 핀 흰 테두리 제거·가로 85%, 추가-8 카테고리 탭 선택 배경 미끄러지기(추가-6 목록·핀·팝업 모션은 뺌), 추가-7 지도 부드러운 이동은 되돌림, 추가-9 [일반 지도 | 스카이뷰] 선택 배경 미끄러지기
+
+문서 정리 · 인증 이동 규칙을 지금 코드에 맞춤 — 진행 중 (승인 2026-10-27 16:29, 검증 통과, 사람 확인 남음, 커밋 3b31971). `docs/convention/api.md`·`docs/convention/pages.md`·`AGENTS.md` 2번. 결정: `skipAuthRedirect`는 원칙으로, AGENTS.md 2번 단서 삭제
 
 두 화면은 PR #61(`YAY` → `develop`)로 올렸다. 기준: 로그인·회원가입_화면설계서_v0.10_20260930, 디자인: 시안 폴더(저장소 밖) `nmcare-design-v5`의 `acc.css`·`acc.js`. 가짜 규칙: 비밀번호 `wrong`은 불일치(5번 실패하면 보안코드), 인증번호 `123456` 일반·`234567` SNS 전용·`345678` 미가입·`456789` 탈퇴, 이메일 `fail@example.com`은 발송 실패, 새 비밀번호에 `fail`이 있으면 저장 실패. 로그인과 인증 화면이 같이 쓰는 컴포넌트는 `features/member/shared/Auth*.jsx`
 
-새 의존성: 없음
-
 ## 다음에 할 것
 
-- 검증 루프 3회차 실패로 보관 중. 기획은 고치지 않는다. 루프를 버리려면 `! sh scripts/verify-loop.sh clear`
-  - 1~3회차 실패 항목: 화면 "올바른 계정 로그인 성공(메인 이동·헤더 로그인 상태)"과 "로그아웃"(2·3회차)을 확인 못 함. 검증 에이전트가 시드 비밀번호를 읽을 권한이 auto mode 분류기에 막혔다. 코드 결함은 보고되지 않았다. 로그아웃은 1회차 검증에서 통과했다
-  - 사람이 2026-10-27에 같은 조건을 직접 확인했다(메인 이동, 전체 메뉴에 로그인 계정 표시). 판정이 `실패`라 `끝`으로 두지 않았다. 검증 에이전트가 시드 계정으로 로그인할 수 있게 한 뒤 `/verify`를 다시 돌린다
-  - 정지 회원(`MEMBER_INACTIVE`)이 로그인 화면에 머무는지는 정지 계정이 없어 코드로만 확인했다
-- PR을 올릴 때 Breaking Changes: `docs/convention/api.md`의 `skipAuthRedirect`를 "getMe와 login에만"으로 바꿨다(결정 1)
-- SCR-ACC-002 연결 남음: SNS 외부 인증창(네이버·카카오·구글 OAuth), 가입 직후 첫 로그인의 닉네임 모달(FN-ACC-001-22), 회원가입 화면(SCR-ACC-001)
-- SCR-ACC-011·012 연결 남음: 인증번호 발송·확인·비밀번호 재설정 API(YAY 백엔드)가 나오면 `features/member/api.js`의 가짜(`sendRecoveryCode`·`verifyRecoveryCode`·`getRecoveryStatus`·`resetPassword`)를 실제 호출로 바꾼다. 인증 유효시간·재전송 제한은 백엔드와 정한다. 탈퇴 계정의 "재가입 복구 절차"는 SCR-ACC-001 복구 화면이 생기면 연결한다
-- 로그인 구현 후 메인·마이페이지 라우트의 `auth`를 `'member'`로 바꾼다
+- 연결 남음: SCR-HOS-001 실제 서버 확인 (백엔드 PR #246 `whole=true` develop 병합 뒤, YAY). 로컬 백엔드로는 확인함
+- 대기: SCR-ACC-002 SNS 로그인 같은 이메일 중복 안내 문구(마일스톤 대기 절). PR #386 병합 뒤 `/start`
+- 팀 알림(SCR-HOS-001): 명세 담당(sannabi1)에게 FN-HOS-001-03 [검색]은 지역명 서버 검색이 아니라 받은 지도 범위 안 상호명·주소 거르기, 목록 카드를 누르면 카카오 상세가 아니라 지도 이동·팝업(상세는 팝업 [상세보기]), 목록 업체 사진 칸 없음을 알린다
+- 코드 후보(SCR-HOS-001): 카카오 상세 주소가 없는 장소(공공데이터·관리자 등록, 시드 데이터 다수)는 팝업 [상세보기]가 좌표 지도로 열려 길찾기처럼 보인다. 카카오맵 검색으로 열거나 버튼을 숨길지 정한다
+- 연결 남음: FN-ACC-001-04·06, SCR-ACC-011 인증, FN-ACC-001-41 (백엔드 연결 발송 응답에 `resendAvailableDt`, 백엔드 저장소에서 /start. 백엔드 마일스톤에 대기 절 넣음). 오답 뒤 재발송 간격 해제는 백엔드에서 끝
+- 주의: 2026-11-13 검증 중 로컬 백엔드가 실제 SMTP로 보내 `verify1113a@naver.com`(남의 주소일 수 있음)·`yay315@naver.com`으로 인증 메일이 나갔다. 로컬 검증은 `app.mail.client=log`로
+- 팀 알림(SCR-ACC-001): 명세 FN-ACC-001-06·42 "불일치는 입력칸과 AI로 안내" → 오답이면 인증번호 칸·타이머를 숨기고 이메일 칸 아래 AI 말풍선 + [다시 보내기]만 남김(백엔드 fail-limit=1)
+- 코드 후보: 재전송 제한 알림("인증번호를 다시 보낼 수 없습니다…")이 남은 초가 0이 된 뒤에도 남는다. 휴대전화 칸 placeholder가 아직 `01012345678`
+
+- 팀 알림(SCR-HOS-001): 명세 담당(sannabi1)에게 FN-HOS-001-07·08·21·22·26 "카카오맵 상세 새 탭" → "작은 창", 처음 검색 영역 "전주시" → "내 위치 주변(정확도 3km 이내), 아니면 전주시"로 바뀐다고 알린다
+- 팀 알림(SCR-HOS-001): 명세 담당(sannabi1)에게 FN-HOS-001-03·19 지도 재검색은 "검색어 유지"가 아니라 입력칸 글자 기준, 처음 검색칸은 카테고리 이름 대신 빈칸이라고 알린다
+- 팀 알림(SCR-HOS-001): 명세 담당(sannabi1)에게 FN-HOS-001-06 정렬이 "추천순·거리순·이름순" → "거리순·이름순"(추천순은 카카오 정확도순이라 뺌), 검색창 아래 추천어를 지웠다고 알린다. FN-HOS-001-03 예시 "다리수술잘하는곳, 가까운곳"은 카카오 키워드 검색으로 찾을 수 없다
+- 코드 후보(SCR-HOS-001): 검색창 새 검색은 지금 지도 영역이 아니라 처음 영역 기준이라, 지도를 옮긴 뒤 결과 0곳이면 머리 "전주시 전체"와 지도 위치가 다르다. 결과 0곳에서 지도를 옮긴 뒤 [처음 위치로]를 누르면 머리가 "지도를 움직였어요"로 남는다. `PlaceMap.jsx` `fitPlaces` 주석 "결과가 없으면 처음 영역"은 이제 [처음 위치로]에만 맞다
+- 결정 필요(SCR-HOS-001): 위치를 못 받거나 정확도가 나쁘면 전주시로 간다. 서비스가 전국 대상이면 "내 위치 직접 정하기"(주소 입력·기억)를 따로 기획한다
+- 코드 후보: 플레이스 위치를 찾는 동안 목록 머리에 "내 위치를 찾는 중 · 결과 0곳"이 보인다(결과가 오기 전 0곳). 검증 메모
+- 코드 후보: 재가입 복구(`recovery/RecoveryForm.jsx`)의 [중복확인]은 빈 칸에서도 켜져 있다(가입 화면은 꺼짐). 맞출지 정한다
+- 코드 후보: 휴대전화번호에 `+82`만 적으면 `normalizePhone`이 `0`이 되어 [중복확인]이 켜진다(누르면 형식 오류 안내). 검증 메모
+- PR Breaking Changes(SCR-ACC-012 문구 정리): 공통 `features/member/shared/AuthField.jsx`가 `hasGuide`면 칸 아래 오류를 숨기고 AI 말풍선만 보인다(로그인·가입·복구·비밀번호 찾기·재설정 칸 오류 모두)
+- 팀 알림: SJM `features/member/profile/PasswordChangeCard.jsx` 10줄 `PW_RULE` 끝에 마침표가 없다(가입·재설정은 마침표 있음)
+- 팀 알림(문구 정리): 화면설계서 담당에게 설계서와 달라진 로그인·회원가입 문구 목록을 보낸다(PR 본문 Design Decisions와 같은 목록). PR Breaking Changes: `AuthNotice`에 `hasGuide`를 주면 색 상자 없이 AI 말풍선만 보인다
+- 팀 알림: `docs/routes.md` 29줄 MAN-001 담당이 아직 YAY다. 담당 표(2026-11-08)대로 LJS로 고치도록 LJS에게 알린다
+
+- 연결 남음: FN-AIM-011-19 (AI 서버 `data/routing.yaml`에 SCR-ACC-020 행, AI 담당). 프론트 `screenPaths.js` 줄은 넣음
+- PR Breaking Changes(SCR-ACC-020): 새 공개 URL `/withdraw/complete`(`PATHS.WITHDRAW_COMPLETE`, `docs/routes.md`), SJM `ProfileEditPage.jsx` [회원 탈퇴] 이동 연결, LJS `screenPaths.js`에 `SCR-ACC-020` 행
+- SNS 배포 연결(팀): 배포 도메인의 `/login/sns/{naver|kakao|google}/callback`을 제공자 콘솔·배포 백엔드 `app.sns.*.redirect-uri`에 등록, 배포 프론트 환경에 `VITE_*` 앱 ID 3개. 카카오는 전화번호 동의항목 권한 신청 전이라 번호를 주지 않는다(직접 입력으로 감)
+- 팀 알림: 새 URL `/login/sns/:provider/callback`(`paths.js` `SNS_CALLBACK`)을 PR Breaking Changes에 적고 팀에 알린다
+- 코드 후보: SNS 가입 확인 화면에서 새로고침하면 history state가 남아 SNS 가입 확인이 그대로 나온다(`SignupPage.jsx` 주석 "새로고침으로 state가 없으면 이메일 가입"과 다름). SCR-ACC-002 SNS 검증 메모
+- 코드 후보: 390 폭에서 SNS 가입 확인의 "가입 계정 확인" 라벨이 두 줄로 꺾이고 이메일이 말줄임된다(`SnsSignupForm.jsx` 라벨 `shrink-0`)
+- PR Breaking Changes(SNS): `.env.example`에 `VITE_NAVER_CLIENT_ID`·`VITE_KAKAO_REST_KEY`·`VITE_GOOGLE_CLIENT_ID` 추가, `TermsStep.jsx`에서 `TermsChecklist`·`SignupForm.jsx`에서 `SignupComplete`를 떼어 냄
+
+- 문서 정리(인증 이동 규칙) 사람 확인 남음: `docs/convention/api.md` 48~61줄, `docs/convention/pages.md` 22~23줄, `AGENTS.md` 2번을 읽고 확인한 뒤 `/end`. develop의 바뀐 `src/api/axios.js`를 병합한 뒤 문서가 다시 어긋나지 않는지 본다. PR Breaking Changes에 AGENTS.md 변경을 적고 LJS에게 알린다
+- 코드 후보: `src/features/member/api.js` 92줄 주석 "랜딩 이동을 끈다"가 지금 동작(로그인 화면 이동)과 다르다
+- 연결 남음: (기반) 메인·마이페이지 라우트 `auth: 'member'` 전환 (팀과 정한 뒤, 각 라우트 담당)
+- 백엔드: `DevTokenController` 삭제(백엔드 마일스톤 SCR-ACC-002 절에 이미 있음)
+- PR Breaking Changes: `api/axios.js` 오류 객체에 `data` 추가(`docs/convention/api.md`), `snsCodes.js` 키를 서버 코드(`USRC0007~0009`)로 변경, 인증 화면 겉틀(`layouts/AuthLayout.jsx`·`AuthSlider.jsx`) 정렬 변경, `components/AiErrorGuide.jsx` 나타남 효과
+- 코드 후보: 재전송 제한 알림이 떠 있을 때 인증번호 확인에 실패하면 그 알림이 남는다(검증 메모)
+- 코드 후보: 가입을 마치고 [로그인 화면으로] → [회원가입]으로 다시 들어오면 새 가입이 아니라 앞 가입의 완료 화면이 남는다(`useSignup` 상태가 슬라이더 안에 남음, 새로고침하면 처음부터). SCR-ACC-001 검증 메모

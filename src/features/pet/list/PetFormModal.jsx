@@ -1,14 +1,35 @@
-import { Check, ChevronDown, CircleAlert, Lock, X } from 'lucide-react';
+import { Check, ChevronDown, Lock } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import DropdownSelect from '@/components/DropdownSelect';
+import DatePicker from '@/components/DatePicker';
+import Checkbox from '@/components/Checkbox';
+import FieldError, { Required } from '@/components/FieldError';
+import FieldFoot from '@/components/FieldFoot';
+import LoadError from '@/components/LoadError';
+import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import { HELP, INPUT, LABEL } from '@/components/formStyles';
+import Modal from '@/components/Modal';
+import Skeleton from '@/components/Skeleton';
 import { showToast } from '@/components/toastStore';
+import { PATHS } from '@/routes/paths';
 import {
   COLR_DRCT_INPT,
   COLR_OPTIONS,
+  findColrName,
   PET_GNDR_OPTIONS,
   PET_SE,
   PET_SE_OPTIONS,
 } from '@/utils/petCodes';
-import { useCreatePet, usePet, useUpdatePet, useVarieties } from '../queries';
+import { isColrMismatch } from '@/utils/petFormat';
+import {
+  useCreatePet,
+  useLastWeightRecord,
+  usePet,
+  useUpdatePet,
+  useVarieties,
+} from '../queries';
+import { BDWG_INPUT, calcBdwgRange, MAX_BDWG } from '../shared/bdwgRange';
 
 /** 품종 [직접 입력] 선택 상태 */
 const VRTY_DRCT_INPT = 'DRCT_INPT';
@@ -28,12 +49,19 @@ const EMPTY_FORM = {
   goalBdwg: '',
   minBdwg: '',
   maxBdwg: '',
+  bdwgRngDrctInptYn: 'N',
   colrCd: '',
   colrDrctInptNm: '',
   chrcCn: '',
   algyCn: '',
   dssCn: '',
 };
+
+/** 정상범위 입력 방식 선택지 */
+const RANGE_MODE_OPTIONS = [
+  { code: 'N', name: '자동 계산' },
+  { code: 'Y', name: '직접 입력' },
+];
 
 const toText = (value) => (value == null ? '' : String(value));
 
@@ -42,10 +70,14 @@ const toForm = (pet) => ({
     Object.keys(EMPTY_FORM).map((key) => [key, toText(pet[key])]),
   ),
   vrtySn: pet.vrtySn == null ? VRTY_DRCT_INPT : String(pet.vrtySn),
+  nutrYn: pet.nutrYn ? 'Y' : 'N',
+  /** 응답에 없으면(옛 데이터) 직접 입력으로 연다 */
+  bdwgRngDrctInptYn: pet.bdwgRngDrctInptYn === 'N' ? 'N' : 'Y',
 });
 
-/** 체중 입력 형식 (DB decimal(8,3) 기준) */
-const DECIMAL_INPUT = /^\d{0,5}(\.\d{0,3})?$/;
+/** 체중 입력은 소수 둘째 자리·200kg 이하 (서버 규칙) */
+const OVER_MAX_MESSAGE = `${MAX_BDWG}kg 이하로 입력해 주세요`;
+const isOverMax = (value) => Number(value) > MAX_BDWG;
 const isPositive = (value) => value !== '' && Number(value) > 0;
 
 /** 쉼표 목록 정리 */
@@ -59,7 +91,27 @@ const normalizeList = (value) =>
 const toNumberOrNull = (value) => (value === '' ? null : Number(value));
 const toTextOrNull = (value) => value.trim() || null;
 
+const PET_SE_NAME = Object.fromEntries(
+  PET_SE_OPTIONS.map(({ code, name }) => [code, name]),
+);
+
+/** 저장된 털색이 그 종 목록에 없을 때 선택지로 보여 줄 원래 값. 없으면 null */
+const getOrphanColr = (pet) => {
+  if (!pet || !isColrMismatch(pet)) return null;
+  const owner = PET_SE_OPTIONS.find(({ code }) =>
+    COLR_OPTIONS[code]?.some((colr) => colr.code === pet.colrCd),
+  );
+  const name = findColrName(pet.colrCd) || '알 수 없는 털색';
+  return {
+    code: pet.colrCd,
+    label: owner ? `${name} (${owner.name} 털색)` : name,
+  };
+};
+
 const formatRecordDate = (rcdDt) => rcdDt.slice(5, 10);
+
+const CHIP_NO_LENGTHS = [12, 15];
+const CHIP_NO_MESSAGE = '인식칩 번호는 숫자 12자리 또는 15자리로 입력해 주세요';
 
 /** 서버 필드명 -> 화면 오류 자리 매핑 */
 const ERROR_KEY = {
@@ -73,7 +125,7 @@ const ERROR_KEY = {
 const errorKeyOf = (field) => ERROR_KEY[field] ?? field;
 
 /** 오류 목록 (화면 순서) */
-const validate = ({ form, breedText, isWeightLocked }) => {
+const validate = ({ form, breedText, isWeightLocked, isColrMismatched }) => {
   const errors = [];
   const isVrtyDrctInpt = form.vrtySn === VRTY_DRCT_INPT;
   const isColrDrctInpt = form.colrCd === COLR_DRCT_INPT;
@@ -95,74 +147,174 @@ const validate = ({ form, breedText, isWeightLocked }) => {
   if (!form.petBrdt) {
     errors.push(['petBrdt', '생년월일을 골라 주세요', 'pet-brdt']);
   }
+  if (form.chipNo !== '' && !CHIP_NO_LENGTHS.includes(form.chipNo.length)) {
+    errors.push(['chipNo', CHIP_NO_MESSAGE, 'pet-chip']);
+  }
   if (!isWeightLocked) {
     if (form.petBdwg === '') {
       errors.push(['petBdwg', '체중을 입력해 주세요', 'pet-bdwg']);
     } else if (!isPositive(form.petBdwg)) {
       errors.push(['petBdwg', '0보다 큰 숫자로 입력해 주세요', 'pet-bdwg']);
+    } else if (isOverMax(form.petBdwg)) {
+      errors.push(['petBdwg', OVER_MAX_MESSAGE, 'pet-bdwg']);
     }
   }
   if (form.goalBdwg !== '' && !isPositive(form.goalBdwg)) {
     errors.push(['goalBdwg', '0보다 큰 숫자로 입력해 주세요', 'pet-goal']);
+  } else if (form.goalBdwg !== '' && isOverMax(form.goalBdwg)) {
+    errors.push(['goalBdwg', OVER_MAX_MESSAGE, 'pet-goal']);
   }
-  if (form.minBdwg === '' || form.maxBdwg === '') {
+  /** 자동 계산('N')이면 서버가 범위를 만들므로 검사하지 않는다 */
+  const isRangeDrct = form.bdwgRngDrctInptYn === 'Y';
+  if (isRangeDrct && (form.minBdwg === '' || form.maxBdwg === '')) {
     errors.push([
       'range',
       '최소·최대 체중을 모두 입력해 주세요',
       form.minBdwg === '' ? 'pet-min' : 'pet-max',
     ]);
-  } else if (!isPositive(form.minBdwg) || !isPositive(form.maxBdwg)) {
+  } else if (
+    isRangeDrct &&
+    (!isPositive(form.minBdwg) || !isPositive(form.maxBdwg))
+  ) {
     errors.push([
       'range',
       '0보다 큰 숫자로 입력해 주세요',
       isPositive(form.minBdwg) ? 'pet-max' : 'pet-min',
     ]);
-  } else if (Number(form.minBdwg) >= Number(form.maxBdwg)) {
+  } else if (
+    isRangeDrct &&
+    (isOverMax(form.minBdwg) || isOverMax(form.maxBdwg))
+  ) {
+    errors.push([
+      'range',
+      OVER_MAX_MESSAGE,
+      isOverMax(form.minBdwg) ? 'pet-min' : 'pet-max',
+    ]);
+  } else if (isRangeDrct && Number(form.minBdwg) >= Number(form.maxBdwg)) {
     errors.push(['range', '최소 체중은 최대 체중보다 작아야 해요', 'pet-min']);
   }
   if (form.colrCd === '') {
     errors.push(['colr', '털색을 골라 주세요', 'pet-colr']);
+  } else if (isColrMismatched) {
+    errors.push(['colr', '털색을 다시 골라 주세요', 'pet-colr']);
   } else if (isColrDrctInpt && !form.colrDrctInptNm.trim()) {
     errors.push(['colr', '털색을 직접 입력해 주세요', 'pet-colr-self']);
   }
   return errors;
 };
 
-export default function PetFormModal({ petSn = null, onClose }) {
-  const { data: pet, isPending } = usePet(petSn);
+/** onCreated(새 동물): 등록 성공 때 onClose 대신 부른다(없으면 onClose) */
+export default function PetFormModal({ petSn = null, onClose, onCreated }) {
+  const {
+    data: pet,
+    isPending: isPetPending,
+    isError: isPetError,
+    refetch: refetchPet,
+  } = usePet(petSn);
+  const { data: lastBdwgRcd = null, isPending: isWeightPending } =
+    useLastWeightRecord(petSn);
+  const createPet = useCreatePet();
+  const updatePet = useUpdatePet();
   const isEdit = petSn != null;
+  const isPending = createPet.isPending || updatePet.isPending;
+  const isFormLoading = isEdit && (isPetPending || isWeightPending);
+  /** 수정인데 반려동물을 못 읽었으면 빈 폼 대신 오류만 보인다 */
+  const isLoadFailed = isEdit && isPetError && !pet;
+  const isSaveDisabled = isPending || isFormLoading || isLoadFailed;
 
   return (
-    <div className="fixed inset-0 z-40 flex items-start justify-center overflow-y-auto px-4 py-8">
-      <div className="fixed inset-0 bg-[rgba(15,23,35,0.45)]" />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="pet-form-title"
-        className="relative m-auto flex w-full max-w-[720px] shrink-0 flex-col rounded-modal bg-white shadow-depth-lg"
-      >
-        <header className="flex items-start gap-3.5 border-b border-line-strong px-7 pt-4 pb-2">
-          <h2 id="pet-form-title" className="text-xl leading-[1.35] font-bold">
-            {isEdit ? '반려동물 수정' : '반려동물 등록'}
-          </h2>
+    <Modal
+      title={isEdit ? '반려동물 수정' : '반려동물 등록'}
+      isLarge
+      isAutoHeight
+      width={720}
+      isDismissDisabled
+      isPending={isPending}
+      onClose={onClose}
+      footer={
+        <div className="ml-auto flex gap-2">
           <button
             type="button"
             onClick={onClose}
-            aria-label="닫기"
-            className="-mt-1 -mr-2 ml-auto grid size-9 shrink-0 place-items-center rounded-box text-muted hover:bg-surface-3 hover:text-ink"
+            disabled={isPending}
+            className={`${BTN_SECONDARY} min-w-24`}
           >
-            <X className="size-5" />
+            취소
           </button>
-        </header>
-        {isEdit && isPending ? null : (
-          <PetForm pet={isEdit ? pet : null} onClose={onClose} />
-        )}
-      </div>
+          <button
+            type="submit"
+            form="pet-form"
+            disabled={isSaveDisabled}
+            className={`${BTN_PRIMARY} min-w-24`}
+          >
+            {isEdit ? '저장하기' : '등록하기'}
+          </button>
+        </div>
+      }
+    >
+      {isLoadFailed ? (
+        <LoadError
+          message="반려동물 정보를 불러오지 못했어요"
+          onRetry={() => refetchPet()}
+        />
+      ) : isFormLoading ? (
+        <PetFormSkeleton />
+      ) : (
+        <PetForm
+          pet={isEdit ? pet : null}
+          lastBdwgRcd={isEdit ? lastBdwgRcd : null}
+          createPet={createPet}
+          updatePet={updatePet}
+          onClose={onClose}
+          onCreated={onCreated}
+        />
+      )}
+    </Modal>
+  );
+}
+
+/**
+ * 수정 모달 로딩 자리: 실제 폼과 같은 그리드·순서·폭 (추가 정보는 펼친 상태)
+ * - PC: 이름 / 종류 / [품종|생년월일] / [성별|털색] / [체중|정상범위] / 추가 정보
+ * - 760px 이하: 폼이 2칸 그리드로 다시 짜이고 Row는 풀린다. 순서·폭은 MOBILE 기준
+ */
+function PetFormSkeleton() {
+  return (
+    <div
+      aria-busy="true"
+      className="flex flex-col gap-6 px-7 pt-6 pb-7 max-[760px]:grid max-[760px]:grid-cols-2 max-[760px]:gap-x-3 max-[760px]:gap-y-5"
+    >
+      <Skeleton className={`h-[68px] ${MOBILE.name}`} />
+      <Skeleton className={`h-[62px] max-[760px]:h-[68px] ${MOBILE.species}`} />
+      <Row>
+        <Skeleton
+          className={`h-[199px] max-[760px]:h-[178px] ${MOBILE.vrty}`}
+        />
+        <Skeleton className={`max-[760px]:h-[68px] ${MOBILE.brdt}`} />
+      </Row>
+      <Row>
+        <Skeleton className={`h-[94px] ${MOBILE.gndr}`} />
+        <Skeleton className={`h-[94px] ${MOBILE.colr}`} />
+      </Row>
+      <Row>
+        <Skeleton className={`h-[141px] ${MOBILE.bdwg}`} />
+        <Skeleton
+          className={`h-[141px] max-[760px]:h-[89px] ${MOBILE.range}`}
+        />
+      </Row>
+      <Skeleton className={`h-[387px] max-[760px]:h-[619px] ${MOBILE.rest}`} />
     </div>
   );
 }
 
-function PetForm({ pet, onClose }) {
+function PetForm({
+  pet,
+  lastBdwgRcd,
+  createPet,
+  updatePet,
+  onClose,
+  onCreated,
+}) {
   const [form, setForm] = useState(() => (pet ? toForm(pet) : EMPTY_FORM));
   /** 품종 칸 표시 글자 */
   const [breedText, setBreedText] = useState(() => {
@@ -170,19 +322,25 @@ function PetForm({ pet, onClose }) {
     return pet.vrtySn == null ? VRTY_DRCT_LABEL : (pet.vrtyNm ?? '');
   });
   const [errors, setErrors] = useState({});
-  /** 추가 정보: 등록은 접힘, 수정은 펼침으로 시작. 접어도 입력값은 form에 남는다 */
+  /** 추가 정보: 등록은 접힘, 수정은 펼침으로 시작. 접어도 입력값은 form에 유지 */
   const [isOptOpen, setIsOptOpen] = useState(pet != null);
   const optRef = useRef(null);
   const { data: varieties = [] } = useVarieties(form.petSeCd);
-  const createPet = useCreatePet();
-  const updatePet = useUpdatePet();
+  const navigate = useNavigate();
 
   const isEdit = pet != null;
-  const lastBdwgRcd = pet?.lastBdwgRcd ?? null;
   const isVrtyDrctInpt = form.vrtySn === VRTY_DRCT_INPT;
   const isColrDrctInpt = form.colrCd === COLR_DRCT_INPT;
   const colrOptions = COLR_OPTIONS[form.petSeCd] ?? [];
-  const isPending = createPet.isPending || updatePet.isPending;
+  /** 수정 진입 때 저장된 털색이 그 종 목록에 없으면 원래 값을 보여 주고 다시 고르게 한다 */
+  const [orphanColr] = useState(() => getOrphanColr(pet));
+  const isOrphanSelected =
+    orphanColr != null &&
+    form.petSeCd === pet.petSeCd &&
+    form.colrCd === orphanColr.code;
+  const orphanNotice = isOrphanSelected
+    ? `${PET_SE_NAME[form.petSeCd]} 털색 목록에 없는 값이에요. 다시 골라 주세요`
+    : null;
 
   const clearError = (...fields) =>
     setErrors((prev) => {
@@ -201,7 +359,27 @@ function PetForm({ pet, onClose }) {
   const handleChange = (e) => setField(e.target.name, e.target.value);
 
   const handleDecimalChange = (e) => {
-    if (DECIMAL_INPUT.test(e.target.value)) handleChange(e);
+    if (BDWG_INPUT.test(e.target.value)) handleChange(e);
+  };
+
+  /** 정상범위 미리보기 기준 체중: 체중 칸이 잠겼으면 서버가 쓰는 저장된 체중 */
+  const isRangeAuto = form.bdwgRngDrctInptYn === 'N';
+  const autoRange = calcBdwgRange(
+    lastBdwgRcd != null ? pet?.petBdwg : form.petBdwg,
+  );
+
+  const handleRangeModeChange = (code) => {
+    if (form.bdwgRngDrctInptYn === code) return;
+    setForm((prev) => {
+      const next = { ...prev, bdwgRngDrctInptYn: code };
+      /** 직접 입력으로 바꿀 때 빈 칸은 미리보기 값으로 채운다. 이미 있는 값은 지우지 않는다 */
+      if (code === 'Y' && autoRange) {
+        if (prev.minBdwg === '') next.minBdwg = String(autoRange.minBdwg);
+        if (prev.maxBdwg === '') next.maxBdwg = String(autoRange.maxBdwg);
+      }
+      return next;
+    });
+    clearError('range');
   };
 
   const handleChipNoChange = (e) => {
@@ -248,6 +426,7 @@ function PetForm({ pet, onClose }) {
       form,
       breedText,
       isWeightLocked: lastBdwgRcd != null,
+      isColrMismatched: isOrphanSelected,
     });
     if (found.length > 0) {
       setErrors(
@@ -264,41 +443,58 @@ function PetForm({ pet, onClose }) {
       });
       return;
     }
+    /** 수정(PATCH)은 null이면 안 바꾸고 ""이면 비우므로 빈 값을 ""로 보냄 */
+    const blank = isEdit ? '' : null;
     const body = {
       petNm: form.petNm.trim(),
       petSeCd: form.petSeCd,
       vrtySn: isVrtyDrctInpt ? null : Number(form.vrtySn),
-      vrtyDrctInptNm: isVrtyDrctInpt ? form.vrtyDrctInptNm.trim() : null,
+      vrtyDrctInptNm: isVrtyDrctInpt ? form.vrtyDrctInptNm.trim() : blank,
       petBrdt: form.petBrdt,
-      chipNo: form.chipNo || null,
+      chipNo: form.chipNo || blank,
       petGndrCd: form.petGndrCd,
-      nutrYn: form.nutrYn,
-      petBdwg: Number(form.petBdwg),
-      goalBdwg: toNumberOrNull(form.goalBdwg),
-      minBdwg: Number(form.minBdwg),
-      maxBdwg: Number(form.maxBdwg),
+      nutrYn: form.nutrYn === 'Y',
+      bdwgRngDrctInptYn: form.bdwgRngDrctInptYn,
       colrCd: form.colrCd,
-      colrDrctInptNm: isColrDrctInpt ? form.colrDrctInptNm.trim() : null,
-      chrcCn: toTextOrNull(form.chrcCn),
-      algyCn: normalizeList(form.algyCn),
-      dssCn: normalizeList(form.dssCn),
+      colrDrctInptNm: isColrDrctInpt ? form.colrDrctInptNm.trim() : blank,
+      chrcCn: toTextOrNull(form.chrcCn) ?? blank,
+      algyCn: normalizeList(form.algyCn) ?? blank,
+      dssCn: normalizeList(form.dssCn) ?? blank,
     };
+    /** 직접 입력('Y')일 때만 범위를 보낸다. 자동 계산('N')은 서버가 체중으로 계산한다 */
+    if (form.bdwgRngDrctInptYn === 'Y') {
+      body.minBdwg = Number(form.minBdwg);
+      body.maxBdwg = Number(form.maxBdwg);
+    }
+    /** 목표체중: 수정에서 있던 값을 비우면 goalBdwgReset만 보냄(둘을 같이 보내면 서버가 400) */
+    const goalBdwg = toNumberOrNull(form.goalBdwg);
+    if (goalBdwg != null || !isEdit) body.goalBdwg = goalBdwg;
+    else if (pet.goalBdwg != null) body.goalBdwgReset = true;
+    /** 수정은 체중이 바뀐 경우에만 보냄 */
+    if (!isEdit || Number(form.petBdwg) !== Number(pet.petBdwg)) {
+      body.petBdwg = Number(form.petBdwg);
+    }
     const options = {
-      onSuccess: () => {
+      onSuccess: (saved) => {
         showToast(
           isEdit ? '반려동물 정보를 수정했어요.' : '반려동물을 등록했어요.',
+          { type: 'success' },
         );
-        onClose();
+        if (!isEdit && onCreated) onCreated(saved);
+        else onClose();
       },
       onError: (error) => {
         if (error.fields) {
           setErrors(
             Object.fromEntries(
-              error.fields.map((f) => [errorKeyOf(f.field), f.message]),
+              error.fields.map((f) => [
+                errorKeyOf(f.field),
+                f.field === 'chipNo' ? CHIP_NO_MESSAGE : f.message,
+              ]),
             ),
           );
         } else {
-          showToast(error.message);
+          showToast(error.message, { type: 'error' });
         }
       },
     };
@@ -406,16 +602,14 @@ function PetForm({ pet, onClose }) {
               required
               error={errors.petBrdt}
             >
-              <input
+              <DatePicker
                 id="pet-brdt"
-                type="date"
-                name="petBrdt"
                 value={form.petBrdt}
-                onChange={handleChange}
+                onChange={(value) => setField('petBrdt', value)}
                 max={today}
-                aria-invalid={errors.petBrdt ? 'true' : undefined}
-                aria-describedby="pet-brdt-e"
-                className={INPUT}
+                monthSelect
+                invalid={Boolean(errors.petBrdt)}
+                describedBy="pet-brdt-e"
               />
             </Field>
           </Row>
@@ -428,50 +622,44 @@ function PetForm({ pet, onClose }) {
                 value={form.petGndrCd}
                 onChange={(code) => setField('petGndrCd', code)}
               />
-              <label className="inline-flex cursor-pointer items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={form.nutrYn === 'Y'}
-                  onChange={(e) =>
-                    setField('nutrYn', e.target.checked ? 'Y' : 'N')
-                  }
-                  className="peer sr-only"
-                />
-                <span
-                  aria-hidden="true"
-                  className="grid size-5 shrink-0 place-items-center rounded-sm border-[1.5px] border-line-strong bg-white transition-colors after:h-[5px] after:w-2.5 after:-translate-y-px after:-rotate-45 after:border-b-2 after:border-l-2 after:border-white after:opacity-0 peer-checked:border-brand-500 peer-checked:bg-brand-500 peer-checked:after:opacity-100 peer-focus-visible:ring-focus"
-                />
+              <Checkbox
+                checked={form.nutrYn === 'Y'}
+                onChange={(e) =>
+                  setField('nutrYn', e.target.checked ? 'Y' : 'N')
+                }
+              >
                 중성화 완료
-              </label>
+              </Checkbox>
             </Group>
             <Field
               m="colr"
               id="pet-colr"
               label="털색"
               required
+              help={orphanNotice}
+              helpId="pet-colr-h"
               error={errors.colr}
             >
               <div className="relative">
-                <select
+                <DropdownSelect
                   id="pet-colr"
-                  name="colrCd"
                   value={form.colrCd}
-                  onChange={handleChange}
-                  aria-invalid={errors.colr ? 'true' : undefined}
-                  aria-describedby="pet-colr-e"
-                  className={`${INPUT} cursor-pointer appearance-none pr-9 invalid:text-placeholder`}
-                  required
-                >
-                  <option value="" disabled>
-                    털색 선택
-                  </option>
-                  {colrOptions.map((colr) => (
-                    <option key={colr.code} value={colr.code}>
-                      {colr.name}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute top-1/2 right-2.5 size-5 -translate-y-1/2 text-muted" />
+                  placeholder="털색 선택"
+                  options={[
+                    ...(isOrphanSelected
+                      ? [{ value: orphanColr.code, label: orphanColr.label }]
+                      : []),
+                    ...colrOptions.map((colr) => ({
+                      value: colr.code,
+                      label: colr.name,
+                    })),
+                  ]}
+                  invalid={Boolean(errors.colr)}
+                  describedBy={
+                    orphanNotice ? 'pet-colr-h pet-colr-e' : 'pet-colr-e'
+                  }
+                  onChange={(value) => setField('colrCd', value)}
+                />
               </div>
               {isColrDrctInpt && (
                 <div className="mt-2 flex flex-col gap-1.5">
@@ -531,10 +719,12 @@ function PetForm({ pet, onClose }) {
                   건강 일지에 기록된 체중이에요 (
                   {formatRecordDate(lastBdwgRcd.rcdDt)} 기록)
                 </p>
-                {/** 건강 일지(SCR-HLT-002) 경로 연결 예정 */}
                 <button
                   type="button"
-                  className="inline-flex h-10 items-center justify-center self-start rounded-md border border-line bg-white px-4 font-semibold hover:border-line-strong hover:bg-surface-2"
+                  onClick={() =>
+                    navigate(`${PATHS.HEALTH_DIARY}?petSn=${pet.petSn}`)
+                  }
+                  className={`${BTN_SECONDARY} self-start`}
                 >
                   건강 일지에서 기록하기
                 </button>
@@ -572,25 +762,40 @@ function PetForm({ pet, onClose }) {
             <Group
               m="range"
               label="체중 정상범위"
-              required
+              required={!isRangeAuto}
               help={
-                <ResponsiveHelp
-                  pc="동물병원에서 확인한 범위를 입력해 주세요. 언제든 수정할 수 있어요"
-                  m="동물병원에서 확인한 범위"
-                />
+                isRangeAuto ? (
+                  '현재 체중의 ±10%로 자동 계산돼요. 성장기이거나 수의사 권장 범위가 있다면 직접 입력해 주세요.'
+                ) : (
+                  <ResponsiveHelp
+                    pc="동물병원에서 확인한 범위를 입력해 주세요. 언제든 수정할 수 있어요"
+                    m="동물병원에서 확인한 범위"
+                  />
+                )
               }
               helpId="pet-range-h"
               error={errors.range}
               errorId="pet-range-e"
             >
+              <RadioGroup
+                name="bdwgRngDrctInptYn"
+                options={RANGE_MODE_OPTIONS}
+                value={form.bdwgRngDrctInptYn}
+                onChange={handleRangeModeChange}
+              />
               <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
                 <KgInput
                   id="pet-min"
                   name="minBdwg"
-                  value={form.minBdwg}
+                  value={
+                    isRangeAuto
+                      ? String(autoRange?.minBdwg ?? '')
+                      : form.minBdwg
+                  }
                   onChange={handleDecimalChange}
-                  placeholder="최소"
+                  placeholder={isRangeAuto ? '체중 입력 시 자동' : '최소'}
                   label="정상범위 최소"
+                  readOnly={isRangeAuto}
                   invalid={!!errors.range}
                   describedBy="pet-range-h pet-range-e"
                 />
@@ -600,10 +805,15 @@ function PetForm({ pet, onClose }) {
                 <KgInput
                   id="pet-max"
                   name="maxBdwg"
-                  value={form.maxBdwg}
+                  value={
+                    isRangeAuto
+                      ? String(autoRange?.maxBdwg ?? '')
+                      : form.maxBdwg
+                  }
                   onChange={handleDecimalChange}
-                  placeholder="최대"
+                  placeholder={isRangeAuto ? '체중 입력 시 자동' : '최대'}
                   label="정상범위 최대"
+                  readOnly={isRangeAuto}
                   invalid={!!errors.range}
                   describedBy="pet-range-h pet-range-e"
                 />
@@ -632,15 +842,22 @@ function PetForm({ pet, onClose }) {
             </summary>
             <div className="flex flex-col gap-6 border-t border-line-soft p-4">
               <Row>
-                <Field id="pet-chip" label="인식칩 번호" optional>
+                <Field
+                  id="pet-chip"
+                  label="인식칩 번호"
+                  optional
+                  error={errors.chipNo}
+                >
                   <input
                     id="pet-chip"
                     name="chipNo"
                     value={form.chipNo}
                     onChange={handleChipNoChange}
                     inputMode="numeric"
-                    maxLength={20}
-                    placeholder="숫자만 입력 (최대 20자리)"
+                    maxLength={15}
+                    placeholder="숫자 12자리 또는 15자리"
+                    aria-invalid={errors.chipNo ? 'true' : undefined}
+                    aria-describedby="pet-chip-e"
                     className={INPUT}
                   />
                 </Field>
@@ -724,52 +941,12 @@ function PetForm({ pet, onClose }) {
           </details>
         </form>
       </div>
-      <footer className="z-[2] flex items-center justify-end gap-2 rounded-b-modal border-t border-line bg-[#fbfcfd] px-7 py-4 max-[760px]:sticky max-[760px]:bottom-0">
-        <button
-          type="button"
-          onClick={onClose}
-          className="inline-flex h-10 min-w-24 items-center justify-center rounded-md border border-line bg-white px-4 font-semibold hover:border-line-strong hover:bg-surface-2"
-        >
-          취소
-        </button>
-        <button
-          type="submit"
-          form="pet-form"
-          disabled={isPending}
-          className="inline-flex h-10 min-w-24 items-center justify-center rounded-md bg-brand-500 px-4 font-semibold text-white hover:bg-brand-600 disabled:cursor-not-allowed disabled:bg-surface-3 disabled:text-line-strong"
-        >
-          {isEdit ? '저장' : '등록하기'}
-        </button>
-      </footer>
     </>
-  );
-}
-
-const INPUT =
-  'block h-10 w-full rounded-md border border-input-line bg-white px-3 placeholder:text-placeholder hover:border-line-strong focus:border-brand-500 focus:ring-focus focus:outline-none aria-invalid:border-danger aria-invalid:focus:ring-error';
-const HELP = 'text-sm leading-normal text-muted';
-const LABEL = 'flex items-center gap-0.5 leading-[1.4] font-semibold';
-
-function Required() {
-  return (
-    <span aria-hidden="true" className="ml-0.5 font-bold text-danger">
-      *
-    </span>
   );
 }
 
 function Optional() {
   return <span className="ml-1 text-badge font-medium text-subtle">선택</span>;
-}
-
-function ErrorText({ id, children }) {
-  if (!children) return null;
-  return (
-    <p id={id} className="flex items-center gap-1 text-sm text-danger">
-      <CircleAlert className="size-4 shrink-0" />
-      <span>{children}</span>
-    </p>
-  );
 }
 
 /** 앱: 항목 순서(order)와 한 줄/반 줄(col-span)을 항목마다 정한다. 정하지 않은 항목은 뒤에 한 줄씩 */
@@ -797,7 +974,7 @@ function ResponsiveHelp({ pc, m }) {
 
 function Row({ children }) {
   return (
-    <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2 max-[760px]:contents">
+    <div className="grid grid-cols-1 gap-x-8 gap-y-6 min-[760px]:grid-cols-2 max-[760px]:contents">
       {children}
     </div>
   );
@@ -818,25 +995,28 @@ function Field({
 }) {
   return (
     <div className={`flex min-w-0 flex-col gap-1.5 ${MOBILE[m]}`}>
-      <div className="flex items-end justify-between gap-2">
-        <label htmlFor={id} className={LABEL}>
-          {label}
-          {required && <Required />}
-          {optional && <Optional />}
-        </label>
-        {count && (
-          <span className="text-sm text-subtle">
-            {count.length} / {count.max.toLocaleString()}
-          </span>
-        )}
-      </div>
+      <label htmlFor={id} className={LABEL}>
+        {label}
+        {required && <Required />}
+        {optional && <Optional />}
+      </label>
       {children}
       {help && (
         <p id={helpId} className={HELP}>
           {help}
         </p>
       )}
-      <ErrorText id={`${id}-e`}>{error}</ErrorText>
+      {/** 오류 문구 왼쪽, 글자 수 오른쪽 한 줄 */}
+      {count ? (
+        <FieldFoot
+          value={{ length: count.length }}
+          max={count.max.toLocaleString()}
+          error={error}
+          errorId={`${id}-e`}
+        />
+      ) : (
+        <FieldError id={`${id}-e`}>{error}</FieldError>
+      )}
     </div>
   );
 }
@@ -866,14 +1046,14 @@ function Group({
           {help}
         </p>
       )}
-      <ErrorText id={errorId}>{error}</ErrorText>
+      <FieldError id={errorId}>{error}</FieldError>
     </fieldset>
   );
 }
 
 function RadioGroup({ name, options, value, onChange }) {
   return (
-    <div className="flex flex-wrap gap-x-7 max-[760px]:h-10 max-[760px]:flex-nowrap max-[760px]:gap-0 max-[760px]:rounded-md max-[760px]:border max-[760px]:border-[#e6eaeb] max-[760px]:bg-[#f1f3f4] max-[760px]:p-[3px]">
+    <div className="flex flex-wrap gap-x-7 max-[760px]:h-10 max-[760px]:flex-nowrap max-[760px]:gap-0 max-[760px]:rounded-md max-[760px]:border max-[760px]:border-line max-[760px]:bg-surface-2 max-[760px]:p-1">
       {options.map((option) => (
         <label
           key={option.code}
@@ -904,6 +1084,7 @@ function KgInput({
   onChange,
   placeholder,
   label,
+  readOnly = false,
   invalid,
   describedBy,
 }) {
@@ -914,12 +1095,13 @@ function KgInput({
         name={name}
         value={value}
         onChange={onChange}
+        readOnly={readOnly}
         inputMode="decimal"
         placeholder={placeholder}
         aria-label={label}
         aria-invalid={invalid ? 'true' : undefined}
         aria-describedby={describedBy}
-        className={`${INPUT} pr-11 tabular-nums`}
+        className={`${INPUT} pr-11 tabular-nums ${readOnly ? 'read-only:bg-surface-2 read-only:text-muted read-only:hover:border-input-line' : ''}`}
       />
       <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-subtle">
         kg
@@ -1000,6 +1182,8 @@ function BreedCombo({ varieties, selected, text, invalid, onType, onSelect }) {
       e.preventDefault();
       pick(active);
     } else if (e.key === 'Escape' && isOpen) {
+      /** 모달(dialog)의 Esc 처리까지 가지 않게 목록만 닫는다 */
+      e.preventDefault();
       e.stopPropagation();
       close();
     }

@@ -1,137 +1,184 @@
+import { PawPrint } from 'lucide-react';
 import Badge from '@/components/Badge';
 import Icon from '@/components/Icon';
 import { formatMonthDayDot } from '@/utils/formatDate';
-import { getCycleName, getDueBadge } from './careDue';
+import { toCareIcon } from './careIcons';
+import {
+  CARE_ZONE,
+  getCareCycleName,
+  getDueBadge,
+  isLinkedCareItem,
+} from './careDue';
 
 const BADGE_TONES = { today: 'brand', upcoming: 'gray', late: 'amber' };
 
-// 케어 항목 한 줄(FN-HLT-003-12·13). 본문 클릭 = 완료 체크, ★ = 메인 표시. 완료는 배경, 메인은 ★로 따로 보여 준다
+/**
+ * 둘째 줄 (※신규 정책)
+ * - 일상관리: 안 했으면 없음, 체크하면 「오늘 완료」
+ * - 정기관리: 「{주기} 주기 · MM.DD 예정」, 오늘 완료면 가운데에 「오늘 완료」(날짜는 새로 계산된 다음 예정일)
+ * - 완료 시각(cmptnDt의 시:분)은 화면에 쓰지 않음
+ * - isShort(760px 미만 정기관리): 「주기」「예정」 글자를 빼 「{주기} · MM.DD」, 오늘 완료면 「{주기} · 오늘 완료 · 다음 MM.DD」
+ */
+const getCareDetail = (item, isDone, isShort = false) => {
+  if (item.careZoneCd !== CARE_ZONE.REGULAR) return isDone ? '오늘 완료' : null;
+  const cycleName = getCareCycleName(item);
+  const dueLabel = item.nxtmPrnmntYmd
+    ? formatMonthDayDot(item.nxtmPrnmntYmd)
+    : null;
+  const parts = isShort
+    ? [
+        cycleName,
+        isDone && '오늘 완료',
+        dueLabel && (isDone ? `다음 ${dueLabel}` : dueLabel),
+      ]
+    : [
+        cycleName && `${cycleName} 주기`,
+        isDone && '오늘 완료',
+        dueLabel && `${dueLabel} 예정`,
+      ];
+  return parts.filter(Boolean).join(' · ');
+};
+
+/**
+ * [케어 항목 한 줄] (FN-HLT-003-12)
+ * - 760px 미만은 항목마다 테두리 있는 둥근 칸(완료하면 칸 전체 초록). 투약 항목은 760px 미만 두 줄, 760px 이상은 [마지막 1회 취소]를 줄 오른쪽 끝에 둔 한 줄
+ * - 줄에는 ⋮ 메뉴가 없음. 수정·삭제는 「케어 항목 관리」 모달에서만 (※신규 정책)
+ * - 본문 클릭 = 완료 체크. 체크 동그라미 없이 완료한 줄은 줄 배경색과 이름·아이콘 색으로만 표시, 완료 여부는 aria-pressed로 알림 (※신규 정책)
+ * - 줄에는 검진상세 이동 링크가 없음. 연동 항목의 검진상세 이동은 「케어 항목 관리」 모달의 [검진상세에서 관리 ›]에서만 (※신규 정책)
+ * - 모든 줄은 둘째 줄에 「케어리스트 연동」 배지가 있는 줄과 같은 최소 높이(74px). 둘째 줄이 없으면 이름이 세로 가운데. 760px 미만은 문구를 자르지 않아 둘째 줄이 감기면 그만큼 늘어남 (※신규 정책)
+ * - isDone: 오늘 완료 여부(목록 응답에 없어 CareList가 완료 기록으로 계산)
+ * - 케어미션 안 한 배지 아이콘은 마이페이지 케어미션과 같은 발바닥 (※신규 정책)
+ * - 케어미션 배지: todayMsnYn인 줄에만. 포인트(msnPnt)는 주양육자에게만 내려옴 (※신규 정책)
+ */
 export default function CareTile({
   item,
+  isDone,
   onCheck,
-  onToggleMain,
   onCancelLastDose,
   className = '',
 }) {
-  const isDose = item.dayGoalCnt != null;
-  const isRegular = item.rptTypeCd === 'REGULAR';
-  const badge = isRegular ? getDueBadge(item.nextSchdYmd) : null;
+  const isDose = item.prscSn != null;
+  const isLinked = isLinkedCareItem(item);
+  /** 줄 버튼 밖 칸은 투약 줄에만(복용 종료일·[마지막 1회 취소]) */
+  const hasSideArea = isDose;
+  const isRegular = item.careZoneCd === CARE_ZONE.REGULAR;
+  const dueBadge =
+    isRegular && item.nxtmPrnmntYmd ? getDueBadge(item.nxtmPrnmntYmd) : null;
+  const detail = getCareDetail(item, isDone);
+  const shortDetail = getCareDetail(item, isDone, true);
+  const missionLabel = item.msnPnt != null ? `+${item.msnPnt}P` : '미션';
 
-  // 640px 미만은 항목마다 테두리 있는 둥근 칸이고, 완료하면 칸 전체를 초록으로 채운다
-  // 투약 항목은 640px 미만에서 두 줄, 640px 이상에서 [마지막 1회 취소]를 ★ 앞으로 올려 한 줄로 둔다
   return (
     <div
-      className={`grid grid-cols-[minmax(0,1fr)_auto] content-start items-center border-b [grid-template-areas:'b_s'_'a_a'] max-sm:rounded-[10px] max-sm:border ${
-        isDose
-          ? "sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:[grid-template-areas:'b_a_s']"
+      className={`grid grid-cols-[minmax(0,1fr)] content-start items-center border-b [grid-template-areas:'b'_'a'] max-[760px]:rounded-[10px] max-[760px]:border ${
+        hasSideArea
+          ? "min-[760px]:grid-cols-[minmax(0,1fr)_auto] min-[760px]:[grid-template-areas:'b_a']"
           : ''
       } ${
-        item.todayDoneYn
-          ? 'border-brand-100 bg-brand-50 max-sm:border-brand-500 max-sm:bg-brand-100'
-          : 'border-line-soft max-sm:border-line max-sm:bg-white'
+        isDone
+          ? 'border-brand-100 bg-brand-50 max-[760px]:border-brand-500 max-[760px]:bg-brand-100'
+          : 'border-line-soft max-[760px]:border-line max-[760px]:bg-white'
       } ${className}`}
     >
       <button
         type="button"
-        aria-pressed={item.todayDoneYn}
-        className={`flex w-full items-center gap-3 px-2 py-3 text-left [grid-area:b] ${
-          isRegular
-            ? 'max-sm:grid max-sm:grid-cols-[minmax(0,1fr)_auto] max-sm:gap-y-0.5 sm:grid sm:grid-cols-[minmax(0,1fr)_--spacing(18)_--spacing(18)_--spacing(12)] sm:gap-x-2'
-            : ''
-        }`}
+        aria-pressed={isDone}
+        className="flex min-h-[74px] min-w-0 items-center gap-2.5 px-2 py-3 text-left [grid-area:b]"
         onClick={() => onCheck(item)}
       >
-        {/* 아이콘 / 이름(고정 폭, 넘치면 말줄임) / 처방약 연동 뱃지. 이름 칸 폭이 같아 뱃지가 모든 줄에서 같은 위치에 온다 */}
-        <span
-          className={`grid min-w-0 grid-cols-[--spacing(8)_minmax(0,7.5em)_auto] items-center justify-items-start gap-x-3 ${
-            isRegular ? 'max-sm:col-start-1 max-sm:row-start-1' : 'flex-1'
-          }`}
-        >
+        <span aria-hidden="true" className="grid place-items-center">
+          <Icon
+            name={toCareIcon(item.rprsIconId)}
+            className={isDone ? 'text-brand-600' : 'text-muted'}
+          />
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col">
           <span
-            aria-hidden="true"
-            className={`grid size-8 place-items-center ${
-              item.todayDoneYn ? 'text-brand-600' : 'text-muted'
-            }`}
+            className={`truncate ${isDone ? 'text-brand-600' : 'text-ink'}`}
           >
-            <Icon name={item.careIconCn} />
+            {item.careArtclNm}
           </span>
-          <span
-            className={`truncate ${item.todayDoneYn ? 'text-brand-600' : 'text-ink'}`}
-          >
-            {item.careItemNm}
-          </span>
-          {item.lnkgTypeCd && (
-            <Badge tone={item.todayDoneYn ? 'white' : 'brand'}>
-              처방약 연동
-            </Badge>
+          {(isLinked || detail) && (
+            <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-muted tabular-nums">
+              {/** 연동 표시: 760px 이상은 배지, 760px 미만은 폭을 아끼려고 핀 아이콘(대시보드 「항상 표시」와 같은 아이콘) (※신규 정책) */}
+              {isLinked && (
+                <>
+                  <Badge
+                    tone={isDone ? 'white' : 'gray'}
+                    className="max-[760px]:hidden"
+                  >
+                    케어리스트 연동
+                  </Badge>
+                  <span
+                    role="img"
+                    aria-label="케어리스트 연동"
+                    className="inline-flex shrink-0 min-[760px]:hidden"
+                  >
+                    <Icon name="push_pin" className="text-lg text-subtle" />
+                  </span>
+                </>
+              )}
+              {detail &&
+                (detail === shortDetail ? (
+                  <span className="break-keep">{detail}</span>
+                ) : (
+                  <>
+                    <span className="break-keep max-[760px]:hidden">
+                      {detail}
+                    </span>
+                    <span className="break-keep min-[760px]:hidden">
+                      {shortDetail}
+                    </span>
+                  </>
+                ))}
+            </span>
           )}
         </span>
-        {isDose && item.dosEndYmd && (
-          <span className="hidden text-sm whitespace-nowrap text-subtle tabular-nums sm:inline">
-            ~{formatMonthDayDot(item.dosEndYmd)}
+        {isDose && item.mdcnEndYmd && (
+          <span className="hidden text-sm whitespace-nowrap text-subtle tabular-nums min-[760px]:inline">
+            ~{formatMonthDayDot(item.mdcnEndYmd)}
           </span>
         )}
         {isDose && (
           <span className="text-sm whitespace-nowrap text-ink-2 tabular-nums">
-            {item.todayChckCnt}/{item.dayGoalCnt}회
+            {item.todayCmptnCnt}/{item.dayMdcnNmtm}회
           </span>
         )}
-        {isRegular && (
-          <>
-            <span className="flex items-center text-sm text-muted max-sm:hidden">
-              {getCycleName(item)} 주기
-            </span>
-            <span className="contents">
-              <span className="flex items-center text-sm text-muted tabular-nums max-sm:hidden">
-                {formatMonthDayDot(item.nextSchdYmd)} 예정
-              </span>
-              {badge && (
-                <Badge
-                  tone={
-                    item.todayDoneYn && badge.tone === 'today'
-                      ? 'white'
-                      : BADGE_TONES[badge.tone]
-                  }
-                  className="justify-self-end tabular-nums max-sm:col-start-2 max-sm:row-span-2 max-sm:row-start-1"
-                >
-                  {badge.label}
-                </Badge>
-              )}
-            </span>
-            {/* 640px 미만: 이름 아래 부제 한 줄(아이콘 폭만큼 들여 이름과 맞춤) */}
-            <span className="col-start-1 row-start-2 truncate pl-11 text-sm text-muted tabular-nums sm:hidden">
-              {getCycleName(item)} 주기 · {formatMonthDayDot(item.nextSchdYmd)}{' '}
-              예정
-            </span>
-          </>
+        {(item.todayMsnYn || dueBadge) && (
+          <span className="flex shrink-0 flex-wrap items-center justify-end gap-1">
+            {item.todayMsnYn && (
+              <Badge
+                tone={item.msnCmptnYn ? 'brand' : 'outline'}
+                className="tabular-nums"
+              >
+                {item.msnCmptnYn ? (
+                  <Icon name="check" className="text-sm" />
+                ) : (
+                  <PawPrint className="size-3.5" aria-hidden="true" />
+                )}
+                {missionLabel}
+              </Badge>
+            )}
+            {dueBadge && (
+              <Badge tone={BADGE_TONES[dueBadge.tone]} className="tabular-nums">
+                {dueBadge.label}
+              </Badge>
+            )}
+          </span>
         )}
       </button>
 
-      <button
-        type="button"
-        aria-label={`${item.careItemNm} 메인 표시`}
-        aria-pressed={item.mainExpsrYn}
-        className="mr-2 grid size-8 place-items-center rounded-full [grid-area:s] hover:bg-surface-3"
-        onClick={() => onToggleMain(item)}
-      >
-        <Icon
-          name="star"
-          filled={item.mainExpsrYn}
-          className={item.mainExpsrYn ? 'text-ink' : 'text-line-strong'}
-        />
-      </button>
-
-      {/* 투약 항목: 640px 미만은 둘째 줄에 복용 종료일·마지막 1회 취소, 640px 이상은 종료일은 이름 줄에 두고 취소만 ★ 앞에 */}
-      {isDose && (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pr-2 pb-3 pl-13 [grid-area:a] sm:p-0 sm:pr-3">
-          {item.dosEndYmd && (
-            <span className="text-sm text-subtle tabular-nums sm:hidden">
-              ~{formatMonthDayDot(item.dosEndYmd)}
+      {/** 줄 버튼 밖 칸: 760px 미만은 둘째 줄(투약 복용 종료일·마지막 1회 취소), 760px 이상은 종료일은 이름 줄에 두고 [마지막 1회 취소]만 줄 오른쪽 끝 */}
+      {hasSideArea && (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pr-2 pb-3 pl-10.5 [grid-area:a] min-[760px]:p-0 min-[760px]:pr-3">
+          {item.mdcnEndYmd && (
+            <span className="text-sm text-subtle tabular-nums min-[760px]:hidden">
+              ~{formatMonthDayDot(item.mdcnEndYmd)}
             </span>
           )}
           <button
             type="button"
-            disabled={item.todayChckCnt === 0}
+            disabled={item.todayCmptnCnt === 0}
             className="text-sm text-brand-600 hover:underline hover:underline-offset-3 disabled:opacity-40 disabled:hover:no-underline"
             onClick={() => onCancelLastDose(item)}
           >

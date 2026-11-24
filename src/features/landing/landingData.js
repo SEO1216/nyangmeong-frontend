@@ -8,6 +8,7 @@ import card3 from '@/assets/landing/service/card3.webp';
 import card4 from '@/assets/landing/service/card4.webp';
 import card5 from '@/assets/landing/service/card5.webp';
 import card6 from '@/assets/landing/service/card6.webp';
+import card7 from '@/assets/landing/service/card7.webp';
 import step1 from '@/assets/landing/process/step1.gif';
 import step2 from '@/assets/landing/process/step2.gif';
 import step3 from '@/assets/landing/process/step3.gif';
@@ -19,14 +20,14 @@ import place from '@/assets/landing/banner/place.png';
 export const LANDING_NAV = [
   { name: '서비스 소개', id: 'service' },
   { name: '서비스 과정', id: 'process' },
-  { name: '냥멍 데이터', id: 'stats' },
+  { name: 'pawever 데이터', id: 'stats' },
   { name: '자주 묻는 질문', id: 'features' },
 ];
 
 export const HERO_SLIDES = [
   {
     image: banner1,
-    sub: '냥멍케어',
+    sub: 'pawever',
     title1: '우리 아이의 건강을',
     title2: '한곳에 기록해요',
     desc: [
@@ -36,7 +37,7 @@ export const HERO_SLIDES = [
   },
   {
     image: banner2,
-    sub: '냥멍케어',
+    sub: 'pawever',
     title1: '궁금한 건 말로 물어보세요',
     title2: 'AI 매니저가 찾아줘요',
     desc: [
@@ -46,37 +47,63 @@ export const HERO_SLIDES = [
   },
   {
     image: banner3,
-    sub: '냥멍케어',
+    sub: 'pawever',
     title1: '매일의 케어가',
     title2: '미션이 됩니다',
     desc: ['식사·음수·산책·약 복용을 체크하고', '포인트도 함께 모아 보세요'],
   },
   {
     image: banner4,
-    sub: '냥멍케어',
+    sub: 'pawever',
     title1: '병원부터 이웃까지',
     title2: '함께하는 반려생활',
-    desc: [
-      '근처 플레이스와 커뮤니티, 실종센터까지',
-      '냥멍케어 안에서 이어져요',
-    ],
+    desc: ['근처 플레이스와 커뮤니티, 실종센터까지', 'pawever 안에서 이어져요'],
   },
 ];
 
+/** 카드 그림은 테스트 계정으로 찍은 모바일(390) 화면 */
 export const SERVICE_CARDS = [
-  { src: card1, title: 'AI 비서' },
-  { src: card2, title: '반려동물 캐릭터 생성' },
-  { src: card3, title: '건강기록 케어' },
-  { src: card4, title: '데일리 케어 미션' },
-  { src: card5, title: '나만의 가계부' },
-  { src: card6, title: '근처 동물병원 확인' },
-  { src: card1, title: 'AI 비서' },
+  {
+    src: card1,
+    title: '건강 일지',
+    desc: '체중·식사·산책 변화를 그래프로 한눈에 봐요.',
+  },
+  {
+    src: card2,
+    title: '케어 캘린더',
+    desc: '병원·접종·투약 일정을 아이별로 모아 챙겨요.',
+  },
+  {
+    src: card3,
+    title: '데일리 케어미션',
+    desc: '매일의 케어를 체크하고 포인트를 모아요.',
+  },
+  {
+    src: card7,
+    title: '픽셀 캐릭터',
+    desc: '우리 아이를 닮은 도트 캐릭터를 만들고 아이템으로 꾸며요.',
+  },
+  {
+    src: card4,
+    title: '나만의 가계부',
+    desc: '사료부터 병원비까지 이번 달 지출을 관리해요.',
+  },
+  {
+    src: card5,
+    title: '펫이야기',
+    desc: '보호자들과 사진과 돌봄 팁을 나눠요.',
+  },
+  {
+    src: card6,
+    title: '플레이스',
+    desc: '근처 동물병원·미용실·동반 장소를 지도로 찾아요.',
+  },
 ];
 
 export const PROCESS_STEPS = [
   {
     step: 'STEP 01',
-    title: '냥멍케어 회원가입',
+    title: 'pawever 회원가입',
     description: '이메일 인증이나 SNS 계정으로 간편하게 가입해요.',
     icon: step1,
   },
@@ -134,9 +161,9 @@ export const COUNT_DATA = [
 
 export const FAQS = [
   {
-    question: '냥멍케어는 무료로 사용할 수 있나요?',
+    question: 'pawever는 무료로 사용할 수 있나요?',
     answer:
-      '냥멍케어는 이메일 또는 SNS 계정으로 간편하게 가입할 수 있으며 누구에게나 무료로 제공됩니다.',
+      'pawever는 이메일 또는 SNS 계정으로 간편하게 가입할 수 있으며 누구에게나 무료로 제공됩니다.',
   },
   {
     question: '반려동물을 여러 마리 등록하고 가족과 같이 관리할 수 있나요?',

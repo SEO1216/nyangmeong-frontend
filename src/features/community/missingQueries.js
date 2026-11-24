@@ -1,19 +1,30 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+import {
+  createComment,
+  deleteComment,
+  getComments,
+  reportComment,
+  reportPost,
+} from './api';
+import { INFINITE_OPTIONS } from '@/utils/infiniteList';
+import { useOptimisticLike } from './optimisticLike';
 import {
   createMissing,
-  createMissingComment,
   deleteMissing,
-  deleteMissingComment,
   extendMissing,
   getBreeds,
+  getJeonbukRegions,
   getMissing,
-  getMissingComments,
   getMissingList,
   getMissingRail,
+  getRegions,
   markMissingFound,
-  reportMissing,
-  reportMissingComment,
-  toggleMissingLike,
   updateMissing,
 } from './missingApi';
 
@@ -24,12 +35,24 @@ export const missingKeys = {
   comments: (pstSn) => ['missing', 'comments', pstSn],
   rail: ['missing', 'rail'],
   breeds: (petSeCd) => ['missing', 'breeds', petSeCd],
+  regions: (upRgnSn) => ['missing', 'regions', upRgnSn],
 };
 
 export const useMissingList = (params) =>
   useQuery({
     queryKey: missingKeys.list(params),
     queryFn: () => getMissingList(params),
+    /** 필터를 바꾸는 동안 이전 목록 유지로 필터 영역 보존 */
+    placeholderData: keepPreviousData,
+  });
+
+/** 무한 스크롤 목록: params에 page는 넣지 않는다 */
+export const useMissingInfiniteList = (params) =>
+  useInfiniteQuery({
+    ...INFINITE_OPTIONS,
+    queryKey: [...missingKeys.list(params), 'infinite'],
+    queryFn: ({ pageParam }) => getMissingList({ ...params, page: pageParam }),
+    placeholderData: keepPreviousData,
   });
 
 export const useMissingRail = () =>
@@ -45,9 +68,10 @@ export const useMissing = (lostTpofSn) =>
 export const useMissingComments = (pstSn) =>
   useQuery({
     queryKey: missingKeys.comments(pstSn),
-    queryFn: () => getMissingComments(pstSn),
+    queryFn: () => getComments(pstSn),
   });
 
+/** 품종·지역 목록은 화면을 열어 둔 동안 변경 없음 */
 export const useBreeds = (petSeCd) =>
   useQuery({
     queryKey: missingKeys.breeds(petSeCd),
@@ -55,7 +79,24 @@ export const useBreeds = (petSeCd) =>
     staleTime: Infinity,
   });
 
-/** 글·댓글·좋아요·상태가 바뀌면 목록·상세·레일을 모두 다시 받는다 */
+/** 전북 시군구 목록 */
+export const useJeonbukRegions = () =>
+  useQuery({
+    queryKey: missingKeys.regions('jeonbuk'),
+    queryFn: getJeonbukRegions,
+    staleTime: Infinity,
+  });
+
+/** 고른 시군구의 읍면동 목록. 시군구를 고르지 않았으면 요청 없음 */
+export const useSubRegions = (upRgnSn) =>
+  useQuery({
+    queryKey: missingKeys.regions(upRgnSn),
+    queryFn: () => getRegions(upRgnSn),
+    enabled: Boolean(upRgnSn),
+    staleTime: Infinity,
+  });
+
+/** 글·댓글·좋아요·상태가 바뀌면 목록·상세·레일을 모두 재조회 */
 const useInvalidatingMutation = (mutationFn) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -67,22 +108,46 @@ const useInvalidatingMutation = (mutationFn) => {
 
 export const useCreateMissing = () => useInvalidatingMutation(createMissing);
 export const useUpdateMissing = () => useInvalidatingMutation(updateMissing);
-export const useDeleteMissing = () => useInvalidatingMutation(deleteMissing);
-export const useToggleMissingLike = () =>
-  useInvalidatingMutation(toggleMissingLike);
+/**
+ * 목록·레일만 무효화. all로 하면 아직 떠 있는 지운 글의 상세를 재조회해 404가 나고,
+ * 상세가 오류 화면으로 바뀌어 삭제 뒤 이동·토스트(mutate의 onSuccess) 호출 안 됨
+ */
+export const useDeleteMissing = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteMissing,
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: [...missingKeys.all, 'list'],
+        }),
+        queryClient.invalidateQueries({ queryKey: missingKeys.rail }),
+      ]),
+  });
+};
+/** 누르는 즉시 그 글 상세의 좋아요·개수가 바뀐다(optimisticLike) */
+export const useToggleMissingLike = (lostTpofSn) =>
+  useOptimisticLike({
+    detailKey: missingKeys.detail(lostTpofSn),
+    allKey: missingKeys.all,
+  });
 export const useMarkMissingFound = () =>
   useInvalidatingMutation(markMissingFound);
 export const useExtendMissing = () => useInvalidatingMutation(extendMissing);
+/** 댓글 영역(CommentSection)은 targetSn(실종 글의 pstSn)으로 전달 */
 export const useCreateMissingComment = () =>
-  useInvalidatingMutation(createMissingComment);
+  useInvalidatingMutation(({ targetSn, ...rest }) =>
+    createComment({ pstSn: targetSn, ...rest }),
+  );
 export const useDeleteMissingComment = () =>
-  useInvalidatingMutation(deleteMissingComment);
+  useInvalidatingMutation(({ targetSn, cmntSn }) =>
+    deleteComment({ pstSn: targetSn, cmntSn }),
+  );
 
-/** 신고·장소 검색은 화면이 바뀌지 않아 다시 받지 않는다 */
-export const useReportMissing = () =>
-  useMutation({ mutationFn: reportMissing });
+/** 신고는 화면이 바뀌지 않아 재조회 없음 */
+export const useReportMissing = () => useMutation({ mutationFn: reportPost });
 export const useReportMissingComment = () =>
-  useMutation({ mutationFn: reportMissingComment });
+  useMutation({ mutationFn: reportComment });
 /** CommentSection에 넘기는 실종센터 댓글 훅 묶음 */
 export const missingCommentHooks = {
   useComments: useMissingComments,

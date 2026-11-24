@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
+import LoadError from '@/components/LoadError';
+import Skeleton from '@/components/Skeleton';
 import Card from '@/components/Card';
-import { BTN_SECONDARY } from '@/components/buttonStyles';
+import {
+  BTN_SECONDARY,
+  FILTER_CHIP,
+  FILTER_CHIP_ON,
+} from '@/components/buttonStyles';
 import useMediaQuery from '@/hooks/useMediaQuery';
-import { formatMonthDayDot } from '@/utils/formatDate';
+import { formatMonthDayDot, getYmdOf } from '@/utils/formatDate';
 import {
   RECORD_TYPES,
   STOOL,
@@ -11,10 +17,14 @@ import {
   findRecordType,
   findStoolState,
 } from '../diaryTypes';
-import BarChart from './BarChart';
+import { DAILY_ITEMS, keepWidgetOrder } from '../dashboard/widgetItems';
+import { useDailyTrend, usePetDetail } from '../queries';
+import { round2 } from '../numberFormat';
+import BarChart from '@/components/BarChart';
 import CountBars from './CountBars';
-import EmptyBox from './EmptyBox';
-import LineChart from './LineChart';
+import EmptyResult from '@/components/EmptyResult';
+import Icon from '@/components/Icon';
+import LineChart from '@/components/LineChart';
 import {
   RECENT_RECORD_COUNT,
   formatAmount,
@@ -23,16 +33,45 @@ import {
   pickType,
 } from './recordUtils';
 
+/** 산책 막대 그래프 높이: 꺾은선 그래프(LineChart 기본값)와 같게 그래프 폭 600 미만 230, 이상 260 */
+const getLineChartHeight = (width) => (width < 600 ? 230 : 260);
+
 /**
  * [건강기록 변화 카드]
- * - 지표 탭 5종 단일 선택, 최근 14개 기록 기준 그래프 (FN-HLT-002-09·10)
+ * - 지표 탭 5종 단일 선택, 최근 5건 기준 그래프 (FN-HLT-002-09·10)
  * - 0건·1건은 그래프 대신 안내
- * - 760px 이하: 지표 탭이 한 줄 가로 밀기이고 줄 끝에 걸쳐 잘린 탭은 반투명, 체중 그래프의 상한·목표·하한은 왼쪽 한 열
+ * - 760px 이하: 지표 탭이 한 줄 가로 밀기이고 줄 끝에 걸쳐 잘린 탭은 반투명, 체중 그래프의 최대·목표·최소은 왼쪽 한 열
+ * - initialTypeCd: 처음 고를 지표(대시보드 카드 「기록하기 ›」, ※신규 정책). 5종이 아니거나 없으면 체중
+ * - 지표 탭은 [대시보드 편집]·[항목 편집]에서 켠 매일 기록만, 대시보드 카드 순서로. widgetIds가 null(고른 적 없음)이면 5종 모두 (※신규 정책, 2026-11-14)
+ *   고른 탭이 꺼지면(또는 처음 고를 지표가 꺼져 있으면) 첫 탭을 고름
  */
-export default function DailyTrendCard({ pet, records, onAddRecord }) {
-  const [typeCd, setTypeCd] = useState(WEIGHT);
+export default function DailyTrendCard({
+  pet,
+  widgetIds,
+  onAddRecord,
+  initialTypeCd,
+}) {
+  const [pickedTypeCd, setTypeCd] = useState(() =>
+    RECORD_TYPES.some((item) => item.cd === initialTypeCd)
+      ? initialTypeCd
+      : WEIGHT,
+  );
+  const shownTypes =
+    widgetIds == null
+      ? RECORD_TYPES
+      : keepWidgetOrder(widgetIds)
+          .map((id) => DAILY_ITEMS.find((item) => item.id === id)?.typeCd)
+          .filter((cd) => cd != null)
+          .map(findRecordType);
+  const typeCd = shownTypes.some((item) => item.cd === pickedTypeCd)
+    ? pickedTypeCd
+    : (shownTypes[0]?.cd ?? WEIGHT);
+  const shownKey = shownTypes.map((item) => item.cd).join();
   const type = findRecordType(typeCd);
-  const isPc = useMediaQuery('(min-width: 761px)');
+  const trend = useDailyTrend(pet.petSn, typeCd);
+  /** 목표체중은 목록(GET /pets)에 없어 상세로 받는다. 실패하거나 오기 전이면 목표선 없이 그린다 */
+  const { data: petDetail } = usePetDetail(pet.petSn, typeCd === WEIGHT);
+  const isPc = useMediaQuery('(width >= 760px)');
   const rowRef = useRef(null);
   /** 줄 끝에 걸쳐 일부만 보이는 탭(모바일 가로 밀기) */
   const [clipped, setClipped] = useState([]);
@@ -59,21 +98,22 @@ export default function DailyTrendCard({ pet, records, onAddRecord }) {
       row.removeEventListener('scroll', update);
       window.removeEventListener('resize', update);
     };
-  }, []);
+    /** 탭 수·순서가 바뀌면 잘림을 다시 잼 */
+  }, [shownKey]);
 
   return (
     <Card
       title="건강기록 변화"
-      sub={<span className="text-sm">최근 {RECENT_RECORD_COUNT}개 기록</span>}
+      sub={<span className="text-sm">최근 {RECENT_RECORD_COUNT}건</span>}
       className="min-w-0"
     >
       <div
         ref={rowRef}
         role="radiogroup"
         aria-label="지표 선택"
-        className="mb-4 flex gap-2 overflow-x-auto [scrollbar-width:none] min-[761px]:flex-wrap min-[761px]:overflow-visible [&::-webkit-scrollbar]:hidden"
+        className="mb-4 flex gap-2 overflow-x-auto [scrollbar-width:none] min-[760px]:flex-wrap min-[760px]:overflow-visible [&::-webkit-scrollbar]:hidden"
       >
-        {RECORD_TYPES.map((item, index) => {
+        {shownTypes.map((item, index) => {
           const isSelected = item.cd === typeCd;
           return (
             <button
@@ -81,12 +121,8 @@ export default function DailyTrendCard({ pet, records, onAddRecord }) {
               type="button"
               role="radio"
               aria-checked={isSelected}
-              className={`inline-flex h-9 shrink-0 items-center rounded-full border px-3.5 transition-opacity ${
+              className={`${isSelected ? FILTER_CHIP_ON : FILTER_CHIP} transition-opacity ${
                 clipped[index] ? 'opacity-50' : ''
-              } ${
-                isSelected
-                  ? 'border-brand-500 bg-brand-500 text-white'
-                  : 'border-line bg-white text-ink-2 hover:border-line-strong hover:text-ink'
               }`}
               onClick={() => setTypeCd(item.cd)}
             >
@@ -98,7 +134,8 @@ export default function DailyTrendCard({ pet, records, onAddRecord }) {
 
       <TrendBody
         pet={pet}
-        records={records}
+        goalBdwg={petDetail?.goalBdwg}
+        trend={trend}
         type={type}
         isPc={isPc}
         onAddRecord={onAddRecord}
@@ -107,23 +144,43 @@ export default function DailyTrendCard({ pet, records, onAddRecord }) {
   );
 }
 
-function TrendBody({ pet, records, type, isPc, onAddRecord }) {
+function TrendBody({ pet, goalBdwg, trend, type, isPc, onAddRecord }) {
   const emptyBox = (
-    <EmptyBox
-      icon="monitoring"
+    <EmptyResult
+      isCompact
+      icon={<Icon name="monitoring" className="text-[28px] text-line-strong" />}
       title={`아직 ${type.nm} 기록이 없어요`}
       description="오늘 기록을 남기면 변화가 그래프로 보여요"
-      action={
+    >
+      {
         <button
           type="button"
-          className={`${BTN_SECONDARY} mt-2 h-8! px-3!`}
+          className={`${BTN_SECONDARY} mt-2`}
           onClick={() => onAddRecord(type.cd)}
         >
-          오늘 기록추가
+          오늘 기록 추가
         </button>
       }
-    />
+    </EmptyResult>
   );
+
+  if (trend.isPending) {
+    return (
+      <div aria-busy="true" className="@container">
+        {/* 산책 막대·꺾은선 그래프 높이(그래프 칸 폭 600 이상 260, 미만 230)에 맞춤. 화면 폭이 아니라 칸 폭 기준 */}
+        <Skeleton className="h-[260px] @max-[600px]:h-[230px]" />
+      </div>
+    );
+  }
+  if (trend.isError) {
+    return (
+      <LoadError
+        message="기록을 불러오지 못했어요. 잠시 뒤 다시 시도해 주세요"
+        onRetry={() => trend.refetch()}
+      />
+    );
+  }
+  const records = trend.data;
 
   if (type.cd === STOOL) {
     const { recordCount, counts } = getStoolCounts(records);
@@ -132,8 +189,8 @@ function TrendBody({ pet, records, type, isPc, onAddRecord }) {
       const [only] = pickType(records, STOOL);
       return (
         <OneRecord
-          ymd={only.rcdYmd}
-          value={findStoolState(only.stlSttsCd).nm}
+          ymd={getYmdOf(only.rcdDt)}
+          value={findStoolState(only.crsdSttsCd).nm}
         />
       );
     }
@@ -165,6 +222,7 @@ function TrendBody({ pet, records, type, isPc, onAddRecord }) {
         points={chartPoints}
         formatValue={(value) => formatAmount(WALK, value)}
         ariaLabel={`산책 시간 막대그래프 · ${summary} · 점선은 하루 평균`}
+        height={getLineChartHeight}
       />
     );
   }
@@ -174,13 +232,13 @@ function TrendBody({ pet, records, type, isPc, onAddRecord }) {
     <LineChart
       points={chartPoints}
       band={
-        isWeight && pet.nrmlWghtMinVal != null && pet.nrmlWghtMaxVal != null
-          ? [pet.nrmlWghtMinVal, pet.nrmlWghtMaxVal]
+        isWeight && pet.minBdwg != null && pet.maxBdwg != null
+          ? [pet.minBdwg, pet.maxBdwg]
           : undefined
       }
-      goal={isWeight ? pet.goalWghtVal : undefined}
+      goal={isWeight ? goalBdwg : undefined}
       formatValue={(value) => formatAmount(type.cd, value)}
-      formatTag={(value) => value.toFixed(1)}
+      formatTag={round2}
       isLeftColumn={!isPc}
       ariaLabel={`${type.nm} 변화 선그래프 · ${summary}`}
     />
@@ -193,9 +251,7 @@ function OneRecord({ ymd, value }) {
       <span className="text-sm/[1.6] text-subtle tabular-nums">
         {formatMonthDayDot(ymd)} 기록
       </span>
-      <span className="text-lg/[1.6] font-bold text-ink tabular-nums">
-        {value}
-      </span>
+      <span className="text-lg font-bold text-ink tabular-nums">{value}</span>
       <span className="text-sm/[1.6] text-subtle">
         기록이 2개 이상 쌓이면 그래프로 보여요
       </span>

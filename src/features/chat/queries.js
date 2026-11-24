@@ -1,55 +1,190 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { showToast } from '@/components/toastStore';
+import { useFileImage } from '@/hooks/useFileImage';
+import useKakaoMap from '@/hooks/useKakaoMap';
+import { careKeys } from '@/features/community/careQueries';
+import { searchPlaces } from '@/utils/placeSearch';
 import {
   acceptCareMatch,
+  approveDealCancel,
   cancelCareMatch,
+  chatImageUrl,
   confirmCareCompletion,
   confirmCareReceipt,
   createChatMessage,
   createChatRoom,
+  getCareMatch,
   getChatMessages,
   getChatRoom,
   getChatRooms,
   getChatUnreadCount,
   leaveChatRoom,
   readChatRoom,
+  rejectDealCancel,
+  reportRoomPost,
   requestCareCompletion,
   requestCareMatch,
-  searchChatPlaces,
+  requestDealCancel,
+  withdrawDealCancel,
 } from './api';
+import { retainChatRealtime, setViewingChatRoom } from './realtime';
+import { CHAT_ROOM_CLOSED, MSG_TYPE } from './shared/chatCodes';
 
 export const chatKeys = {
   lists: ['chat-rooms', 'list'],
   list: (unreadOnly) => ['chat-rooms', 'list', unreadOnly],
   unreadCount: ['chat-rooms', 'unread-count'],
   detail: (otoChatRoomSn) => ['chat-rooms', otoChatRoomSn, 'detail'],
-  places: (keyword) => ['chat-places', keyword],
   messages: (otoChatRoomSn) => ['chat-rooms', otoChatRoomSn, 'messages'],
+  image: (otoChatRoomSn, atchFileSn) => [
+    'chat-rooms',
+    otoChatRoomSn,
+    'images',
+    atchFileSn,
+  ],
+  careMatch: (petPrtcMtchSn) => ['care-matches', petPrtcMtchSn],
 };
 
-/** 다른 창의 새 메시지를 반영하는 1분 주기 목록 */
-export const useChatRooms = (unreadOnly) =>
-  useQuery({
+/** 메시지 캐시(최신순 페이지들)의 맨 앞에 새 메시지. 이미 있으면 그대로 */
+const prependMessage = (queryClient, otoChatRoomSn, message) =>
+  queryClient.setQueryData(chatKeys.messages(otoChatRoomSn), (data) => {
+    if (!data) return data;
+    const exists = data.pages.some((page) =>
+      page.content.some((item) => item.chatMsgSn === message.chatMsgSn),
+    );
+    if (exists) return data;
+    const [first, ...rest] = data.pages;
+    return {
+      ...data,
+      pages: [{ ...first, content: [message, ...first.content] }, ...rest],
+    };
+  });
+
+/** 목록 마지막 대화·안 읽은 수 다시 조회 */
+const invalidateSummaries = (queryClient) => {
+  queryClient.invalidateQueries({ queryKey: chatKeys.lists });
+  queryClient.invalidateQueries({ queryKey: chatKeys.unreadCount });
+};
+
+/** 거래 단계가 바뀌면 시스템 안내·거래 카드가 오므로 방 정보와 매칭도 다시 조회 */
+const DEAL_MSG_TYPES = [MSG_TYPE.SYSTEM, MSG_TYPE.DEAL_CARD];
+
+/** 실시간 수신을 캐시에 반영: 새 메시지는 그 방 대화에 붙이고, 읽음은 목록·배지만 */
+const useChatRealtime = (enabled = true) => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!enabled) return undefined;
+    return retainChatRealtime((event) => {
+      if (event.type === 'MESSAGE') {
+        prependMessage(queryClient, event.otoChatRoomSn, event.message);
+        if (DEAL_MSG_TYPES.includes(event.message.msgTypeCd)) {
+          queryClient.invalidateQueries({
+            queryKey: chatKeys.detail(event.otoChatRoomSn),
+          });
+          queryClient.invalidateQueries({ queryKey: ['care-matches'] });
+        }
+      }
+      invalidateSummaries(queryClient);
+      /** 열려 있는 펫돌봄 글·목록의 채팅 인원수·모집 상태 칩(매칭완료 등)도 새로 고침 없이 맞춘다 */
+      queryClient.invalidateQueries({ queryKey: careKeys.all });
+    });
+  }, [enabled, queryClient]);
+};
+
+/** 새 메시지는 실시간으로 반영, 연결이 끊긴 동안을 메우는 1분 주기 */
+export const useChatRooms = (unreadOnly) => {
+  useChatRealtime();
+  return useQuery({
     queryKey: chatKeys.list(unreadOnly),
     queryFn: () => getChatRooms({ unreadOnly }),
     refetchInterval: 60_000,
   });
+};
 
-/** 헤더 배지: 채팅 창에서 읽고 본창으로 돌아오면 다시 조회 */
-export const useChatUnreadCount = () =>
-  useQuery({
+/** 헤더 배지: 채팅 창에서 읽고 본창으로 돌아오면 다시 조회. 로그인 전에는 enabled=false(조회·소켓 없음) */
+export const useChatUnreadCount = (enabled = true) => {
+  useChatRealtime(enabled);
+  return useQuery({
     queryKey: chatKeys.unreadCount,
     queryFn: getChatUnreadCount,
+    enabled,
     refetchInterval: 60_000,
     refetchOnWindowFocus: true,
   });
+};
 
-export const useChatMessages = (otoChatRoomSn) =>
-  useQuery({
+/** 최신순 커서 페이지를 오래된 순 목록으로. fetchNextPage가 더 오래된 30건 */
+export const useChatMessages = (otoChatRoomSn) => {
+  useChatRealtime();
+  return useInfiniteQuery({
     queryKey: chatKeys.messages(otoChatRoomSn),
-    queryFn: () => getChatMessages(otoChatRoomSn),
+    queryFn: ({ pageParam }) =>
+      getChatMessages({ otoChatRoomSn, beforeChatMsgSn: pageParam }),
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasNext ? lastPage.content.at(-1)?.chatMsgSn : undefined,
+    select: (data) => data.pages.flatMap((page) => page.content).reverse(),
     enabled: otoChatRoomSn !== null,
   });
+};
+
+/** 지금 보는 방을 서버에 알림: 방을 닫거나 창이 포커스를 잃으면 null */
+export const useViewingChatRoom = (otoChatRoomSn) => {
+  useEffect(() => {
+    const sync = () =>
+      setViewingChatRoom(
+        document.visibilityState === 'visible' && document.hasFocus()
+          ? otoChatRoomSn
+          : null,
+      );
+    sync();
+    window.addEventListener('focus', sync);
+    window.addEventListener('blur', sync);
+    document.addEventListener('visibilitychange', sync);
+    return () => {
+      window.removeEventListener('focus', sync);
+      window.removeEventListener('blur', sync);
+      document.removeEventListener('visibilitychange', sync);
+      setViewingChatRoom(null);
+    };
+  }, [otoChatRoomSn]);
+};
+
+/** 채팅 사진(참여자만, 쿠키 인증). atchFileSn이 null이면 받지 않는다 */
+export const useChatImage = (otoChatRoomSn, atchFileSn) =>
+  useFileImage({
+    queryKey: chatKeys.image(otoChatRoomSn, atchFileSn),
+    url: chatImageUrl(otoChatRoomSn, atchFileSn),
+    enabled: atchFileSn != null,
+  });
+
+/** 「이름 (주소)」로 보낸 장소는 괄호 안 주소로, 그 밖에는 글자 전체로 위치를 찾는다 */
+const toAddressSearchText = (shrnAddr) =>
+  (/\(([^()]+)\)\s*$/.exec(shrnAddr)?.[1] ?? shrnAddr).trim();
+
+/**
+ * 주소 공유 글자의 좌표(서버는 글자만 저장): 카카오 주소·장소 검색(전북)의 첫 결과. 못 찾으면 null
+ * 같은 글자는 한 번만 찾는다
+ */
+export const useAddressPoint = (shrnAddr) => {
+  const { kakao } = useKakaoMap();
+  return useQuery({
+    queryKey: ['chat-address-point', shrnAddr],
+    queryFn: async () => {
+      const [first] = await searchPlaces(kakao, toAddressSearchText(shrnAddr));
+      return first ? { lat: first.wtnsPlcLat, lng: first.wtnsPlcLot } : null;
+    },
+    enabled: Boolean(kakao && shrnAddr),
+    staleTime: Infinity,
+  });
+};
 
 export const useCreateChatRoom = () => {
   const queryClient = useQueryClient();
@@ -58,7 +193,7 @@ export const useCreateChatRoom = () => {
     mutationFn: createChatRoom,
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: chatKeys.lists }),
-    onError: (error) => showToast(error.message),
+    onError: (error) => showToast(error.message, { type: 'error' }),
   });
 };
 
@@ -67,21 +202,26 @@ export const useReadChatRoom = () => {
 
   return useMutation({
     mutationFn: readChatRoom,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: chatKeys.lists });
-      queryClient.invalidateQueries({ queryKey: chatKeys.unreadCount });
-    },
+    onSuccess: () => invalidateSummaries(queryClient),
   });
 };
 
+/** 보낸 메시지는 응답으로 바로 대화에 붙임(실시간으로 같은 메시지가 와도 한 번만) */
 export const useSendChatMessage = (otoChatRoomSn) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (body) => createChatMessage({ otoChatRoomSn, ...body }),
-    onSuccess: () => {
+    onSuccess: (message) => {
+      prependMessage(queryClient, otoChatRoomSn, message);
+      queryClient.invalidateQueries({ queryKey: chatKeys.lists });
+    },
+    /** 화면은 열려 있는데 서버에서 방이 닫힌 경우: 방 정보를 다시 받아 입력을 막는다 */
+    onError: (error) => {
+      if (error.code !== CHAT_ROOM_CLOSED) return;
+      showToast(error.message, { type: 'error' });
       queryClient.invalidateQueries({
-        queryKey: chatKeys.messages(otoChatRoomSn),
+        queryKey: chatKeys.detail(otoChatRoomSn),
       });
       queryClient.invalidateQueries({ queryKey: chatKeys.lists });
     },
@@ -96,14 +236,15 @@ export const useChatRoom = (otoChatRoomSn) =>
     refetchInterval: 60_000,
   });
 
-/** 주소 공유 모달의 장소 목록: 키워드가 없으면 돌봄 글 동네 근처 */
-export const useChatPlaces = (keyword) =>
+/** 합의 조건(cnd): 매칭 전(petPrtcMtchSn 없음)이면 조회하지 않음 */
+export const useCareMatch = (petPrtcMtchSn) =>
   useQuery({
-    queryKey: chatKeys.places(keyword),
-    queryFn: () => searchChatPlaces({ keyword }),
+    queryKey: chatKeys.careMatch(petPrtcMtchSn),
+    queryFn: () => getCareMatch(petPrtcMtchSn),
+    enabled: petPrtcMtchSn !== null && petPrtcMtchSn !== undefined,
   });
 
-/** 거래 버튼이 부르는 API: 눌린 key → 함수 */
+/** 거래 버튼이 부르는 API: 눌린 key → 함수. 요청은 방 기준, 나머지는 매칭 기준 */
 const DEAL_API = {
   request: requestCareMatch,
   cancel: cancelCareMatch,
@@ -111,17 +252,20 @@ const DEAL_API = {
   doneRequest: requestCareCompletion,
   confirm: confirmCareCompletion,
   receive: confirmCareReceipt,
+  dealCancel: requestDealCancel,
+  dealCancelApprove: approveDealCancel,
+  dealCancelReject: rejectDealCancel,
+  dealCancelWithdraw: withdrawDealCancel,
 };
 
-/** 거래 단계 변경: 서버가 방·대화에 반영하므로 끝나면 둘 다 다시 조회 */
-export const useDealAction = (otoChatRoomSn) => {
+/** 거래 단계 변경 { action, cnclRsn }: 서버가 방·대화에 반영하므로 끝나면 다시 조회 */
+export const useDealAction = (room) => {
   const queryClient = useQueryClient();
+  const { otoChatRoomSn, petPrtcMtchSn } = room;
 
   return useMutation({
-    mutationFn: (action) =>
-      action === 'request'
-        ? DEAL_API.request({ otoChatRoomSn })
-        : DEAL_API[action](otoChatRoomSn),
+    mutationFn: ({ action, cnclRsn }) =>
+      DEAL_API[action]({ otoChatRoomSn, petPrtcMtchSn, cnclRsn }),
     onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: chatKeys.detail(otoChatRoomSn),
@@ -129,9 +273,37 @@ export const useDealAction = (otoChatRoomSn) => {
       queryClient.invalidateQueries({
         queryKey: chatKeys.messages(otoChatRoomSn),
       });
+      queryClient.invalidateQueries({ queryKey: ['care-matches'] });
       queryClient.invalidateQueries({ queryKey: chatKeys.lists });
+      /** 펫돌봄 글·목록의 모집 상태 칩(매칭완료 등)과 채팅 인원수도 함께 맞춘다 */
+      queryClient.invalidateQueries({ queryKey: careKeys.all });
     },
-    onError: (error) => showToast(error.message),
+    onError: (error) => showToast(error.message, { type: 'error' }),
+  });
+};
+
+/**
+ * 여러 방 나가기(목록의 선택 삭제): 방마다 나가기를 부르고 성공·실패한 방 번호를 돌려준다
+ * - 일부가 실패해도 나머지는 처리된 채로 두고, 끝나면 목록·안 읽음 수를 다시 받는다
+ */
+export const useLeaveChatRooms = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (otoChatRoomSns) => {
+      const results = await Promise.allSettled(
+        otoChatRoomSns.map((otoChatRoomSn) => leaveChatRoom(otoChatRoomSn)),
+      );
+      return {
+        succeeded: otoChatRoomSns.filter(
+          (_, index) => results[index].status === 'fulfilled',
+        ),
+        failed: otoChatRoomSns.filter(
+          (_, index) => results[index].status === 'rejected',
+        ),
+      };
+    },
+    onSettled: () => invalidateSummaries(queryClient),
   });
 };
 
@@ -140,10 +312,17 @@ export const useLeaveChatRoom = (otoChatRoomSn) => {
 
   return useMutation({
     mutationFn: () => leaveChatRoom(otoChatRoomSn),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: chatKeys.lists });
-      queryClient.invalidateQueries({ queryKey: chatKeys.unreadCount });
+    onSuccess: () => invalidateSummaries(queryClient),
+    onError: (error) => {
+      showToast(error.message, { type: 'error' });
+      /** 409 CHAT_LEAVE_IN_DEAL 등: 방 상태가 화면과 다르니 다시 조회 */
+      queryClient.invalidateQueries({
+        queryKey: chatKeys.detail(otoChatRoomSn),
+      });
     },
-    onError: (error) => showToast(error.message),
   });
 };
+
+/** 채팅방 메뉴 [신고하기]: 방의 돌봄 글을 신고 */
+export const useReportRoomPost = () =>
+  useMutation({ mutationFn: reportRoomPost });

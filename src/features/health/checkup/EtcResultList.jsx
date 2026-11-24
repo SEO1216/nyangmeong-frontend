@@ -9,9 +9,9 @@ import { ADD_ROW, ROW_LINE, TEXT_BTN, TEXT_BTN_DEL } from './checkupStyles';
 /**
  * [기타검사 목록]
  * - 검사명·결과(텍스트)·메모, 메모가 없으면 줄 생략. 참고범위·추이 이동 없음 (FN-HLT-005-02)
- * - 행 [수정] → 기타검사 입력 모달(값 채움), [삭제] → 확인 후 삭제, [＋ 기타검사 입력]은 목록 아래 상시
+ * - 행 [수정] → 기타검사 추가 모달(값 채움), [삭제] → 확인 후 삭제, [＋ 기타검사 추가]는 목록 아래 상시
  */
-export default function EtcResultList({ ckupRcdSn, etcInspections }) {
+export default function EtcResultList({ petSn, ckupRcdSn, etcInspections }) {
   /** 입력 모달: null이면 닫힘, { etcInspection }이 null이면 새로 입력 */
   const [modal, setModal] = useState(null);
   const [deleteSn, setDeleteSn] = useState(null);
@@ -19,13 +19,15 @@ export default function EtcResultList({ ckupRcdSn, etcInspections }) {
 
   const handleDelete = () =>
     deleteEtcInspection.mutate(
-      { ckupRcdSn, etcInspSn: deleteSn },
+      { petSn, ckupRcdSn, etcInspSn: deleteSn },
       { onSuccess: () => setDeleteSn(null) },
     );
 
   return (
     <div>
-      {etcInspections.length === 0 && <p className="text-muted">결과 없음</p>}
+      {etcInspections.length === 0 && (
+        <p className="text-muted">결과가 없어요</p>
+      )}
       <ul>
         {etcInspections.map((etc) => (
           <li
@@ -35,7 +37,7 @@ export default function EtcResultList({ ckupRcdSn, etcInspections }) {
             <div className="min-w-0 flex-1">
               <p className="font-semibold break-words">{etc.inspNm}</p>
               <p className="mt-1 break-words whitespace-pre-line">
-                {etc.rsltCn}
+                {etc.inspRsltCn}
               </p>
               {etc.memoCn && (
                 <p className="text-subtle break-words">메모 · {etc.memoCn}</p>
@@ -66,11 +68,12 @@ export default function EtcResultList({ ckupRcdSn, etcInspections }) {
         onClick={() => setModal({ etcInspection: null })}
       >
         <Icon name="add" className="text-lg" />
-        기타검사 입력
+        기타검사 추가
       </button>
 
       {modal && (
         <EtcInspectionModal
+          petSn={petSn}
           ckupRcdSn={ckupRcdSn}
           etcInspection={modal.etcInspection}
           onClose={() => setModal(null)}
@@ -81,6 +84,7 @@ export default function EtcResultList({ ckupRcdSn, etcInspections }) {
         <Modal
           isConfirm
           title="이 기타검사를 삭제할까요?"
+          description="삭제하면 되돌릴 수 없어요."
           isPending={deleteEtcInspection.isPending}
           onClose={() => setDeleteSn(null)}
           footer={

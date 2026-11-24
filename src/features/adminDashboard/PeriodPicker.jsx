@@ -1,0 +1,124 @@
+import { useState } from 'react';
+import DatePicker from '@/components/DatePicker';
+import { BTN_PRIMARY } from '@/components/buttonStyles';
+import { getTodayYmd } from '@/utils/formatDate';
+import {
+  getRangeError,
+  PERIOD_CUSTOM,
+  PERIOD_OPTIONS,
+} from './dashboardPeriod';
+
+/**
+ * [통계 기간 선택]
+ * - 최근 7일·30일은 누르면 바로 적용, 직접 입력은 [조회]를 눌러야 적용
+ * - period: { periodKey, fromYmd, toYmd }, onChange(next)
+ */
+export default function PeriodPicker({ period, onChange }) {
+  const [isCustomOpen, setIsCustomOpen] = useState(
+    period.periodKey === PERIOD_CUSTOM,
+  );
+  const [draft, setDraft] = useState({
+    fromYmd: period.fromYmd,
+    toYmd: period.toYmd,
+  });
+  const [rangeError, setRangeError] = useState(null);
+
+  const selectedKey = isCustomOpen ? PERIOD_CUSTOM : period.periodKey;
+  const todayYmd = getTodayYmd();
+
+  const handleSelect = (key) => {
+    setRangeError(null);
+    if (key === PERIOD_CUSTOM) {
+      setDraft({ fromYmd: period.fromYmd, toYmd: period.toYmd });
+      setIsCustomOpen(true);
+      return;
+    }
+    setIsCustomOpen(false);
+    onChange({ periodKey: key });
+  };
+
+  /** 날짜 칸 하나 변경 */
+  const setField = (name, value) => {
+    setDraft((prev) => ({ ...prev, [name]: value }));
+    setRangeError(null);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const error = getRangeError(draft.fromYmd, draft.toYmd);
+    if (error) {
+      setRangeError(error);
+      return;
+    }
+    onChange({ periodKey: PERIOD_CUSTOM, ...draft });
+  };
+
+  return (
+    // 넓은 폭: 기간 버튼 묶음은 늘 오른쪽 끝, 날짜 칸·오류 문구는 그 아래 오른쪽을 맞춘다
+    <div className="flex flex-col items-start gap-2 max-[760px]:w-full min-[760px]:items-end">
+      <div
+        role="group"
+        aria-label="통계 기간"
+        className="inline-flex rounded-md border border-line bg-white p-0.5"
+      >
+        {PERIOD_OPTIONS.map(({ key, label }) => {
+          const isSelected = key === selectedKey;
+          return (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={isSelected}
+              className={`h-9 rounded-[5px] px-3 text-sm whitespace-nowrap ${
+                isSelected
+                  ? 'bg-brand-900 font-bold text-white'
+                  : 'font-semibold text-subtle hover:text-ink'
+              }`}
+              onClick={() => handleSelect(key)}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+      {isCustomOpen && (
+        <form
+          onSubmit={handleSubmit}
+          noValidate
+          className="flex flex-col gap-2 self-stretch"
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2 max-[760px]:w-full">
+              <DatePicker
+                label="통계 시작일"
+                value={draft.fromYmd}
+                max={todayYmd}
+                onChange={(value) => setField('fromYmd', value)}
+                className="min-[760px]:w-40"
+              />
+              <span className="text-subtle">~</span>
+              <DatePicker
+                label="통계 종료일"
+                value={draft.toYmd}
+                max={todayYmd}
+                onChange={(value) => setField('toYmd', value)}
+                className="min-[760px]:w-40"
+              />
+            </div>
+            <button
+              type="submit"
+              className={`${BTN_PRIMARY} max-[760px]:w-full`}
+            >
+              조회
+            </button>
+          </div>
+          {rangeError && (
+            // w-0 min-w-full: 문구 길이가 영역 폭을 늘리지 않는다
+            <p role="alert" className="w-0 min-w-full text-sm text-danger">
+              {rangeError}
+            </p>
+          )}
+        </form>
+      )}
+    </div>
+  );
+}

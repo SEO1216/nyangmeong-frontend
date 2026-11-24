@@ -1,4 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import {
   createComment,
   createPost,
@@ -12,9 +18,10 @@ import {
   getTodayStory,
   reportComment,
   reportPost,
-  togglePostLike,
   updatePost,
 } from './api';
+import { INFINITE_OPTIONS } from '@/utils/infiniteList';
+import { useOptimisticLike } from './optimisticLike';
 
 export const postKeys = {
   all: ['posts'],
@@ -28,6 +35,17 @@ export const usePostList = (params) =>
   useQuery({
     queryKey: postKeys.list(params),
     queryFn: () => getPostList(params),
+    /** 탭·정렬·검색·쪽을 바꾸는 동안 이전 목록 유지로 화면이 스켈레톤으로 바뀌지 않게 한다 */
+    placeholderData: keepPreviousData,
+  });
+
+/** 무한 스크롤 목록: params에 page는 넣지 않는다(쪽은 쿼리가 1부터 이어서 받음). 글을 쓰거나 지우면 ['posts','list']로 함께 새로 받는다 */
+export const usePostInfiniteList = (params) =>
+  useInfiniteQuery({
+    ...INFINITE_OPTIONS,
+    queryKey: [...postKeys.list(params), 'infinite'],
+    queryFn: ({ pageParam }) => getPostList({ ...params, page: pageParam }),
+    placeholderData: keepPreviousData,
   });
 
 export const usePost = (pstSn) =>
@@ -61,7 +79,7 @@ export const useHealthTips = () =>
     queryFn: getHealthTips,
   });
 
-/** 글·댓글·좋아요가 바뀌면 목록·상세·레일을 모두 다시 받는다 */
+/** 글·댓글·좋아요가 바뀌면 목록·상세·레일을 모두 재조회 */
 const useInvalidatingMutation = (mutationFn) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -72,9 +90,28 @@ const useInvalidatingMutation = (mutationFn) => {
 
 export const useCreatePost = () => useInvalidatingMutation(createPost);
 export const useUpdatePost = () => useInvalidatingMutation(updatePost);
-export const useDeletePost = () => useInvalidatingMutation(deletePost);
-export const useTogglePostLike = () => useInvalidatingMutation(togglePostLike);
-/** 댓글 영역(CommentSection)은 게시판 종류를 몰라 targetSn으로 받는다 */
+/**
+ * 목록·레일만 무효화한다. all로 하면 아직 떠 있는 지운 글의 상세를 다시 받아 404가 나고,
+ * 상세가 오류 화면으로 바뀌어 삭제 뒤 이동·토스트(mutate의 onSuccess) 호출 안 됨
+ */
+export const useDeletePost = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deletePost,
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: [...postKeys.all, 'list'] }),
+        queryClient.invalidateQueries({ queryKey: postKeys.rail }),
+      ]),
+  });
+};
+/** 누르는 즉시 그 글 상세의 좋아요·개수가 바뀐다(optimisticLike) */
+export const useTogglePostLike = (pstSn) =>
+  useOptimisticLike({
+    detailKey: postKeys.detail(pstSn),
+    allKey: postKeys.all,
+  });
+/** 댓글 영역(CommentSection)은 게시판 종류를 몰라 targetSn으로 수신 */
 export const useCreateComment = () =>
   useInvalidatingMutation(({ targetSn, ...rest }) =>
     createComment({ pstSn: targetSn, ...rest }),
@@ -84,7 +121,7 @@ export const useDeleteComment = () =>
     deleteComment({ pstSn: targetSn, cmntSn }),
   );
 
-/** 신고는 화면이 바뀌지 않아 다시 받지 않는다 */
+/** 신고는 화면이 바뀌지 않아 재조회 없음 */
 export const useReportPost = () => useMutation({ mutationFn: reportPost });
 export const useReportComment = () =>
   useMutation({ mutationFn: reportComment });

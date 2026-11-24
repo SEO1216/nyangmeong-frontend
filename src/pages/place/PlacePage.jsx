@@ -22,29 +22,42 @@ export default function PlacePage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { search } = place;
 
-  const handlePinSelect = (id) => {
-    place.selectPlace(id, 'pin');
+  // 핀이나 목록 항목으로 고르면 지도가 그 업체로 가고 팝업이 뜬다. 모바일은 시트를 내려 지도가 보이게 한다
+  const handlePinSelect = (plcSn) => {
+    place.selectPlace(plcSn, 'pin');
     sheet.setSheet('peek');
   };
 
-  const handleListSelect = (id) => {
-    place.selectPlace(id, 'list');
+  const handleListSelect = (plcSn) => {
+    place.selectPlace(plcSn, 'list');
     sheet.setSheet('peek');
   };
+
+  // 현재 지도 안에 있으면서 검색 결과에 없는 즐겨찾기는 번호 없는 별 핀으로 보인다.
+  // 다시 검색한 영역 밖이어도 목록에서 고른 즐겨찾기는 지도가 그리로 가므로 핀을 보인다.
+  // 새 영역 결과를 받는 동안은 결과가 비어 모든 즐겨찾기가 별 핀이 됐다가 번호 핀으로 바뀌므로, 고른 것만 남긴다
+  const strayFavorites = place.favorites.filter((fav) => {
+    const isSelected = fav.plcSn === place.selectedPlace?.plcSn;
+    if (!place.query.isSuccess) return isSelected;
+    return (
+      (!place.isOutside(fav) || isSelected) &&
+      !place.results.some((result) => result.plcSn === fav.plcSn)
+    );
+  });
 
   return (
     <div
       ref={attachContainer}
       style={{ '--sheet-peek': `${sheet.peekY}px` }}
-      className={`relative h-full border-t border-line bg-white md:grid ${
+      className={`relative h-full border-t border-line bg-white min-[760px]:grid ${
         isCollapsed
-          ? 'md:grid-cols-[64px_0_minmax(0,1fr)] lg:grid-cols-[72px_0_minmax(0,1fr)]'
-          : 'md:grid-cols-[64px_340px_minmax(0,1fr)] lg:grid-cols-[72px_400px_minmax(0,1fr)]'
+          ? 'min-[760px]:grid-cols-[64px_0_minmax(0,1fr)] min-[1100px]:grid-cols-[72px_0_minmax(0,1fr)]'
+          : 'min-[760px]:grid-cols-[64px_340px_minmax(0,1fr)] min-[1100px]:grid-cols-[72px_400px_minmax(0,1fr)]'
       }`}
     >
       <nav
         aria-label="장소 종류"
-        className="z-[3] hidden flex-col items-center gap-1 border-r border-line bg-white py-3 md:flex"
+        className="relative z-[3] hidden flex-col items-center gap-1 border-r border-line bg-white py-3 min-[760px]:flex"
       >
         <PlaceCategoryNav
           variant="rail"
@@ -54,27 +67,32 @@ export default function PlacePage() {
       </nav>
 
       <PlacePanel
-        category={category}
         search={search}
         sort={place.sort}
         regionText={place.regionText}
-        resultIds={place.resultIds}
-        favoriteIds={place.favoriteIds}
+        query={place.query}
+        results={place.results}
+        totalCount={place.totalCount}
         favorites={place.favorites}
+        bookmarkSnOf={place.bookmarkSnOf}
         isOutside={place.isOutside}
         isCollapsed={isCollapsed}
         sheet={sheet}
         onSearch={place.submitSearch}
+        onType={place.typeSearch}
         onSortChange={place.setSort}
         onSelectPlace={handleListSelect}
         onToggleFavorite={place.toggleFavorite}
       />
 
       <PlaceMap
-        resultIds={place.resultIds}
-        favoriteIds={place.favoriteIds}
-        isOutside={place.isOutside}
-        selected={search.selected}
+        results={place.results}
+        strayFavorites={strayFavorites}
+        selectedPlace={place.selectedPlace}
+        isFavorite={(target) => place.bookmarkSnOf(target) !== null}
+        fitKey={search.fitKey}
+        homeArea={place.homeArea}
+        isReady={place.query.isSuccess}
         regionText={place.regionText}
         isMoved={search.isMoved}
         isCollapsed={isCollapsed}
@@ -85,17 +103,18 @@ export default function PlacePage() {
         onResearch={place.researchHere}
         onToggleCollapse={() => setIsCollapsed((prev) => !prev)}
       >
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-[5] flex flex-col gap-2 px-4 pt-3 md:hidden">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-[5] flex flex-col gap-2 px-4 pt-3 min-[760px]:hidden">
           <PlaceSearchForm
-            id="place-mq"
             q={search.q}
+            category={search.category}
             onSearch={place.submitSearch}
-            className="pointer-events-auto shadow-depth-md"
+            onType={place.typeSearch}
+            className="pointer-events-auto rounded-md shadow-depth-sm"
           />
           <div
             role="group"
             aria-label="장소 종류"
-            className="pointer-events-auto -mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none]"
+            className="pointer-events-auto relative -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]"
           >
             <PlaceCategoryNav
               variant="chips"

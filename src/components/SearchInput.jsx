@@ -1,13 +1,33 @@
 import { Search } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
-/** 검색창: 입력값은 부모가 들고, 제출할 때만 onSubmit을 부른다 */
+/**
+ * 검색창: 입력값은 부모 보관, 제출할 때 onSubmit 호출. compact: 높이 34px·글자 14px
+ * - liveDelay(ms): 주면 입력을 멈추고 그만큼 지나면 자동으로 onSubmit을 부른다(Enter·돋보기는 그대로 바로 검색).
+ *   한글 조합 중에는 기다리고, 조합이 끝난 뒤에 센다. 안 주면 제출할 때만(다른 화면 기본 동작)
+ */
 export default function SearchInput({
   value,
   onChange,
   onSubmit,
   placeholder,
+  compact = false,
+  liveDelay,
   className = '',
 }) {
+  const submitRef = useRef(onSubmit);
+  const [isComposing, setIsComposing] = useState(false);
+
+  useEffect(() => {
+    submitRef.current = onSubmit;
+  });
+
+  useEffect(() => {
+    if (!liveDelay || isComposing) return undefined;
+    const timer = setTimeout(() => submitRef.current(), liveDelay);
+    return () => clearTimeout(timer);
+  }, [value, liveDelay, isComposing]);
+
   const handleSubmit = (event) => {
     event.preventDefault();
     onSubmit();
@@ -19,14 +39,16 @@ export default function SearchInput({
         type="search"
         value={value}
         onChange={(event) => onChange(event.target.value)}
+        onCompositionStart={() => setIsComposing(true)}
+        onCompositionEnd={() => setIsComposing(false)}
         placeholder={placeholder}
         aria-label={placeholder}
-        className="h-10 w-full rounded-md border border-[#d3dae2] bg-white pr-10 pl-[15px] text-base placeholder:text-[#8c9899]"
+        className={`w-full rounded-md border border-input-line bg-white pr-10 pl-3 ${compact ? 'h-[34px] text-sm' : 'h-10 text-base'} placeholder:text-placeholder hover:border-line-strong focus:border-brand-500 focus:outline-none focus:ring-focus`}
       />
       <button
         type="submit"
         aria-label="검색"
-        className="absolute top-[9px] right-[9px] text-[#566465]"
+        className="absolute top-1/2 right-1 grid size-8 -translate-y-1/2 place-items-center text-muted"
       >
         <Search size={20} />
       </button>

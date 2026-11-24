@@ -4,9 +4,10 @@ import { addDays } from '@/utils/formatDate';
  * [영수증 인식 결과 확인 계산]
  * - 탭 만들기·금액 배분·품목 배정·검증·저장 값 만들기를 화면 밖의 순수 함수로 둔다 (FN-HLT-002-34~45)
  * - 탭 한 개 = 반려동물 한 마리의 검진기록 한 건. petSn은 숫자, 미선택은 null, "저장 안 함"은 SKIP
+ * - 인식 결과는 AI 서버 영수증 분석 응답의 ocr(hsptlNm·ckupYmd·recptAmt·btmDscntAmt·sections)을 그대로 사용
  */
 
-export const MAX_HOSPITAL_NAME_LENGTH = 50;
+export const MAX_HOSPITAL_NAME_LENGTH = 80;
 export const MAX_CONTENT_LENGTH = 500;
 export const MAX_MEMO_LENGTH = 200;
 export const MAX_DRUG_NAME_LENGTH = 40;
@@ -15,7 +16,7 @@ export const MAX_DRUG_NAME_LENGTH = 40;
 export const SKIP = 'SKIP';
 
 export const DRUG_STATUSES = [
-  { cd: 'ING', nm: '복용중' },
+  { cd: 'ING', nm: '복용 중' },
   { cd: 'END', nm: '종료' },
 ];
 
@@ -33,8 +34,42 @@ export const formatAmount = (amount) => `${amount.toLocaleString('ko-KR')}원`;
 export const getTooLongMessage = (max) => `${max}자까지 입력할 수 있어요`;
 
 /** 구역 이름이 등록된 이름과 공백을 빼고 같은 반려동물 */
-export const findPetByZoneName = (zoneNm, pets) =>
-  pets.find((pet) => removeSpace(pet.petNm) === removeSpace(zoneNm));
+export const findPetBySectionName = (sectionNm, pets) =>
+  pets.find((pet) => removeSpace(pet.petNm) === removeSpace(sectionNm));
+
+/** 반려동물 구역이 없는 영수증: 이름 없는 구역 1개로 수신 */
+export const isNoSectionReceipt = (ocr) =>
+  ocr.sections.every((section) => section.sectionNm == null);
+
+/**
+ * 비율로 나눌 할인: 하단 할인. 구역이 없는 영수증은 그 구역에 찍힌 할인도 영수증 전체 할인이라 함께 분배
+ * 구역이 있는 영수증의 구역 할인은 그 구역 금액에서 바로 뺀다 (FN-AIM-009-20)
+ */
+export const getSplitDiscount = (ocr) =>
+  (ocr.btmDscntAmt ?? 0) +
+  (isNoSectionReceipt(ocr)
+    ? sum(ocr.sections.map((section) => section.dscntAmt ?? 0))
+    : 0);
+
+/** 구역이 없는 영수증의 배정 목록 행: 진료 품목·처방 약품 원래 값에 행 번호만 추가 */
+export const buildLines = (ocr) => {
+  let lineSn = 0;
+  return ocr.sections.flatMap((section) => [
+    ...section.items.map((item) => ({ lineSn: ++lineSn, ...item })),
+    ...section.drugs.map((drug) => ({ lineSn: ++lineSn, ...drug })),
+  ]);
+};
+
+export const isDrugLine = (line) => 'mdcnNm' in line;
+
+export const getLineName = (line) =>
+  (isDrugLine(line) ? line.mdcnNm : line.itemNm) ?? '';
+
+export const getLineAmount = (line) =>
+  (isDrugLine(line) ? line.mdcnAmt : line.itemAmt) ?? null;
+
+/** 용법 원문("1일 2회")의 횟수, 못 읽으면 빈 칸 (FN-AIM-009-04) */
+const readPerDay = (mdcnUsage) => mdcnUsage?.match(/(\d+)\s*회/)?.[1] ?? '';
 
 /** 진료 품목명을 쉼표로 이어 검진 내용으로, 500자를 넘으면 잘라 "…" */
 export const joinContent = (names) => {
@@ -71,15 +106,16 @@ export const splitDiscount = (subtotals, discountAmt) => {
  * 시작일 = 검진일, 종료일 = 검진일 + 일수 − 1, 상태는 종료일이 오늘보다 이전이면 종료
  */
 export const toDrugRow = (drug, ckupYmd, todayYmd) => {
-  const endYmd = ckupYmd && drug.days ? addDays(ckupYmd, drug.days - 1) : '';
+  const endYmd =
+    ckupYmd && drug.mdcnDays ? addDays(ckupYmd, drug.mdcnDays - 1) : '';
   return {
     rowId: nextId('drug'),
-    drugNm: drug.drugNm ?? '',
+    drugNm: drug.mdcnNm ?? '',
     startYmd: ckupYmd,
     endYmd,
-    perDay: drug.perDay ? String(drug.perDay) : '',
+    perDay: readPerDay(drug.mdcnUsage),
     statusCd: endYmd && endYmd < todayYmd ? 'END' : 'ING',
-    amt: drug.amt ?? null,
+    amt: drug.mdcnAmt ?? null,
     isEdited: false,
   };
 };
@@ -97,7 +133,7 @@ export const makeEmptyDrugRow = (ckupYmd) => ({
 
 const makeTab = (fields) => ({
   id: nextId('tab'),
-  zoneNm: null,
+  sectionNm: null,
   petSn: null,
   isAutoLinked: false,
   ckupTypeCd: '',
@@ -112,40 +148,46 @@ const makeTab = (fields) => ({
   ...fields,
 });
 
-/** 구역이 있는 영수증: 구역마다 탭 1개 */
-export const buildZoneTabs = ({ detail, pets, todayYmd }) => {
-  const usedPetSns = new Set();
-  const matchedPets = detail.zones.map((zone) => {
-    const pet = findPetByZoneName(zone.zoneNm, pets);
-    if (!pet || usedPetSns.has(pet.petSn)) return null;
-    usedPetSns.add(pet.petSn);
-    return pet;
-  });
-  const { amounts, discounts } = splitDiscount(
-    detail.zones.map((zone) => zone.subtotal),
-    detail.discountAmt,
+/**
+ * 구역이 있는 영수증: 구역마다 탭 1개. 구역 할인은 그 구역 소계에서 차감, 하단 할인만 비율 분배
+ * 자동 연결은 이름이 같은 구역 모두. 한 아이를 여러 구역에 연결하면 저장할 때 검진기록 1건으로 합친다
+ * (buildSaveEntries, ※신규 정책 2026-11-09)
+ */
+export const buildSectionTabs = ({ ocr, pets, todayYmd }) => {
+  const matchedPets = ocr.sections.map(
+    (section) => findPetBySectionName(section.sectionNm, pets) ?? null,
   );
-  return detail.zones.map((zone, index) =>
+  const subtotals = ocr.sections.map((section) =>
+    section.sbttlAmt == null
+      ? null
+      : section.sbttlAmt - (section.dscntAmt ?? 0),
+  );
+  const { amounts, discounts } = splitDiscount(
+    subtotals,
+    getSplitDiscount(ocr),
+  );
+  return ocr.sections.map((section, index) =>
     makeTab({
-      zoneNm: zone.zoneNm,
+      sectionNm: section.sectionNm,
+      /** [반려동물 연결] 줄의 진료 건수 */
+      itemCnt: section.items.length,
       petSn: matchedPets[index]?.petSn ?? null,
       isAutoLinked: matchedPets[index] != null,
-      ckupTypeCd: zone.ckupTypeCd ?? '',
-      ckupCn: joinContent(zone.items.map((item) => item.itmNm)),
+      ckupCn: joinContent(section.items.map((item) => item.itemNm ?? '')),
       amt: amounts[index] == null ? '' : String(amounts[index]),
-      subtotal: zone.subtotal,
+      subtotal: subtotals[index],
       discount: discounts[index],
-      drugs: zone.drugs.map((drug) =>
-        toDrugRow(drug, detail.ckupYmd, todayYmd),
+      drugs: section.drugs.map((drug) =>
+        toDrugRow(drug, ocr.ckupYmd ?? '', todayYmd),
       ),
     }),
   );
 };
 
 /**
- * 구역이 없는 영수증: 탭마다 배정된 품목(lines)으로 검진 내용·금액·약품을 다시 채운다
- * 탭이 1개면 전부 그 탭의 것이고, 2개 이상이면 assign({ [lineSn]: tabId })으로 나눈다
- * 사람이 고친 검진 내용·금액은 그대로 두고, 약품 행은 배정이 바뀔 때마다 다시 만든다
+ * 구역이 없는 영수증: 탭마다 배정된 품목(lines)으로 검진 내용·금액·약품을 다시 채움
+ * 탭이 1개면 전부 그 탭의 것, 2개 이상이면 assign({ [lineSn]: tabId })으로 분배
+ * 사람이 고친 검진 내용·금액은 그대로 두고, 약품 행은 배정이 바뀔 때마다 재생성
  */
 export const applyLineAssignment = ({
   tabs,
@@ -161,7 +203,7 @@ export const applyLineAssignment = ({
   const subtotals = tabs.map((tab) => {
     const ownLines = ownLinesOf(tab);
     return ownLines.length > 0
-      ? sum(ownLines.map((line) => line.amt ?? 0))
+      ? sum(ownLines.map((line) => getLineAmount(line) ?? 0))
       : null;
   });
   const { amounts, discounts } = splitDiscount(subtotals, discountAmt);
@@ -172,9 +214,7 @@ export const applyLineAssignment = ({
       ckupCn: tab.edited.cn
         ? tab.ckupCn
         : joinContent(
-            ownLines
-              .filter((line) => line.kind === 'item')
-              .map((line) => line.nm),
+            ownLines.filter((line) => !isDrugLine(line)).map(getLineName),
           ),
       amt: tab.edited.amt
         ? tab.amt
@@ -184,36 +224,20 @@ export const applyLineAssignment = ({
       subtotal: subtotals[index],
       discount: discounts[index],
       drugs: ownLines
-        .filter((line) => line.kind === 'drug')
-        .map((line) =>
-          toDrugRow(
-            {
-              drugNm: line.nm,
-              days: line.days,
-              perDay: line.perDay,
-              amt: line.amt,
-            },
-            ckupYmd,
-            todayYmd,
-          ),
-        ),
+        .filter(isDrugLine)
+        .map((line) => toDrugRow(line, ckupYmd, todayYmd)),
     };
   });
 };
 
-export const buildNoZoneTabs = ({ detail, petSn, todayYmd }) =>
+/** 구역이 없는 영수증: 업로드 때 고른 반려동물 탭 1개로 시작 (FN-AIM-008-03) */
+export const buildNoSectionTabs = ({ ocr, lines, petSn, todayYmd }) =>
   applyLineAssignment({
-    tabs: [
-      makeTab({
-        petSn,
-        isAutoLinked: true,
-        ckupTypeCd: detail.ckupTypeCd ?? '',
-      }),
-    ],
-    lines: detail.lines,
+    tabs: [makeTab({ petSn, isAutoLinked: true })],
+    lines,
     assign: {},
-    discountAmt: detail.discountAmt,
-    ckupYmd: detail.ckupYmd,
+    discountAmt: getSplitDiscount(ocr),
+    ckupYmd: ocr.ckupYmd ?? '',
     todayYmd,
   });
 
@@ -244,6 +268,28 @@ const validateDrug = (drug) => {
   return errors;
 };
 
+/** 저장할 탭을 반려동물별로 묶는다. 줄(탭) 순서 그대로, 「기록 안 함」·미선택은 뺀다 */
+const groupTabsByPet = (tabs) => {
+  const groups = new Map();
+  tabs
+    .filter((tab) => tab.petSn != null && tab.petSn !== SKIP)
+    .forEach((tab) => {
+      if (!groups.has(tab.petSn)) groups.set(tab.petSn, []);
+      groups.get(tab.petSn).push(tab);
+    });
+  return [...groups.values()];
+};
+
+/** 같은 아이 줄을 합칠 때의 검진 내용·메모 (※신규 정책 2026-11-09). 빈 것은 뺀다 */
+const joinTabTexts = (group, key, separator) =>
+  group
+    .map((tab) => tab[key].trim())
+    .filter((text) => text !== '')
+    .join(separator);
+
+const CONTENT_SEPARATOR = ', ';
+const MEMO_SEPARATOR = '\n';
+
 /**
  * 저장 가능 여부와 칸별 안내
  * assignableTabIds: 품목을 배정할 수 있는(반려동물을 고른) 탭
@@ -254,7 +300,7 @@ export const validateReceipt = ({
   tabs,
   lines,
   assign,
-  isNoZone,
+  isNoSection,
 }) => {
   const common = {};
   if (ckupYmd === '') common.ckupYmd = '검진일을 입력해 주세요';
@@ -283,13 +329,40 @@ export const validateReceipt = ({
     if (Object.keys(errors).length > 0) tabErrors[tab.id] = errors;
   });
 
+  /**
+   * 같은 아이 줄끼리 합칠 수 있는지 (※신규 정책 2026-11-09)
+   * - 검진 종류가 첫 줄과 다르면 두 번째 줄부터 막음
+   * - 합친 검진 내용·메모가 최대 길이를 넘으면 그 아이의 줄마다 안내
+   */
+  groupTabsByPet(savedTabs)
+    .filter((group) => group.length >= 2)
+    .forEach((group) => {
+      const baseType = group.find((tab) => tab.ckupTypeCd !== '')?.ckupTypeCd;
+      const isCnTooLong =
+        joinTabTexts(group, 'ckupCn', CONTENT_SEPARATOR).length >
+        MAX_CONTENT_LENGTH;
+      const isMemoTooLong =
+        joinTabTexts(group, 'ckupMemoCn', MEMO_SEPARATOR).length >
+        MAX_MEMO_LENGTH;
+      group.forEach((tab) => {
+        const errors = { ...tabErrors[tab.id] };
+        if (!errors.type && baseType != null && tab.ckupTypeCd !== baseType)
+          errors.type = '같은 아이의 다른 줄과 검진 종류를 맞춰 주세요';
+        if (!errors.cn && isCnTooLong)
+          errors.cn = `합치면 ${MAX_CONTENT_LENGTH}자를 넘어요`;
+        if (!errors.memo && isMemoTooLong)
+          errors.memo = `합치면 ${MAX_MEMO_LENGTH}자를 넘어요`;
+        if (Object.keys(errors).length > 0) tabErrors[tab.id] = errors;
+      });
+    });
+
   const assignableTabIds = new Set(
     tabs
       .filter((tab) => tab.petSn != null && tab.petSn !== SKIP)
       .map((tab) => tab.id),
   );
   const unassignedCount =
-    isNoZone && tabs.length >= 2
+    isNoSection && tabs.length >= 2
       ? lines.filter((line) => !assignableTabIds.has(assign[line.lineSn]))
           .length
       : 0;
@@ -307,22 +380,34 @@ export const validateReceipt = ({
   };
 };
 
-/** 저장 요청의 항목: "저장 안 함" 탭은 뺀다. 가계부에 안 쓸 탭은 ledgerAmt가 null */
+const toSaveDrug = (drug) => ({
+  drugNm: drug.drugNm.trim(),
+  startYmd: drug.startYmd,
+  endYmd: drug.endYmd,
+  perDay: Number(drug.perDay),
+  statusCd: drug.statusCd,
+});
+
+/**
+ * 저장 요청의 항목: 반려동물 1마리 = 1건. "저장 안 함" 탭은 뺀다
+ * 같은 아이를 고른 줄이 여럿이면 합친다(※신규 정책 2026-11-09)
+ * - tabId: 그 아이의 첫 줄(중복 지출·가까운 일정 안내가 이 탭을 가리킴), tabIds: 합친 줄 모두
+ * - 검진 종류는 첫 줄(validateReceipt가 같은지 확인), 검진 내용은 ", ", 메모는 줄바꿈으로 이음
+ * - 약품은 줄 순서대로 모두, 가계부 금액은 가계부에 체크한 줄의 합. 하나도 없으면 ledgerAmt null
+ */
 export const buildSaveEntries = (tabs) =>
-  tabs
-    .filter((tab) => tab.petSn !== SKIP)
-    .map((tab) => ({
-      tabId: tab.id,
-      petSn: tab.petSn,
-      ckupTypeCd: tab.ckupTypeCd,
-      ckupCn: tab.ckupCn.trim(),
-      ckupMemoCn: tab.ckupMemoCn.trim(),
-      drugs: tab.drugs.map((drug) => ({
-        drugNm: drug.drugNm.trim(),
-        startYmd: drug.startYmd,
-        endYmd: drug.endYmd,
-        perDay: Number(drug.perDay),
-        statusCd: drug.statusCd,
-      })),
-      ledgerAmt: getLedgerAmount(tab),
-    }));
+  groupTabsByPet(tabs).map((group) => {
+    const ledgerAmounts = group
+      .map(getLedgerAmount)
+      .filter((amount) => amount != null);
+    return {
+      tabId: group[0].id,
+      tabIds: group.map((tab) => tab.id),
+      petSn: group[0].petSn,
+      ckupTypeCd: group[0].ckupTypeCd,
+      ckupCn: joinTabTexts(group, 'ckupCn', CONTENT_SEPARATOR),
+      ckupMemoCn: joinTabTexts(group, 'ckupMemoCn', MEMO_SEPARATOR),
+      drugs: group.flatMap((tab) => tab.drugs.map(toSaveDrug)),
+      ledgerAmt: ledgerAmounts.length > 0 ? sum(ledgerAmounts) : null,
+    };
+  });

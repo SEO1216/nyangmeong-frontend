@@ -1,142 +1,111 @@
-import { Bot, MapPinOff } from 'lucide-react';
+import { MapPinOff } from 'lucide-react';
+import DropdownSelect from '@/components/DropdownSelect';
+import EmptyResult from '@/components/EmptyResult';
+import LoadError from '@/components/LoadError';
+import Skeleton from '@/components/Skeleton';
 import PlaceListItem from './PlaceListItem';
 import PlaceSearchForm from './PlaceSearchForm';
-import { SORT_OPTIONS, SUGGESTIONS } from './placeData';
-
-// const AI_KEYWORDS = ['전주', '동물병원', '정형외과'];
+import { SORT_OPTIONS } from './placeData';
+import { PLACE_LIST_ID } from './placeFormat';
 
 const groupTitle =
-  'flex items-baseline gap-1.5 px-4 pt-4 text-sm font-semibold text-ink-2 md:px-5';
+  'flex items-baseline gap-2 px-4 pt-4 text-sm font-semibold text-ink-2 min-[760px]:px-5';
 
 export default function PlacePanel({
-  category,
   search,
   sort,
   regionText,
-  resultIds,
-  favoriteIds,
+  query,
+  results,
+  totalCount,
   favorites,
+  bookmarkSnOf,
   isOutside,
   isCollapsed,
   sheet,
   onSearch,
+  onType,
   onSortChange,
   onSelectPlace,
   onToggleFavorite,
 }) {
   return (
     <section
+      id={PLACE_LIST_ID}
       aria-label="장소 목록"
       style={{ '--sheet-y': `${sheet.sheetY}px` }}
-      className={`relative z-[2] flex min-h-0 min-w-0 flex-col overflow-hidden border-r border-line bg-white max-md:absolute max-md:inset-x-0 max-md:bottom-0 max-md:z-[6] max-md:h-[calc(100%-56px)] max-md:translate-y-[calc(100%-var(--sheet-y))] max-md:rounded-t-[20px] max-md:border-0 max-md:shadow-[0_-6px_24px_rgba(26,50,52,0.14)] ${
+      className={`relative z-[2] flex min-h-0 min-w-0 flex-col overflow-hidden border-r border-line bg-white max-[760px]:absolute max-[760px]:inset-x-0 max-[760px]:bottom-0 max-[760px]:z-[6] max-[760px]:h-[calc(100%-56px)] max-[760px]:translate-y-[calc(100%-var(--sheet-y))] max-[760px]:rounded-t-[20px] max-[760px]:border-0 max-[760px]:shadow-[0_-6px_24px_rgba(26,50,52,0.14)] ${
         sheet.isDragging
           ? ''
-          : 'max-md:transition-transform max-md:duration-300 max-md:ease-[cubic-bezier(.2,.8,.2,1)] motion-reduce:transition-none'
-      } ${isCollapsed ? 'md:invisible' : ''}`}
+          : 'max-[760px]:transition-transform max-[760px]:duration-300 max-[760px]:ease-[cubic-bezier(.2,.8,.2,1)] motion-reduce:transition-none'
+      } ${isCollapsed ? 'min-[760px]:invisible' : ''}`}
     >
       <button
         type="button"
         aria-label="목록 크기 바꾸기"
         onPointerDown={(event) => sheet.startDrag(event, true)}
         onClick={sheet.handleHandleClick}
-        className="flex w-full cursor-grab touch-none flex-col items-center gap-1.5 pb-1.5 pt-2.5 before:h-1 before:w-10 before:rounded-sm before:bg-line-strong before:content-[''] md:hidden"
+        className="flex w-full cursor-grab touch-none flex-col items-center gap-2 pb-2 pt-3 before:h-1 before:w-10 before:rounded-sm before:bg-line-strong before:content-[''] min-[760px]:hidden"
       >
         <span className="text-sm text-subtle">
           {sheet.isFull ? '아래로 내려 지도 보기' : '위로 올려 목록 보기'}
         </span>
       </button>
 
-      <div className="hidden flex-col gap-3 px-5 pb-4 pt-6 md:flex">
+      <div className="hidden flex-col gap-3 px-5 pb-4 pt-6 min-[760px]:flex">
         <h1 className="text-2xl font-bold leading-[1.3] tracking-[-0.02em] text-ink">
           반려동물 플레이스
         </h1>
-        <PlaceSearchForm id="place-q" q={search.q} onSearch={onSearch} />
-        <div className="flex min-w-0 items-center gap-1.5 overflow-x-auto whitespace-nowrap text-sm text-subtle [scrollbar-width:none]">
-          <span className="shrink-0">추천</span>
-          {SUGGESTIONS[category].map((text, index) => (
-            <span key={text} className="flex shrink-0 items-center gap-1.5">
-              {index > 0 && <i className="not-italic text-line-strong">·</i>}
-              <button
-                type="button"
-                onClick={() => onSearch(text)}
-                className="py-0.5 font-medium text-brand-600 hover:underline hover:underline-offset-[3px]"
-              >
-                {text}
-              </button>
-            </span>
-          ))}
-        </div>
+        <PlaceSearchForm
+          q={search.q}
+          category={search.category}
+          onSearch={onSearch}
+          onType={onType}
+        />
       </div>
 
-      <div className="flex min-h-12 items-center justify-between gap-3 border-y border-line bg-surface-2 px-5 max-md:border-t-0 max-md:bg-white max-md:px-4 md:min-h-[52px]">
+      <div className="flex min-h-12 items-center justify-between gap-3 border-y border-line bg-surface-2 px-5 max-[760px]:border-t-0 max-[760px]:bg-white max-[760px]:px-4 min-[760px]:min-h-[52px]">
         <p
           onPointerDown={(event) => sheet.startDrag(event, false)}
-          className="min-w-0 flex-1 touch-none truncate text-sm text-muted max-md:cursor-grab"
+          className="min-w-0 flex-1 touch-none truncate text-sm text-muted max-[760px]:cursor-grab"
         >
           <b className="font-semibold text-ink">{regionText}</b> · 결과{' '}
-          {resultIds.length}곳
+          {totalCount}곳
         </p>
-        <select
-          aria-label="정렬"
+        <DropdownSelect
+          label="정렬"
           value={sort}
-          onChange={(event) => onSortChange(event.target.value)}
-          className="h-9 w-[104px] shrink-0 rounded-md border border-input-line bg-white px-2 text-sm text-ink focus:ring-focus focus:outline-none"
-        >
-          {SORT_OPTIONS.map((option) => (
-            <option key={option}>{option}</option>
-          ))}
-        </select>
+          size="sm"
+          options={SORT_OPTIONS}
+          className="w-[104px] shrink-0"
+          onChange={onSortChange}
+        />
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-        {/* {search.isAi && (
-          <div className="mx-4 mt-4 flex gap-3 rounded-xl bg-brand-50 p-4 md:mx-5">
-            <Bot className="size-10 shrink-0 text-brand-500" />
-            <div className="text-sm text-ink-2">
-              <b className="block text-base text-ink">
-                AI 매니저가 찾은 키워드
-              </b>
-              질문을 장소 검색어로 바꿔 찾았어요
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {AI_KEYWORDS.map((keyword) => (
-                  <span
-                    key={keyword}
-                    className="inline-flex h-6 items-center rounded-full border border-line-strong bg-white px-2 text-badge font-semibold text-ink-2"
-                  >
-                    {keyword}
-                  </span>
-                ))}
-              </div>
-              <p className="mt-2">
-                수술 실력이나 의학적 판단을 보증하지 않아요. 진료 전 병원에 꼭
-                문의해 주세요.
-              </p>
-            </div>
-          </div>
-        )} */}
-
-        {favoriteIds.length > 0 && (
+        {favorites.length > 0 && (
           <section
             aria-labelledby="place-fav-title"
             className="border-b-8 border-surface-2"
           >
             <h2 id="place-fav-title" className={groupTitle}>
-              내 즐겨찾기 <b className="text-brand-600">{favoriteIds.length}</b>
+              내 즐겨찾기 <b className="text-brand-600">{favorites.length}</b>
               <small className="ml-auto text-sm font-normal text-subtle">
                 상단 고정
               </small>
             </h2>
             <ul>
-              {favoriteIds.map((id) => (
+              {favorites.map((place) => (
                 <PlaceListItem
-                  key={id}
-                  id={id}
+                  key={place.plcSn}
+                  place={place}
                   isFavorite
-                  isStarred={!!favorites[id]}
-                  isOutside={isOutside(id)}
-                  isSelected={search.selected === id}
+                  isStarred
+                  isOutside={isOutside(place)}
+                  isSelected={search.selected === place.plcSn}
                   shouldScroll={
-                    search.selected === id && search.selectedBy === 'pin'
+                    search.selected === place.plcSn &&
+                    search.selectedBy === 'pin'
                   }
                   onSelect={onSelectPlace}
                   onToggleFavorite={onToggleFavorite}
@@ -148,33 +117,53 @@ export default function PlacePanel({
 
         <section aria-labelledby="place-result-title">
           <h2 id="place-result-title" className={groupTitle}>
-            검색 결과 <b className="text-brand-600">{resultIds.length}</b>
-            <small className="ml-auto text-sm font-normal text-subtle">
-              “{search.q}”
-            </small>
+            검색 결과 <b className="text-brand-600">{totalCount}</b>
+            {search.keyword && (
+              <small className="ml-auto text-sm font-normal text-subtle">
+                “{search.keyword}”
+              </small>
+            )}
           </h2>
-          {resultIds.length === 0 ? (
-            <div className="flex flex-col items-center gap-2.5 px-6 py-12 text-center text-muted">
-              <span className="grid size-16 place-items-center rounded-full bg-brand-50 text-brand-500">
-                <MapPinOff className="size-8" />
-              </span>
-              <p className="text-lg font-bold text-ink">
-                이 지도 영역에 검색 결과가 없어요
-              </p>
-              <p>지도를 옮기거나 검색어를 바꿔 보세요</p>
+          {query.isPending ? (
+            <ul aria-label="검색 결과를 불러오는 중">
+              {[0, 1, 2].map((index) => (
+                <li
+                  key={index}
+                  className="border-b border-line-soft px-4 py-4 min-[760px]:px-5"
+                >
+                  <Skeleton className="h-6 w-1/2" />
+                  <Skeleton lines={2} className="mt-3" />
+                </li>
+              ))}
+            </ul>
+          ) : query.isError ? (
+            <LoadError
+              message="검색 결과를 불러오지 못했어요"
+              onRetry={() => query.refetch()}
+              className="px-6 py-12"
+            />
+          ) : results.length === 0 ? (
+            <div className="p-4">
+              <EmptyResult
+                isCompact
+                icon={<MapPinOff className="size-8" />}
+                title="이 지도 영역에 검색 결과가 없어요"
+                description="지도를 옮기거나 검색어를 바꿔 보세요"
+              />
             </div>
           ) : (
             <>
               <ul>
-                {resultIds.map((id, index) => (
+                {results.map((place, index) => (
                   <PlaceListItem
-                    key={id}
-                    id={id}
-                    letter={String.fromCharCode(65 + index)}
-                    isStarred={!!favorites[id]}
-                    isSelected={search.selected === id}
+                    key={place.plcSn}
+                    place={place}
+                    letter={String(index + 1)}
+                    isStarred={bookmarkSnOf(place) != null}
+                    isSelected={search.selected === place.plcSn}
                     shouldScroll={
-                      search.selected === id && search.selectedBy === 'pin'
+                      search.selected === place.plcSn &&
+                      search.selectedBy === 'pin'
                     }
                     onSelect={onSelectPlace}
                     onToggleFavorite={onToggleFavorite}

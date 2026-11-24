@@ -1,16 +1,17 @@
 import { formatYm } from '@/utils/yearMonth';
 import { getClsfName } from '../shared/expenseStats';
 import { getPetLabel } from '../shared/expenseFormat';
+import { getTodayYmd } from '../shared/expenseInput';
 
 const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
 /** 앱: 칸 테두리 없이 주 사이 얇은 선만, 날짜는 가운데 */
 const CELL =
-  'flex min-h-20 min-w-0 flex-col items-start border-r border-b border-line bg-white p-2 text-left text-sm max-[760px]:min-h-0 max-[760px]:items-center max-[760px]:gap-1 max-[760px]:border-r-0 max-[760px]:border-line-soft max-[760px]:bg-transparent max-[760px]:px-0 max-[760px]:pt-1.5 max-[760px]:pb-2';
+  'flex min-h-20 min-[1100px]:min-h-[88px] min-w-0 flex-col items-start border-r border-b border-line bg-white p-2 text-left text-sm max-[760px]:min-h-0 max-[760px]:items-center max-[760px]:gap-1 max-[760px]:border-r-0 max-[760px]:border-line-soft max-[760px]:bg-transparent max-[760px]:px-0 max-[760px]:pt-1.5 max-[760px]:pb-2';
 
 const DAY_BASE =
   'max-[760px]:grid max-[760px]:size-8 max-[760px]:place-items-center max-[760px]:rounded-full max-[760px]:text-[15px]';
 
-/** 날짜 칸 클릭 -> 등록 또는 상세 */
+/** 날짜 칸 클릭 -> 등록 또는 상세. 칸은 늘 6주(42칸). 1100px 이상은 남는 높이를 주마다 똑같이 나눈다 */
 export default function ExpenseCalendar({
   ym,
   cells,
@@ -19,17 +20,15 @@ export default function ExpenseCalendar({
   onEmptyDay,
 }) {
   const monthLabel = formatYm(ym);
-  /** UTC 변환 시 날짜 어긋남 방지 */
-  const todayYmd = new Date().toLocaleDateString('sv-SE');
+  const todayYmd = getTodayYmd();
   const lastDayIndex = cells.findLastIndex((cell) => cell.day !== null);
-
   return (
-    <div>
+    <div className="min-[1100px]:flex min-[1100px]:min-h-0 min-[1100px]:flex-1 min-[1100px]:flex-col">
       <p className="mb-3 text-sm text-subtle">날짜를 눌러 지출을 등록하세요</p>
       <div
         role="group"
         aria-label={`${monthLabel} 달력`}
-        className="grid grid-cols-7 overflow-hidden rounded-box border-t border-l border-line max-[760px]:overflow-visible max-[760px]:rounded-none max-[760px]:border-0"
+        className={`grid grid-cols-7 min-[1100px]:flex-1 min-[1100px]:grid-rows-[auto_repeat(6,minmax(88px,1fr))] overflow-hidden rounded-box border-t border-l border-line max-[760px]:overflow-visible max-[760px]:rounded-none max-[760px]:border-0`}
       >
         {DAY_NAMES.map((name) => (
           <div
@@ -49,7 +48,9 @@ export default function ExpenseCalendar({
               />
             );
           }
-          const hasItems = cell.items.length > 0;
+          const hasItems = cell.count > 0;
+          /** 내일 이후 칸은 지출이 없으면 등록할 수 없다 */
+          const isFuture = cell.expndYmd > todayYmd;
           const isSelected = cell.expndYmd === selectedYmd;
           const isWeekend = index % 7 === 0 || index % 7 === 6;
           /** 앱: 오늘은 초록 글자, 선택은 초록 원 */
@@ -67,6 +68,7 @@ export default function ExpenseCalendar({
             <button
               key={cell.expndYmd}
               type="button"
+              disabled={isFuture && !hasItems}
               onClick={() =>
                 hasItems
                   ? onSelectDay(cell.expndYmd)
@@ -76,9 +78,11 @@ export default function ExpenseCalendar({
               aria-label={
                 hasItems
                   ? undefined
-                  : `${Number(ym.slice(5))}월 ${cell.day}일 지출 등록`
+                  : isFuture
+                    ? `${Number(ym.slice(5))}월 ${cell.day}일 (등록할 수 없는 날짜)`
+                    : `${Number(ym.slice(5))}월 ${cell.day}일 지출 등록`
               }
-              className={`${CELL} cursor-pointer hover:bg-surface-2 max-[760px]:hover:bg-transparent ${
+              className={`${CELL} enabled:cursor-pointer enabled:hover:bg-surface-2 max-[760px]:hover:bg-transparent disabled:cursor-not-allowed ${
                 isSelected
                   ? 'bg-brand-50 shadow-[inset_0_0_0_2px_var(--color-brand-500)] hover:bg-brand-50 max-[760px]:bg-transparent max-[760px]:shadow-none'
                   : ''
@@ -93,17 +97,17 @@ export default function ExpenseCalendar({
               </span>
               {hasItems && (
                 <>
-                  <span className="mt-1 max-w-full truncate font-bold max-[760px]:hidden">
+                  <span className="mt-1 max-w-full truncate font-bold tabular-nums max-[760px]:hidden">
                     {cell.totalAmt.toLocaleString('ko-KR')}
                   </span>
                   <span className="max-w-full truncate text-subtle max-[760px]:hidden">
-                    {cell.items.length === 1
-                      ? `${getPetLabel(cell.items[0])}·${getClsfName(cell.items[0].expndClsfCd)}`
-                      : `${cell.items.length}건`}
+                    {cell.only
+                      ? `${getPetLabel(cell.only)}·${getClsfName(cell.only.expndClsfCd)}`
+                      : `${cell.count}건`}
                   </span>
                   <span
                     aria-hidden="true"
-                    className={`hidden h-[5px] rounded-[3px] max-[760px]:block ${cell.items.length > 1 ? 'w-3.5' : 'w-[5px]'} ${isSelected ? 'bg-brand-600' : 'bg-[#4f8f86]'}`}
+                    className={`hidden h-[5px] rounded-[3px] max-[760px]:block ${cell.count > 1 ? 'w-3.5' : 'w-[5px]'} ${isSelected ? 'bg-brand-600' : 'bg-brand-500'}`}
                   />
                 </>
               )}

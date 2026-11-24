@@ -1,37 +1,36 @@
 import { User } from 'lucide-react';
 import { useState } from 'react';
 import Modal from '@/components/Modal';
-import { useCheckNickname, useUpdateNickname } from '../queries';
-import { PRIMARY_BTN, SIDE_BTN } from '../shared/authStyles';
+import { useCheckNicknameAvailability, useSetupNickname } from '../queries';
+import { SIDE_BTN, AUTH_BTN_PRIMARY } from '../shared/authStyles';
 import AuthField from '../shared/AuthField';
-import {
-  NICKNAME_MAX,
-  isValidNickname,
-  sanitizeNickname,
-} from '../shared/validate';
+import { NICKNAME_MAX, isValidNickname } from '../shared/validate';
 import { SIGNUP_MESSAGES as MSG } from './signupMessages';
+import FieldFoot from '@/components/FieldFoot';
 
 export default function NicknameModal({ savedNickname, onSaved, onClose }) {
   const [value, setValue] = useState(savedNickname);
   const [isEdited, setIsEdited] = useState(false);
   // idle | available | duplicate | failed
   const [status, setStatus] = useState('idle');
-  const check = useCheckNickname();
-  const save = useUpdateNickname();
+  const check = useCheckNicknameAvailability();
+  const save = useSetupNickname();
   const isBusy = check.isPending || save.isPending;
 
   const isSame = value === savedNickname;
-  const isValid = isValidNickname(value);
-  const error =
-    isEdited && !value
-      ? MSG.nickEmpty
-      : value && !isValid
-        ? MSG.nickRule
-        : status === 'duplicate'
-          ? MSG.nickDuplicate
-          : status === 'failed'
-            ? MSG.nickFailed
-            : '';
+  // 입력을 자르거나 지우지 않고 그대로 두고, 길이·문자 오류를 문구로 알린다
+  const isTooLong = value.length > NICKNAME_MAX;
+  const isValid = !isTooLong && isValidNickname(value);
+  // 빈 칸이면 오류를 띄우지 않는다. [중복확인]·[설정 완료]가 isValid로 막힌다(추가-1)
+  const error = isTooLong
+    ? MSG.nickTooLong
+    : value && !isValid
+      ? MSG.nickRule
+      : status === 'duplicate'
+        ? MSG.nickDuplicate
+        : status === 'failed'
+          ? MSG.nickFailed
+          : '';
   const help =
     isEdited && isValid && !isSame && status === 'idle'
       ? MSG.nickNeedCheck
@@ -39,7 +38,7 @@ export default function NicknameModal({ savedNickname, onSaved, onClose }) {
   const canSave = isValid && (isSame || status === 'available') && !isBusy;
 
   const change = (next) => {
-    setValue(sanitizeNickname(next));
+    setValue(next);
     setIsEdited(true);
     setStatus('idle');
   };
@@ -48,23 +47,21 @@ export default function NicknameModal({ savedNickname, onSaved, onClose }) {
     check.mutate(
       { mbrNcnm: value },
       {
-        onSuccess: ({ dplctYn }) =>
-          setStatus(dplctYn ? 'duplicate' : 'available'),
+        onSuccess: ({ available }) =>
+          setStatus(available ? 'available' : 'duplicate'),
         onError: () => setStatus('failed'),
       },
     );
 
   const handleSave = () => {
-    if (isSame) {
-      onSaved(value);
-      return;
-    }
     save.mutate(
       { mbrNcnm: value },
       {
         onSuccess: () => onSaved(value),
         onError: (err) =>
-          setStatus(err.code === 'DUPLICATE' ? 'duplicate' : 'failed'),
+          setStatus(
+            err.code === 'NICKNAME_ALREADY_USED' ? 'duplicate' : 'failed',
+          ),
       },
     );
   };
@@ -79,7 +76,7 @@ export default function NicknameModal({ savedNickname, onSaved, onClose }) {
           type="button"
           disabled={!canSave}
           onClick={handleSave}
-          className={PRIMARY_BTN}
+          className={`${AUTH_BTN_PRIMARY} w-full`}
         >
           닉네임 설정 완료
         </button>
@@ -99,17 +96,11 @@ export default function NicknameModal({ savedNickname, onSaved, onClose }) {
           label="닉네임"
           value={value}
           onChange={change}
-          placeholder="닉네임을 입력하세요"
+          placeholder="닉네임 입력"
           autoComplete="off"
           error={error}
           success={status === 'available' ? MSG.nickAvailable : ''}
           help={help}
-          hasGuide
-          endAdornment={
-            <span className="text-sm text-subtle tabular-nums">
-              {value.length} / {NICKNAME_MAX}
-            </span>
-          }
           action={
             <button
               type="button"
@@ -117,14 +108,18 @@ export default function NicknameModal({ savedNickname, onSaved, onClose }) {
               disabled={!isValid || isSame || isBusy}
               className={SIDE_BTN}
             >
-              중복 확인
+              중복확인
             </button>
           }
         />
+        {/** 글자 수는 칸 아래 오른쪽(공용 FieldFoot, 사람 피드백 2026-11-23) */}
+        <div className="mt-1.5">
+          <FieldFoot value={value} max={NICKNAME_MAX} />
+        </div>
         <p className="mt-2 text-sm leading-5 text-muted">
           최대 10글자 · 한글·영문·숫자만 가능
           <br />
-          특수문자·공백·이모지는 사용할 수 없어요.
+          특수문자·공백·이모지는 사용할 수 없습니다.
         </p>
       </div>
     </Modal>

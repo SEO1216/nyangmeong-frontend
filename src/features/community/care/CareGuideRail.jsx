@@ -13,7 +13,7 @@ export function CareCheckGuide() {
     <section aria-labelledby="care-check-title">
       <h2
         id="care-check-title"
-        className="pb-3 text-lg leading-[1.4] font-bold text-ink"
+        className="pb-2 text-lg font-bold tracking-[-0.01em] text-ink"
       >
         돌봄 전, 꼭 확인해요
       </h2>
@@ -22,12 +22,12 @@ export function CareCheckGuide() {
   );
 }
 
-/** 목록 오른쪽 레일: 돌봄 전 확인 안내 + 안전 안내. 검색·필터·쪽과 관계없이 늘 같다 */
+/** 목록 오른쪽 레일: 돌봄 전 확인 안내 + 안전 안내. 검색·필터·쪽과 관계없이 항상 동일 */
 export default function CareGuideRail() {
   return (
     <aside
       aria-label="돌봄 전 확인 안내"
-      className="flex min-w-0 flex-col gap-8"
+      className="flex min-w-0 flex-col gap-10"
     >
       <CareCheckGuide />
       <div className="rounded-[14px] bg-brand-50 px-5 py-4 text-sm leading-[1.6] text-brand-600">

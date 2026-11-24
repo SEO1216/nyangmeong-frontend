@@ -1,11 +1,16 @@
 import { X } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import EmptyResult from '@/components/EmptyResult';
+import Skeleton from '@/components/Skeleton';
+import SkeletonCard from '@/components/SkeletonCard';
 import { showToast } from '@/components/toastStore';
+import { useCharacterImage } from '@/hooks/useCharacterImage';
 import { PATHS } from '@/routes/paths';
-import { useCharacterItems, useUpdateCharacterWear } from '../queries';
+import { usePixelCharacter, useSaveEquippedItems } from '../queries';
 import { ITEM_PART } from '../shared/petCodes';
+import ItemImage from './ItemImage';
 import ItemShopModal from './ItemShopModal';
 import ItemStorage from './ItemStorage';
 import WearPreview from './WearPreview';
@@ -27,34 +32,45 @@ const SLOT_ORDER = {
   [ITEM_PART.BAG]: 'max-[760px]:order-5',
 };
 
-/** 서버 아이템 목록 → { 부위: 착용 중인 아이템 } */
+/** 보유 아이템 목록 → { 부위: 착용 중인 아이템 } */
 const toWorn = (items) =>
   Object.fromEntries(
-    items
-      .filter((item) => item.wearYn === 'Y')
-      .map((item) => [item.itemPartCd, item]),
+    items.filter((item) => item.equipYn).map((item) => [item.itemRegnCd, item]),
   );
+
+const SAVE_ERRORS = {
+  PET_PRIMARY_ONLY: '주양육자만 꾸밀 수 있어요',
+};
 
 /**
  * [꾸미기] (FN-MYP-010-13~16·24)
  * - draft: 저장 전 착용 상태. null이면 서버에 저장된 상태 그대로
  * - [되돌리기]는 draft를 버려 진입 시점(저장된) 상태로, [장착]은 draft를 저장
  */
-export default function CharacterDecorate({ pet, pntBal }) {
-  const { data: items = [], isPending } = useCharacterItems(pet.petSn);
-  const { mutate: saveWear, isPending: isSaving } = useUpdateCharacterWear();
+export default function CharacterDecorate({ pet }) {
+  const navigate = useNavigate();
+  const {
+    data: character,
+    isPending,
+    isError,
+    refetch,
+  } = usePixelCharacter(pet.pixelCharSn);
+  const items = character?.heldItems ?? [];
+  const { mutate: saveWear, isPending: isSaving } = useSaveEquippedItems();
   const [draft, setDraft] = useState(null);
   const [isShopOpen, setIsShopOpen] = useState(false);
+  const characterImage = useCharacterImage(pet.petSn, 'full');
 
   const worn = draft ?? toWorn(items);
+  const wornItemSns = Object.values(worn).map((item) => item.itemSn);
 
   const toggle = (item) => {
     const next = { ...worn };
     /** 같은 아이템을 다시 누르면 해제, 같은 부위의 다른 아이템이면 교체 */
-    if (next[item.itemPartCd]?.itemSn === item.itemSn) {
-      delete next[item.itemPartCd];
+    if (next[item.itemRegnCd]?.hldItemSn === item.hldItemSn) {
+      delete next[item.itemRegnCd];
     } else {
-      next[item.itemPartCd] = item;
+      next[item.itemRegnCd] = item;
     }
     setDraft(next);
   };
@@ -65,19 +81,37 @@ export default function CharacterDecorate({ pet, pntBal }) {
     setDraft(next);
   };
 
+  /** 미리보기 합성이 실패하면 마지막으로 성공한 조합으로 되돌린다 */
+  const revertTo = (confirmedSns) => {
+    const confirmed = new Set(confirmedSns);
+    setDraft(toWorn(items.filter((item) => confirmed.has(item.itemSn))));
+  };
+
   const handleSave = () => {
     saveWear(
       {
+        pixelCharSn: pet.pixelCharSn,
         petSn: pet.petSn,
+        hldItemSns: Object.values(worn).map((item) => item.hldItemSn),
         itemSns: Object.values(worn).map((item) => item.itemSn),
       },
       {
         onSuccess: () => {
           setDraft(null);
-          showToast('착용 상태를 저장했어요');
+          showToast('착용 상태를 저장했어요', { type: 'success' });
         },
-        onError: () =>
-          showToast('저장하지 못했어요. 잠시 뒤 다시 시도해 주세요'),
+        onError: (error) => {
+          if (error.code === 'PIXEL_CHARACTER_UNDER_REVIEW') {
+            showToast('오류 확인 중인 캐릭터는 꾸밀 수 없어요');
+            navigate(PATHS.MYPAGE_CHARACTERS, { replace: true });
+            return;
+          }
+          showToast(
+            SAVE_ERRORS[error.code] ??
+              '저장하지 못했어요. 잠시 뒤 다시 시도해 주세요',
+            { type: 'error' },
+          );
+        },
       },
     );
   };
@@ -91,12 +125,22 @@ export default function CharacterDecorate({ pet, pntBal }) {
     />
   );
 
-  if (isPending) return null;
+  if (isPending) return <DecorateSkeleton />;
+
+  if (isError) {
+    return (
+      <EmptyResult title="꾸미기 정보를 불러오지 못했어요">
+        <button type="button" onClick={() => refetch()} className={BTN_PRIMARY}>
+          다시 시도
+        </button>
+      </EmptyResult>
+    );
+  }
 
   return (
     <>
       <div className="flex justify-end max-[760px]:mb-4 max-[760px]:-translate-y-3">
-        {pet.inqryRcptYn === 'Y' ? (
+        {character?.inqryRcptYn === true ? (
           <button type="button" disabled className={BTN_SECONDARY}>
             문의 접수됨
           </button>
@@ -106,7 +150,8 @@ export default function CharacterDecorate({ pet, pntBal }) {
             state={{
               inquiryType: 'PIXEL_CHARACTER',
               petSn: pet.petSn,
-              imageUrl: pet.chrcImgUrl,
+              pixelCharSn: pet.pixelCharSn,
+              imageUrl: characterImage,
             }}
             className={BTN_SECONDARY}
           >
@@ -114,18 +159,23 @@ export default function CharacterDecorate({ pet, pntBal }) {
           </Link>
         )}
       </div>
-      <div className="mt-4 grid items-start gap-4 max-[760px]:col-span-full min-[1101px]:grid-cols-[minmax(0,1fr)_minmax(360px,420px)]">
+      <div className="mt-4 grid items-start gap-4 max-[760px]:col-span-full min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(360px,420px)]">
         <section
           aria-label="착용 미리보기"
           className="rounded-card border border-line bg-white shadow-sm max-[760px]:col-span-full max-[760px]:grid max-[760px]:grid-cols-5 max-[760px]:gap-x-2 max-[760px]:gap-y-3 max-[760px]:p-4"
         >
-          <div className="max-[760px]:contents grid grid-cols-[72px_minmax(0,300px)_72px] items-center justify-center gap-3 px-4 pt-8 pb-4 min-[600px]:grid-cols-[96px_minmax(0,300px)_96px] min-[600px]:gap-5 min-[600px]:px-6">
+          <div className="max-[760px]:contents grid grid-cols-[72px_minmax(0,300px)_72px] items-center justify-center gap-3 px-4 pt-8 pb-4 min-[760px]:grid-cols-[96px_minmax(0,300px)_96px] min-[760px]:gap-5 min-[760px]:px-6">
             <div className="flex flex-col gap-5 max-[760px]:contents">
               {slot(ITEM_PART.HEAD)}
               {slot(ITEM_PART.FACE)}
             </div>
             <div className="max-[760px]:col-span-full max-[760px]:mx-auto max-[760px]:w-[min(220px,100%)]">
-              <WearPreview pet={pet} worn={worn} />
+              <WearPreview
+                pet={pet}
+                itemSns={wornItemSns}
+                enabled={!isSaving}
+                onFail={revertTo}
+              />
             </div>
             <div className="flex flex-col gap-5 max-[760px]:contents">
               {slot(ITEM_PART.CLOTHES)}
@@ -133,7 +183,7 @@ export default function CharacterDecorate({ pet, pntBal }) {
             </div>
           </div>
           <div className="flex justify-center px-6 pb-6 max-[760px]:contents">
-            <div className="w-[72px] min-[600px]:w-24 max-[760px]:contents">
+            <div className="w-[72px] min-[760px]:w-24 max-[760px]:contents">
               {slot(ITEM_PART.NECK)}
             </div>
           </div>
@@ -181,12 +231,29 @@ export default function CharacterDecorate({ pet, pntBal }) {
         <ItemShopModal
           pet={pet}
           worn={worn}
-          ownedItems={items}
-          pntBal={pntBal}
           onClose={() => setIsShopOpen(false)}
         />
       )}
     </>
+  );
+}
+
+/** 꾸미기 로딩 자리: 미리보기 카드 + 보관함 카드 (CharacterPage 로딩도 같이 쓴다) */
+export function DecorateSkeleton() {
+  return (
+    <div aria-busy="true" className="contents">
+      <div className="flex justify-end max-[760px]:mb-4 max-[760px]:-translate-y-3">
+        <Skeleton className="h-10 w-24" />
+      </div>
+      <div className="mt-4 grid items-start gap-4 max-[760px]:col-span-full min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(360px,420px)]">
+        <SkeletonCard className="h-[478px] max-[760px]:h-[346px]" />
+        <SkeletonCard className="h-[187px]" />
+      </div>
+      <div className="mt-5 flex justify-end gap-2 border-t border-line pt-5 max-[760px]:col-span-full">
+        <Skeleton className="h-10 w-24 max-[760px]:flex-1" />
+        <Skeleton className="h-10 w-24 max-[760px]:flex-1" />
+      </div>
+    </div>
   );
 }
 
@@ -200,7 +267,14 @@ function Slot({ name, item, onRelease, className = '' }) {
             : 'border border-dashed border-line-strong bg-white font-normal text-placeholder'
         }`}
       >
-        {item ? item.itemNm : '비어있음'}
+        {item ? (
+          <ItemImage
+            item={item}
+            fallback={<span className="break-all">{item.itemNm}</span>}
+          />
+        ) : (
+          '비어있음'
+        )}
         {item && (
           <button
             type="button"

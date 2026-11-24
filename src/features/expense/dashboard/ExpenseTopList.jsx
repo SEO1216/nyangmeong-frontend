@@ -1,3 +1,4 @@
+import { ChevronRight } from 'lucide-react';
 import ExpenseCategoryBadge from '../shared/ExpenseCategoryBadge';
 import { EXPND_CLSF } from '../shared/expenseCodes';
 import {
@@ -12,13 +13,26 @@ import {
   CARD_TITLE,
 } from '../shared/expenseStyles';
 
-export default function ExpenseTopList({ expenses }) {
+/** isGrow: 1100px 이상에서 남는 높이만큼 늘어난다(달력과 아래 끝 맞춤)
+ * onViewAll(): 1100px 이상에서만 제목 옆 링크로 보인다(미만은 대시보드의 전체 내역 카드) */
+export default function ExpenseTopList({ expenses, onViewAll, isGrow }) {
   return (
-    <section aria-labelledby="expense-top-title" className={CARD}>
+    <section
+      aria-labelledby="expense-top-title"
+      className={`${CARD} ${isGrow ? 'min-[1100px]:flex-1' : ''}`}
+    >
       <div className={CARD_HEAD}>
         <h2 id="expense-top-title" className={CARD_TITLE}>
           이번달 주요 지출
         </h2>
+        <button
+          type="button"
+          onClick={onViewAll}
+          className="hidden items-center gap-0.5 font-semibold text-muted hover:text-brand-600 min-[1100px]:inline-flex"
+        >
+          전체 내역 보기
+          <ChevronRight className="size-4" aria-hidden="true" />
+        </button>
       </div>
       <div className={CARD_BODY}>
         {expenses.length === 0 ? (
@@ -29,7 +43,7 @@ export default function ExpenseTopList({ expenses }) {
               <li
                 key={expense.expndSn}
                 style={{ '--cat': EXPND_CLSF[expense.expndClsfCd].color }}
-                className='relative flex items-center gap-3 border-t border-line-soft py-3 first:border-t-0 max-[760px]:grid max-[760px]:grid-cols-[auto_minmax(0,1fr)_auto] max-[760px]:gap-x-0 max-[760px]:gap-y-0.5 max-[760px]:pl-[14px] max-[760px]:before:absolute max-[760px]:before:top-3 max-[760px]:before:bottom-3 max-[760px]:before:left-0 max-[760px]:before:w-1 max-[760px]:before:rounded-xs max-[760px]:before:bg-[var(--cat)] max-[760px]:before:content-[""]'
+                className='relative flex items-center gap-3 border-t border-line-soft py-3 first:border-t-0 max-[760px]:grid max-[760px]:grid-cols-[auto_minmax(0,1fr)_auto] max-[760px]:gap-x-0 max-[760px]:gap-y-0.5 max-[760px]:pl-4 max-[760px]:before:absolute max-[760px]:before:top-3 max-[760px]:before:bottom-3 max-[760px]:before:left-0 max-[760px]:before:w-1 max-[760px]:before:rounded-xs max-[760px]:before:bg-[var(--cat)] max-[760px]:before:content-[""]'
               >
                 <span className="w-12 text-sm text-subtle max-[760px]:col-start-1 max-[760px]:row-start-2 max-[760px]:w-auto">
                   {formatMonthDay(expense.expndYmd)}
@@ -44,7 +58,7 @@ export default function ExpenseTopList({ expenses }) {
                   </span>
                   {getPetLabel(expense)}
                 </span>
-                <b className="font-bold whitespace-nowrap max-[760px]:col-start-3 max-[760px]:row-span-2 max-[760px]:row-start-1 max-[760px]:self-center max-[760px]:text-[15px]">
+                <b className="font-bold whitespace-nowrap tabular-nums max-[760px]:col-start-3 max-[760px]:row-span-2 max-[760px]:row-start-1 max-[760px]:self-center max-[760px]:text-[15px]">
                   {formatWon(expense.expndAmt)}
                 </b>
               </li>

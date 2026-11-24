@@ -1,48 +1,63 @@
 import { ReceiptText } from 'lucide-react';
-import aiCharacter from '@/assets/ai-character.png';
 import { formatDate } from '@/utils/formatDate';
+import { callName } from '@/utils/josa';
 import { FAILURE } from '../receipt/receiptFailure';
 import PetChoiceChips from './PetChoiceChips';
+import AiAvatar from './AiAvatar';
 
 const EMPTY_MARK = '—';
 const AI_NOTICE =
   'AI가 자동으로 인식·판정한 결과이며 실수가 있을 수 있습니다. 저장 전에 반드시 확인해 주세요.';
 
 const bubbleClass =
-  'max-w-[592px] rounded-[4px_18px_18px_18px] border border-[#e2e7e7] bg-white px-4 py-3 text-[15px] leading-relaxed text-[#1a3234]';
+  'max-w-[592px] rounded-[4px_18px_18px_18px] border border-line bg-white px-4 py-3 text-[15px] leading-relaxed text-ink';
 const noteClass =
-  'mt-2 border-t border-dashed border-[#e2e7e7] pt-2 text-sm text-[#667374]';
+  'mt-2 border-t border-dashed border-line pt-2 text-sm text-subtle';
 const buttonClass =
-  'h-8 rounded-md px-3 text-base font-semibold disabled:cursor-not-allowed disabled:border-0 disabled:bg-[#ebf0f0] disabled:text-[#b9c4c4]';
-const primaryClass = `${buttonClass} bg-[#285a5c] text-white enabled:hover:bg-[#1e4a4c]`;
-const secondaryClass = `${buttonClass} border border-[#e2e7e7] bg-white text-[#1a3234] enabled:hover:bg-[#f4f6f6]`;
+  'h-8 rounded-md px-3 text-base font-semibold disabled:cursor-not-allowed disabled:border-0 disabled:bg-surface-3 disabled:text-line-strong';
+const primaryClass = `${buttonClass} bg-brand-500 text-white enabled:hover:bg-brand-600`;
+const secondaryClass = `${buttonClass} border border-line bg-white text-ink enabled:hover:bg-surface-2`;
 
 const formatAmount = (amount) =>
   amount == null ? EMPTY_MARK : `${amount.toLocaleString()}원`;
 
-/** 카드 표시 칸: 반려동물 구역별 금액은 이름을 칸 제목으로 */
-const buildRows = (result) => [
-  ['병원명', result.hsptlNm ?? EMPTY_MARK],
-  ['검진일', result.ckupYmd ? formatDate(result.ckupYmd) : EMPTY_MARK],
-  ['영수증 금액', formatAmount(result.recptAmt)],
-  [
-    '처방 약품',
-    result.prscrptnCnt == null ? EMPTY_MARK : `${result.prscrptnCnt}건`,
-  ],
-  ...result.petAmts.map((petAmt) => [petAmt.petNm, formatAmount(petAmt.amt)]),
-];
+/** 할인 합계: 하단 할인 + 구역 안 할인 */
+const sumDiscount = (ocr) =>
+  (ocr.btmDscntAmt ?? 0) +
+  ocr.sections.reduce((sum, section) => sum + (section.dscntAmt ?? 0), 0);
+
+/**
+ * 카드 표시 칸: 분석 응답 ocr 그대로
+ * 결제 금액은 recptAmt(할인 후), 총금액은 결제 금액 + 할인 합계(할인 전)
+ * 반려동물 구역별 금액은 구역 이름(없으면 고른 반려동물 이름)을 칸 제목으로, 처방 약품은 구역별 약품 수 합
+ */
+const buildRows = (ocr, pet) => {
+  const discount = sumDiscount(ocr);
+  return [
+    ['병원명', ocr.hsptlNm ?? EMPTY_MARK],
+    ['검진일', ocr.ckupYmd ? formatDate(ocr.ckupYmd) : EMPTY_MARK],
+    [
+      '총금액',
+      formatAmount(ocr.recptAmt == null ? null : ocr.recptAmt + discount),
+    ],
+    ['할인', discount ? `-${discount.toLocaleString()}원` : '없음'],
+    ['결제 금액', formatAmount(ocr.recptAmt)],
+    [
+      '처방 약품',
+      `${ocr.sections.reduce((sum, section) => sum + section.drugs.length, 0)}건`,
+    ],
+    ...ocr.sections.map((section) => [
+      section.sectionNm ?? pet.petNm,
+      formatAmount(section.sbttlAmt),
+    ]),
+  ];
+};
 
 /** AI 아바타 + 내용 */
-function AiRow({ children }) {
+function AiRow({ avatarPet, children }) {
   return (
     <div className="flex min-w-0 items-start gap-3">
-      <img
-        src={aiCharacter}
-        alt=""
-        width="36"
-        height="36"
-        className="size-9 shrink-0 rounded-full border border-[#e2e7e7] bg-[#e9f2f2] object-contain p-1"
-      />
+      <AiAvatar pet={avatarPet} />
       <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
         {children}
       </div>
@@ -51,22 +66,22 @@ function AiRow({ children }) {
 }
 
 /** 결과 미리보기 카드 */
-function ResultCard({ result, isDismissed, onConfirm, onDismiss }) {
+function ResultCard({ result, pet, isDismissed, onConfirm, onDismiss }) {
   return (
     <section
       aria-label="영수증 분석 결과"
-      className="w-full max-w-[520px] rounded-[14px] border border-[#e2e7e7] bg-white p-5"
+      className="w-full max-w-[520px] rounded-[14px] border border-line bg-white p-5"
     >
-      <h2 className="flex items-center gap-2 text-base font-semibold text-[#1a3234]">
-        <ReceiptText aria-hidden="true" className="size-5 text-[#285a5c]" />
+      <h2 className="flex items-center gap-2 text-base font-semibold text-ink">
+        <ReceiptText aria-hidden="true" className="size-5 text-brand-500" />
         영수증을 이렇게 읽었어요.
       </h2>
 
-      <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 rounded-[10px] bg-[#f4f6f6] p-4">
-        {buildRows(result).map(([label, value]) => (
-          <div key={label} className="min-w-0">
-            <dt className="text-sm text-[#667374]">{label}</dt>
-            <dd className="break-words text-base font-semibold text-[#1a3234]">
+      <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 rounded-[10px] bg-surface-2 p-4">
+        {buildRows(result.ocr, pet).map(([label, value], index) => (
+          <div key={index} className="min-w-0">
+            <dt className="text-sm text-subtle">{label}</dt>
+            <dd className="break-words text-base font-semibold text-ink tabular-nums">
               {value}
             </dd>
           </div>
@@ -105,6 +120,7 @@ export default function ReceiptAnalysisBubble({
   onDismiss,
   onRetry,
   onManualInput,
+  avatarPet,
 }) {
   const { status, pet, result, failure } = receipt;
 
@@ -116,10 +132,10 @@ export default function ReceiptAnalysisBubble({
           alt={receipt.file.name}
           width="160"
           height="120"
-          className="h-[120px] w-40 rounded-[10px] border border-[#e2e7e7] object-cover"
+          className="h-[120px] w-40 rounded-[10px] border border-line object-cover"
         />
         {receipt.text && (
-          <p className="max-w-[592px] whitespace-pre-wrap rounded-[18px_4px_18px_18px] border border-[#e8d27e] bg-[#f9eaa6] px-4 py-3 text-[15px] leading-relaxed text-[#1a3234]">
+          <p className="max-w-[592px] whitespace-pre-wrap rounded-[18px_4px_18px_18px] border border-fab-line bg-accent-300 px-4 py-3 text-[15px] leading-relaxed text-ink">
             {receipt.text}
           </p>
         )}
@@ -127,23 +143,21 @@ export default function ReceiptAnalysisBubble({
 
       {status === 'choosing' && (
         <>
-          <AiRow>
+          <AiRow avatarPet={avatarPet}>
             <p className={bubbleClass}>어느 반려동물의 영수증인가요?</p>
           </AiRow>
           <PetChoiceChips
             pets={pets}
             isDisabled={false}
-            onSelect={(petNm) =>
-              onChoosePet(pets.find((item) => item.petNm === petNm))
-            }
+            onSelect={onChoosePet}
           />
         </>
       )}
 
       {(status === 'analyzing' || status === 'cancelled') && (
-        <AiRow>
+        <AiRow avatarPet={avatarPet}>
           <div role="status" className={bubbleClass}>
-            <p>{pet.petNm}의 영수증을 분석하고 있어요…</p>
+            <p>{callName(pet.petNm)}의 영수증을 분석하고 있어요…</p>
             {status === 'cancelled' && <p className={noteClass}>취소됨</p>}
           </div>
           {status === 'analyzing' && (
@@ -155,9 +169,10 @@ export default function ReceiptAnalysisBubble({
       )}
 
       {(status === 'result' || status === 'dismissed') && (
-        <AiRow>
+        <AiRow avatarPet={avatarPet}>
           <ResultCard
             result={result}
+            pet={pet}
             isDismissed={status === 'dismissed'}
             onConfirm={onConfirm}
             onDismiss={onDismiss}
@@ -166,7 +181,7 @@ export default function ReceiptAnalysisBubble({
       )}
 
       {status === 'failed' && (
-        <AiRow>
+        <AiRow avatarPet={avatarPet}>
           <div role="alert" className={bubbleClass}>
             <p className="font-semibold">{FAILURE[failure].title}</p>
             <p>{FAILURE[failure].message}</p>

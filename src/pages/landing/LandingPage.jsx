@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import CountSection from '@/features/landing/CountSection';
 import FaqSection from '@/features/landing/FaqSection';
@@ -11,6 +12,7 @@ import { PATHS } from '@/routes/paths';
 
 export default function LandingPage() {
   const { search } = useLocation();
+  const [heroKey, setHeroKey] = useState(0);
   const redirect = new URLSearchParams(search).get('redirect');
   const loginTo = redirect
     ? `${PATHS.LOGIN}?redirect=${encodeURIComponent(redirect)}`
@@ -18,9 +20,13 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-dvh bg-white">
-      <LandingHeader loginTo={loginTo} />
+      <LandingHeader
+        loginTo={loginTo}
+        onHome={() => setHeroKey((key) => key + 1)}
+      />
       <main>
-        <HeroSlider />
+        {/* 로고를 누르면 key가 바뀌어 슬라이드가 첫 장부터 다시 시작한다 */}
+        <HeroSlider key={heroKey} />
         <ServiceSection />
         <ProcessSection />
         <PartnersSection />

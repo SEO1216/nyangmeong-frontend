@@ -1,16 +1,17 @@
 import { generatePath, useNavigate } from 'react-router-dom';
 import PostForm from '@/features/community/PostForm';
 import { BBS_INFO } from '@/features/community/postCodes';
+import { profanityFieldsOf } from '@/utils/profanity';
 import { useCreatePost } from '@/features/community/queries';
-import useLeaveGuard from '@/features/community/useLeaveGuard';
+import useLeaveGuard from '@/hooks/useLeaveGuard';
 import SubPageLayout from '@/layouts/SubPageLayout';
 import { PATHS } from '@/routes/paths';
 
-const INITIAL = { bbsCd: BBS_INFO, pstTtl: '', pstCn: '', atchFiles: [] };
+const INITIAL = { bbsCd: BBS_INFO, pstTtl: '', pstCn: '', imgs: [] };
 
 export default function PostWritePage() {
   const navigate = useNavigate();
-  const { mutate, isPending, isError } = useCreatePost();
+  const { mutate, isPending, isError, error } = useCreatePost();
   const { setDirty, onLeave, leaveModal } = useLeaveGuard();
 
   const handleSubmit = (values) =>
@@ -19,13 +20,12 @@ export default function PostWritePage() {
         navigate(generatePath(PATHS.COMMUNITY_POST_DETAIL, { pstSn })),
     });
 
-  /** 「목록으로」는 폼 아래 줄에 있어 머리의 ‹ 목록으로(back)는 끈다 */
+  /** 「목록으로」는 본문 박스 위(머리의 ‹ 목록으로, 나가기 확인을 거침) */
   return (
     <SubPageLayout
       section="community"
       menu={PATHS.COMMUNITY}
-      title="글쓰기"
-      back={false}
+      title="펫이야기 글쓰기"
       onLeave={onLeave}
     >
       <PostForm
@@ -36,6 +36,7 @@ export default function PostWritePage() {
         errorMessage={
           isError && '게시글을 등록하지 못했어요. 잠시 뒤 다시 시도해 주세요'
         }
+        profanityFields={profanityFieldsOf(error)}
         onSubmit={handleSubmit}
         onLeave={onLeave}
         onDirtyChange={setDirty}

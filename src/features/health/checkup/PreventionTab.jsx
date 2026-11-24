@@ -5,10 +5,11 @@ import Icon from '@/components/Icon';
 import Modal from '@/components/Modal';
 import { BTN_DANGER, BTN_SECONDARY } from '@/components/buttonStyles';
 import { formatDate } from '@/utils/formatDate';
+import CareShortageNotice from '../CareShortageNotice';
 import { getCycleName } from '../careDue';
-import EmptyBox from '../diary/EmptyBox';
+import EmptyResult from '@/components/EmptyResult';
 import { useCancelPrevention } from '../queries';
-import PreventionForm from './PreventionForm';
+import PreventionModal from './PreventionModal';
 import { ADD_ROW, ROW_LINE, TEXT_BTN_DEL } from './checkupStyles';
 import { PREVENTION_ITEMS, findName } from './checkupTypes';
 
@@ -17,29 +18,35 @@ import { PREVENTION_ITEMS, findName } from './checkupTypes';
  * - 목록 행: 예방 항목·반복 주기·다음 예정일·연동 뱃지·[해지] (FN-HLT-005-05)
  * - [해지]는 확인 뒤 반복 주기를 해지하고 자동 추가된 케어 항목을 삭제(완료 기록은 유지)
  */
-export default function PreventionTab({ ckupRcdSn, preventions }) {
+export default function PreventionTab({ petSn, ckupRcdSn, preventions }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [cancelSn, setCancelSn] = useState(null);
   const cancelPrevention = useCancelPrevention();
 
   const handleCancel = () =>
     cancelPrevention.mutate(
-      { ckupRcdSn, prvntSn: cancelSn },
+      { petSn, ckupRcdSn, reptPrvntMngSn: cancelSn },
       { onSuccess: () => setCancelSn(null) },
     );
 
   return (
-    <Card title="반복 예방 관리" sub="선택 입력">
+    <Card title="반복 예방" sub="선택">
       {preventions.length === 0 ? (
-        <EmptyBox
-          icon="pest_control"
+        <EmptyResult
+          isCompact
+          icon={
+            <Icon
+              name="pest_control"
+              className="text-[28px] text-line-strong"
+            />
+          }
           title="심장사상충 예방·구충제를 등록하면 케어 캘린더에 주기대로 추가돼요"
         />
       ) : (
         <ul>
           {preventions.map((prevention) => (
             <li
-              key={prevention.prvntSn}
+              key={prevention.reptPrvntMngSn}
               className={`flex items-center gap-3.5 py-3.5 ${ROW_LINE}`}
             >
               <span className="grid size-10 shrink-0 place-items-center rounded-[10px] border border-line bg-surface-2 text-ink-2">
@@ -47,23 +54,23 @@ export default function PreventionTab({ ckupRcdSn, preventions }) {
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block font-semibold">
-                  {findName(PREVENTION_ITEMS, prevention.prvntItmCd)}
+                  {findName(PREVENTION_ITEMS, prevention.reptPrvntArtclCd)}
                 </span>
                 <span className="block text-subtle tabular-nums">
                   {getCycleName({
-                    rptCycleCd: prevention.rptCycleCd,
-                    rptCycleDayCnt: prevention.rptCycleDayCnt,
+                    rptCycleCd: prevention.reptCycleCd,
+                    rptCycleDayCnt: prevention.cycleDrctInptDayCnt,
                   })}{' '}
                   주기
-                  {prevention.nextSchdYmd &&
-                    ` · 다음 예정 ${formatDate(prevention.nextSchdYmd)}`}
+                  {prevention.nxtmPrnmntYmd &&
+                    ` · 다음 예정 ${formatDate(prevention.nxtmPrnmntYmd)}`}
                 </span>
               </span>
-              <Badge tone="brand">처방약 연동</Badge>
+              <Badge tone="brand">케어리스트 연동</Badge>
               <button
                 type="button"
                 className={TEXT_BTN_DEL}
-                onClick={() => setCancelSn(prevention.prvntSn)}
+                onClick={() => setCancelSn(prevention.reptPrvntMngSn)}
               >
                 해지
               </button>
@@ -72,18 +79,17 @@ export default function PreventionTab({ ckupRcdSn, preventions }) {
         </ul>
       )}
 
-      {!isFormOpen && (
-        <button
-          type="button"
-          className={`${BTN_SECONDARY} ${ADD_ROW} w-full`}
-          onClick={() => setIsFormOpen(true)}
-        >
-          <Icon name="add" className="text-lg" />
-          반복 예방 추가
-        </button>
-      )}
+      <button
+        type="button"
+        className={`${BTN_SECONDARY} ${ADD_ROW} w-full`}
+        onClick={() => setIsFormOpen(true)}
+      >
+        <Icon name="add" className="text-lg" />
+        반복 예방 추가
+      </button>
       {isFormOpen && (
-        <PreventionForm
+        <PreventionModal
+          petSn={petSn}
           ckupRcdSn={ckupRcdSn}
           onClose={() => setIsFormOpen(false)}
         />
@@ -116,7 +122,14 @@ export default function PreventionTab({ ckupRcdSn, preventions }) {
               </button>
             </>
           }
-        />
+        >
+          {/** 지우면 케어리스트가 5개 미만이 될 때만 안내 (※신규 정책) */}
+          <CareShortageNotice
+            petSn={petSn}
+            verb="해지하면"
+            isTarget={(item) => item.reptPrvntMngSn === cancelSn}
+          />
+        </Modal>
       )}
     </Card>
   );

@@ -9,15 +9,17 @@ export const PATHS = {
 
   /** account */
   LOGIN: '/login',
+  SNS_CALLBACK: '/login/sns/:provider/callback',
   SIGNUP: '/signup',
   PASSWORD_FIND: '/password/find',
   PASSWORD_RESET: '/password/reset',
+  WITHDRAW_COMPLETE: '/withdraw/complete',
 
   /** settings */
   SETTINGS_NOTIFICATIONS: '/settings/notifications',
 
   /** ai */
-  AI: '/ai',
+  AI: '/ai-chat',
 
   /** chat */
   CHAT: '/chat',
@@ -26,8 +28,9 @@ export const PATHS = {
   HEALTH: '/health',
   HEALTH_DIARY: '/health/diary',
   HEALTH_CALENDAR: '/health/calendar',
-  HEALTH_CHECKUP_DETAIL: '/health/checkups/:ckupRcdSn',
-  HEALTH_CHECKUP_INSPECTIONS: '/health/checkups/:ckupRcdSn/inspections',
+  HEALTH_CHECKUP_DETAIL: '/health/pets/:petSn/checkups/:ckupRcdSn',
+  HEALTH_CHECKUP_INSPECTIONS:
+    '/health/pets/:petSn/checkups/:ckupRcdSn/inspections',
 
   /** place */
   PLACES: '/places',
@@ -71,4 +74,37 @@ export const PATHS = {
 
   /** admin */
   ADMIN: '/admin',
+  ADMIN_MEMBERS: '/admin/members',
+  ADMIN_MEMBER_DETAIL: '/admin/members/:mbrSn',
+  ADMIN_MEMBER_SUSPENSIONS: '/admin/members/suspensions',
+  ADMIN_MEMBERS_WITHDRAWN: '/admin/members/withdrawn',
+  ADMIN_POSTS: '/admin/posts',
+  ADMIN_POST_DETAIL: '/admin/posts/:pstSn',
+  ADMIN_LOST_REPORTS: '/admin/lost-reports',
+  ADMIN_CARE_MATCHES: '/admin/care-matches',
+  ADMIN_EXPOSURE: '/admin/exposure',
+  ADMIN_REPORTS: '/admin/reports',
+  ADMIN_REPORT_DETAIL: '/admin/reports/:dclrSn',
+  ADMIN_NOTICES: '/admin/notices',
+  ADMIN_NOTICE_NEW: '/admin/notices/new',
+  ADMIN_NOTICE_EDIT: '/admin/notices/:ntcMttrSn/edit',
+  ADMIN_FAQS: '/admin/faqs',
+  ADMIN_NEWS: '/admin/news',
+  ADMIN_TERMS: '/admin/terms',
+  ADMIN_TERM_NEW: '/admin/terms/new',
+  ADMIN_INQUIRIES: '/admin/inquiries',
+  ADMIN_INQUIRY_DETAIL: '/admin/inquiries/:otoInqrySn',
+  ADMIN_ITEMS: '/admin/items',
+  ADMIN_CARE_MISSIONS: '/admin/care-missions',
+  ADMIN_POINTS: '/admin/points',
+  ADMIN_AI_ROUTES: '/admin/ai-routes',
+  ADMIN_PROCESSING: '/admin/processing',
+  ADMIN_NOTIFICATION_TEMPLATES: '/admin/notification-templates',
+  ADMIN_NOTIFICATION_LOGS: '/admin/notification-logs',
+  ADMIN_BREEDS: '/admin/breeds',
+  ADMIN_SETTINGS: '/admin/settings',
+  ADMIN_BATCHES: '/admin/batches',
+  ADMIN_EXTERNAL_API_USAGE: '/admin/external-api-usage',
+  ADMIN_ADMINS: '/admin/admins',
+  ADMIN_AUDIT_LOGS: '/admin/audit-logs',
 };

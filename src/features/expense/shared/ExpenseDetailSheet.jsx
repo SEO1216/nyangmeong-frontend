@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import useScrollLock from '@/hooks/useScrollLock';
 import { BTN_SECONDARY } from '@/components/buttonStyles';
 import { EXPND_CLSF } from './expenseCodes';
 import {
@@ -10,9 +11,9 @@ import {
 
 /**
  * [지출 상세 시트] 앱(≤760px) 전용, 아래에서 올라오는 시트 (FN-MYP-030-22)
- * - 날짜별 상세·전체 내역의 행을 누르면 열린다. PC에는 없다
+ * - 날짜별 상세·전체 내역의 행을 누르면 열림. PC에는 없음
  * - [편집]: 시트를 닫고 수정 폼으로, [지출 삭제]: 삭제 확인 모달로 (둘 다 부모가 처리)
- * - 영수증 원본 보기는 없다
+ * - 영수증 원본 보기 없음
  */
 function DetailRow({ label, value }) {
   return (
@@ -32,6 +33,7 @@ export default function ExpenseDetailSheet({
   onClose,
 }) {
   const dialogRef = useRef(null);
+  useScrollLock();
   const clsf = EXPND_CLSF[expense.expndClsfCd];
 
   useEffect(() => {
@@ -58,7 +60,7 @@ export default function ExpenseDetailSheet({
       aria-labelledby="expense-detail-title"
       onCancel={handleCancel}
       onMouseDown={handleMouseDown}
-      className="m-0 mt-auto hidden w-full max-w-none rounded-t-modal bg-white p-0 shadow-depth-lg backdrop:bg-[rgba(15,23,35,0.45)] open:max-[760px]:block"
+      className="m-0 mt-auto hidden w-full max-w-none rounded-t-modal bg-white p-0 shadow-depth-lg backdrop:bg-dim/45 open:max-[760px]:block"
     >
       <div className="relative">
         <span
@@ -89,7 +91,7 @@ export default function ExpenseDetailSheet({
             />
             {clsf.name}
           </p>
-          <p className="mt-1 text-[26px] font-bold">
+          <p className="mt-1 text-2xl font-bold tabular-nums">
             {formatWon(expense.expndAmt)}
           </p>
           <dl className="mt-4 border-t border-line-soft">
@@ -103,7 +105,7 @@ export default function ExpenseDetailSheet({
           <button
             type="button"
             onClick={onDelete}
-            className="h-11 w-full rounded-md bg-[#fbeeec] font-semibold text-danger hover:bg-[#f7e0dc]"
+            className="h-11 w-full rounded-md bg-danger-soft font-semibold text-danger hover:bg-danger/15"
           >
             지출 삭제
           </button>

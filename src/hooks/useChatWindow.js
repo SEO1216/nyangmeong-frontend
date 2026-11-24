@@ -17,14 +17,20 @@ const getPopupFeatures = () => {
   return `popup,width=${width},height=${height},left=${left},top=${top}`;
 };
 
-/** 열린 채팅 창 닫기 */
+/** 이 탭에서 연 채팅 창: 닫을 때 창 이름으로 찾으면 창이 없을 때 빈 창이 열림 */
+let openedChatWindow = null;
+
+/** 이 탭에서 연 채팅 창만 닫기, 본창 새로고침 뒤에는 모름 */
 export function closeChatWindow() {
-  window.open('', CHAT_WINDOW_NAME)?.close();
+  if (openedChatWindow && !openedChatWindow.closed) {
+    openedChatWindow.close();
+  }
+  openedChatWindow = null;
 }
 
 /**
  * open({ otoChatRoomSn?, pstSn?, listPstSn? }) 반환, 창 열림 true·팝업 차단 false
- * - listPstSn: 돌봄 글 [채팅 목록 보기]가 그 글의 채팅만 보여 주며 열 때
+ * - listPstSn: 돌봄 글 [채팅 목록 보기]가 그 글의 채팅을 목록 맨 위에 두고 열 때(다른 글의 채팅도 아래에 그대로 보인다)
  * - 클릭 핸들러에서 바로 호출: 요청을 기다린 뒤 부르면 팝업 차단
  */
 export default function useChatWindow() {
@@ -32,6 +38,7 @@ export default function useChatWindow() {
     /** 빈 URL: 기존 창 재사용, 창 옵션은 새로 열 때만 적용 */
     const chatWindow = window.open('', CHAT_WINDOW_NAME, getPopupFeatures());
     if (!chatWindow) return false;
+    openedChatWindow = chatWindow;
 
     const params = new URLSearchParams();
     if (otoChatRoomSn != null) params.set('otoChatRoomSn', otoChatRoomSn);

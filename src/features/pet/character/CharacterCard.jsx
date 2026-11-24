@@ -1,6 +1,10 @@
-import { Cat, Dog } from 'lucide-react';
+import defaultCatCharacter from '@/assets/pets/default-character-cat-full.png';
+import defaultDogCharacter from '@/assets/pets/default-character-dog-full.png';
 import Badge from '@/components/Badge';
 import { BTN_PRIMARY } from '@/components/buttonStyles';
+import FileImage from '@/components/FileImage';
+import { characterImageOptions } from '@/hooks/useCharacterImage';
+import { useFileImage } from '@/hooks/useFileImage';
 import { CHRC_STTS, PET_SE } from '../shared/petCodes';
 
 /** 카드마다 돌려 쓰는 무대 배경 */
@@ -15,7 +19,8 @@ const STAGE_TONES = [
 /**
  * [캐릭터 카드]
  * - mode: 'own'(내 캐릭터, 꾸미기·대표 지정·만들기) / 'shared'(공동양육, 조회 전용)
- * - 캐릭터가 없거나 오류 확인 중이면 종별 기본 캐릭터를 쓴다
+ * - pet: GET /pets 한 행 + { pixelCharSn, charStatus, isCharError }(CharacterPage가 GET /pixel-characters로 합침)
+ * - 이미지는 GET /pets/{petSn}/character-image (오류 확인 중이면 서버가 종별 기본 캐릭터를 줘서 흑백으로 보임)
  */
 export default function CharacterCard({
   pet,
@@ -26,17 +31,30 @@ export default function CharacterCard({
   onSetRepresentative,
 }) {
   const isOwn = mode === 'own';
-  const isDone = pet.chrcSttsCd === CHRC_STTS.DONE;
-  const isNone = pet.chrcSttsCd === CHRC_STTS.NONE;
-  const isGenerating = pet.chrcSttsCd === CHRC_STTS.GENERATING;
-  const isError = pet.chrcSttsCd === CHRC_STTS.ERROR;
-  const isRep = isOwn && pet.rprsYn === 'Y';
-  const canDecorate = isOwn && isDone;
-  const Icon = pet.petSeCd === PET_SE.CAT ? Cat : Dog;
+  const isDone = pet.charStatus === CHRC_STTS.DONE;
+  const isNone = pet.charStatus === CHRC_STTS.NONE;
+  const isGenerating = pet.charStatus === CHRC_STTS.GENERATING;
+  const isError = pet.isCharError;
+  const isRep = isOwn && pet.rprsPetYn;
+  /** 오류 확인 중에는 꾸미기 진입을 막는다 (FN-MYP-010-23) */
+  const canDecorate = isOwn && isDone && !isError;
+  const { src, isPending } = useFileImage({
+    ...characterImageOptions(pet.petSn, 'full'),
+    enabled: isDone,
+  });
+  const defaultImage =
+    pet.petSeCd === PET_SE.CAT ? defaultCatCharacter : defaultDogCharacter;
+  const defaultCharacter = (
+    <img
+      src={defaultImage}
+      alt=""
+      className="size-full object-contain [image-rendering:pixelated]"
+    />
+  );
 
   const stage = (
     <span
-      className={`relative grid aspect-square place-items-end justify-items-center pb-[16%] after:absolute after:inset-x-0 after:bottom-0 after:h-[22%] after:bg-white after:opacity-55 ${
+      className={`@container relative grid aspect-square place-items-end justify-items-center pb-[16%] after:absolute after:inset-x-0 after:bottom-0 after:h-[22%] after:bg-white after:opacity-55 ${
         isDone ? STAGE_TONES[toneIndex % STAGE_TONES.length] : 'bg-surface-2'
       } ${canDecorate ? 'group-hover:shadow-[inset_0_0_0_2px_var(--color-brand-100)]' : ''}`}
     >
@@ -44,54 +62,47 @@ export default function CharacterCard({
         aria-hidden="true"
         className="absolute bottom-[17%] left-1/2 z-[1] h-[7%] w-[46%] -translate-x-1/2 rounded-full bg-ink opacity-[0.08]"
       />
+      {/* 실루엣 영역: 효과는 안쪽 span에만 걸어 "?"가 물려받지 않게 하고, cqw는 이 영역 폭 기준 */}
       <span
         aria-hidden="true"
-        className={`relative z-[2] grid aspect-square w-[62%] place-items-center text-brand-500 ${
-          isError ? 'opacity-55 grayscale' : ''
-        } ${isNone || isGenerating ? 'opacity-[0.12] brightness-0' : ''}`}
+        className="relative z-[2] aspect-square w-[62%] @container"
       >
-        {pet.chrcImgUrl && isDone ? (
-          <img
-            src={pet.chrcImgUrl}
-            alt=""
-            className="size-full object-contain [image-rendering:pixelated]"
-          />
-        ) : (
-          <Icon className="size-3/5" />
+        <span
+          className={`grid size-full place-items-center ${
+            isError ? 'opacity-55 grayscale' : ''
+          } ${isNone || isGenerating ? 'opacity-[0.12] brightness-0' : ''}`}
+        >
+          {isDone ? (
+            <FileImage
+              src={src}
+              pending={isPending}
+              className="size-full object-contain [image-rendering:pixelated]"
+              fallback={defaultCharacter}
+            />
+          ) : (
+            defaultCharacter
+          )}
+        </span>
+        {isNone && (
+          <span className="absolute top-[41%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-[46cqw] leading-none font-bold text-muted">
+            ?
+          </span>
         )}
       </span>
-      {isNone && (
-        <span
-          aria-hidden="true"
-          className="absolute top-[34%] left-1/2 z-[3] -translate-x-1/2 text-xl font-bold text-subtle"
-        >
-          ?
+      {(isRep || isError || isGenerating) && (
+        <span className="absolute top-3 left-3 z-[4] flex flex-col items-start gap-1">
+          {isRep && <Badge tone="solid">대표</Badge>}
+          {isError && <Badge tone="amber">오류 확인 중</Badge>}
+          {isGenerating && <Badge tone="amber">만드는 중</Badge>}
         </span>
       )}
-      {isRep && (
-        <Badge
-          tone="brand"
-          className="absolute top-3 left-3 z-[4] bg-brand-500! text-white!"
-        >
-          대표
-        </Badge>
-      )}
-      {isError && (
-        <Badge tone="amber" className="absolute top-3 left-3 z-[4]">
-          오류 확인 중
-        </Badge>
-      )}
-      {isGenerating && (
-        <Badge tone="amber" className="absolute top-3 left-3 z-[4]">
-          만드는 중
-        </Badge>
-      )}
       {isOwn && isNone && (
-        <span className="absolute inset-x-4 bottom-3 z-[5]">
+        <span className="absolute inset-x-2 bottom-3 z-[5] @[180px]:inset-x-4">
+          {/* 카드(무대) 폭이 좁으면 안쪽 여백·글자를 줄여 한 줄로 유지 */}
           <button
             type="button"
             onClick={() => onCreate(pet)}
-            className={`${BTN_PRIMARY} h-9 w-full`}
+            className={`${BTN_PRIMARY} h-9 w-full px-2! text-xs whitespace-nowrap @[180px]:px-3! @[180px]:text-sm @[240px]:px-4! @[240px]:text-base`}
           >
             캐릭터 만들기
           </button>

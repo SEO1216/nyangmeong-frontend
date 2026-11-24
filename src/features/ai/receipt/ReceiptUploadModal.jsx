@@ -1,66 +1,40 @@
 import { FolderOpen, Image, ImagePlus, Info, Camera } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import AnalyzeProgress from '@/components/AnalyzeProgress';
 import Modal from '@/components/Modal';
-import Select from '@/components/Select';
+import DropdownSelect from '@/components/DropdownSelect';
 import { RECEIPT_ACCEPT, validateReceiptFile } from '@/utils/receiptFile';
 import { useRecognizeCheckupReceipt } from '../queries';
-import { ANALYZE_TIMEOUT_MS, FAILURE } from './receiptFailure';
+import {
+  FAILURE,
+  FILE_ERROR,
+  SERVER_ANALYZE_GUARD_MS,
+  getFailureByCode,
+  isEmptyOcr,
+} from './receiptFailure';
 
-/** 진행 막대 갱신 간격과 차오르는 속도(약 6초에 63%, 15초에 약 85%) */
-const PROGRESS_TICK_MS = 100;
-const PROGRESS_TIME_CONSTANT_MS = 6000;
-
-const HELP ='jpg · jpeg · png · webp · 1건 10MB 이하';
+const HELP = 'jpg · jpeg · png · webp · 1건 10MB 이하';
 
 const formatSize = (bytes) => `${(bytes / 1024 / 1024).toFixed(1)}MB`;
 
-const getPetLabel = (pet) =>
-  pet.vrtyNm ? `${pet.petNm} (${pet.vrtyNm})` : pet.petNm;
+const getPetLabel = (pet) => pet.petNm;
 
-/** 고른 이미지 한 줄 */
+/** 고른 이미지: 큰 미리보기(모달 폭, 최대 높이 240px) 아래에 파일 이름·크기 */
 function PickedFile({ picked }) {
   return (
-    <div className="flex items-center gap-3 rounded-box border border-line bg-surface-2 p-2">
+    <div className="flex flex-col gap-2 rounded-box border border-line bg-surface-2 p-2">
       <img
         src={picked.previewUrl}
         alt="첨부한 영수증"
-        className="size-10 shrink-0 rounded-md object-cover"
+        className="max-h-60 w-full rounded-md bg-white object-contain"
       />
-      <span className="min-w-0 flex-1 truncate">{picked.file.name}</span>
-      <span className="shrink-0 text-sm text-muted">
-        {formatSize(picked.file.size)}
-      </span>
-    </div>
-  );
-}
-
-/** 진행 막대: 90%를 향해 점점 느려지며 차오름, 응답 시간을 알 수 없어 100%는 완료 때만 */
-function AnalyzeProgress() {
-  const [percent, setPercent] = useState(0);
-
-  useEffect(() => {
-    const startedAt = Date.now();
-    const timer = setInterval(() => {
-      const elapsed = Date.now() - startedAt;
-      setPercent(90 * (1 - Math.exp(-elapsed / PROGRESS_TIME_CONSTANT_MS)));
-    }, PROGRESS_TICK_MS);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <div
-      role="progressbar"
-      aria-label="영수증 분석 진행"
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={Math.round(percent)}
-      className="h-1.5 w-full overflow-hidden rounded-full bg-surface-3"
-    >
-      <div
-        className="h-full rounded-full bg-brand-500 transition-[width] duration-200 ease-linear"
-        style={{ width: `${percent}%` }}
-      />
+      <div className="flex items-center gap-3 px-1">
+        <span className="min-w-0 flex-1 truncate">{picked.file.name}</span>
+        <span className="shrink-0 text-sm text-muted">
+          {formatSize(picked.file.size)}
+        </span>
+      </div>
     </div>
   );
 }
@@ -68,8 +42,8 @@ function AnalyzeProgress() {
 /**
  * 영수증 촬영·업로드 모달 (SCR-AIM-008)
  * pets: [{ petSn, petNm, vrtyNm? }], 목록은 여는 쪽이 넘긴다(features/pet import 금지)
- * onRecognized(result): 인식 성공(일부만 인식돼도 실패 안내 없이 여기로)
- * onManualInput({ rcptSn? }): 직접 입력, 추출 0건 뒤에만 rcptSn(저장 때 영수증 상태를 바꾸는 데 쓴다)
+ * onRecognized(result): 인식 성공 { recptSn, petSn, ocr }(일부만 인식돼도 실패 안내 없이 여기로)
+ * onManualInput({ recptSn? }): 직접 입력, 추출 0건·OCR 시간 초과·OCR 오류 뒤에만 recptSn(저장 때 영수증 상태를 변경용)
  */
 export default function ReceiptUploadModal({
   pets,
@@ -92,8 +66,8 @@ export default function ReceiptUploadModal({
   const [isCancelled, setIsCancelled] = useState(false);
   /** 'empty' | 'timeout' | 'error' */
   const [failure, setFailure] = useState(null);
-  /** 추출 0건일 때 서버가 만든 영수증 식별자 */
-  const [failedRcptSn, setFailedRcptSn] = useState(null);
+  /** 추출 0건·OCR 실패 때 서버가 만든 영수증 식별자 */
+  const [failedRecptSn, setFailedRecptSn] = useState(null);
   const recognize = useRecognizeCheckupReceipt();
   const isAnalyzing = recognize.isPending;
   const hasPetSelect = pets.length >= 2;
@@ -137,23 +111,29 @@ export default function ReceiptUploadModal({
     timerRef.current = setTimeout(() => {
       isTimedOutRef.current = true;
       controller.abort();
-    }, ANALYZE_TIMEOUT_MS);
+    }, SERVER_ANALYZE_GUARD_MS);
     recognize.mutate(
       { file: picked.file, petSn, signal: controller.signal },
       {
         onSuccess: (result) => {
           clearTimeout(timerRef.current);
           isRunningRef.current = false;
-          if (result.items.length > 0) return onRecognized(result);
-          setFailedRcptSn(result.rcptSn);
+          if (!isEmptyOcr(result.ocr)) return onRecognized(result);
+          setFailedRecptSn(result.recptSn);
           setFailure('empty');
         },
         onError: (error) => {
           clearTimeout(timerRef.current);
           isRunningRef.current = false;
+          /** OCR_TIMEOUT·OCR_API_ERROR만 서버가 만든 영수증 번호를 줌 */
+          setFailedRecptSn(error.data?.recptSn ?? null);
           if (isTimedOutRef.current) return setFailure('timeout');
-          if (error.name === 'AbortError') return setIsCancelled(true);
-          setFailure('error');
+          if (controller.signal.aborted) return setIsCancelled(true);
+          if (FILE_ERROR[error.code]) {
+            setPicked(null);
+            return setFileError(FILE_ERROR[error.code]);
+          }
+          setFailure(getFailureByCode(error.code));
         },
       },
     );
@@ -164,7 +144,7 @@ export default function ReceiptUploadModal({
   /** 실패 안내에서 다시 촬영: 이미지를 비우고 업로드 화면으로 */
   const handleRetake = () => {
     setFailure(null);
-    setFailedRcptSn(null);
+    setFailedRecptSn(null);
     setPicked(null);
     setIsCancelled(false);
   };
@@ -190,7 +170,7 @@ export default function ReceiptUploadModal({
             <button
               type="button"
               onClick={() =>
-                onManualInput(failedRcptSn ? { rcptSn: failedRcptSn } : {})
+                onManualInput(failedRecptSn ? { recptSn: failedRecptSn } : {})
               }
               className={BTN_SECONDARY}
             >
@@ -274,12 +254,12 @@ export default function ReceiptUploadModal({
       {hasPetSelect && (
         <div className="mb-4">
           <p className="mb-1.5 text-sm font-semibold">대상 반려동물</p>
-          <Select
+          <DropdownSelect
             label="대상 반려동물"
-            value={String(petSn)}
-            onChange={(value) => setPetSn(Number(value))}
+            value={petSn}
+            onChange={setPetSn}
             options={pets.map((item) => ({
-              value: String(item.petSn),
+              value: item.petSn,
               label: getPetLabel(item),
             }))}
           />

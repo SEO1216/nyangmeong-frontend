@@ -29,7 +29,10 @@ export default function ExpenseLimitModal({ mmExpndLimAmt, onClose }) {
     if (!canSave) return;
     saveLimit.mutate(Number(digits), {
       onSuccess: onClose,
-      onError: () => showToast('저장하지 못했어요. 잠시 후 다시 시도해 주세요'),
+      onError: () =>
+        showToast('저장하지 못했어요. 잠시 후 다시 시도해 주세요', {
+          type: 'error',
+        }),
     });
   };
 
@@ -54,7 +57,7 @@ export default function ExpenseLimitModal({ mmExpndLimAmt, onClose }) {
             disabled={!canSave || saveLimit.isPending}
             className={BTN_PRIMARY}
           >
-            저장
+            저장하기
           </button>
         </>
       }
@@ -78,7 +81,7 @@ export default function ExpenseLimitModal({ mmExpndLimAmt, onClose }) {
               }
               onChange={handleChange}
               aria-describedby="expense-limit-help"
-              className="block h-10 w-full rounded-md border border-input-line bg-white pr-9 pl-3 text-right hover:border-line-strong focus:border-brand-500 focus:ring-focus focus:outline-none"
+              className="block h-10 w-full rounded-md border border-input-line bg-white pr-9 pl-3 text-right tabular-nums hover:border-line-strong focus:border-brand-500 focus:ring-focus focus:outline-none"
             />
             <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-subtle">
               원

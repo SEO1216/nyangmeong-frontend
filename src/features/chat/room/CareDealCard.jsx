@@ -1,14 +1,18 @@
 /**
  * [거래 카드]
  * - 채팅방 위 한 줄 바(상태·글 제목·지금 할 일·내 차례 버튼)와 펼침(글 정보·5단계·확인 칸) (FN-CMU-005-06~11)
- * - 되돌릴 수 없는 단계는 카드 안 확인 칸에서 한 번 더 받는다. 단계가 바뀌면 key로 새로 그려 접힌다
+ * - 되돌릴 수 없는 단계는 카드 안 확인 칸에서 한 번 더 확인. 단계가 바뀌면 key로 새로 그려 접힘
  */
 import { useEffect, useRef, useState } from 'react';
-import { generatePath } from 'react-router-dom';
 import Icon from '@/components/Icon';
-import { PATHS } from '@/routes/paths';
-import { useDealAction, useSendChatMessage } from '../queries';
-import { MSG_TYPE, ROLE } from '../shared/chatCodes';
+import { useCareMatch, useDealAction } from '../queries';
+import {
+  MTCH_STTS,
+  RCRT_STTS_RECRUITING,
+  ROOM_STTS,
+  getDealCancelState,
+  isDealCancelRequesting,
+} from '../shared/chatCodes';
 import DealBadge from './DealBadge';
 import {
   CANCEL_REASONS,
@@ -16,23 +20,24 @@ import {
   DEAL_STEPS,
   OTHER_REASON,
   OTHER_REASON_MAX_LENGTH,
+  getDealCancelGuide,
   getDealGuide,
   getStepProgress,
 } from './dealSteps';
 
 const BUTTON_BASE =
-  'inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md border font-semibold disabled:cursor-not-allowed';
+  'inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md border text-sm font-medium disabled:cursor-not-allowed';
 const BUTTON_VARIANT = {
   primary:
     'border-transparent bg-brand-500 text-white hover:enabled:bg-brand-600 disabled:bg-surface-3 disabled:text-line-strong',
   secondary:
     'border-line bg-white hover:enabled:border-line-strong hover:enabled:bg-surface-2 disabled:border-transparent disabled:bg-surface-3 disabled:text-line-strong',
   danger:
-    'border-transparent bg-danger text-white hover:enabled:bg-[#983a2f] disabled:bg-surface-3 disabled:text-line-strong',
+    'border-transparent bg-danger text-white hover:enabled:bg-danger-600 disabled:bg-surface-3 disabled:text-line-strong',
 };
 
 function DealButton({ action, isSmall = false, isPending, onClick }) {
-  const size = isSmall ? 'h-9 px-3.5' : 'h-10 min-w-24 px-4 max-[760px]:h-11';
+  const size = isSmall ? 'h-9 px-3.5' : 'h-10 min-w-24 px-4';
 
   return (
     <button
@@ -52,7 +57,7 @@ function StepList({ stage }) {
   return (
     <ol
       aria-label="거래 진행 단계"
-      className="mt-3.5 grid grid-cols-5 text-sm max-[400px]:text-[13px]"
+      className="mt-3.5 grid grid-cols-5 text-sm max-[390px]:text-[13px]"
     >
       {DEAL_STEPS.map((name, index) => {
         const step = index + 1;
@@ -61,15 +66,16 @@ function StepList({ stage }) {
         const lineColor =
           isEnded || !(isDone || isNow)
             ? 'before:bg-line'
-            : 'before:bg-[#e9d27a]';
-        let circle = 'bg-white shadow-[inset_0_0_0_2px_#b9c4c4]';
+            : 'before:bg-fab-line';
+        let circle =
+          'bg-white shadow-[inset_0_0_0_2px_var(--color-line-strong)]';
         if (isDone) {
           circle = isEnded
-            ? 'bg-surface-3 shadow-[inset_0_0_0_1px_#b9c4c4]'
-            : 'bg-[#f9eaa6] shadow-[inset_0_0_0_1px_#e9d27a]';
+            ? 'bg-surface-3 shadow-[inset_0_0_0_1px_var(--color-line-strong)]'
+            : 'bg-accent-300 shadow-[inset_0_0_0_1px_var(--color-fab-line)]';
         } else if (isNow) {
           circle =
-            'bg-white shadow-[inset_0_0_0_2px_#e9d27a,0_0_0_4px_#f9eaa6]';
+            'bg-white shadow-[inset_0_0_0_2px_var(--color-fab-line),0_0_0_4px_var(--color-accent-300)]';
         }
         let textColor = 'text-placeholder';
         if (isDone && !isEnded) textColor = 'text-ink-2';
@@ -208,28 +214,51 @@ function ConfirmPanel({ ask, isPending, onClose, onConfirm }) {
   );
 }
 
+const CST_UNIT_LABEL = { PCAC0004: '시급', PCAC0005: '건당' };
+
+/** "2026-11-07T10:00:00" → "11.07 10:00" */
+const formatShortDt = (dt) =>
+  `${dt.slice(5, 7)}.${dt.slice(8, 10)} ${dt.slice(11, 16)}`;
+
+/** 합의 조건 한 줄: 일정 · 비용 (매칭 조회 cnd) */
+const formatCondition = (cnd) => {
+  const schedule =
+    cnd.acrdPrtcBgngDt && cnd.acrdPrtcEndDt
+      ? `${formatShortDt(cnd.acrdPrtcBgngDt)} ~ ${formatShortDt(cnd.acrdPrtcEndDt)}`
+      : '일정 협의';
+  const cost =
+    `${CST_UNIT_LABEL[cnd.cstUnitCd] ?? ''} ${cnd.acrdCstAmt.toLocaleString('ko-KR')}원`.trim();
+  return `${schedule} · ${cost}`;
+};
+
 const ACT_TONE = {
-  todo: 'bg-[#f9eaa6] [&_.icon]:text-ink text-ink',
-  done: 'bg-[#ebf3ee] [&_.icon]:text-[#2f6f57]',
+  todo: 'bg-accent-300 [&_.icon]:text-ink text-ink',
+  done: 'bg-tone-green-bg [&_.icon]:text-ok',
   end: '[&_.icon]:text-placeholder',
   '': '',
 };
 
 export default function CareDealCard({ room }) {
-  const { otoChatRoomSn, mtchDlngSttsCd: stage, myRole } = room;
+  const { mtchDlngSttsCd: stage, myRole } = room;
   const [isOpen, setIsOpen] = useState(false);
   const [askKey, setAskKey] = useState(null);
   const rootRef = useRef(null);
   const toggleRef = useRef(null);
-  const dealAction = useDealAction(otoChatRoomSn);
-  const sendMessage = useSendChatMessage(otoChatRoomSn);
-  const guide = getDealGuide(stage, myRole);
+  const dealAction = useDealAction(room);
+  const { data: careMatch } = useCareMatch(room.petPrtcMtchSn);
+  const isActiveRoom = room.chatRoomSttsCd === ROOM_STTS.ACTIVE;
+  const guide = getDealCancelGuide(room) ??
+    getDealGuide(stage, myRole, room.rcrtSttsCd === RCRT_STTS_RECRUITING);
+  const isCancelRequesting = isDealCancelRequesting(room);
+  /** 상대가 동의해 거래가 취소된 방: 방이 읽기 전용이어도 취소 안내와 구분되는 배지를 보인다 */
+  const isDealCanceled =
+    getDealCancelState(room) === 'approved' && stage === MTCH_STTS.CANCELED;
   const mainAction = guide.actions.find(
     (action) => action.variant === 'primary',
   );
   const otherActions = guide.actions.filter((action) => action !== mainAction);
   const ask = askKey ? DEAL_ASKS[askKey] : null;
-  const isPending = dealAction.isPending || sendMessage.isPending;
+  const { isPending } = dealAction;
 
   /** 펼침은 바깥을 누르거나 Esc로 접힌다(확인 칸이 열려 있으면 유지) */
   useEffect(() => {
@@ -260,62 +289,53 @@ export default function CareDealCard({ room }) {
       setIsOpen(true);
       return;
     }
-    if (!isPending) dealAction.mutate(key);
+    if (!isPending) dealAction.mutate({ action: key });
   };
 
-  const handleConfirm = async (reason) => {
+  const handleConfirm = (reason) => {
     if (isPending) return;
-    try {
-      await dealAction.mutateAsync(ask.action);
-    } catch {
-      return;
-    }
-    /** 요청 취소 사유는 내 채팅 메시지로 남는다 (화면설계서 SCR-CMU-005-03 ②) */
-    if (reason) {
-      sendMessage.mutate({
-        msgTypeCd: MSG_TYPE.TEXT,
-        msgCn: reason,
-        tagCn: '요청 취소',
-        idmptDmndId: crypto.randomUUID(),
-      });
-    }
+    /** 요청 취소 사유는 서버가 상태 이력과 채팅 시스템 안내에 남긴다 */
+    dealAction.mutate({ action: ask.action, cnclRsn: reason });
   };
 
   return (
     <section
       ref={rootRef}
       aria-label="돌봄 거래"
-      className="relative z-[15] shrink-0 border-b border-line bg-white"
+      className="@container relative z-[15] shrink-0 border-b border-line bg-white"
     >
       <div
-        className={`flex min-h-16 items-center gap-2.5 py-2.5 pr-1.5 pl-4 transition-colors max-[520px]:pl-3.5 ${
-          mainAction ? 'bg-[#f9eaa6]' : ''
+        className={`flex flex-wrap items-center gap-x-2 gap-y-1.5 py-1.5 pr-1.5 pl-4 transition-colors max-[390px]:pl-3.5 ${
+          mainAction ? 'bg-accent-300' : ''
         }`}
       >
-        <div className="min-w-0 flex-1">
-          <p className="flex min-w-0 items-center gap-1.5">
+        <p className="order-1 flex min-w-0 flex-1 items-center gap-2">
+          {isCancelRequesting && (
+            <DealBadge label="취소 요청중" tone="amber" />
+          )}
+          {isDealCanceled && <DealBadge label="거래 취소" tone="gray" />}
+          {!isCancelRequesting && !isDealCanceled && (
             <DealBadge stage={stage} />
-            <span className="truncate text-sm font-semibold text-ink max-[520px]:hidden">
-              {room.pstTtl}
-            </span>
-          </p>
-          <p
-            className={`mt-0.5 text-sm max-[520px]:line-clamp-2 min-[521px]:truncate ${
+          )}
+          <span
+            className={`min-w-0 text-sm @max-[559px]:line-clamp-2 @min-[560px]:truncate ${
               mainAction ? 'font-semibold text-ink' : 'text-muted'
             }`}
           >
-            {room.chatRoomSttsCd === 'OPEN'
+            {isActiveRoom || isDealCanceled
               ? guide.title
               : '대화가 종료된 채팅방이에요'}
-          </p>
-        </div>
-        {mainAction && !isOpen && room.chatRoomSttsCd === 'OPEN' && (
-          <DealButton
-            action={mainAction}
-            isSmall
-            isPending={isPending}
-            onClick={handleAction}
-          />
+          </span>
+        </p>
+        {mainAction && !isOpen && isActiveRoom && (
+          <div className="order-3 w-full pr-1.5 pb-1 *:w-full @min-[560px]:order-2 @min-[560px]:w-auto @min-[560px]:pr-0 @min-[560px]:pb-0 @min-[560px]:*:w-auto">
+            <DealButton
+              action={mainAction}
+              isSmall
+              isPending={isPending}
+              onClick={handleAction}
+            />
+          </div>
         )}
         <button
           ref={toggleRef}
@@ -323,7 +343,7 @@ export default function CareDealCard({ room }) {
           aria-expanded={isOpen}
           aria-controls="deal-more"
           aria-label={`거래 정보 ${isOpen ? '접기' : '펼치기'}`}
-          className="grid size-11 shrink-0 place-items-center rounded-full text-ink-2 hover:bg-surface-3"
+          className="order-2 grid size-9 shrink-0 place-items-center rounded-full text-ink-2 hover:bg-surface-3 @min-[560px]:order-3"
           onClick={() => {
             setIsOpen((prev) => !prev);
             setAskKey(null);
@@ -339,39 +359,24 @@ export default function CareDealCard({ room }) {
       {isOpen && (
         <div
           id="deal-more"
-          className="absolute inset-x-0 top-full max-h-[min(70vh,520px)] overflow-y-auto border-b border-line bg-white px-4 pt-1 pb-4 shadow-[0_12px_24px_-12px_rgba(26,50,52,0.25)]"
+          className="absolute inset-x-0 top-full max-h-[min(70vh,520px)] overflow-y-auto border-b border-line bg-white px-4 pt-3 pb-4 shadow-[0_12px_24px_-12px_rgba(26,50,52,0.25)]"
         >
-          <p className="text-sm text-subtle">
-            {myRole === ROLE.OWNER
-              ? '내가 올린 돌봄 글'
-              : '내가 지원한 돌봄 글'}
-          </p>
-          <a
-            className="mt-1 block truncate font-semibold text-ink hover:text-brand-600"
-            href={generatePath(PATHS.COMMUNITY_PETCARE_DETAIL, {
-              petPrtcRcrtSn: room.petPrtcRcrtSn,
-            })}
-            target="_blank"
-            rel="noopener"
-          >
-            {room.pstTtl}
-          </a>
-          <p className="mt-0.5 text-sm text-muted">{room.rcrtSummary}</p>
+          {careMatch && (
+            <p className="text-sm text-muted tabular-nums">
+              {formatCondition(careMatch.cnd)}
+            </p>
+          )}
 
           <StepList stage={stage} />
 
           <div
             className={`mt-3.5 flex flex-wrap items-center gap-x-3 gap-y-2.5 rounded-card bg-surface-2 py-3 pr-3 pl-3.5 ${ACT_TONE[guide.tone]}`}
           >
-            <Icon name={guide.icon} className="text-[22px] text-subtle" />
-            <p className="min-w-0 flex-1 text-sm leading-normal text-muted">
-              <b className="block text-base font-semibold text-ink">
-                {guide.title}
-              </b>
+            <p className="min-w-0 flex-1 text-sm leading-normal text-muted @max-[559px]:basis-full">
               {guide.description}
             </p>
             {!ask && guide.actions.length > 0 && (
-              <div className="flex shrink-0 flex-wrap gap-1.5 max-[760px]:w-full max-[760px]:*:flex-1">
+              <div className="flex shrink-0 flex-wrap gap-1.5 @max-[559px]:w-full @max-[559px]:*:flex-1">
                 {otherActions.map((action) => (
                   <DealButton
                     key={action.key}
