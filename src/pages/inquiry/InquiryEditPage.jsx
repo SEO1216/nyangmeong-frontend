@@ -1,10 +1,10 @@
 import {
   generatePath,
-  Link,
   Navigate,
   useNavigate,
   useParams,
 } from 'react-router-dom';
+import LoadError from '@/components/LoadError';
 import PageSkeleton from '@/components/PageSkeleton';
 import SkeletonCard from '@/components/SkeletonCard';
 import { isAnswered } from '@/features/inquiry/api';
@@ -15,6 +15,7 @@ import {
   useUpdateInquiry,
 } from '@/features/inquiry/queries';
 import { PATHS } from '@/routes/paths';
+import { profanityFieldsOf } from '@/utils/profanity';
 
 export default function InquiryEditPage() {
   const navigate = useNavigate();
@@ -35,15 +36,13 @@ export default function InquiryEditPage() {
   }
   if (loadError) {
     return (
-      <div role="alert" className="text-[#566465]">
-        <p>{loadError.message}</p>
-        <Link
-          to={PATHS.INQUIRIES}
-          className="mt-3 inline-block font-medium underline"
-        >
-          목록으로
-        </Link>
-      </div>
+      <LoadError
+        message={loadError.message}
+        onRetry={() => {
+          if (inquiryQuery.isError) inquiryQuery.refetch();
+          if (types.isError) types.refetch();
+        }}
+      />
     );
   }
 
@@ -66,6 +65,7 @@ export default function InquiryEditPage() {
       isPending={update.isPending}
       errorMessage={update.error?.message}
       fieldErrors={update.error?.fields}
+      profanityFields={profanityFieldsOf(update.error)}
       onSubmit={handleSubmit}
     />
   );

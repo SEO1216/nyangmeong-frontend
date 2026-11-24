@@ -1,53 +1,48 @@
 import { useRef, useState } from 'react';
 import { generatePath, useNavigate } from 'react-router-dom';
+import Badge from '@/components/Badge';
 import Card from '@/components/Card';
 import Icon from '@/components/Icon';
 import Modal from '@/components/Modal';
 import { BTN_DANGER, BTN_SECONDARY } from '@/components/buttonStyles';
 import { showToast } from '@/components/toastStore';
 import { PATHS } from '@/routes/paths';
-import EmptyBox from '../diary/EmptyBox';
+import { getAttachmentFile } from '../checkupApi';
+import EmptyResult from '@/components/EmptyResult';
+import { toAnalyzedItems } from '../labInput/labRows';
 import {
   useAnalyzeLabPdf,
   useDeleteAttachment,
   useReplaceAttachment,
 } from '../queries';
-import AttachmentForm from './AttachmentForm';
+import AttachmentModal from './AttachmentModal';
 import { getFileError } from './attachmentUtils';
-import {
-  ADD_ROW,
-  BTN_SM,
-  ROW_LINE,
-  TAG,
-  TEXT_BTN,
-  TEXT_BTN_DEL,
-} from './checkupStyles';
+import { ADD_ROW, ROW_LINE, TEXT_BTN, TEXT_BTN_DEL } from './checkupStyles';
 import {
   ATTACHMENT_IMAGE,
   ATTACHMENT_LAB,
   ATTACHMENT_ACCEPT,
   ATTACHMENT_TYPES,
+  FILE_EXT_PDF,
   IMAGING_KINDS,
   IMAGING_PARTS,
   findName,
 } from './checkupTypes';
 
-const PDF_MIME = 'application/pdf';
+/** 새 창에 연 PDF 임시 주소를 해제하기까지의 시간 */
+const PDF_URL_LIFETIME = 60 * 1000;
 
 /**
  * [첨부 자료 탭]
  * - 첨부 목록(유형 태그·파일명·영상 종류·촬영 부위)과 파일별 PDF 분석·다운로드·교체·삭제, [＋ 첨부 추가] (FN-HLT-005-01·04)
+ * - PDF 파일은 [열기](새 창), 이미지는 [다운로드]
  * - PDF 분석은 검사결과지 유형의 PDF 행마다. 성공하면 인식 항목을 들고 검사 수치 입력으로 이동
  * - 영수증 원본은 첨부 자료에 넣지 않음
  */
-export default function AttachmentTab({
-  ckupRcdSn,
-  attachments,
-  isAddOpenInitially,
-}) {
+export default function AttachmentTab({ petSn, ckupRcdSn, attachments }) {
   const navigate = useNavigate();
   const replaceInputRef = useRef(null);
-  const [isAddOpen, setIsAddOpen] = useState(isAddOpenInitially);
+  const [isAddOpen, setIsAddOpen] = useState(false);
   const [replaceSn, setReplaceSn] = useState(null);
   const [deleteSn, setDeleteSn] = useState(null);
   const [analyzingSn, setAnalyzingSn] = useState(null);
@@ -57,15 +52,43 @@ export default function AttachmentTab({
 
   const hasLabPdf = attachments.some(isLabPdf);
 
-  const handleDownload = (attachment) => {
-    if (!attachment.fileUrl) {
-      showToast('내려받을 수 있는 파일이 없어요');
-      return;
+  /** 비공개 파일이라 받은 Blob을 임시 주소로 바꿔 내려받는다 */
+  const handleDownload = async (attachment) => {
+    try {
+      const blob = await getAttachmentFile({
+        petSn,
+        ckupRcdAtchSn: attachment.ckupRcdAtchSn,
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = attachment.orgnlFileNm;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      showToast('파일을 내려받지 못했어요. 잠시 뒤 다시 시도해 주세요', {
+        type: 'error',
+      });
     }
-    const link = document.createElement('a');
-    link.href = attachment.fileUrl;
-    link.download = attachment.fileNm;
-    link.click();
+  };
+
+  /** PDF는 받은 Blob을 새 창으로 연다. 팝업 차단을 피하려고 클릭 순간 빈 창을 먼저 연다 */
+  const handleOpenPdf = async (attachment) => {
+    const win = window.open('', '_blank');
+    try {
+      const blob = await getAttachmentFile({
+        petSn,
+        ckupRcdAtchSn: attachment.ckupRcdAtchSn,
+      });
+      const url = URL.createObjectURL(blob);
+      win.location.href = url;
+      setTimeout(() => URL.revokeObjectURL(url), PDF_URL_LIFETIME);
+    } catch {
+      win?.close();
+      showToast('파일을 열지 못했어요. 잠시 뒤 다시 시도해 주세요', {
+        type: 'error',
+      });
+    }
   };
 
   const handleReplaceChange = (event) => {
@@ -74,27 +97,44 @@ export default function AttachmentTab({
     if (!file) return;
     const error = getFileError(file);
     if (error) {
-      showToast(error);
+      showToast(error, { type: 'error' });
       return;
     }
-    replaceAttachment.mutate({ ckupRcdSn, atchSn: replaceSn, file });
+    replaceAttachment.mutate({
+      petSn,
+      ckupRcdSn,
+      ckupRcdAtchSn: replaceSn,
+      file,
+    });
   };
 
+  /** 성공하면 인식 항목을, 실패하면 오류를 들고 검사 수치 입력으로(그 화면에서 다시 분석·직접 입력) */
   const handleAnalyze = (attachment) => {
-    setAnalyzingSn(attachment.atchSn);
+    const toInspections = (state) =>
+      navigate(
+        {
+          pathname: generatePath(PATHS.HEALTH_CHECKUP_INSPECTIONS, {
+            petSn,
+            ckupRcdSn,
+          }),
+          search: `?mode=pdf&atch=${attachment.ckupRcdAtchSn}`,
+        },
+        { state },
+      );
+    setAnalyzingSn(attachment.ckupRcdAtchSn);
     analyzeLabPdf.mutate(
-      { ckupRcdSn, atchSn: attachment.atchSn },
+      {
+        petSn,
+        ckupRcdAtchSn: attachment.ckupRcdAtchSn,
+        fileNm: attachment.orgnlFileNm,
+      },
       {
         onSuccess: (result) =>
-          navigate(
-            {
-              pathname: generatePath(PATHS.HEALTH_CHECKUP_INSPECTIONS, {
-                ckupRcdSn,
-              }),
-              search: `?mode=pdf&atch=${attachment.atchSn}`,
-            },
-            { state: { analyzedItems: result.items } },
-          ),
+          toInspections({ analyzedItems: toAnalyzedItems(result) }),
+        onError: (error) =>
+          toInspections({
+            analysisError: { code: error.code, message: error.message },
+          }),
         onSettled: () => setAnalyzingSn(null),
       },
     );
@@ -102,61 +142,60 @@ export default function AttachmentTab({
 
   const handleDelete = () =>
     deleteAttachment.mutate(
-      { ckupRcdSn, atchSn: deleteSn },
+      { petSn, ckupRcdSn, ckupRcdAtchSn: deleteSn },
       { onSuccess: () => setDeleteSn(null) },
     );
-
-  const addForm = isAddOpen && (
-    <AttachmentForm ckupRcdSn={ckupRcdSn} onClose={() => setIsAddOpen(false)} />
-  );
 
   return (
     <Card title="첨부 자료" sub="여러 건 등록 가능">
       {attachments.length === 0 ? (
-        <>
-          <EmptyBox
-            icon="description"
-            title="첨부한 자료가 없어요"
-            description="검사결과지 PDF를 올리면 수치를 자동으로 읽어요"
-            action={
-              <button
-                type="button"
-                className={`${BTN_SECONDARY} ${BTN_SM}`}
-                onClick={() => setIsAddOpen(true)}
-              >
-                ＋ 첨부 추가
-              </button>
-            }
-          />
-          {addForm}
-        </>
+        <EmptyResult
+          isCompact
+          icon={
+            <Icon name="description" className="text-[28px] text-line-strong" />
+          }
+          title="첨부한 자료가 없어요"
+          description="검사결과지 PDF를 올리면 수치를 자동으로 읽어요"
+        >
+          {
+            <button
+              type="button"
+              className={`${BTN_SECONDARY}`}
+              onClick={() => setIsAddOpen(true)}
+            >
+              ＋ 첨부 추가
+            </button>
+          }
+        </EmptyResult>
       ) : (
         <>
           <ul>
             {attachments.map((attachment) => (
               <li
-                key={attachment.atchSn}
+                key={attachment.ckupRcdAtchSn}
                 className={`flex flex-wrap items-center gap-x-3 gap-y-2 py-3 ${ROW_LINE}`}
               >
-                <span className={TAG}>
+                <Badge>
                   {findName(ATTACHMENT_TYPES, attachment.atchTypeCd)}
-                </span>
+                </Badge>
                 <span className="inline-flex min-w-0 items-center gap-1">
                   <Icon
                     name={
-                      attachment.mimeType === PDF_MIME ? 'description' : 'image'
+                      attachment.fileExtnCd === FILE_EXT_PDF
+                        ? 'description'
+                        : 'image'
                     }
                     className="text-lg"
                   />
-                  <span className="break-all">{attachment.fileNm}</span>
+                  <span className="break-all">{attachment.orgnlFileNm}</span>
                 </span>
                 {attachment.atchTypeCd === ATTACHMENT_IMAGE && (
                   <span className="text-sm text-subtle">
-                    {findName(IMAGING_KINDS, attachment.imgKindCd)} ·{' '}
-                    {findName(IMAGING_PARTS, attachment.imgPartCd)}
+                    {findName(IMAGING_KINDS, attachment.imgKndCd)} ·{' '}
+                    {findName(IMAGING_PARTS, attachment.shtRegnCd)}
                   </span>
                 )}
-                <span className="flex items-center gap-3 max-sm:w-full sm:ml-auto">
+                <span className="flex items-center gap-3 max-[760px]:w-full min-[760px]:ml-auto">
                   {isLabPdf(attachment) && (
                     <button
                       type="button"
@@ -167,19 +206,29 @@ export default function AttachmentTab({
                       PDF 분석
                     </button>
                   )}
-                  <button
-                    type="button"
-                    className={TEXT_BTN}
-                    onClick={() => handleDownload(attachment)}
-                  >
-                    다운로드
-                  </button>
+                  {attachment.fileExtnCd === FILE_EXT_PDF ? (
+                    <button
+                      type="button"
+                      className={TEXT_BTN}
+                      onClick={() => handleOpenPdf(attachment)}
+                    >
+                      열기
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className={TEXT_BTN}
+                      onClick={() => handleDownload(attachment)}
+                    >
+                      다운로드
+                    </button>
+                  )}
                   <button
                     type="button"
                     className={TEXT_BTN}
                     disabled={replaceAttachment.isPending}
                     onClick={() => {
-                      setReplaceSn(attachment.atchSn);
+                      setReplaceSn(attachment.ckupRcdAtchSn);
                       replaceInputRef.current.click();
                     }}
                   >
@@ -188,7 +237,7 @@ export default function AttachmentTab({
                   <button
                     type="button"
                     className={TEXT_BTN_DEL}
-                    onClick={() => setDeleteSn(attachment.atchSn)}
+                    onClick={() => setDeleteSn(attachment.ckupRcdAtchSn)}
                   >
                     삭제
                   </button>
@@ -206,18 +255,23 @@ export default function AttachmentTab({
               먼저 검사결과지를 등록하세요
             </p>
           )}
-          {!isAddOpen && (
-            <button
-              type="button"
-              className={`${TEXT_BTN} ${ADD_ROW}`}
-              onClick={() => setIsAddOpen(true)}
-            >
-              <Icon name="add" className="text-lg" />
-              첨부 추가
-            </button>
-          )}
-          {addForm}
+          <button
+            type="button"
+            className={`${TEXT_BTN} ${ADD_ROW}`}
+            onClick={() => setIsAddOpen(true)}
+          >
+            <Icon name="add" className="text-lg" />
+            첨부 추가
+          </button>
         </>
+      )}
+
+      {isAddOpen && (
+        <AttachmentModal
+          petSn={petSn}
+          ckupRcdSn={ckupRcdSn}
+          onClose={() => setIsAddOpen(false)}
+        />
       )}
 
       <input
@@ -233,6 +287,7 @@ export default function AttachmentTab({
         <Modal
           isConfirm
           title="이 첨부 자료를 삭제할까요?"
+          description="삭제하면 되돌릴 수 없어요."
           isPending={deleteAttachment.isPending}
           onClose={() => setDeleteSn(null)}
           footer={
@@ -264,6 +319,7 @@ export default function AttachmentTab({
 /** 검사결과지 유형의 PDF 파일: [PDF 분석] 대상 */
 function isLabPdf(attachment) {
   return (
-    attachment.atchTypeCd === ATTACHMENT_LAB && attachment.mimeType === PDF_MIME
+    attachment.atchTypeCd === ATTACHMENT_LAB &&
+    attachment.fileExtnCd === FILE_EXT_PDF
   );
 }

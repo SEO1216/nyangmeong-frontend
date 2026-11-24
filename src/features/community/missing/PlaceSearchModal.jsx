@@ -4,16 +4,16 @@ import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import Modal from '@/components/Modal';
 import useKakaoMap from '@/hooks/useKakaoMap';
 import MissingMap from './MissingMap';
-import { findRegion, searchPlaces } from './placeSearch';
+import { findRegion, searchPlaces } from '@/utils/placeSearch';
 
 /**
- * 장소 찾기 모달(전북 한정): 실종센터 목격 장소, 펫돌봄 돌봄 장소가 같이 쓴다
- * - 1단계 검색: 장소명·동·주소를 한 칸에서 카카오 장소·주소 검색(./placeSearch)으로 찾고 전북 결과만 보여 준다
- *   입력을 멈추고 SEARCH_DELAY 뒤 자동으로 찾는다. 돋보기 버튼·Enter는 바로 찾는다. 늦게 온 이전 검색어의 결과는 버린다
+ * 장소 찾기 모달(전북 한정): 실종센터 목격 장소, 펫돌봄 돌봄 장소 공용
+ * - 1단계 검색: 장소명·동·주소를 한 칸에서 카카오 장소·주소 검색(./placeSearch)으로 찾고 전북 결과만 표시
+ *   입력을 멈추고 SEARCH_DELAY 뒤 자동 검색. 돋보기 버튼·Enter는 즉시 검색. 늦게 온 이전 검색어의 결과는 폐기
  * - 2단계 위치 맞추기: 고른 결과를 지도(반경)로 보여 주고, 지도를 끌면 그 자리의 주소·시군구·동으로 바뀐다(전북 밖은 되돌림)
  *   「‹ 다시 검색」은 검색어·결과를 그대로 두고 1단계로 돌아간다. [확인 버튼]으로 부모에 넘긴다: onSelect(place)
  * - title·confirmLabel·guide: 모달 제목, 확인 버튼 문구, 검색 안내 문구(기본은 실종센터 문구)
- * - 모달이라 글쓰기 폼의 다른 입력값은 그대로 유지된다. 취소하면 이전 선택을 바꾸지 않는다
+ * - 모달이라 글쓰기 폼의 다른 입력값은 그대로 유지. 취소하면 이전 선택 유지
  */
 const SEARCH_DELAY = 300;
 
@@ -110,16 +110,16 @@ export default function PlaceSearchModal({
           <button
             type="button"
             onClick={() => setSelected(null)}
-            className="-ml-1 inline-flex min-h-8 items-center gap-0.5 text-sm font-medium text-muted hover:text-ink"
+            className="-ml-1 inline-flex min-h-8 items-center gap-1 text-sm font-medium text-muted hover:text-ink"
           >
             <ChevronLeft size={16} aria-hidden="true" />
             다시 검색
           </button>
-          <p className="mt-2 flex items-start gap-1.5">
+          <p className="mt-2 flex items-start gap-2">
             <MapPin
               size={18}
               aria-hidden="true"
-              className="mt-0.5 shrink-0 text-brand-500"
+              className="mt-1 shrink-0 text-brand-500"
             />
             <span className="min-w-0">
               <b className="block font-bold text-ink">{selected.wtnsPlcNm}</b>
@@ -157,7 +157,7 @@ export default function PlaceSearchModal({
                   setKeyword(event.target.value);
                   setPickError('');
                 }}
-                className="block h-10 w-full rounded-md border border-input-line bg-white pr-11 pl-3 text-base focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
+                className="block h-10 w-full rounded-md border border-input-line bg-white pr-11 pl-3 text-base focus:border-brand-500 focus:ring-focus focus:outline-none"
               />
               <button
                 type="submit"
@@ -206,19 +206,19 @@ export default function PlaceSearchModal({
                   <button
                     type="button"
                     onClick={() => handlePick(row)}
-                    className="flex w-full items-start gap-2 px-3 py-2.5 text-left hover:bg-surface-2"
+                    className="flex w-full items-start gap-2 px-3 py-3 text-left hover:bg-surface-2"
                   >
                     {row.isAddress ? (
                       <MapIcon
                         size={16}
                         aria-hidden="true"
-                        className="mt-0.5 shrink-0 text-subtle"
+                        className="mt-1 shrink-0 text-subtle"
                       />
                     ) : (
                       <MapPin
                         size={16}
                         aria-hidden="true"
-                        className="mt-0.5 shrink-0 text-brand-500"
+                        className="mt-1 shrink-0 text-brand-500"
                       />
                     )}
                     <span className="min-w-0">

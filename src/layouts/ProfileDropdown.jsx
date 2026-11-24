@@ -3,12 +3,14 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import userAvatar from '@/assets/user.svg';
 import ConfirmModal from '@/components/ConfirmModal';
+import FileImage from '@/components/FileImage';
 import Skeleton from '@/components/Skeleton';
-import { useLogout, useMemberSummary } from '@/features/member/queries';
+import { useLogout, useMe, useMemberSummary } from '@/features/member/queries';
+import { useAiModal } from '@/context/aiModal';
 import { useChatModal } from '@/context/chatModal';
-import { closeAiWindow } from '@/hooks/useAiWindow';
 import { closeChatWindow } from '@/hooks/useChatWindow';
 import { PATHS } from '@/routes/paths';
+import { publicFileUrl } from '@/utils/fileUrl';
 
 const MENU_LINKS = [
   { label: '마이페이지', to: PATHS.MYPAGE },
@@ -17,7 +19,7 @@ const MENU_LINKS = [
 ];
 
 const itemClass =
-  'flex h-11 w-full items-center rounded-lg px-3 text-left text-base text-[#1a3234] hover:bg-[#f4f6f6]';
+  'flex h-11 w-full items-center rounded-lg px-3 text-left text-base text-ink hover:bg-surface-2';
 
 /** 열릴 때만 마운트: 열 때마다 회원 요약 요청 */
 function ProfileMenuPanel({ onClose, onLogout }) {
@@ -26,14 +28,14 @@ function ProfileMenuPanel({ onClose, onLogout }) {
   return (
     <div
       role="menu"
-      className="absolute right-0 top-[61px] z-40 w-60 rounded-[14px] border border-[#e2e7e7] bg-white p-2 shadow-lg"
+      className="absolute right-0 top-[61px] z-40 w-60 rounded-card border border-line bg-white p-2 shadow-depth-md"
     >
       {/** 요약 로딩 중 상자 크기 고정(min-h) */}
-      <div className="mb-1 min-h-[71px] border-b border-[#edf1f1] px-3 pb-2 pt-3.5">
-        <div className="flex h-[26px] items-center text-base font-bold leading-[26px] text-[#1a3234]">
+      <div className="mb-1 min-h-[71px] border-b border-line-soft px-3 pb-2 pt-3.5">
+        <div className="flex h-[26px] items-center text-base font-bold leading-[26px] text-ink">
           {summary ? summary.mbrNcnm : <Skeleton className="h-4 w-24" />}
         </div>
-        <div className="flex h-[23px] items-center text-sm leading-[23px] text-[#667374]">
+        <div className="flex h-[23px] items-center text-sm leading-[23px] text-subtle">
           {summary ? (
             summary.maskedAcntEml
           ) : (
@@ -70,13 +72,14 @@ export function LogoutConfirm({ onClose }) {
   const queryClient = useQueryClient();
   const logout = useLogout();
   const { close: closeChatModal } = useChatModal();
+  const { close: closeAiModal } = useAiModal();
 
   const handleConfirm = () => {
     logout.mutate(undefined, {
       onSuccess: () => {
-        closeAiWindow();
         closeChatWindow();
         closeChatModal();
+        closeAiModal();
         /** 이전 회원 캐시 비우기 */
         queryClient.clear();
         onClose();
@@ -87,7 +90,8 @@ export function LogoutConfirm({ onClose }) {
 
   return (
     <ConfirmModal
-      title="로그아웃하시겠어요?"
+      title="로그아웃할까요?"
+      description="다시 이용하려면 로그인해 주세요."
       confirmLabel="로그아웃"
       errorMessage={
         logout.isError
@@ -110,6 +114,11 @@ export default function ProfileDropdown({
   const rootRef = useRef(null);
   const buttonRef = useRef(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  /** 프로필 사진: 없거나 열리지 않으면 기본 아이콘 */
+  const { data: me } = useMe();
+  const avatar = (
+    <img src={userAvatar} alt="" className="size-full object-cover" />
+  );
 
   /** 토글 버튼이 rootRef 안: 닫자마자 다시 열리는 것 방지 */
   useEffect(() => {
@@ -158,7 +167,11 @@ export default function ProfileDropdown({
         aria-expanded={isOpen}
         onClick={onToggle}
       >
-        <img src={userAvatar} alt="" className="size-full object-cover" />
+        <FileImage
+          src={publicFileUrl(me?.atchFileSn)}
+          className="size-full object-cover"
+          fallback={avatar}
+        />
       </button>
       {isOpen && (
         <ProfileMenuPanel onClose={onClose} onLogout={handleLogoutClick} />

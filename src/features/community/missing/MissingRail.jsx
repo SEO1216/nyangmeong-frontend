@@ -24,9 +24,12 @@ const GUIDE_ITEMS = [
   ['해질녘 · 새벽에 다시 찾기', '사람이 적은 시간에 움직이는 경우가 많아요'],
 ];
 
-const H2_CLASS = 'pb-3 text-lg leading-[1.4] font-bold text-ink';
+/** 「자세한 대처 요령 보기」가 여는 공지사항 글(/notices/42) */
+const GUIDE_NOTICE_SN = 42;
 
-/** 실종센터 목록 오른쪽 레일: 실종 Check 가이드 · 최근 실종 소식 · 최근 찾은 반려동물 */
+const H2_CLASS = 'pb-2 text-lg font-bold tracking-[-0.01em] text-ink';
+
+/** 실종센터 목록 오른쪽 레일: 실종 체크 가이드 · 최근 실종 소식 · 최근 찾은 반려동물 */
 export default function MissingRail() {
   const { data } = useMissingRail();
 
@@ -34,12 +37,12 @@ export default function MissingRail() {
     <aside aria-label="실종 안내" className="flex min-w-0 flex-col gap-10">
       <section aria-labelledby="missing-guide-title">
         <h2 id="missing-guide-title" className={H2_CLASS}>
-          실종 Check 가이드
+          실종 체크 가이드
         </h2>
         <CheckList items={GUIDE_ITEMS} />
         <Link
-          to={PATHS.NOTICES}
-          className="mt-1 inline-flex min-h-10 items-center gap-0.5 text-sm font-semibold text-brand-600 hover:underline"
+          to={generatePath(PATHS.NOTICE_DETAIL, { ntcMttrSn: GUIDE_NOTICE_SN })}
+          className="mt-3 flex h-10 items-center justify-center gap-1 rounded-md bg-brand-50 text-base font-semibold text-brand-600 hover:bg-brand-100"
         >
           자세한 대처 요령 보기
           <ChevronRight size={16} aria-hidden="true" />
@@ -60,7 +63,7 @@ export default function MissingRail() {
                 to={generatePath(PATHS.COMMUNITY_MISSING_DETAIL, {
                   lostTpofSn: item.lostTpofSn,
                 })}
-                className="group flex min-h-[52px] items-center gap-2.5"
+                className="group flex min-h-[52px] items-center gap-3"
               >
                 <MissingStatusBadge post={item} className="shrink-0" />
                 <span className="min-w-0 flex-1 truncate font-medium text-ink group-hover:text-brand-600">
@@ -83,16 +86,28 @@ export default function MissingRail() {
           {data?.found.map((item) => (
             <li
               key={item.lostTpofSn}
-              className="flex items-start gap-2 border-t border-line py-3 text-sm leading-[1.6] text-ink-2 first:border-t-0 first:pt-0.5"
+              className="border-t border-line first:border-t-0"
             >
-              <Heart
-                size={20}
-                aria-hidden="true"
-                className="shrink-0 text-tone-green-fg"
-              />
-              <span>
-                <b>{item.petNm}</b>가 무사히 가족의 품으로 돌아갔어요
-              </span>
+              <Link
+                to={generatePath(PATHS.COMMUNITY_MISSING_DETAIL, {
+                  lostTpofSn: item.lostTpofSn,
+                })}
+                className="group flex items-start gap-2 py-3 text-sm leading-[1.6] text-ink-2 hover:text-brand-600"
+              >
+                <Heart
+                  size={20}
+                  aria-hidden="true"
+                  className="shrink-0 text-tone-green-fg"
+                />
+                {/* 남의 찾았어요 글은 이름이 null이라 제목으로 */}
+                {item.petNm ? (
+                  <span>
+                    <b>{item.petNm}</b>가 무사히 가족의 품으로 돌아갔어요
+                  </span>
+                ) : (
+                  <span>{item.pstTtl}</span>
+                )}
+              </Link>
             </li>
           ))}
         </ul>

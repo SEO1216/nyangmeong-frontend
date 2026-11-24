@@ -39,6 +39,7 @@ export default function ReportModal({
     }
     if (reason === ETC && !detail.trim()) {
       setError('기타를 고르셨다면 상세 내용을 적어 주세요');
+      document.getElementById('report-detail')?.focus();
       return;
     }
     onSubmit({ reason, detail: detail.trim() });
@@ -72,17 +73,17 @@ export default function ReportModal({
         </>
       }
     >
-      <p className="mb-4 rounded-md bg-[#f4f6f6] px-3 py-2.5 text-sm leading-normal break-all text-[#3d4a4b]">
+      <p className="mb-4 rounded-md bg-surface-2 px-3 py-2.5 text-sm leading-normal font-medium break-all text-ink-2">
         {targetLabel}
       </p>
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1 text-base font-semibold text-[#1a3234]">
+        <legend className="mb-1 text-base font-semibold text-ink">
           신고 사유
         </legend>
         {REPORT_REASONS.map((item) => (
           <label
             key={item}
-            className="flex cursor-pointer items-center gap-2 text-base text-[#3d4a4b]"
+            className="flex cursor-pointer items-center gap-2 text-base text-ink-2"
           >
             <input
               type="radio"
@@ -93,7 +94,7 @@ export default function ReportModal({
                 setReason(item);
                 setError('');
               }}
-              className="size-4 accent-[#285a5c]"
+              className="size-4 accent-brand-500"
             />
             {item}
           </label>
@@ -103,11 +104,16 @@ export default function ReportModal({
         <div className="flex items-center justify-between">
           <label
             htmlFor="report-detail"
-            className="text-base font-semibold text-[#1a3234]"
+            className="text-base font-semibold text-ink"
           >
             상세 내용
+            {reason === ETC && (
+              <span className="ml-1 text-danger" aria-hidden="true">
+                (필수)
+              </span>
+            )}
           </label>
-          <span className="text-sm text-[#667374]">
+          <span className="text-xs text-subtle">
             {detail.length} / {DETAIL_MAX}
           </span>
         </div>
@@ -116,18 +122,20 @@ export default function ReportModal({
           value={detail}
           maxLength={DETAIL_MAX}
           rows={3}
-          placeholder="신고 사유를 자세히 적어 주세요 (선택)"
+          required={reason === ETC}
+          aria-required={reason === ETC}
+          placeholder="신고 사유를 입력해 주세요."
           onChange={(event) => {
-            setDetail(event.target.value);
+            setDetail(event.target.value.slice(0, DETAIL_MAX));
             setError('');
           }}
-          className="block w-full resize-none rounded-md border border-[#d3dae2] bg-white px-3 py-2 text-base placeholder:text-[#8c9899] focus:border-[#285a5c] focus:ring-2 focus:ring-[#285a5c]/20 focus:outline-none"
+          className="block w-full resize-none rounded-md border border-input-line bg-white px-3 py-2 text-base placeholder:text-placeholder focus:border-brand-500 focus:ring-focus focus:outline-none"
         />
       </div>
       {shownError && (
         <p
           role="alert"
-          className="mt-3 flex items-center gap-1 text-sm text-[#b4473a]"
+          className="mt-3 flex items-center gap-1 text-sm text-danger"
         >
           <CircleAlert size={14} aria-hidden="true" />
           {shownError}

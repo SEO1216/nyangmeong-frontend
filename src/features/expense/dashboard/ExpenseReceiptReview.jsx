@@ -1,10 +1,14 @@
 import { Plus, Receipt, Sparkles, X } from 'lucide-react';
 import { useState } from 'react';
+import DatePicker from '@/components/DatePicker';
 import AmountInput from '@/components/AmountInput';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import { Required } from '@/components/FieldError';
+import { INPUT, LABEL } from '@/components/formStyles';
 import Modal from '@/components/Modal';
+import NoticeBox from '@/components/NoticeBox';
 import Select from '@/components/Select';
-import { EXPND_PLACE_KEY } from '../api';
+import { MissingNotice } from '../shared/ExpenseRequired';
 import ExpenseCategoryChips from '../shared/ExpenseCategoryChips';
 import { FILTER_SHARED, HOSPITAL_CLSF_CD } from '../shared/expenseCodes';
 import {
@@ -18,9 +22,6 @@ import {
 import { PLACE_MAX_LENGTH, formatWon } from '../shared/expenseFormat';
 
 const FORM_ID = 'expense-receipt-form';
-const LABEL = 'font-semibold';
-const INPUT =
-  'block h-10 w-full rounded-md border border-input-line bg-white px-3 placeholder:text-placeholder hover:border-line-strong focus:border-brand-500 focus:ring-focus focus:outline-none';
 
 let nextRowKey = 1;
 const newRow = (petValue, digits) => ({
@@ -44,7 +45,7 @@ export default function ExpenseReceiptReview({
   const [ymd, setYmd] = useState(result.expndYmd ?? fallbackYmd);
   const [expndClsfCd, setExpndClsfCd] = useState(result.expndClsfCd);
   const [place, setPlace] = useState(() =>
-    (result[EXPND_PLACE_KEY] ?? '').slice(0, PLACE_MAX_LENGTH),
+    (result.expndPlcusNm ?? '').slice(0, PLACE_MAX_LENGTH),
   );
   const [dtlMttr, setDtlMttr] = useState(result.dtlMttr ?? '');
   const [rows, setRows] = useState(() => [
@@ -64,6 +65,13 @@ export default function ExpenseReceiptReview({
     ymd <= maxYmd &&
     expndClsfCd !== null &&
     rows.every((row) => row.petValue !== '' && Number(row.digits) >= 1);
+  /** [저장]이 막힌 이유: 빠진 항목을 화면 순서대로 */
+  const missing = [
+    ymd === '' && '날짜',
+    expndClsfCd === null && '카테고리',
+    rows.some((row) => row.petValue === '') && '반려동물',
+    rows.some((row) => Number(row.digits) < 1) && '금액(1원 이상)',
+  ].filter(Boolean);
   const canAddRow = rows.length < activePets.length;
 
   const updateRow = (key, patch) =>
@@ -103,7 +111,7 @@ export default function ExpenseReceiptReview({
         expndClsfCd,
         expndAmt: Number(row.digits),
         dtlMttr: dtlMttr.trim(),
-        [EXPND_PLACE_KEY]: place.trim(),
+        expndPlcusNm: place.trim(),
         expndYmd: ymd,
       })),
     );
@@ -132,7 +140,7 @@ export default function ExpenseReceiptReview({
               disabled={!canSave || isPending}
               className={BTN_PRIMARY}
             >
-              저장
+              등록하기
             </button>
           </>
         }
@@ -170,20 +178,24 @@ export default function ExpenseReceiptReview({
             <div>
               <label htmlFor="receipt-ymd" className={LABEL}>
                 날짜
+                <Required />
               </label>
-              <input
+              <DatePicker
                 id="receipt-ymd"
-                type="date"
                 value={ymd}
                 max={maxYmd}
-                onChange={(event) => setYmd(event.target.value)}
-                className={`${INPUT} mt-2`}
+                onChange={setYmd}
+                className="mt-2"
               />
             </div>
             <div>
-              <span className={LABEL}>카테고리</span>
+              <span className={LABEL}>
+                카테고리
+                <Required />
+              </span>
               <div className="mt-2">
                 <ExpenseCategoryChips
+                  isRequired
                   value={expndClsfCd}
                   onChange={handleChangeClsf}
                 />
@@ -191,7 +203,8 @@ export default function ExpenseReceiptReview({
             </div>
             <div>
               <label htmlFor="receipt-place" className={LABEL}>
-                사용처 <span className="font-normal text-subtle">선택</span>
+                사용처{' '}
+                <span className="ml-1 font-normal text-subtle">선택</span>
               </label>
               <input
                 id="receipt-place"
@@ -203,7 +216,7 @@ export default function ExpenseReceiptReview({
             </div>
             <div>
               <label htmlFor="receipt-memo" className={LABEL}>
-                내용 <span className="font-normal text-subtle">선택</span>
+                내용 <span className="ml-1 font-normal text-subtle">선택</span>
               </label>
               <input
                 id="receipt-memo"
@@ -214,7 +227,10 @@ export default function ExpenseReceiptReview({
               />
             </div>
             <div>
-              <span className={LABEL}>반려동물별 금액</span>
+              <span className={LABEL}>
+                반려동물별 금액
+                <Required />
+              </span>
               <div className="mt-2 flex flex-col gap-2">
                 {rows.map((row, index) => (
                   <div
@@ -222,7 +238,7 @@ export default function ExpenseReceiptReview({
                     className="grid grid-cols-[minmax(0,1fr)_minmax(0,140px)_auto] items-center gap-2"
                   >
                     <Select
-                      label={`반려동물 ${index + 1}`}
+                      label={`반려동물 ${index + 1} (필수)`}
                       value={row.petValue}
                       onChange={(value) => handleChangePet(row.key, value)}
                       options={getPetOptions({
@@ -235,7 +251,8 @@ export default function ExpenseReceiptReview({
                       })}
                     />
                     <AmountInput
-                      label={`금액 ${index + 1}`}
+                      isRequired
+                      label={`금액 ${index + 1} (필수)`}
                       value={row.digits}
                       onChange={(digits) => updateRow(row.key, { digits })}
                     />
@@ -255,9 +272,9 @@ export default function ExpenseReceiptReview({
                 ))}
               </div>
               {hasHospitalNotice && rows.some((row) => row.petValue === '') && (
-                <p role="alert" className="mt-2 text-sm text-danger">
+                <NoticeBox tone="danger" role="alert" className="mt-2">
                   {HOSPITAL_NOTICE}
-                </p>
+                </NoticeBox>
               )}
               {canAddRow && (
                 <button
@@ -271,12 +288,15 @@ export default function ExpenseReceiptReview({
               )}
               <p className="mt-2 flex flex-wrap justify-between gap-2 text-sm text-subtle">
                 {hasReceiptAmt ? (
-                  <span>영수증 금액 {formatWon(result.expndAmt)}</span>
+                  <span className="tabular-nums">
+                    영수증 금액 {formatWon(result.expndAmt)}
+                  </span>
                 ) : (
                   <span />
                 )}
                 <span>
-                  나눈 합계 <b className="text-ink">{formatWon(totalAmt)}</b>
+                  나눈 합계{' '}
+                  <b className="text-ink tabular-nums">{formatWon(totalAmt)}</b>
                 </span>
               </p>
               {hasReceiptAmt && totalAmt !== result.expndAmt && (
@@ -285,11 +305,17 @@ export default function ExpenseReceiptReview({
                 </p>
               )}
             </div>
-            <p className="flex items-start gap-2 rounded-box bg-warn-soft px-4 py-3 text-sm text-warn">
-              <Sparkles className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            <NoticeBox tone="warn" className="flex items-start gap-2">
+              <Sparkles className="mt-1 size-4 shrink-0" aria-hidden="true" />
               AI가 자동으로 인식한 결과라 실수가 있을 수 있어요. 저장 전에 꼭
               확인해 주세요
-            </p>
+            </NoticeBox>
+            {!canSave && (
+              <MissingNotice
+                missing={missing}
+                isFutureYmd={ymd !== '' && ymd > maxYmd}
+              />
+            )}
           </form>
         </div>
       </Modal>

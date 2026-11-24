@@ -2,22 +2,69 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CountBadge from '@/components/CountBadge';
 import Icon from '@/components/Icon';
+import LoadError from '@/components/LoadError';
 import Skeleton from '@/components/Skeleton';
 import NotificationItem from '@/features/notification/shared/NotificationItem';
 import { NOTI_TABS, NOTI_TYPE } from '@/features/notification/shared/notiTabs';
 import {
   useNotifications,
+  useReadAllNotifications,
   useReadNotification,
   useUnreadCount,
 } from '@/features/notification/queries';
 import { useChatModal } from '@/context/chatModal';
 import { HEADER_ICON_CLASS } from './headerStyles';
+import { useMe } from '@/features/member/queries';
 
 /** 열릴 때만 마운트: 알림 목록 요청과 탭 상태를 열 때마다 초기화 */
-function NotificationPanel({ unreadCount, onClose }) {
+function NotificationPanel({ unreadCount, onClose, onDismiss }) {
   const [tab, setTab] = useState(NOTI_TABS[0]);
-  const { data, isPending } = useNotifications(tab);
+  const {
+    data,
+    isPending,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
+    fetchNextPage,
+  } = useNotifications(tab);
+  const listRef = useRef(null);
+  const sentinelRef = useRef(null);
+  /** 관찰 콜백이 마지막 렌더 값을 읽게 */
+  const canLoadMoreRef = useRef(false);
+  const fetchNextPageRef = useRef(fetchNextPage);
+  const canLoadMore =
+    hasNextPage && !isFetchingNextPage && !isFetchNextPageError;
+  useEffect(() => {
+    canLoadMoreRef.current = canLoadMore;
+    fetchNextPageRef.current = fetchNextPage;
+  }, [canLoadMore, fetchNextPage]);
+
+  /**
+   * 목록 끝 줄이 새로 보이게 된 순간에만 다음 5건을 한 번 부른다
+   * (보임 상태로 부르면 다음 쪽 도착 직후 끝 줄이 아직 보이는 것으로 남아 한 쪽 더 부름)
+   * 실패하면 [다시 시도]로만 다시 부른다
+   */
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && canLoadMoreRef.current) {
+          fetchNextPageRef.current();
+        }
+      },
+      { root: listRef.current },
+    );
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  /** 탭을 바꾸면 목록 칸을 맨 위로: 맨 아래에 있던 끝 줄이 새 탭에서 바로 보이지 않게 */
+  const handleTabChange = (item) => {
+    listRef.current.scrollTop = 0;
+    setTab(item);
+  };
+
   const readNotification = useReadNotification();
+  const readAll = useReadAllNotifications();
   const navigate = useNavigate();
   const { open: openChatModal } = useChatModal();
 
@@ -50,16 +97,32 @@ function NotificationPanel({ unreadCount, onClose }) {
   };
 
   return (
-    <div className="absolute right-0 top-[61px] z-40 w-[380px] overflow-hidden rounded-[14px] border border-[#e2e7e7] bg-white shadow-lg max-[760px]:fixed max-[760px]:inset-x-3 max-[760px]:top-[72px] max-[760px]:w-auto">
+    <div className="absolute right-0 top-[61px] z-40 w-[380px] overflow-hidden rounded-card border border-line bg-white shadow-depth-md max-[760px]:fixed max-[760px]:inset-x-3 max-[760px]:top-[72px] max-[760px]:w-auto">
       <div className="flex items-center justify-between px-[18px] pb-2 pt-3.5">
-        <h2 className="text-base font-bold leading-[26px] text-[#1a3234]">
-          알림
-        </h2>
-        <p className="text-base font-medium leading-[26px] text-[#566465]">
-          미읽음 <span className="font-bold text-[#f44b21]">{unreadCount}</span>
-        </p>
+        <h2 className="text-base font-bold leading-[26px] text-ink">알림</h2>
+        <div className="flex items-center gap-1">
+          <p className="text-base font-medium leading-[26px] text-muted">
+            미읽음 <span className="font-bold text-alert">{unreadCount}</span>
+          </p>
+          <button
+            type="button"
+            className="ml-1 h-8 rounded-full px-2 text-sm font-semibold leading-[18px] tracking-[-0.03em] text-brand-500 hover:bg-surface-2 disabled:text-line-strong disabled:hover:bg-transparent"
+            disabled={unreadCount === 0 || readAll.isPending}
+            onClick={() => readAll.mutate()}
+          >
+            모두 읽음
+          </button>
+          <button
+            type="button"
+            className="-my-[3px] -mr-2 flex size-8 items-center justify-center rounded-full text-muted hover:bg-surface-2"
+            aria-label="알림 닫기"
+            onClick={onDismiss}
+          >
+            <Icon name="close" className="text-xl" />
+          </button>
+        </div>
       </div>
-      <div className="flex gap-1.5 border-b border-[#edf1f1] px-[18px] pb-3">
+      <div className="flex gap-1.5 border-b border-line-soft px-[18px] pb-3">
         {NOTI_TABS.map((item) => (
           <button
             key={item.key}
@@ -67,39 +130,65 @@ function NotificationPanel({ unreadCount, onClose }) {
             aria-pressed={item.key === tab.key}
             className={`h-[30px] rounded-full border px-3 text-sm ${
               item.key === tab.key
-                ? 'border-[#285a5c] bg-[#285a5c] text-white'
-                : 'border-[#e2e7e7] bg-white text-[#3d4a4b] hover:bg-[#f4f6f6]'
+                ? 'border-brand-500 bg-brand-500 text-white'
+                : 'border-line bg-white text-ink-2 hover:bg-surface-2'
             }`}
-            onClick={() => setTab(item)}
+            onClick={() => handleTabChange(item)}
           >
             {item.label}
           </button>
         ))}
       </div>
-      {isPending && (
-        <div aria-busy="true">
-          {Array.from({ length: 5 }, (_, index) => (
-            <div
-              key={index}
-              className="border-b border-[#edf1f1] px-[18px] py-4 last:border-b-0"
-            >
-              <Skeleton className="my-[5px] h-4 w-4/5" />
-            </div>
-          ))}
+      {/**
+       * 목록 칸 높이 고정(4.5행): 알림 수·탭과 관계없이 패널 크기가 같고, 5건부터 칸 안에서만 스크롤
+       * 첫 쪽 스켈레톤 5행은 칸보다 높아 로딩 중에는 스크롤을 막는다(열기·탭 바꾸기 때 칸이 움직이지 않게)
+       */}
+      <div
+        ref={listRef}
+        className={`h-[264px] overscroll-contain ${
+          isPending ? 'overflow-hidden' : 'overflow-y-auto'
+        }`}
+      >
+        {isPending && (
+          <div aria-busy="true">
+            {Array.from({ length: 5 }, (_, index) => (
+              <div
+                key={index}
+                className="border-b border-line-soft px-[18px] py-4 last:border-b-0"
+              >
+                <Skeleton className="my-[5px] h-4 w-4/5" />
+              </div>
+            ))}
+          </div>
+        )}
+        {data?.length === 0 && (
+          <p className="flex h-full items-center justify-center px-[18px] text-base text-subtle">
+            새 알림이 없어요
+          </p>
+        )}
+        {data?.map((notification) => (
+          <NotificationItem
+            key={notification.inappNotiSn}
+            notification={notification}
+            onClick={handleItemClick}
+          />
+        ))}
+        {/** 목록 끝 감지 줄: 패널이 열릴 때 한 번 관찰을 걸어 항상 둔다. 내용은 다음 쪽이 있을 때만 */}
+        <div ref={sentinelRef}>
+          {hasNextPage &&
+            (isFetchNextPageError ? (
+              <LoadError
+                message="불러오지 못했어요"
+                onRetry={() => fetchNextPage()}
+                className="py-4"
+              />
+            ) : (
+              <div aria-busy="true" className="px-[18px] py-4">
+                <Skeleton className="my-[5px] h-4 w-4/5" />
+              </div>
+            ))}
         </div>
-      )}
-      {data?.length === 0 && (
-        <p className="px-[18px] py-10 text-center text-base text-[#667374]">
-          새 알림이 없어요
-        </p>
-      )}
-      {data?.map((notification) => (
-        <NotificationItem
-          key={notification.inappNotiSn}
-          notification={notification}
-          onClick={handleItemClick}
-        />
-      ))}
+      </div>
     </div>
   );
 }
@@ -112,7 +201,15 @@ export default function NotificationDropdown({
 }) {
   const rootRef = useRef(null);
   const buttonRef = useRef(null);
-  const { data: unread } = useUnreadCount();
+  const { data: me } = useMe();
+  /** 로그인 전(공개 화면)에는 조회하지 않는다: 401이면 로그인 화면으로 이동하므로 */
+  const { data: unread } = useUnreadCount(Boolean(me));
+
+  /** 닫기 버튼: Esc와 같게 알림 버튼으로 포커스를 돌린다 */
+  const handleDismiss = () => {
+    onClose();
+    buttonRef.current.focus();
+  };
 
   /** 토글 버튼이 rootRef 안: 닫자마자 다시 열리는 것 방지 */
   useEffect(() => {
@@ -142,7 +239,7 @@ export default function NotificationDropdown({
       <button
         ref={buttonRef}
         type="button"
-        className={`${buttonClassName} ${isOpen ? 'bg-[#ebf0f0]' : ''}`}
+        className={`${buttonClassName} ${isOpen ? 'bg-surface-3' : ''}`}
         aria-label="알림"
         aria-expanded={isOpen}
         onClick={onToggle}
@@ -154,7 +251,11 @@ export default function NotificationDropdown({
         />
       </button>
       {isOpen && (
-        <NotificationPanel unreadCount={unread?.count ?? 0} onClose={onClose} />
+        <NotificationPanel
+          unreadCount={unread?.count ?? 0}
+          onClose={onClose}
+          onDismiss={handleDismiss}
+        />
       )}
     </div>
   );

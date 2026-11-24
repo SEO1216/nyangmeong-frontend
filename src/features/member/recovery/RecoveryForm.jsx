@@ -1,0 +1,285 @@
+import { Check, ChevronRight, Mail, Phone, ShieldCheck } from 'lucide-react';
+import {
+  SIDE_BTN,
+  AUTH_BTN_PRIMARY,
+  AUTH_BTN_SECONDARY,
+} from '../shared/authStyles';
+import StepMotion from '@/components/StepMotion';
+import AuthActions from '../shared/AuthActions';
+import AuthBody from '../shared/AuthBody';
+import AuthCard from '../shared/AuthCard';
+import Checkbox from '@/components/Checkbox';
+import AuthField from '../shared/AuthField';
+import AuthHeading from '../shared/AuthHeading';
+import AuthNotice from '../shared/AuthNotice';
+import { resendLabel } from '../shared/emailCert';
+import TermsModal from '../shared/TermsModal';
+import { hasTermsView } from '../shared/validate';
+import SignupSummary from '../signup/SignupSummary';
+import { SIGNUP_MESSAGES as SIGNUP } from '../signup/signupMessages';
+import { RECOVERY_MESSAGES as MSG } from './recoveryMessages';
+import useRecovery from './useRecovery';
+
+const CONFIRM_BTN =
+  '!border-transparent !bg-brand-50 !text-brand-600 hover:enabled:!bg-brand-100 disabled:!bg-surface-3 disabled:!text-line-strong';
+
+// 1단계. 복구할 이메일을 읽기 전용으로 보이고 인증번호로 본인을 확인한다
+function VerifyStep({ form }) {
+  return (
+    <form noValidate onSubmit={form.submitVerify}>
+      <div className="flex flex-col gap-5">
+        <AuthField
+          id="recovery-email"
+          icon={Mail}
+          label="복구할 이메일"
+          value={form.email}
+          onChange={() => {}}
+          readOnly
+          autoComplete="username"
+          error={form.errors.email}
+          help={MSG.emailHelp}
+          action={
+            <button
+              type="button"
+              onClick={form.sendCode}
+              disabled={form.isSending || form.resendSeconds > 0}
+              className={SIDE_BTN}
+            >
+              {form.isSent
+                ? resendLabel(form.resendSeconds)
+                : '인증번호 보내기'}
+            </button>
+          }
+        />
+        {/** 오답 안내: 이메일 칸 바로 아래 */}
+        {form.isCodeLocked && form.notice && (
+          <AuthNotice type={form.notice.type} message={form.notice.message} />
+        )}
+        {form.isSent && !form.isCodeLocked && (
+          <AuthField
+            id="recovery-code"
+            icon={ShieldCheck}
+            label="인증번호"
+            value={form.code}
+            onChange={form.changeCode}
+            placeholder="숫자 6자리 입력"
+            autoComplete="one-time-code"
+            inputMode="numeric"
+            maxLength={6}
+            error={form.errors.code}
+            help={MSG.sent}
+            endAdornment={
+              <span className="font-semibold text-danger tabular-nums">
+                {form.countdown.text}
+              </span>
+            }
+            action={
+              <button
+                type="submit"
+                disabled={form.isVerifying}
+                className={`${SIDE_BTN} ${CONFIRM_BTN}`}
+              >
+                인증 확인
+              </button>
+            }
+          />
+        )}
+      </div>
+    </form>
+  );
+}
+
+// 2단계. 본인확인된 기존 회원 정보를 보이고, 빠진 약관·번호를 받은 뒤 사용자가 직접 복구한다
+function ConfirmStep({ form }) {
+  const { info } = form;
+  return (
+    <>
+      <SignupSummary
+        rows={[
+          ['복구할 이메일', info.acntEml],
+          ['기존 닉네임', info.mbrNcnm],
+          [
+            '복구 가능 기간',
+            form.remainDays > 0 ? `${form.remainDays}일 남음` : '오늘까지',
+          ],
+        ]}
+      />
+      <p className="mt-3 text-sm leading-5 text-muted">
+        새 계정을 만들지 않고 회원정보·반려동물·건강기록·픽셀캐릭터를 그대로
+        되살립니다.
+      </p>
+      <div className="mt-5 flex flex-col gap-5">
+        {info.missingTrms.length > 0 && (
+          <div>
+            {info.missingTrms.map(
+              ({ trmsSn, trmsFixIdntfKey, trmsTtl, esntlAgreYn }) => (
+                <div
+                  key={trmsSn}
+                  className="flex min-h-10 items-center px-4 text-ink-2"
+                >
+                  <Checkbox
+                    checked={Boolean(form.agreed[trmsSn])}
+                    onChange={() => form.toggleAgree(trmsSn)}
+                    className="flex-1"
+                  >
+                    <span>
+                      <em
+                        className={`mr-1.5 font-semibold not-italic ${
+                          esntlAgreYn ? 'text-brand-600' : 'text-subtle'
+                        }`}
+                      >
+                        {esntlAgreYn ? '[필수]' : '[선택]'}
+                      </em>
+                      {trmsTtl}
+                    </span>
+                  </Checkbox>
+                  {hasTermsView(trmsFixIdntfKey) && (
+                    <button
+                      type="button"
+                      onClick={() => form.openTerms(trmsSn)}
+                      aria-label={`${trmsTtl} 내용보기`}
+                      className="-mr-1 grid size-6 shrink-0 place-items-center text-subtle hover:text-ink max-[760px]:-mr-3.5 max-[760px]:size-11"
+                    >
+                      <ChevronRight className="size-4" />
+                    </button>
+                  )}
+                </div>
+              ),
+            )}
+          </div>
+        )}
+        {form.hasStoredPhone ? (
+          <SignupSummary
+            rows={[['휴대전화번호 · 기존 번호 유지', info.maskedMblTelno]]}
+          />
+        ) : (
+          <AuthField
+            id="recovery-phone"
+            icon={Phone}
+            label="휴대전화번호"
+            value={form.phone}
+            onChange={form.changePhone}
+            placeholder="01012345678"
+            autoComplete="tel"
+            inputMode="tel"
+            error={form.errors.phone}
+            success={form.isPhoneChecked ? SIGNUP.phoneAvailable : ''}
+            help={form.phone ? SIGNUP.phoneNeedCheck : SIGNUP.phoneHelp}
+            action={
+              <button
+                type="button"
+                onClick={form.submitPhoneCheck}
+                disabled={form.isPhoneChecking}
+                className={SIDE_BTN}
+              >
+                중복확인
+              </button>
+            }
+          />
+        )}
+      </div>
+    </>
+  );
+}
+
+// 재가입 복구(탈퇴 후 보관 기간 안의 회원). 본인확인 → 복구 확인 → 복구 완료.
+// 복구해도 로그인하지 않으므로 완료 뒤 로그인 방법 선택으로 보낸다
+export default function RecoveryForm({
+  email,
+  onCancel,
+  onGoLogin,
+  onRestartSignup,
+}) {
+  const form = useRecovery(email, { onCancel });
+
+  if (form.step === 'complete') {
+    return (
+      <AuthCard isCentered={false}>
+        <StepMotion
+          stepKey="complete"
+          direction={form.direction}
+          className="flex flex-1 flex-col"
+        >
+          {/* 체크·제목 묶음은 칸 가운데, 버튼은 맨 아래 */}
+          <div className="flex flex-1 flex-col justify-center text-center">
+            <div className="mx-auto mb-5 grid size-16 place-items-center rounded-full bg-tone-green-bg text-tone-green-fg">
+              <Check className="size-8" />
+            </div>
+            <AuthHeading title={MSG.done} subtitle={MSG.doneHelp} />
+          </div>
+          <AuthActions>
+            <button
+              type="button"
+              onClick={onGoLogin}
+              className={`${AUTH_BTN_PRIMARY} w-full`}
+            >
+              로그인으로
+            </button>
+          </AuthActions>
+        </StepMotion>
+      </AuthCard>
+    );
+  }
+
+  const isConfirm = form.step === 'confirm';
+  return (
+    <AuthCard>
+      <StepMotion stepKey={`${form.step}-head`} direction={form.direction}>
+        <AuthHeading
+          title={isConfirm ? '기존 정보 복구 확인' : '기존 정보 복구 본인확인'}
+          subtitle={
+            isConfirm
+              ? '기존 정보를 복구할지 선택해 주세요.'
+              : '탈퇴 후 30일 안에는 이메일 인증을 거쳐 기존 정보를 되살릴 수 있습니다.'
+          }
+        />
+      </StepMotion>
+      <StepMotion
+        stepKey={form.step}
+        direction={form.direction}
+        className="flex grow flex-col"
+      >
+        {form.notice && !(form.step === 'verify' && form.isCodeLocked) && (
+          <>
+            <AuthNotice type={form.notice.type} message={form.notice.message} />
+            {form.notice.isExpired && (
+              <button
+                type="button"
+                onClick={onRestartSignup}
+                className={`${AUTH_BTN_SECONDARY} w-full -mt-2 mb-6`}
+              >
+                새로 회원가입하기
+              </button>
+            )}
+          </>
+        )}
+        <AuthBody>
+          {isConfirm ? <ConfirmStep form={form} /> : <VerifyStep form={form} />}
+        </AuthBody>
+        <AuthActions className="flex flex-col gap-3">
+          {isConfirm && (
+            <button
+              type="button"
+              onClick={form.submitRecover}
+              disabled={!form.canRecover || form.isRecovering}
+              className={`${AUTH_BTN_PRIMARY} w-full`}
+            >
+              기존 정보 복구
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={form.cancel}
+            disabled={form.isRecovering}
+            className={`${AUTH_BTN_SECONDARY} w-full`}
+          >
+            취소
+          </button>
+        </AuthActions>
+      </StepMotion>
+      {form.termsView && (
+        <TermsModal trmsSn={form.termsView} onClose={form.closeTerms} />
+      )}
+    </AuthCard>
+  );
+}

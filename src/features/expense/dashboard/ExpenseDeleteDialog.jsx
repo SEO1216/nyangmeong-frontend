@@ -17,7 +17,10 @@ export default function ExpenseDeleteDialog({ expense, onDeleted, onClose }) {
         onDeleted?.();
         onClose();
       },
-      onError: () => showToast('삭제하지 못했어요. 잠시 후 다시 시도해 주세요'),
+      onError: () =>
+        showToast('삭제하지 못했어요. 잠시 후 다시 시도해 주세요', {
+          type: 'error',
+        }),
     });
 
   return (
@@ -43,7 +46,7 @@ export default function ExpenseDeleteDialog({ expense, onDeleted, onClose }) {
             disabled={deleteExpense.isPending}
             className={BTN_DANGER}
           >
-            삭제
+            삭제하기
           </button>
         </>
       }

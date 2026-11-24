@@ -6,13 +6,20 @@ import {
 } from 'react-router-dom';
 import PageSkeleton from '@/components/PageSkeleton';
 import SkeletonCard from '@/components/SkeletonCard';
+import LoadError from '@/components/LoadError';
 import { INQUIRY_TYPE_PIXEL_CHARACTER } from '@/features/inquiry/api';
 import InquiryForm from '@/features/inquiry/InquiryForm';
-import { useCreateInquiry, useInquiryTypes } from '@/features/inquiry/queries';
+import {
+  useCreateInquiry,
+  useInquiries,
+  useInquiryTypes,
+} from '@/features/inquiry/queries';
+import { useCharacterImage } from '@/hooks/useCharacterImage';
 import { PATHS } from '@/routes/paths';
+import { profanityFieldsOf } from '@/utils/profanity';
 
 /**
- * 문의 유형을 미리 고른다
+ * 문의 유형 미리 선택
  * - 픽셀 캐릭터 화면의 문의 링크(state.inquiryType === 'PIXEL_CHARACTER')
  * - ?type=에 유형 코드나 이름이 오면 그 유형
  */
@@ -33,6 +40,14 @@ export default function InquiryWritePage() {
   const [searchParams] = useSearchParams();
   const types = useInquiryTypes();
   const { mutate, isPending, error } = useCreateInquiry();
+  /** 문의 이력이 없으면 돌아갈 목록이 없으니 [취소]를 숨긴다 */
+  const { data: firstPage } = useInquiries({ page: 1, size: 1, status: '' });
+  const hasNoInquiry = firstPage?.totalElements === 0;
+  /** 캐릭터 화면에서 넘어왔으면 자동 첨부될 캐릭터 이미지(미리보기). 새로고침해도 보이게 번호로 다시 받는다 */
+  const characterImage = useCharacterImage(
+    state?.pixelCharSn != null ? state.petSn : null,
+    'full',
+  );
 
   if (types.isPending) {
     return (
@@ -42,18 +57,20 @@ export default function InquiryWritePage() {
     );
   }
   if (types.isError) {
-    return (
-      <p role="alert" className="text-[#566465]">
-        {types.error.message}
-      </p>
-    );
+    return <LoadError message={types.error.message} onRetry={types.refetch} />;
   }
 
+  /** 캐릭터 화면에서 넘겨받은 pixelCharSn은 유형이 픽셀 캐릭터 그대로일 때만 보낸다 */
   const handleSubmit = (values) =>
-    mutate(values, {
-      onSuccess: ({ otoInqrySn }) =>
-        navigate(generatePath(PATHS.INQUIRY_DETAIL, { otoInqrySn })),
-    });
+    mutate(
+      values.inqryTypeCd === INQUIRY_TYPE_PIXEL_CHARACTER
+        ? { ...values, pixelCharSn: state?.pixelCharSn }
+        : values,
+      {
+        onSuccess: ({ otoInqrySn }) =>
+          navigate(generatePath(PATHS.INQUIRY_DETAIL, { otoInqrySn })),
+      },
+    );
 
   return (
     <InquiryForm
@@ -70,9 +87,13 @@ export default function InquiryWritePage() {
         imgs: [],
       }}
       cancelTo={PATHS.INQUIRIES}
+      hideCancel={hasNoInquiry}
       isPending={isPending}
       errorMessage={error?.message}
       fieldErrors={error?.fields}
+      characterLinked={state?.pixelCharSn != null}
+      characterImage={characterImage}
+      profanityFields={profanityFieldsOf(error)}
       onSubmit={handleSubmit}
     />
   );

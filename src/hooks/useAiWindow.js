@@ -1,30 +1,15 @@
 import { useCallback } from 'react';
-import { PATHS } from '@/routes/paths';
+import { useAiModal } from '@/context/aiModal';
 
-/** 고정된 창 이름: window.open이 기존 채팅 창 재사용 */
-const AI_WINDOW_NAME = 'nyangmeong-ai';
-
-/** 열린 AI 창 닫기 */
-export function closeAiWindow() {
-  window.open('', AI_WINDOW_NAME)?.close();
-}
-
-/** open(firstMessage?) 반환, 창 열림 true·팝업 차단 false */
+/**
+ * AI 매니저 열기: 모든 폭에서 같은 창의 AI 모달(사람 결정 2026-11-11, 새 창 안 씀)
+ * open(firstMessage?, file?, origin?)
+ * - origin: { from: 'input', rect } 메인 검색창 자리에서 / { from: 'fab' } 플로팅 버튼에서 / 없으면 그냥 열기
+ */
 export default function useAiWindow() {
-  return useCallback((firstMessage) => {
-    /** 빈 URL: 기존 창 재사용 */
-    const aiWindow = window.open('', AI_WINDOW_NAME);
-    if (!aiWindow) return false;
-
-    if (aiWindow.location.href === 'about:blank') {
-      /** 새 창 채팅 페이지 이동 */
-      const query = firstMessage
-        ? `?q=${encodeURIComponent(firstMessage)}`
-        : '';
-      aiWindow.location.href = `${PATHS.AI}${query}`;
-    } else {
-      aiWindow.focus();
-    }
-    return true;
-  }, []);
+  const { open: openAiModal } = useAiModal();
+  return useCallback(
+    (firstMessage, file, origin) => openAiModal(firstMessage, file, origin),
+    [openAiModal],
+  );
 }

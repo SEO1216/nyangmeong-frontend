@@ -8,16 +8,19 @@ export default function InvitationRejectDialog({ invitation, onClose }) {
   const rejectInvitation = useRejectInvitation();
 
   const handleReject = () =>
-    rejectInvitation.mutate(invitation.invitationToken, {
+    rejectInvitation.mutate(invitation.jntBrupInvtnSn, {
       onSuccess: onClose,
-      onError: () => showToast('거절하지 못했어요. 잠시 후 다시 시도해 주세요'),
+      onError: (error) => {
+        onClose();
+        showToast(error.message, { type: 'error' });
+      },
     });
 
   return (
     <Modal
       isConfirm
       title="초대를 거절할까요?"
-      description={`거절하면 이 초대는 사라져요. 다시 참여하려면 ${invitation.invtrNcnm}님께 초대를 다시 받아야 해요.`}
+      description={`거절하면 이 초대는 사라져요. 다시 참여하려면 ${invitation.sndrMbrNcnm}님께 초대를 다시 받아야 해요.`}
       isPending={rejectInvitation.isPending}
       onClose={onClose}
       footer={
@@ -36,7 +39,7 @@ export default function InvitationRejectDialog({ invitation, onClose }) {
             disabled={rejectInvitation.isPending}
             className={BTN_DANGER}
           >
-            거절
+            거절하기
           </button>
         </>
       }

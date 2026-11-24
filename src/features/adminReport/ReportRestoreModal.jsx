@@ -1,0 +1,95 @@
+import { useState } from 'react';
+import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import Modal from '@/components/Modal';
+import { showToast } from '@/components/toastStore';
+import { toFieldErrors, toFormError } from '@/utils/fieldErrors';
+import { useRestoreReport } from './queries';
+
+const TEXTAREA_CLASS =
+  'block min-h-24 w-full resize-none rounded-[6px] border border-input-line bg-white px-3 py-2 text-base leading-[1.4] text-ink outline-none hover:border-line-strong focus:border-brand-500 focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)] aria-invalid:border-danger';
+
+/** 사유 최대 글자 수 */
+const MAX_RSN_LENGTH = 1000;
+
+/**
+ * [자동 블라인드 복구 모달]
+ * - 사유 필수, 대상의 접수 신고는 서버가 반려 처리
+ * - 실패하면 입력을 유지하고 서버 문구 표시
+ */
+export default function ReportRestoreModal({ report, onClose }) {
+  const [chgRsn, setChgRsn] = useState('');
+  const restore = useRestoreReport();
+
+  // 400 칸별 오류는 사유 칸 아래, 그 밖의 오류는 아래 줄
+  const fieldError = toFieldErrors(restore.error).chgRsn;
+  const formError = toFormError(restore.error, ['chgRsn']);
+  const trimmedRsn = chgRsn.trim();
+
+  const handleSubmit = () =>
+    restore.mutate(
+      { dclrSn: report.dclrSn, chgRsn: trimmedRsn },
+      {
+        onSuccess: () => {
+          showToast('대상을 복구했어요', { type: 'success' });
+          onClose();
+        },
+      },
+    );
+
+  return (
+    <Modal
+      title="자동 블라인드 복구"
+      isTop
+      isPending={restore.isPending}
+      onClose={onClose}
+      footer={
+        <>
+          <button
+            type="button"
+            className={BTN_SECONDARY}
+            disabled={restore.isPending}
+            onClick={onClose}
+          >
+            취소
+          </button>
+          <button
+            type="button"
+            className={BTN_PRIMARY}
+            disabled={!trimmedRsn || restore.isPending}
+            onClick={handleSubmit}
+          >
+            복구
+          </button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <div>
+          <p className="mb-1.5 text-sm font-semibold text-ink-2">대상</p>
+          <p className="break-words text-base text-ink">{report.trgtCn}</p>
+        </div>
+        <label className="block text-sm font-semibold text-ink-2">
+          사유
+          <textarea
+            value={chgRsn}
+            maxLength={MAX_RSN_LENGTH}
+            placeholder="복구 사유를 입력해 주세요"
+            aria-invalid={Boolean(fieldError)}
+            className={`${TEXTAREA_CLASS} mt-1.5 font-normal`}
+            onChange={(event) => setChgRsn(event.target.value)}
+          />
+          {fieldError && (
+            <span className="mt-1.5 block font-normal text-danger">
+              {fieldError}
+            </span>
+          )}
+        </label>
+        {formError && (
+          <p role="alert" className="text-sm text-danger">
+            {formError}
+          </p>
+        )}
+      </div>
+    </Modal>
+  );
+}

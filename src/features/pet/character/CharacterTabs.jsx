@@ -1,43 +1,35 @@
-const TABS = [
-  { key: 'own', nm: '내 캐릭터' },
-  { key: 'shared', nm: '공동양육' },
-];
+import UnderlineTabs from '@/components/UnderlineTabs';
+
+/** 탭 id `char-<own|shared>`. 탭 패널은 이 id, 탭 버튼은 `${id}-tab`(UnderlineTabs). CharacterPage가 같은 이름으로 패널을 단다 */
+const CHAR_TAB_IDS = { own: 'char-own', shared: 'char-shared' };
 
 /**
- * [내 캐릭터 · 공동양육 탭]
+ * [내 캐릭터 · 공동양육 탭] 공용 밑줄 탭(UI 체크리스트 69)
  * - 공동양육 동물이 없으면 호출하는 쪽에서 이 탭을 그리지 않는다 (FN-MYP-010-01)
  */
 export default function CharacterTabs({ selectedKey, sharedCount, onSelect }) {
+  const items = [
+    { id: CHAR_TAB_IDS.own, label: '내 캐릭터' },
+    {
+      id: CHAR_TAB_IDS.shared,
+      label: (
+        <span className="inline-flex items-center gap-1.5">
+          공동양육
+          <span className="font-semibold text-subtle tabular-nums">
+            ({sharedCount})
+          </span>
+        </span>
+      ),
+    },
+  ];
+
   return (
-    <div
-      role="tablist"
-      aria-label="캐릭터 구분"
-      className="flex gap-1 overflow-x-auto shadow-[inset_0_-1px_0_var(--color-line)] [scrollbar-width:none]"
-    >
-      {TABS.map((tab) => {
-        const isSelected = tab.key === selectedKey;
-        return (
-          <button
-            key={tab.key}
-            type="button"
-            role="tab"
-            aria-selected={isSelected}
-            onClick={() => onSelect(tab.key)}
-            className={`relative inline-flex h-12 shrink-0 items-center gap-1.5 px-4 text-lg/[1.6] whitespace-nowrap ${
-              isSelected
-                ? 'font-bold text-[#2f6f57] after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-sm after:bg-[#2f6f57]'
-                : 'font-semibold text-muted hover:text-ink'
-            }`}
-          >
-            {tab.nm}
-            {tab.key === 'shared' && (
-              <span className="font-semibold text-subtle tabular-nums">
-                ({sharedCount})
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
+    <UnderlineTabs
+      items={items}
+      activeId={CHAR_TAB_IDS[selectedKey]}
+      onSelect={(id) => onSelect(id === CHAR_TAB_IDS.shared ? 'shared' : 'own')}
+      label="캐릭터 구분"
+      isScrollable
+    />
   );
 }

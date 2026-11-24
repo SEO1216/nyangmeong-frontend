@@ -7,7 +7,7 @@ import { NORMAL_STOOL } from '../diaryTypes';
 export default function CountBars({ counts, total }) {
   return (
     <ul
-      aria-label={`배변 상태별 횟수 · 최근 ${total}개 기록`}
+      aria-label={`배변 상태별 횟수 · 최근 ${total}건`}
       className="flex flex-col gap-3 py-4"
     >
       {counts.map((state) => (
@@ -16,7 +16,7 @@ export default function CountBars({ counts, total }) {
           <span className="h-2.5 flex-1 overflow-hidden rounded-full bg-surface-3">
             <span
               className={`block h-full rounded-full ${
-                state.cd === NORMAL_STOOL ? 'bg-brand-500' : 'bg-[#9a5c0c]'
+                state.cd === NORMAL_STOOL ? 'bg-brand-500' : 'bg-tone-amber-fg'
               }`}
               style={{ width: `${(state.count / total) * 100}%` }}
             />

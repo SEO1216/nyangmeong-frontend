@@ -11,22 +11,23 @@ import useKakaoMap from '@/hooks/useKakaoMap';
 import PlaceOverlay from './PlaceOverlay';
 import PlacePin from './PlacePin';
 import PlacePopup from './PlacePopup';
-import { SPOTS } from './placeData';
-
-const HOME_CENTER = [35.832, 127.1385];
 const INITIAL_LEVEL = 6;
+const SINGLE_LEVEL = 4;
 const BOUNDS_PADDING = 80;
 
-const floatCard = 'bg-white shadow-depth-md';
+const floatCard = 'bg-white shadow-depth-sm';
 const toolButton =
   'grid size-11 place-items-center text-ink-2 hover:bg-surface-2 hover:text-ink';
 
 // 지도 영역. 지도를 움직이면 '이 지역에서 다시 검색'이 뜬다. children은 모바일에서 지도 위에 얹는 검색창·칩이다
 export default function PlaceMap({
-  resultIds,
-  favoriteIds,
-  isOutside,
-  selected,
+  results,
+  strayFavorites,
+  selectedPlace,
+  isFavorite,
+  fitKey,
+  homeArea,
+  isReady,
   regionText,
   isMoved,
   isCollapsed,
@@ -40,7 +41,7 @@ export default function PlaceMap({
 }) {
   const { kakao, isError } = useKakaoMap();
   const containerRef = useRef(null);
-  const homeBoundsRef = useRef(null);
+  const fittedKeyRef = useRef(null);
   // 코드로 지도를 옮기는 중에는 zoom_changed를 사용자가 움직인 것으로 치지 않는다
   const isAutoMoveRef = useRef(false);
   const onMovedRef = useRef(onMoved);
@@ -51,10 +52,27 @@ export default function PlaceMap({
     onMovedRef.current = onMoved;
   }, [onMoved]);
 
-  const fitHome = (target = map) => {
+  // 결과가 다 보이게 지도를 맞춘다. 결과가 없으면 처음 영역(내 주변·전주시 대표 영역)을 보인다
+  const fitPlaces = (target, places) => {
     isAutoMoveRef.current = true;
+    if (places.length === 1) {
+      target.setCenter(
+        new kakao.maps.LatLng(places[0].plcLat, places[0].plcLot),
+      );
+      target.setLevel(SINGLE_LEVEL);
+      return;
+    }
+    const bounds = new kakao.maps.LatLngBounds();
+    if (places.length === 0) {
+      bounds.extend(new kakao.maps.LatLng(homeArea.swLat, homeArea.swLot));
+      bounds.extend(new kakao.maps.LatLng(homeArea.neLat, homeArea.neLot));
+    } else {
+      places.forEach(({ plcLat, plcLot }) =>
+        bounds.extend(new kakao.maps.LatLng(plcLat, plcLot)),
+      );
+    }
     target.setBounds(
-      homeBoundsRef.current,
+      bounds,
       BOUNDS_PADDING,
       BOUNDS_PADDING,
       BOUNDS_PADDING,
@@ -64,17 +82,10 @@ export default function PlaceMap({
 
   useEffect(() => {
     if (!kakao) return;
-    const bounds = new kakao.maps.LatLngBounds();
-    Object.values(SPOTS).forEach(([lat, lng]) =>
-      bounds.extend(new kakao.maps.LatLng(lat, lng)),
-    );
-    homeBoundsRef.current = bounds;
-
     const kakaoMap = new kakao.maps.Map(containerRef.current, {
-      center: new kakao.maps.LatLng(...HOME_CENTER),
+      center: new kakao.maps.LatLng(homeArea.cntrLat, homeArea.cntrLot),
       level: INITIAL_LEVEL,
     });
-    fitHome(kakaoMap);
     kakao.maps.event.addListener(kakaoMap, 'idle', () => {
       isAutoMoveRef.current = false;
     });
@@ -90,7 +101,7 @@ export default function PlaceMap({
     const observer = new ResizeObserver(() => kakaoMap.relayout());
     observer.observe(containerRef.current);
     return () => observer.disconnect();
-    // 지도는 SDK가 준비됐을 때 한 번만 만든다
+    // 지도는 SDK가 준비됐을 때 한 번만 만든다. 처음 영역이 나중에 정해지면 새 검색 결과로 맞춘다(fitPlaces)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kakao]);
 
@@ -101,22 +112,53 @@ export default function PlaceMap({
     );
   }, [map, kakao, isSky]);
 
+  // 위치를 찾는 동안 전주로 만든 지도를 찾은 처음 영역으로 옮긴다(처음 영역은 한 번만 바뀐다).
+  // 결과가 없으면 아래에서 지도를 옮기지 않으므로 여기서 맞춰 둔다
   useEffect(() => {
-    if (!map || !selected) return;
-    const [lat, lng] = SPOTS[selected];
-    map.panTo(new kakao.maps.LatLng(lat, lng));
-  }, [map, kakao, selected]);
+    if (!map) return;
+    isAutoMoveRef.current = true;
+    map.setCenter(new kakao.maps.LatLng(homeArea.cntrLat, homeArea.cntrLot));
+  }, [map, kakao, homeArea]);
+
+  // 새 검색의 결과가 오면 한 번 맞춘다. 재검색·정렬로 결과가 바뀔 때는 지도를 그대로 둔다.
+  // 결과가 없으면 지도를 옮기지 않고 검색한 그 자리에 둔다
+  useEffect(() => {
+    if (!map || !isReady || fittedKeyRef.current === fitKey) return;
+    fittedKeyRef.current = fitKey;
+    if (results.length > 0) fitPlaces(map, results);
+    // 결과가 바뀔 때마다가 아니라 새 검색일 때만 맞춘다
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, isReady, fitKey]);
+
+  useEffect(() => {
+    if (!map || !selectedPlace) return;
+    map.panTo(
+      new kakao.maps.LatLng(selectedPlace.plcLat, selectedPlace.plcLot),
+    );
+  }, [map, kakao, selectedPlace]);
+
+  // 버튼을 누른 순간의 지도 영역과 중앙으로 다시 검색한다
+  const handleResearch = () => {
+    const bounds = map.getBounds();
+    const southWest = bounds.getSouthWest();
+    const northEast = bounds.getNorthEast();
+    const center = map.getCenter();
+    onResearch({
+      swLat: southWest.getLat(),
+      swLot: southWest.getLng(),
+      neLat: northEast.getLat(),
+      neLot: northEast.getLng(),
+      cntrLat: center.getLat(),
+      cntrLot: center.getLng(),
+    });
+  };
 
   const zoom = (direction) => {
     map?.setLevel(map.getLevel() - direction, { animate: true });
   };
 
-  const strayFavoriteIds = favoriteIds.filter(
-    (id) => !isOutside(id) && !resultIds.includes(id),
-  );
-
   return (
-    <div className="relative min-w-0 overflow-hidden bg-[#f1f2ed] max-md:absolute max-md:inset-0">
+    <div className="relative min-w-0 overflow-hidden bg-[#f1f2ed] max-[760px]:absolute max-[760px]:inset-0">
       <div ref={containerRef} className="absolute inset-0 isolate" />
       {!map && (
         <p className="absolute inset-0 grid place-items-center text-sm text-muted">
@@ -124,34 +166,35 @@ export default function PlaceMap({
         </p>
       )}
       {map &&
-        resultIds.map((id, index) => (
+        results.map((place, index) => (
           <PlaceOverlay
-            key={id}
+            key={place.plcSn}
             kakao={kakao}
             map={map}
-            position={SPOTS[id]}
-            zIndex={selected === id ? 3 : 1}
+            position={[place.plcLat, place.plcLot]}
+            zIndex={selectedPlace?.plcSn === place.plcSn ? 3 : 1}
           >
             <PlacePin
-              id={id}
-              label={String.fromCharCode(65 + index)}
-              isSelected={selected === id}
+              place={place}
+              label={String(index + 1)}
+              isFavorite={isFavorite(place)}
+              isSelected={selectedPlace?.plcSn === place.plcSn}
               onSelect={onSelectPin}
             />
           </PlaceOverlay>
         ))}
       {map &&
-        strayFavoriteIds.map((id) => (
+        strayFavorites.map((place) => (
           <PlaceOverlay
-            key={id}
+            key={place.plcSn}
             kakao={kakao}
             map={map}
-            position={SPOTS[id]}
-            zIndex={selected === id ? 3 : 1}
+            position={[place.plcLat, place.plcLot]}
+            zIndex={selectedPlace?.plcSn === place.plcSn ? 3 : 1}
           >
             <PlacePin
-              id={id}
-              isSelected={selected === id}
+              place={place}
+              isSelected={selectedPlace?.plcSn === place.plcSn}
               onSelect={onSelectPin}
             />
           </PlaceOverlay>
@@ -161,7 +204,7 @@ export default function PlaceMap({
         type="button"
         onClick={onToggleCollapse}
         aria-label={isCollapsed ? '목록 펼치기' : '목록 접기'}
-        className="absolute left-0 top-1/2 z-[4] -mt-7 hidden h-14 w-6 place-items-center rounded-r-md border border-l-0 border-line bg-white text-muted shadow-sm hover:text-ink md:grid"
+        className="absolute left-0 top-1/2 z-[4] -mt-7 hidden h-14 w-6 place-items-center rounded-r-md border border-l-0 border-line bg-white text-muted shadow-depth-sm hover:text-ink min-[760px]:grid"
       >
         <ChevronLeft
           className={`size-5 transition-transform ${isCollapsed ? 'rotate-180' : ''}`}
@@ -170,9 +213,9 @@ export default function PlaceMap({
 
       {children}
 
-      <div className="pointer-events-none absolute inset-x-4 top-4 z-[2] flex items-start justify-between gap-3 max-md:top-[116px]">
+      <div className="pointer-events-none absolute inset-x-4 top-4 z-[2] flex items-start justify-between gap-3 max-[760px]:top-[108px]">
         <span
-          className={`pointer-events-auto inline-flex h-10 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold text-ink ${floatCard}`}
+          className={`pointer-events-auto inline-flex h-10 items-center gap-2 rounded-full px-3.5 text-sm font-semibold text-ink ${floatCard}`}
         >
           <MapPin className="size-[18px] text-brand-500" />
           {regionText}
@@ -180,8 +223,15 @@ export default function PlaceMap({
         <div
           role="group"
           aria-label="지도 종류"
-          className={`pointer-events-auto flex rounded-md p-[3px] max-md:hidden ${floatCard}`}
+          className={`pointer-events-auto relative grid grid-cols-2 rounded-md p-[3px] max-[760px]:hidden ${floatCard}`}
         >
+          {/* 고른 쪽 밑에 깔리는 배경. 지도 종류를 바꾸면 좌우로 미끄러져 간다 */}
+          <span
+            aria-hidden="true"
+            className={`pointer-events-none absolute inset-y-[3px] left-[3px] w-[calc(50%-3px)] rounded-sm bg-brand-500 transition-transform duration-300 ease-[cubic-bezier(.2,.8,.2,1)] motion-reduce:transition-none ${
+              isSky ? 'translate-x-full' : ''
+            }`}
+          />
           {[
             ['일반 지도', false],
             ['스카이뷰', true],
@@ -191,9 +241,9 @@ export default function PlaceMap({
               type="button"
               aria-pressed={isSky === sky}
               onClick={() => setIsSky(sky)}
-              className={`h-[34px] rounded-sm px-3.5 text-sm ${
+              className={`relative h-[34px] rounded-sm px-3.5 text-sm transition-colors duration-300 motion-reduce:transition-none ${
                 isSky === sky
-                  ? 'bg-brand-500 font-semibold text-white'
+                  ? 'font-semibold text-white'
                   : 'font-medium text-muted'
               }`}
             >
@@ -206,30 +256,30 @@ export default function PlaceMap({
       {isMoved && (
         <button
           type="button"
-          onClick={onResearch}
-          className={`absolute left-1/2 top-[72px] z-[2] inline-flex h-11 -translate-x-1/2 items-center gap-1.5 rounded-md px-5 font-semibold text-brand-600 max-md:top-[164px] ${floatCard}`}
+          onClick={handleResearch}
+          className={`absolute left-1/2 top-[72px] z-[2] inline-flex h-11 -translate-x-1/2 items-center gap-2 rounded-md px-5 font-semibold break-keep text-brand-600 max-[760px]:top-[156px] ${floatCard}`}
         >
           <RefreshCw className="size-5" />이 지도 영역에서 다시 검색
         </button>
       )}
 
       <div
-        className={`absolute right-4 top-1/2 z-[2] flex -translate-y-1/2 flex-col gap-2 max-md:bottom-[calc(var(--sheet-peek)+16px)] max-md:top-auto max-md:translate-y-0 ${
-          isSheetFull ? 'max-md:hidden' : ''
+        className={`absolute right-4 top-1/2 z-[2] flex -translate-y-1/2 flex-col gap-2 max-[760px]:bottom-[calc(var(--sheet-peek)+16px)] max-[760px]:top-auto max-[760px]:translate-y-0 ${
+          isSheetFull ? 'max-[760px]:hidden' : ''
         }`}
       >
         <div className={`overflow-hidden rounded-card ${floatCard}`}>
           <button
             type="button"
             aria-label="처음 위치로"
-            onClick={() => map && fitHome()}
+            onClick={() => map && fitPlaces(map, results)}
             className={toolButton}
           >
             <LocateFixed className="size-[22px]" />
           </button>
         </div>
         <div
-          className={`flex flex-col divide-y divide-line-soft overflow-hidden rounded-card max-md:hidden ${floatCard}`}
+          className={`flex flex-col divide-y divide-line-soft overflow-hidden rounded-card max-[760px]:hidden ${floatCard}`}
         >
           <button
             type="button"
@@ -250,13 +300,9 @@ export default function PlaceMap({
         </div>
       </div>
 
-      <p className="absolute bottom-[13px] left-[90px] z-[2] rounded-sm bg-white/85 px-2 py-0.5 text-sm text-subtle max-md:hidden">
-        업체는 설명용 예시예요
-      </p>
-
-      {selected && (
-        <div className={isSheetFull ? 'max-md:hidden' : ''}>
-          <PlacePopup id={selected} onClose={onClosePopup} />
+      {selectedPlace && (
+        <div className={isSheetFull ? 'max-[760px]:hidden' : ''}>
+          <PlacePopup place={selectedPlace} onClose={onClosePopup} />
         </div>
       )}
     </div>

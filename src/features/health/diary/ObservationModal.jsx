@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import DropdownSelect from '@/components/DropdownSelect';
+import DatePicker from '@/components/DatePicker';
 import Icon from '@/components/Icon';
 import { BTN_SECONDARY } from '@/components/buttonStyles';
-import { getTodayYmd } from '@/utils/formatDate';
+import { getTodayYmd, getYmdOf } from '@/utils/formatDate';
 import {
   OBSERVATION_CHANGES,
   OBSERVATION_PARTS,
@@ -9,86 +11,84 @@ import {
   PHOTO_MAX_BYTES,
 } from '../diaryTypes';
 import {
-  useCreateObservation,
-  useCreateObservationRound,
-  useUpdateObservationRound,
+  useCreateObservationCycle,
+  useCreateObservationItem,
+  useUpdateObservationCycle,
 } from '../queries';
-import FieldError from './FieldError';
-import FormModal from './FormModal';
 import {
-  INPUT_CLASS,
-  LABEL_CLASS,
-  SELECT_ARROW_STYLE,
-  SELECT_CLASS,
-  TEXTAREA_CLASS,
-} from './formStyles';
+  DECIMAL_MESSAGE,
+  hasOverTwoDecimals,
+  toInputText,
+} from '../numberFormat';
+import FieldError, { Required } from '@/components/FieldError';
+import FormModal from './FormModal';
+import { INPUT, LABEL, TEXTAREA } from '@/components/formStyles';
+import ObservationPhoto from './ObservationPhoto';
 import { formatPart } from './observationUtils';
+import CharCount from '../shared/CharCount';
 
 const MAX_ITEM_NAME_LENGTH = 40;
 const MAX_PART_DETAIL_LENGTH = 40;
 const MAX_MEMO_LENGTH = 200;
 
-const REQUIRED = <span className="ml-0.5 font-bold text-[#b4473a]">*</span>;
+const REQUIRED = <Required />;
 const OPTIONAL = (
-  <span className="ml-1 text-[13px] font-medium text-[#667374]">선택</span>
+  <span className="ml-1 text-[13px] font-medium text-subtle">선택</span>
 );
 
-const getModalTitle = (mode, item, round) => {
-  if (mode === 'A') return '관찰 항목 등록';
-  const nextNo = item.rounds.length + 1;
-  if (mode === 'B') return `${item.obsvItmNm} · ${nextNo}회차 추가`;
-  const roundNo =
-    item.rounds.findIndex((target) => target.obsvRndSn === round.obsvRndSn) + 1;
-  return `${item.obsvItmNm} · ${roundNo}회차 수정`;
+const getModalTitle = (mode, item, cycles, cycle) => {
+  if (mode === 'A') return '관찰 항목 추가';
+  if (mode === 'B')
+    return `${item.obsrvArtclNm} · ${cycles.length + 1}회차 추가`;
+  return `${item.obsrvArtclNm} · ${cycle.cyclNo}회차 수정`;
 };
 
 /**
  * [관찰 기록 등록 모달]
  * - mode A: 새 관찰 항목 + 1회차 / B: 선택 항목에 회차 추가(항목명·부위 고정) / E: 선택 회차 수정
- * - 사진은 필수(jpg·jpeg·png·webp, 10MB 이하). 가짜 응답에서는 브라우저 임시 주소로 미리보기만 함
+ * - 사진은 필수(jpg·jpeg·png·webp, 10MB 이하). 수정에서는 새로 고른 때만 바꾼다. 고른 사진은 브라우저 임시 주소로 미리 본다
  */
 export default function ObservationModal({
   mode,
   petSn,
   item,
-  round,
+  cycles,
+  cycle,
   onSaved,
   onClose,
 }) {
   const isCreateItem = mode === 'A';
   const isEdit = mode === 'E';
-  const roundIndex = isEdit
-    ? item.rounds.findIndex((target) => target.obsvRndSn === round.obsvRndSn)
-    : -1;
-  const isFirstRound = isCreateItem || roundIndex === 0;
+  const isFirstCycle = isCreateItem || cycle?.cyclNo === 1;
 
-  const [name, setName] = useState(item?.obsvItmNm ?? '');
+  const [name, setName] = useState(item?.obsrvArtclNm ?? '');
   const [partCd, setPartCd] = useState('');
   const [partDetail, setPartDetail] = useState('');
-  const [obsvYmd, setObsvYmd] = useState(round?.obsvYmd ?? getTodayYmd());
-  const [photoPath, setPhotoPath] = useState(round?.photoPath ?? null);
+  const [obsrvYmd, setObsrvYmd] = useState(
+    cycle ? getYmdOf(cycle.obsrvDt) : getTodayYmd(),
+  );
+  const [file, setFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [photoError, setPhotoError] = useState('');
-  const [sizeMm, setSizeMm] = useState(round?.obsvSizeMm ?? '');
-  const [chgCd, setChgCd] = useState(round?.obsvChgCd ?? '');
-  const [memo, setMemo] = useState(round?.obsvMemoCn ?? '');
+  const [size, setSize] = useState(toInputText(cycle?.obsrvSz));
+  const [chgCd, setChgCd] = useState(cycle?.obsrvChgCd ?? '');
+  const [memo, setMemo] = useState(cycle?.memoCn ?? '');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const cameraRef = useRef(null);
   const albumRef = useRef(null);
-  /** 이 모달에서 만든 임시 주소. 저장하지 않고 닫으면 해제 */
-  const localPhotoRef = useRef(null);
-  const isSavedRef = useRef(false);
+  /** 이 모달에서 만든 임시 주소. 닫을 때 해제 */
+  const previewRef = useRef(null);
 
-  const createItem = useCreateObservation();
-  const createRound = useCreateObservationRound();
-  const updateRound = useUpdateObservationRound();
+  const createItem = useCreateObservationItem();
+  const createCycle = useCreateObservationCycle();
+  const updateCycle = useUpdateObservationCycle();
   const isPending =
-    createItem.isPending || createRound.isPending || updateRound.isPending;
+    createItem.isPending || createCycle.isPending || updateCycle.isPending;
 
   useEffect(
     () => () => {
-      if (localPhotoRef.current && !isSavedRef.current)
-        URL.revokeObjectURL(localPhotoRef.current);
+      if (previewRef.current) URL.revokeObjectURL(previewRef.current);
     },
     [],
   );
@@ -97,36 +97,38 @@ export default function ObservationModal({
   const errors = {
     name: isCreateItem && name.trim() === '',
     part: isCreateItem && partCd === '',
-    date: obsvYmd === '' || obsvYmd > today,
-    photo: photoPath === null && !isEdit,
+    date: obsrvYmd === '' || obsrvYmd > today,
+    photo: file === null && !isEdit,
+    /** 폼이 noValidate라 step이 막지 못해 코드로 검사 */
+    size: hasOverTwoDecimals(size),
   };
   const hasError = Object.values(errors).some(Boolean);
   const isInvalid = (field) => isSubmitted && errors[field];
 
   const handleFile = (event) => {
-    const [file] = event.target.files;
+    const [picked] = event.target.files;
     event.target.value = '';
-    if (!file) return;
-    const extension = file.name.split('.').pop().toLowerCase();
+    if (!picked) return;
+    const extension = picked.name.split('.').pop().toLowerCase();
     if (
       !PHOTO_EXTENSIONS.includes(extension) ||
-      !file.type.startsWith('image/')
+      !picked.type.startsWith('image/')
     ) {
       setPhotoError('jpg·jpeg·png·webp 형식만 올릴 수 있어요');
       return;
     }
-    if (file.size > PHOTO_MAX_BYTES) {
+    if (picked.size > PHOTO_MAX_BYTES) {
       setPhotoError('사진은 10MB 이하만 올릴 수 있어요');
       return;
     }
-    if (localPhotoRef.current) URL.revokeObjectURL(localPhotoRef.current);
-    localPhotoRef.current = URL.createObjectURL(file);
-    setPhotoPath(localPhotoRef.current);
+    if (previewRef.current) URL.revokeObjectURL(previewRef.current);
+    previewRef.current = URL.createObjectURL(picked);
+    setFile(picked);
+    setPreviewUrl(previewRef.current);
     setPhotoError('');
   };
 
   const handleSaved = (result) => {
-    isSavedRef.current = true;
     onSaved(result);
     onClose();
   };
@@ -134,91 +136,111 @@ export default function ObservationModal({
   const handleSubmit = () => {
     setIsSubmitted(true);
     if (hasError) return;
-    const roundBody = {
-      obsvYmd,
-      photoPath,
-      obsvSizeMm: sizeMm,
-      obsvChgCd: isFirstRound ? null : chgCd,
-      obsvMemoCn: memo.trim(),
-    };
     const options = { onSuccess: handleSaved };
     if (isCreateItem) {
       createItem.mutate(
         {
           petSn,
-          obsvItmNm: name.trim(),
-          obsvPrtCd: partCd,
-          obsvPrtDtlNm: partDetail.trim(),
-          ...roundBody,
+          obsrvArtclNm: name.trim(),
+          obsrvRegnCd: partCd,
+          obsrvRegnDtlNm: partDetail.trim(),
+          file,
+          obsrvYmd,
+          obsrvSz: size,
+          memoCn: memo.trim(),
         },
         options,
       );
     } else if (isEdit) {
-      updateRound.mutate({ obsvRndSn: round.obsvRndSn, ...roundBody }, options);
+      updateCycle.mutate(
+        {
+          petSn,
+          obsrvCyclSn: cycle.obsrvCyclSn,
+          cycle,
+          isFirstCycle,
+          file,
+          obsrvYmd,
+          obsrvSz: size,
+          obsrvChgCd: chgCd,
+          memoCn: memo.trim(),
+        },
+        options,
+      );
     } else {
-      createRound.mutate({ obsvItmSn: item.obsvItmSn, ...roundBody }, options);
+      createCycle.mutate(
+        {
+          petSn,
+          obsrvArtclSn: item.obsrvArtclSn,
+          file,
+          obsrvYmd,
+          obsrvSz: size,
+          obsrvChgCd: chgCd,
+          memoCn: memo.trim(),
+        },
+        options,
+      );
     }
   };
 
   return (
     <FormModal
-      icon="photo_camera"
-      title={getModalTitle(mode, item, round)}
+      title={getModalTitle(mode, item, cycles, cycle)}
+      submitLabel={isEdit ? '저장하기' : '등록하기'}
       isPending={isPending}
       onSubmit={handleSubmit}
       onClose={onClose}
     >
       <label className="flex flex-col gap-1.5">
-        <span className={LABEL_CLASS}>관찰 항목{REQUIRED}</span>
+        <span className={LABEL}>관찰 항목{REQUIRED}</span>
         <input
           value={name}
           readOnly={!isCreateItem}
           maxLength={MAX_ITEM_NAME_LENGTH}
           aria-invalid={isInvalid('name')}
-          className={INPUT_CLASS}
+          className={INPUT}
           onChange={(event) => setName(event.target.value)}
         />
+        {isCreateItem && <CharCount value={name} max={MAX_ITEM_NAME_LENGTH} />}
         {isInvalid('name') && (
           <FieldError>관찰 항목을 입력해 주세요</FieldError>
         )}
       </label>
 
       <div className="flex flex-col gap-1.5">
-        <span id="obsv-part-label" className={LABEL_CLASS}>
+        <span id="obsv-part-label" className={LABEL}>
           관찰 부위{REQUIRED}
         </span>
         {isCreateItem ? (
-          <div className="grid grid-cols-2 gap-x-4">
-            <select
-              aria-labelledby="obsv-part-label"
+          <div className="grid grid-cols-2 items-start gap-x-4">
+            <DropdownSelect
+              label="관찰 부위"
               value={partCd}
-              aria-invalid={isInvalid('part')}
-              className={SELECT_CLASS}
-              style={SELECT_ARROW_STYLE}
-              onChange={(event) => setPartCd(event.target.value)}
-            >
-              <option value="">대분류 선택</option>
-              {OBSERVATION_PARTS.map((part) => (
-                <option key={part.cd} value={part.cd}>
-                  {part.nm}
-                </option>
-              ))}
-            </select>
-            <input
-              value={partDetail}
-              maxLength={MAX_PART_DETAIL_LENGTH}
-              placeholder="세부 위치 (선택)"
-              aria-label="세부 위치 (선택)"
-              className={INPUT_CLASS}
-              onChange={(event) => setPartDetail(event.target.value)}
+              invalid={isInvalid('part')}
+              placeholder="대분류 선택"
+              options={OBSERVATION_PARTS.map((part) => ({
+                value: part.cd,
+                label: part.nm,
+              }))}
+              onChange={setPartCd}
             />
+            <div className="flex flex-col gap-1.5">
+              <input
+                value={partDetail}
+                maxLength={MAX_PART_DETAIL_LENGTH}
+                placeholder="세부 위치 (선택)"
+                aria-label="세부 위치 (선택)"
+                className={INPUT}
+                onChange={(event) => setPartDetail(event.target.value)}
+              />
+              <CharCount value={partDetail} max={MAX_PART_DETAIL_LENGTH} />
+            </div>
           </div>
         ) : (
           <input
             readOnly
             aria-labelledby="obsv-part-label"
             value={formatPart(item)}
-            className={INPUT_CLASS}
+            className={INPUT}
           />
         )}
         {isInvalid('part') && (
@@ -227,27 +249,31 @@ export default function ObservationModal({
       </div>
 
       <label className="flex flex-col gap-1.5">
-        <span className={LABEL_CLASS}>관찰일{REQUIRED}</span>
-        <input
-          type="date"
-          value={obsvYmd}
+        <span className={LABEL}>관찰일{REQUIRED}</span>
+        <DatePicker
+          value={obsrvYmd}
           max={today}
-          aria-invalid={isInvalid('date')}
-          className={`${INPUT_CLASS} tabular-nums`}
-          onChange={(event) => setObsvYmd(event.target.value)}
+          invalid={isInvalid('date')}
+          onChange={setObsrvYmd}
         />
         {isInvalid('date') && (
           <FieldError>오늘 이후 날짜는 고를 수 없어요</FieldError>
         )}
       </label>
 
-      <div className="rounded-xl bg-[#f4f6f6] p-4">
-        <span className={LABEL_CLASS}>사진{REQUIRED}</span>
+      <div className="rounded-xl bg-surface-2 p-4">
+        <span className={LABEL}>사진{REQUIRED}</span>
         <div className="mt-2 grid h-40 place-items-center overflow-hidden rounded-[10px] border border-dashed border-line-strong bg-white text-subtle">
-          {photoPath ? (
+          {previewUrl ? (
             <img
-              src={photoPath}
+              src={previewUrl}
               alt="선택한 사진"
+              className="size-full object-contain"
+            />
+          ) : isEdit ? (
+            <ObservationPhoto
+              petSn={petSn}
+              obsrvCyclSn={cycle.obsrvCyclSn}
               className="size-full object-contain"
             />
           ) : (
@@ -260,7 +286,7 @@ export default function ObservationModal({
         <div className="mt-3 flex flex-wrap gap-2">
           <button
             type="button"
-            className={`${BTN_SECONDARY} h-8! px-3!`}
+            className={`${BTN_SECONDARY}`}
             onClick={() => cameraRef.current.click()}
           >
             <Icon name="photo_camera" />
@@ -268,13 +294,18 @@ export default function ObservationModal({
           </button>
           <button
             type="button"
-            className={`${BTN_SECONDARY} h-8! px-3!`}
+            className={`${BTN_SECONDARY}`}
             onClick={() => albumRef.current.click()}
           >
             <Icon name="photo_library" />
             앨범에서 선택
           </button>
         </div>
+        {isEdit && (
+          <p className="mt-2 text-[13px] font-medium text-subtle">
+            사진은 바꿀 수만 있어요
+          </p>
+        )}
         <input
           ref={cameraRef}
           type="file"
@@ -297,59 +328,59 @@ export default function ObservationModal({
 
       <div className="grid grid-cols-2 gap-x-4">
         <label className="flex flex-col gap-1.5">
-          <span className={LABEL_CLASS}>크기{OPTIONAL}</span>
+          <span className={LABEL}>크기{OPTIONAL}</span>
           <span className="relative block">
             <input
               type="number"
               min="0"
-              step="0.1"
+              step="0.01"
               inputMode="decimal"
-              value={sizeMm}
+              value={size}
               placeholder="선택 입력"
-              className={`${INPUT_CLASS} pr-12 tabular-nums`}
-              onChange={(event) => setSizeMm(event.target.value)}
+              className={`${INPUT} pr-12 tabular-nums`}
+              onChange={(event) => setSize(event.target.value)}
             />
             <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-muted">
               mm
             </span>
           </span>
+          {isInvalid('size') && <FieldError>{DECIMAL_MESSAGE}</FieldError>}
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className={LABEL_CLASS}>변화{OPTIONAL}</span>
-          {isFirstRound ? (
+          <span className={LABEL}>변화{OPTIONAL}</span>
+          {isFirstCycle ? (
             <input
               disabled
               value="1회차는 비교 없음"
               aria-label="변화 (1회차는 비교 없음)"
-              className={INPUT_CLASS}
+              className={INPUT}
             />
           ) : (
-            <select
+            <DropdownSelect
               value={chgCd}
-              className={SELECT_CLASS}
-              style={SELECT_ARROW_STYLE}
-              onChange={(event) => setChgCd(event.target.value)}
-            >
-              <option value="">선택 안 함</option>
-              {OBSERVATION_CHANGES.map((change) => (
-                <option key={change.cd} value={change.cd}>
-                  {change.nm}
-                </option>
-              ))}
-            </select>
+              options={[
+                { value: '', label: '선택 안 함' },
+                ...OBSERVATION_CHANGES.map((change) => ({
+                  value: change.cd,
+                  label: change.nm,
+                })),
+              ]}
+              onChange={setChgCd}
+            />
           )}
         </label>
       </div>
 
       <label className="flex flex-col gap-1.5">
-        <span className={LABEL_CLASS}>메모{OPTIONAL}</span>
+        <span className={LABEL}>메모{OPTIONAL}</span>
         <textarea
           value={memo}
           maxLength={MAX_MEMO_LENGTH}
           placeholder="선택 입력"
-          className={TEXTAREA_CLASS}
+          className={TEXTAREA}
           onChange={(event) => setMemo(event.target.value)}
         />
+        <CharCount value={memo} max={MAX_MEMO_LENGTH} />
       </label>
     </FormModal>
   );

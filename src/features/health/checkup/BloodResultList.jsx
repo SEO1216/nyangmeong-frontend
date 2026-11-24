@@ -1,57 +1,67 @@
 import { useState } from 'react';
-import { Link, generatePath, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import NoticeBox from '@/components/NoticeBox';
+import Badge from '@/components/Badge';
+import Checkbox from '@/components/Checkbox';
 import Icon from '@/components/Icon';
 import Modal from '@/components/Modal';
 import { BTN_DANGER, BTN_SECONDARY } from '@/components/buttonStyles';
 import { PATHS } from '@/routes/paths';
 import { formatDate } from '@/utils/formatDate';
+import { round2 } from '../numberFormat';
 import { useDeleteInspections } from '../queries';
-import BloodResultForm from './BloodResultForm';
-import { ADD_ROW, BTN_SM, ROW_LINE, TAG, TAG_STRONG } from './checkupStyles';
-import { FUNCTION_TAGS, findName } from './checkupTypes';
+import BloodResultModal from './BloodResultModal';
+import { ADD_ROW, ROW_LINE, TEXT_BTN } from './checkupStyles';
+import { findBloodItem } from '../labInput/bloodItems';
+import { FUNCTION_TAGS, findName, getInspectionName } from './checkupTypes';
 
-/** 참고범위를 벗어난 방향: 초과 'high', 미만 'low', 범위 안이거나 미입력이면 null */
-const getOutDirection = ({ rsltVal, refMinVal, refMaxVal }) => {
-  if (refMinVal != null && rsltVal < refMinVal) return 'low';
-  if (refMaxVal != null && rsltVal > refMaxVal) return 'high';
+/** 항목의 기능 태그(혈구·신장·간·당): 서버가 주지 않아 항목 약어로 찾는다. 직접입력은 없음 */
+const getFunctionTag = (item) =>
+  findBloodItem(getInspectionName(item))?.fnctTagCd;
+
+/**
+ * 참고범위를 벗어난 방향: 초과 'high', 미만 'low', 범위 안이거나 미입력이면 null
+ * - 화면에 보이는 값끼리 비교하도록 결과·참고범위 모두 소수 둘째 자리로 반올림해 비교 (※신규 정책)
+ */
+const getOutDirection = ({ rsltNvl, refLlmtNvl, refUplmtNvl }) => {
+  const value = round2(rsltNvl);
+  if (refLlmtNvl != null && value < round2(refLlmtNvl)) return 'low';
+  if (refUplmtNvl != null && value > round2(refUplmtNvl)) return 'high';
   return null;
 };
 
 /**
  * [혈액검사 결과 목록]
  * - 기능 태그·태그별 건수, 항목·측정값·참고범위 한 줄, 참고범위 밖은 색 + ▲▼ (FN-HLT-005-02)
- * - 행의 어디를 눌러도(체크박스 제외) 검사 수치 입력(수정), [＋ 검사 수치 추가] → 목록 아래에 입력 영역이 열림
+ * - 행의 어디를 눌러도(체크박스·추이 보기 제외) 검사 수치 수정 모달, [＋ 검사 수치 추가] → 검사 수치 추가 모달
  * - 체크박스로 고른 항목을 확인 뒤 삭제
  */
 export default function BloodResultList({ checkup, items }) {
-  const navigate = useNavigate();
-  const { ckupRcdSn } = checkup;
+  const { petSn, ckupRcdSn } = checkup;
   const [selectedSns, setSelectedSns] = useState([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  /** 입력 모달: null이면 닫힘, item이 null이면 새로 추가 */
+  const [modal, setModal] = useState(null);
   const deleteInspections = useDeleteInspections();
 
-  const inputPath = generatePath(PATHS.HEALTH_CHECKUP_INSPECTIONS, {
-    ckupRcdSn,
-  });
   const tagCounts = FUNCTION_TAGS.map((tag) => ({
     ...tag,
-    count: items.filter((item) => item.fnctTagCd === tag.cd).length,
+    count: items.filter((item) => getFunctionTag(item) === tag.cd).length,
   })).filter((tag) => tag.count > 0);
   const isAllSelected =
     items.length > 0 &&
-    items.every((item) => selectedSns.includes(item.inspSn));
+    items.every((item) => selectedSns.includes(item.inspNvlSn));
 
-  const toggleItem = (inspSn) =>
+  const toggleItem = (inspNvlSn) =>
     setSelectedSns((prev) =>
-      prev.includes(inspSn)
-        ? prev.filter((sn) => sn !== inspSn)
-        : [...prev, inspSn],
+      prev.includes(inspNvlSn)
+        ? prev.filter((sn) => sn !== inspNvlSn)
+        : [...prev, inspNvlSn],
     );
 
   const handleDelete = () =>
     deleteInspections.mutate(
-      { ckupRcdSn, inspSns: selectedSns },
+      { petSn, ckupRcdSn, inspNvlSns: selectedSns },
       {
         onSuccess: () => {
           setSelectedSns([]);
@@ -60,19 +70,18 @@ export default function BloodResultList({ checkup, items }) {
       },
     );
 
-  const goEdit = (item) =>
-    navigate({ pathname: inputPath, search: `?mode=edit&item=${item.inspSn}` });
+  const openEdit = (item) => setModal({ item });
 
   return (
     <div>
       {items.length === 0 ? (
-        <p className="text-muted">결과 없음</p>
+        <p className="text-muted">결과가 없어요</p>
       ) : (
         <>
           <div className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-2">
-            <h3 className="text-lg/[1.6] font-semibold">혈액검사</h3>
+            <h3 className="text-lg font-semibold">혈액검사</h3>
             <span className="text-subtle tabular-nums">
-              검사일 {formatDate(checkup.ckupYmd)} · {checkup.hospNm} ·{' '}
+              검사일 {formatDate(checkup.ckupYmd)} · {checkup.hsptlNm} ·{' '}
               {items.length}건
             </span>
           </div>
@@ -81,32 +90,30 @@ export default function BloodResultList({ checkup, items }) {
             className="mb-3 flex flex-wrap gap-2"
           >
             {tagCounts.map((tag) => (
-              <span key={tag.cd} className={TAG}>
+              <Badge key={tag.cd}>
                 {tag.nm} {tag.count}
-              </span>
+              </Badge>
             ))}
           </div>
 
           <div className="flex items-center gap-3 border-b border-line py-2">
-            <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-md border border-input-line bg-white px-3">
-              <input
-                type="checkbox"
-                checked={isAllSelected}
-                className="size-4 accent-brand-500"
-                onChange={(event) =>
-                  setSelectedSns(
-                    event.target.checked
-                      ? items.map((item) => item.inspSn)
-                      : [],
-                  )
-                }
-              />
+            <Checkbox
+              checked={isAllSelected}
+              className="h-10 rounded-md border border-input-line bg-white px-3"
+              onChange={(event) =>
+                setSelectedSns(
+                  event.target.checked
+                    ? items.map((item) => item.inspNvlSn)
+                    : [],
+                )
+              }
+            >
               전체 선택
-            </label>
+            </Checkbox>
             <button
               type="button"
               disabled={selectedSns.length === 0}
-              className={`${BTN_SECONDARY} ${BTN_SM} ml-auto`}
+              className={`${BTN_SECONDARY} ml-auto`}
               onClick={() => setIsConfirmOpen(true)}
             >
               선택 삭제 ({selectedSns.length})
@@ -116,53 +123,52 @@ export default function BloodResultList({ checkup, items }) {
           <ul className="max-h-96 overflow-y-auto">
             {items.map((item) => {
               const direction = getOutDirection(item);
-              const hasRange = item.refMinVal != null && item.refMaxVal != null;
+              const hasRange =
+                item.refLlmtNvl != null && item.refUplmtNvl != null;
               return (
                 <li
-                  key={item.inspSn}
+                  key={item.inspNvlSn}
                   className={`flex cursor-pointer items-center gap-3 py-3 hover:bg-surface-2 ${ROW_LINE}`}
-                  onClick={() => goEdit(item)}
+                  onClick={() => openEdit(item)}
                 >
-                  <label
-                    className="inline-flex h-10 cursor-pointer items-center rounded-md border border-input-line bg-white px-3"
-                    onClick={(event) => event.stopPropagation()}
-                  >
-                    <input
-                      type="checkbox"
-                      aria-label={`${item.inspItmNm} 선택`}
-                      checked={selectedSns.includes(item.inspSn)}
-                      className="size-4 accent-brand-500"
-                      onChange={() => toggleItem(item.inspSn)}
+                  <span onClick={(event) => event.stopPropagation()}>
+                    <Checkbox
+                      ariaLabel={`${getInspectionName(item)} 선택`}
+                      checked={selectedSns.includes(item.inspNvlSn)}
+                      className="h-10 rounded-md border border-input-line bg-white px-3"
+                      onChange={() => toggleItem(item.inspNvlSn)}
                     />
-                  </label>
-                  {item.fnctTagCd && (
-                    <span
-                      className={`${TAG} min-w-12 justify-center ${direction ? TAG_STRONG : ''}`}
+                  </span>
+                  {getFunctionTag(item) && (
+                    <Badge
+                      tone={direction ? 'ink' : 'gray'}
+                      className="min-w-12 justify-center"
                     >
-                      {findName(FUNCTION_TAGS, item.fnctTagCd)}
-                    </span>
+                      {findName(FUNCTION_TAGS, getFunctionTag(item))}
+                    </Badge>
                   )}
                   <span className="min-w-0 flex-1">
-                    <Link
-                      to={{
-                        pathname: inputPath,
-                        search: `?mode=edit&item=${item.inspSn}`,
+                    <button
+                      type="button"
+                      className="text-left text-lg font-semibold text-ink underline underline-offset-4 hover:text-brand-600"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        openEdit(item);
                       }}
-                      className="text-lg/[1.6] font-semibold text-ink underline underline-offset-4 hover:text-brand-600"
-                      onClick={(event) => event.stopPropagation()}
                     >
-                      {item.inspItmNm}
-                    </Link>
+                      {getInspectionName(item)}
+                    </button>
                     {hasRange && (
                       <span className="block text-sm text-subtle tabular-nums">
-                        참고범위 {item.refMinVal}~{item.refMaxVal} {item.unitNm}
+                        참고범위 {round2(item.refLlmtNvl)}~
+                        {round2(item.refUplmtNvl)} {item.unitNm}
                       </span>
                     )}
                   </span>
                   <span
-                    className={`text-right text-lg/[1.6] font-semibold whitespace-nowrap tabular-nums ${direction ? 'text-danger' : ''}`}
+                    className={`text-right text-lg font-semibold whitespace-nowrap tabular-nums ${direction ? 'text-danger' : ''}`}
                   >
-                    {item.rsltVal}{' '}
+                    {round2(item.rsltNvl)}{' '}
                     <span className="text-sm font-normal text-subtle">
                       {item.unitNm}
                     </span>
@@ -181,6 +187,17 @@ export default function BloodResultList({ checkup, items }) {
                       </>
                     )}
                   </span>
+                  {/** 종합 건강기록 검사 수치 카드를 이 항목으로 (※신규 정책). 행 클릭(수정 화면)은 막음 */}
+                  <Link
+                    to={{
+                      pathname: PATHS.HEALTH,
+                      search: `?${new URLSearchParams({ petSn: String(petSn), inspection: getInspectionName(item) })}`,
+                    }}
+                    className={`${TEXT_BTN} shrink-0 whitespace-nowrap`}
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    추이 보기 ›
+                  </Link>
                 </li>
               );
             })}
@@ -188,32 +205,33 @@ export default function BloodResultList({ checkup, items }) {
         </>
       )}
 
-      {!isFormOpen && (
-        <button
-          type="button"
-          className={`${BTN_SECONDARY} ${ADD_ROW} w-full`}
-          onClick={() => setIsFormOpen(true)}
-        >
-          <Icon name="add" className="text-lg" />
-          검사 수치 추가
-        </button>
-      )}
-      {isFormOpen && (
-        <BloodResultForm
+      <button
+        type="button"
+        className={`${BTN_SECONDARY} ${ADD_ROW} w-full`}
+        onClick={() => setModal({ item: null })}
+      >
+        <Icon name="add" className="text-lg" />
+        검사 수치 추가
+      </button>
+      {modal && (
+        <BloodResultModal
+          petSn={petSn}
           ckupRcdSn={ckupRcdSn}
-          registeredNames={new Set(items.map((item) => item.inspItmNm))}
-          onClose={() => setIsFormOpen(false)}
+          item={modal.item}
+          registeredNames={new Set(items.map(getInspectionName))}
+          onClose={() => setModal(null)}
         />
       )}
-      <p className="mt-3 flex gap-2.5 rounded-[10px] bg-surface-2 px-3.5 py-3 text-muted">
-        <Icon name="info" className="mt-0.5 text-lg text-subtle" />
+      <NoticeBox className="mt-3 flex gap-2.5">
+        <Icon name="info" className="text-lg text-subtle" />
         <span>PDF로 받은 결과지는 첨부 자료 탭에서 [PDF 분석]</span>
-      </p>
+      </NoticeBox>
 
       {isConfirmOpen && (
         <Modal
           isConfirm
           title={`선택한 ${selectedSns.length}개 항목을 삭제할까요?`}
+          description="삭제하면 되돌릴 수 없어요."
           isPending={deleteInspections.isPending}
           onClose={() => setIsConfirmOpen(false)}
           footer={

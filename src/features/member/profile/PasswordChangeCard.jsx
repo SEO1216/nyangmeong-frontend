@@ -1,11 +1,14 @@
 import { useId, useState } from 'react';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import FieldError from '@/components/FieldError';
 import { showToast } from '@/components/toastStore';
 import { useUpdatePassword } from '../queries';
-import { ACT_BTN, HELP, INPUT, LABEL } from '../shared/profileStyles';
+import { HELP, INPUT, LABEL } from '@/components/formStyles';
+import { ACT_BTN } from '../shared/profileStyles';
 import { isValidPassword } from '../shared/validate';
 import AccountRow from './AccountRow';
-import { ErrorText } from './FieldMessage';
+
+const PW_RULE = '영문과 숫자를 함께 써서 8~64자로 입력해 주세요(공백 제외)';
 
 export default function PasswordChangeCard({ isEditing, onEdit, onClose }) {
   return (
@@ -28,7 +31,7 @@ export default function PasswordChangeCard({ isEditing, onEdit, onClose }) {
   );
 }
 
-/** 펼쳐졌을 때만 그려진다. 닫히면 입력이 함께 사라진다 */
+/** 펼쳐졌을 때만 렌더. 닫히면 입력이 함께 사라짐 */
 function PasswordEdit({ onClose }) {
   const curId = useId();
   const newId = useId();
@@ -38,9 +41,16 @@ function PasswordEdit({ onClose }) {
   const [curPswd, setCurPswd] = useState('');
   const [newPswd, setNewPswd] = useState('');
   const [cfmPswd, setCfmPswd] = useState('');
-  const { mutate, isPending, isError, reset } = useUpdatePassword();
+  const { mutate, isPending, error, reset } = useUpdatePassword();
+  const fieldMessage = (name) =>
+    error?.fields?.find((item) => item.field === name) ? PW_RULE : null;
+  const isCurError = error?.code === 'CURRENT_PASSWORD_MISMATCH';
+  const isCfmServerError = error?.code === 'PASSWORD_MISMATCH';
+  const isSameError = error?.code === 'PASSWORD_SAME_AS_CURRENT';
+  const newError = isSameError ? error.message : fieldMessage('pswd');
 
-  const isMismatch = cfmPswd !== '' && cfmPswd !== newPswd;
+  const isMismatch =
+    (cfmPswd !== '' && cfmPswd !== newPswd) || isCfmServerError;
   const canSave =
     curPswd !== '' &&
     isValidPassword(newPswd) &&
@@ -49,18 +59,29 @@ function PasswordEdit({ onClose }) {
 
   const handleSave = () =>
     mutate(
-      { curPswd, newPswd },
+      { currentPswd: curPswd, pswd: newPswd, pswdCnfrm: cfmPswd },
       {
         onSuccess: () => {
-          showToast('비밀번호를 변경했어요');
+          showToast('비밀번호를 변경했어요', { type: 'success' });
           onClose();
+        },
+        onError: (err) => {
+          // 입력란 아래에 안내하는 오류 말고는 토스트로 알린다
+          if (
+            err.code !== 'CURRENT_PASSWORD_MISMATCH' &&
+            err.code !== 'PASSWORD_MISMATCH' &&
+            err.code !== 'PASSWORD_SAME_AS_CURRENT' &&
+            !err.fields?.some((item) => item.field === 'pswd')
+          ) {
+            showToast('잠시 후 다시 시도해 주세요', { type: 'error' });
+          }
         },
       },
     );
 
   return (
     <>
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2">
         <label className={LABEL} htmlFor={curId}>
           현재 비밀번호
         </label>
@@ -70,21 +91,19 @@ function PasswordEdit({ onClose }) {
           value={curPswd}
           autoComplete="current-password"
           placeholder="현재 비밀번호 입력"
-          aria-invalid={isError || undefined}
-          aria-describedby={isError ? curErrId : undefined}
+          aria-invalid={isCurError || undefined}
+          aria-describedby={isCurError ? curErrId : undefined}
           onChange={(event) => {
             setCurPswd(event.target.value);
-            if (isError) reset();
+            if (isCurError || isSameError) reset();
           }}
           className={INPUT}
         />
-        {isError && (
-          <ErrorText id={curErrId}>
-            현재 비밀번호가 일치하지 않습니다.
-          </ErrorText>
+        {isCurError && (
+          <FieldError id={curErrId}>현재 비밀번호가 일치하지 않아요</FieldError>
         )}
       </div>
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2">
         <label className={LABEL} htmlFor={newId}>
           새 비밀번호
         </label>
@@ -93,15 +112,23 @@ function PasswordEdit({ onClose }) {
           type="password"
           value={newPswd}
           autoComplete="new-password"
-          aria-describedby={`${newId}-help`}
-          onChange={(event) => setNewPswd(event.target.value)}
+          aria-invalid={newError ? true : undefined}
+          aria-describedby={newError ? `${newId}-err` : `${newId}-help`}
+          onChange={(event) => {
+            setNewPswd(event.target.value);
+            if (newError) reset();
+          }}
           className={INPUT}
         />
-        <p id={`${newId}-help`} className={HELP}>
-          8자 이상, 문자·숫자 조합
-        </p>
+        {newError ? (
+          <FieldError id={`${newId}-err`}>{newError}</FieldError>
+        ) : (
+          <p id={`${newId}-help`} className={HELP}>
+            {PW_RULE}
+          </p>
+        )}
       </div>
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2">
         <label className={LABEL} htmlFor={cfmId}>
           새 비밀번호 확인
         </label>
@@ -112,11 +139,14 @@ function PasswordEdit({ onClose }) {
           autoComplete="new-password"
           aria-invalid={isMismatch || undefined}
           aria-describedby={isMismatch ? cfmErrId : undefined}
-          onChange={(event) => setCfmPswd(event.target.value)}
+          onChange={(event) => {
+            setCfmPswd(event.target.value);
+            if (isCfmServerError) reset();
+          }}
           className={INPUT}
         />
         {isMismatch && (
-          <ErrorText id={cfmErrId}>비밀번호가 일치하지 않아요</ErrorText>
+          <FieldError id={cfmErrId}>비밀번호가 일치하지 않아요</FieldError>
         )}
       </div>
       <div className="flex justify-end gap-2">

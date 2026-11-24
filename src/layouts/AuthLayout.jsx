@@ -26,15 +26,15 @@ export default function AuthLayout() {
   const copy = isSignup ? PANEL_COPY.signup : PANEL_COPY.login;
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-surface-2 p-4 max-md:items-start max-md:bg-white max-md:p-0 lg:p-5">
+    <div className="flex min-h-dvh items-center justify-center bg-page-bg p-4 max-[760px]:items-start max-[760px]:p-0 min-[1100px]:p-5">
       <main
-        className={`grid w-full max-w-270 md:h-150 overflow-hidden rounded-4xl bg-white shadow-[0_20px_50px_rgba(0,0,0,0.08)] transition-[grid-template-columns] duration-800 ease-[cubic-bezier(0.25,1,0.5,1)] max-md:min-h-dvh max-md:grid-cols-1 max-md:rounded-none max-md:shadow-none ${
+        className={`grid w-full max-w-270 min-[760px]:h-150 overflow-hidden rounded-4xl bg-white shadow-[0_20px_50px_rgba(0,0,0,0.08)] transition-[grid-template-columns] duration-800 ease-[cubic-bezier(0.25,1,0.5,1)] max-[760px]:min-h-dvh max-[760px]:grid-cols-1 max-[760px]:rounded-none max-[760px]:shadow-none ${
           isWide
-            ? 'grid-cols-[0.7fr_1.5fr] lg:grid-cols-[1.1fr_1.5fr]'
-            : 'grid-cols-[1fr_1.1fr] lg:grid-cols-[1.6fr_1fr]'
+            ? 'grid-cols-[0.7fr_1.5fr] min-[1100px]:grid-cols-[1.1fr_1.5fr]'
+            : 'grid-cols-[1fr_1.1fr] min-[1100px]:grid-cols-[1.6fr_1fr]'
         }`}
       >
-        <section className="relative flex min-w-0 flex-col justify-between overflow-hidden bg-brand-900 px-8 py-9 text-white max-md:hidden lg:px-11 lg:py-12.5">
+        <section className="relative flex min-w-0 flex-col justify-between overflow-hidden bg-brand-900 px-8 py-9 text-white max-[760px]:hidden min-[1100px]:px-11 min-[1100px]:py-12.5">
           <img
             src={sideImage}
             alt=""
@@ -55,7 +55,7 @@ export default function AuthLayout() {
             key={isSignup ? 'signup' : 'login'}
             className="relative transition duration-500 starting:translate-y-2.5 starting:opacity-0"
           >
-            <h1 className="mb-3 text-2xl leading-[1.3] font-bold lg:text-[32px]">
+            <h1 className="mb-3 text-2xl leading-[1.3] font-bold min-[1100px]:text-[32px]">
               {copy.title[0]}
               <br />
               {copy.title[1]}
@@ -64,12 +64,14 @@ export default function AuthLayout() {
           </div>
         </section>
         <section className="flex min-h-0 min-w-0 flex-col">
-          <Link to={PATHS.HOME} className="hidden px-4 pt-6 max-md:block">
+          <Link to={PATHS.HOME} className="hidden px-4 pt-6 max-[760px]:block">
             <img src={logo} alt="냥멍케어" className="h-8 w-auto" />
           </Link>
           <div
-            className={`flex min-h-0 min-w-0 flex-1 flex-col justify-center ${
-              isSlider ? '' : 'px-8 py-8 max-md:px-4 max-md:py-6 lg:px-12.5'
+            className={`flex min-h-0 min-w-0 flex-1 flex-col justify-center-safe ${
+              isSlider
+                ? ''
+                : 'overflow-y-auto px-8 py-8 max-[760px]:px-4 max-[760px]:py-6 min-[1100px]:px-12.5'
             }`}
           >
             <Outlet />

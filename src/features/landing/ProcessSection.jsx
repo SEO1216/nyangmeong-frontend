@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import useInView from '@/hooks/useInView';
 import useMediaQuery from '@/hooks/useMediaQuery';
 import FadeIn from './FadeIn';
+import SectionTitle from './SectionTitle';
 import { PROCESS_STEPS } from './landingData';
 
 const STEP_MS = 600;
@@ -100,24 +101,20 @@ export default function ProcessSection() {
     <section
       id="process"
       ref={sectionRef}
-      className="relative flex w-full scroll-mt-20 flex-col items-center justify-center overflow-hidden bg-white py-24 lg:min-h-screen"
+      className="relative flex w-full scroll-mt-20 flex-col items-center justify-center overflow-hidden bg-[#f7f7f4] min-h-[calc(100dvh-5rem)] py-24"
     >
       <div className="mx-auto w-full max-w-[1440px]">
-        <FadeIn
-          delay={100}
-          className="mb-20 flex flex-col items-center space-y-4 text-center lg:mb-28"
-        >
-          <span className="text-[14px] font-medium tracking-wider text-[#2c6669] uppercase md:text-[18px] lg:text-[20px]">
-            SERVICE PROCESS
-          </span>
-          <h2 className="text-[28px] leading-tight font-normal break-keep text-black md:text-[40px] lg:text-[48px]">
-            냥멍케어 서비스 과정
-          </h2>
-          <p className="text-[14px] leading-relaxed break-keep text-black md:text-[18px] lg:text-[20px]">
-            가입부터 기록, 미션, 커뮤니티까지
-            <br />네 단계로 시작해요.
-          </p>
-        </FadeIn>
+        <SectionTitle
+          label="Service Process"
+          title="pawever 서비스 과정"
+          desc={
+            <>
+              가입부터 기록, 미션, 커뮤니티까지
+              <br />네 단계로 시작해요.
+            </>
+          }
+          className="mb-20 lg:mb-28"
+        />
 
         <div>
           <div

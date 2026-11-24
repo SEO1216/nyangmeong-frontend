@@ -1,11 +1,17 @@
-import { ChevronDown } from 'lucide-react';
-import { useRef, useState } from 'react';
-import { BTN_SECONDARY } from '@/components/buttonStyles';
+import { useState } from 'react';
+import Checkbox from '@/components/Checkbox';
+import DropdownSelect from '@/components/DropdownSelect';
+import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import EmptyResult from '@/components/EmptyResult';
 import MonthNav from '@/components/MonthNav';
 import MonthPicker from '@/components/MonthPicker';
 import Pagination from '@/components/Pagination';
+import Skeleton from '@/components/Skeleton';
+import SkeletonCard from '@/components/SkeletonCard';
+import { showToast } from '@/components/toastStore';
 import useMediaQuery from '@/hooks/useMediaQuery';
 import { getCurrentYm, isYm, shiftYm } from '@/utils/yearMonth';
+import { toDateCond } from '../api';
 import ExpenseDeleteDialog from '../dashboard/ExpenseDeleteDialog';
 import ExpenseBulkDeleteDialog from './ExpenseBulkDeleteDialog';
 import {
@@ -13,7 +19,6 @@ import {
   FILTER_ALL,
   FILTER_SHARED,
   LOAD,
-  PAGE_SIZE,
   RANGE_MODE,
   SORT,
 } from '../shared/expenseCodes';
@@ -25,18 +30,23 @@ import ExpenseGroupList from './ExpenseGroupList';
 import ExpenseLoadMore from './ExpenseLoadMore';
 import ExpenseRangeSelect from './ExpenseRangeSelect';
 import ExpenseSelectBar from './ExpenseSelectBar';
-import {
-  filterExpenses,
-  groupByDay,
-  sortExpenses,
-  sumAmt,
-} from '../shared/expenseStats';
+import { groupByDay } from '../shared/expenseStats';
 import { CARD } from '../shared/expenseStyles';
-import { useExpenseOverview, useExpenses } from '../queries';
+import {
+  useExpenseMonths,
+  useExpensePets,
+  useExpenseTotals,
+  useExpenses,
+  useInfiniteExpenses,
+} from '../queries';
+
+/** 서버가 받는 해제 번호 최대 개수(ExpenseBulkDeleteRequest.excludeExpndSn) */
+const MAX_EXCLUDE = 1000;
+const EXCLUDE_LIMIT_MESSAGE =
+  '한 번에 1,000건까지 해제할 수 있어요. 개별 선택으로 골라 주세요';
 
 /** 앱(≤760px)은 페이지 번호 대신 무한 스크롤 */
-const MOBILE_QUERY = '(max-width: 760px)';
-const LOAD_MORE_MS = 500;
+const MOBILE_QUERY = '(width < 760px)';
 
 /** 기간 순서 보정 */
 const getSortedPeriod = (range) =>
@@ -51,6 +61,27 @@ const getQueryRange = (range, isEditing, ym) => {
   if (range.mode === RANGE_MODE.ALL) return { fromYm: null, toYm: null };
   return getSortedPeriod(range);
 };
+
+/** 반려동물·카테고리 필터를 서버 조건으로 */
+const toFilterCond = (petFilter, categoryFilter) => ({
+  ...(petFilter === FILTER_SHARED && { common: true }),
+  ...(petFilter !== FILTER_ALL &&
+    petFilter !== FILTER_SHARED && { petSn: Number(petFilter) }),
+  ...(categoryFilter !== FILTER_ALL && { expndClsfCd: categoryFilter }),
+});
+
+/** 첫 로딩 자리: 실제 배치(1440px·390px에서 잰 높이, 한 쪽 20건 기준) */
+function ExpenseHistorySkeleton() {
+  return (
+    <div aria-busy="true" className="flex flex-col gap-5">
+      <Skeleton className="h-[74px] rounded-card max-[760px]:h-[124px]" />
+      <Skeleton className="h-10 rounded-card" />
+      <Skeleton className="-mb-2 h-7 min-[760px]:hidden" />
+      <SkeletonCard className="h-[1786px] max-[760px]:h-[1854px]" />
+      <Skeleton className="mx-auto h-9 w-64" />
+    </div>
+  );
+}
 
 /** initialYm: 진입 시 보던 달 */
 export default function ExpenseHistory({ initialYm }) {
@@ -68,53 +99,101 @@ export default function ExpenseHistory({ initialYm }) {
     fromYm: ym,
     toYm: ym,
   });
-  const [selected, setSelected] = useState(() => new Set());
+  /** 개별 선택: 지출 번호 -> 금액(페이지를 넘어도 유지) */
+  const [selected, setSelected] = useState(() => new Map());
+  /** 조회 결과 전체 선택: 번호 대신 조건(범위·필터)으로 지운다 */
+  const [isAllResult, setIsAllResult] = useState(false);
+  /** 결과 전체 선택 뒤 개별 해제한 지출: 번호 -> 금액(서버에 제외 번호로 보낸다) */
+  const [excluded, setExcluded] = useState(() => new Map());
   const [isBulkOpen, setIsBulkOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
-  /** 앱 지출 상세 시트: 보고 있는 지출 번호(편집 중에는 시트를 잠시 숨기고 저장하면 다시 보인다) */
+  /** 앱 지출 상세 시트: 보고 있는 지출 번호(편집 중에는 시트를 잠시 숨기고 저장하면 다시 표시) */
   const [detailSn, setDetailSn] = useState(null);
   const [deletingExpense, setDeletingExpense] = useState(null);
-  /** 앱 무한 스크롤: 지금까지 불러온 건수·불러오기 상태 */
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [loadStatus, setLoadStatus] = useState(LOAD.IDLE);
-  const loadTokenRef = useRef(0);
-  /** 개발 전용 ?fake=more-fail: 첫 이어 불러오기만 실패해 ↻ 상태를 확인한다 */
-  const failOnceRef = useRef(
-    new URLSearchParams(window.location.search).get('fake') === 'more-fail',
-  );
   const isMobile = useMediaQuery(MOBILE_QUERY);
 
-  const { data: overview } = useExpenseOverview();
-  const { data: expenses = [], isPlaceholderData } = useExpenses(
-    getQueryRange(range, isEditing, ym),
-  );
+  const monthsQuery = useExpenseMonths();
+  const petsQuery = useExpensePets();
+  const { data: months } = monthsQuery;
+  const { data: pets } = petsQuery;
 
-  if (!overview) return null;
+  const queryRange = getQueryRange(range, isEditing, ym);
+  const filterCond = toFilterCond(petFilter, categoryFilter);
+  const resultCond = { ...toDateCond(queryRange), ...filterCond };
+  const listCond = {
+    ...resultCond,
+    sort: sort === SORT.AMOUNT ? 'amount' : 'latest',
+  };
 
-  const filtered = sortExpenses(
-    filterExpenses(expenses, { petFilter, categoryFilter }),
-    sort,
-  );
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  /** 상단 합계·건수는 필터와 무관한 그 달 전체 */
+  const totalsQuery = useExpenseTotals(toDateCond({ fromYm: ym, toYm: ym }));
+  const { data: monthTotals } = totalsQuery;
+  /** 편집 중 조회 결과 전체의 건수·합계 */
+  const { data: resultTotals } = useExpenseTotals(resultCond, {
+    enabled: isEditing,
+  });
+  const pageQuery = useExpenses(listCond, page, { enabled: !isMobile });
+  const infiniteQuery = useInfiniteExpenses(listCond, { enabled: isMobile });
+
+  const pageCount = Math.max(1, pageQuery.data?.totalPages ?? 1);
   const currentPage = Math.min(page, pageCount);
+  /** 마지막 쪽 항목을 다 지우면 앞 쪽으로 */
+  if (!isMobile && pageQuery.data && page > pageCount) setPage(pageCount);
+
+  if (!months || !pets || (!monthTotals && !totalsQuery.isError)) {
+    const failed = [monthsQuery, petsQuery].filter(
+      (query) => !query.data && query.isError,
+    );
+    if (failed.length === 0) return <ExpenseHistorySkeleton />;
+    return (
+      <EmptyResult title="가계부를 불러오지 못했어요">
+        <button
+          type="button"
+          onClick={() => failed.forEach((query) => query.refetch())}
+          className={BTN_PRIMARY}
+        >
+          다시 시도
+        </button>
+      </EmptyResult>
+    );
+  }
+
+  /** 목록 데이터가 없을 때만 로딩·오류 자리(다음 쪽만 실패하면 불러온 목록을 둔다) */
+  const listQuery = isMobile ? infiniteQuery : pageQuery;
+  const isListLoading = !listQuery.data && !listQuery.isError;
+  const isListError = !listQuery.data && listQuery.isError;
+
   const pageItems = isMobile
-    ? filtered.slice(0, visibleCount)
-    : filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
-  const isLoadEnd = visibleCount >= filtered.length;
-  const detailExpense = expenses.find(
+    ? (infiniteQuery.data?.pages.flatMap((result) => result.content) ?? [])
+    : (pageQuery.data?.content ?? []);
+  const isPlaceholderData = isMobile
+    ? infiniteQuery.isRefetching || infiniteQuery.isPlaceholderData
+    : pageQuery.isPlaceholderData;
+  const isLoadEnd = !infiniteQuery.hasNextPage;
+  let loadStatus = LOAD.IDLE;
+  if (infiniteQuery.isFetchingNextPage) loadStatus = LOAD.LOADING;
+  else if (infiniteQuery.isFetchNextPageError) loadStatus = LOAD.ERROR;
+
+  const isChecked = (expndSn) =>
+    isAllResult ? !excluded.has(expndSn) : selected.has(expndSn);
+  const detailExpense = pageItems.find(
     (expense) => expense.expndSn === detailSn,
   );
-  const selectedItems = filtered.filter((expense) =>
-    selected.has(expense.expndSn),
-  );
+  const resultCount = resultTotals?.expndCnt ?? 0;
+  const sumAmt = (amtMap) =>
+    [...amtMap.values()].reduce((sum, amt) => sum + amt, 0);
+  const selectedCount = isAllResult
+    ? resultCount - excluded.size
+    : selected.size;
+  const selectedAmt = isAllResult
+    ? (resultTotals?.totalExpndAmt ?? 0) - sumAmt(excluded)
+    : sumAmt(selected);
   const isPageAllSelected =
     pageItems.length > 0 &&
-    pageItems.every((expense) => selected.has(expense.expndSn));
-  const isResultAllSelected =
-    filtered.length > 0 && selectedItems.length === filtered.length;
+    pageItems.every((expense) => isChecked(expense.expndSn));
 
   /** 기간 지정 선택 가능 달 */
-  const rangeMonths = [...new Set([...overview.expndMonths, ym])].sort();
+  const rangeMonths = [...new Set([...months, ym])].sort();
   const scope =
     range.mode === RANGE_MODE.ALL
       ? {
@@ -122,9 +201,7 @@ export default function ExpenseHistory({ initialYm }) {
           toYm: rangeMonths[rangeMonths.length - 1],
         }
       : getQueryRange(range, true, ym);
-  const petOption = overview.pets.find(
-    (pet) => String(pet.petSn) === petFilter,
-  );
+  const petOption = pets.find((pet) => String(pet.petSn) === petFilter);
   const petLabel =
     petFilter === FILTER_ALL
       ? '전체 반려동물'
@@ -136,25 +213,16 @@ export default function ExpenseHistory({ initialYm }) {
       ? '전체 카테고리'
       : EXPND_CLSF[categoryFilter].name;
 
-  /** 앱: 처음부터 다시 불러오기 (진행 중이던 불러오기는 버린다) */
-  const resetLoaded = () => {
-    loadTokenRef.current += 1;
-    setVisibleCount(PAGE_SIZE);
-    setLoadStatus(LOAD.IDLE);
+  const clearSelection = () => {
+    setSelected(new Map());
+    setExcluded(new Map());
+    setIsAllResult(false);
   };
+  /** 앱: 다음 20건 (조건이 바뀌면 키가 바뀌어 1쪽부터 다시 불러온다) */
   const handleLoadMore = () => {
-    const token = loadTokenRef.current;
-    setLoadStatus(LOAD.LOADING);
-    setTimeout(() => {
-      if (token !== loadTokenRef.current) return;
-      if (failOnceRef.current) {
-        failOnceRef.current = false;
-        setLoadStatus(LOAD.ERROR);
-        return;
-      }
-      setVisibleCount((count) => count + PAGE_SIZE);
-      setLoadStatus(LOAD.IDLE);
-    }, LOAD_MORE_MS);
+    if (infiniteQuery.hasNextPage && !infiniteQuery.isFetching) {
+      infiniteQuery.fetchNextPage();
+    }
   };
   const handleOpenItem = (expense) =>
     isMobile ? setDetailSn(expense.expndSn) : setEditingExpense(expense);
@@ -162,9 +230,8 @@ export default function ExpenseHistory({ initialYm }) {
   /** 조회 조건 변경 시 1페이지·편집 종료 */
   const resetView = () => {
     setPage(1);
-    resetLoaded();
     setIsEditing(false);
-    setSelected(new Set());
+    clearSelection();
   };
   const handleChangeMonth = (nextYm) => {
     setYm(nextYm);
@@ -184,39 +251,78 @@ export default function ExpenseHistory({ initialYm }) {
   };
   const handleStartEdit = () => {
     setRange({ mode: RANGE_MODE.MONTH, fromYm: ym, toYm: ym });
-    setSelected(new Set());
+    clearSelection();
     setPage(1);
-    resetLoaded();
     setIsEditing(true);
   };
   const handleChangeRange = (nextRange) => {
     setRange(nextRange);
-    setSelected(new Set());
+    clearSelection();
     setPage(1);
-    resetLoaded();
+  };
+  /** 결과 전체 선택 중 해제 목록을 바꾼다. 다 해제해 0건이 되면 선택을 모두 푼다 */
+  const applyExcluded = (next) => {
+    if (resultCount - next.size <= 0) clearSelection();
+    else setExcluded(next);
   };
   const handleToggle = (expndSn) => {
-    const next = new Set(selected);
-    if (next.has(expndSn)) next.delete(expndSn);
-    else next.add(expndSn);
+    if (isAllResult) {
+      const next = new Map(excluded);
+      if (next.has(expndSn)) {
+        next.delete(expndSn);
+      } else {
+        if (next.size >= MAX_EXCLUDE) {
+          showToast(EXCLUDE_LIMIT_MESSAGE);
+          return;
+        }
+        const item = pageItems.find((expense) => expense.expndSn === expndSn);
+        next.set(expndSn, item.expndAmt);
+      }
+      applyExcluded(next);
+      return;
+    }
+    const next = new Map(selected);
+    if (next.has(expndSn)) {
+      next.delete(expndSn);
+    } else {
+      const item = pageItems.find((expense) => expense.expndSn === expndSn);
+      next.set(expndSn, item.expndAmt);
+    }
     setSelected(next);
   };
   const handleTogglePage = () => {
-    const next = new Set(selected);
+    if (isAllResult) {
+      const next = new Map(excluded);
+      if (isPageAllSelected) {
+        pageItems.forEach((expense) =>
+          next.set(expense.expndSn, expense.expndAmt),
+        );
+        /** 한도를 넘으면 그 쪽 전체를 해제하지 않는다 */
+        if (next.size > MAX_EXCLUDE) {
+          showToast(EXCLUDE_LIMIT_MESSAGE);
+          return;
+        }
+      } else {
+        pageItems.forEach((expense) => next.delete(expense.expndSn));
+      }
+      applyExcluded(next);
+      return;
+    }
+    const next = new Map(selected);
     pageItems.forEach((expense) => {
       if (isPageAllSelected) next.delete(expense.expndSn);
-      else next.add(expense.expndSn);
+      else next.set(expense.expndSn, expense.expndAmt);
     });
     setSelected(next);
   };
-  const handleToggleResult = () =>
-    setSelected(
-      isResultAllSelected
-        ? new Set()
-        : new Set(filtered.map((expense) => expense.expndSn)),
-    );
+  const handleToggleResult = () => {
+    setSelected(new Map());
+    setExcluded(new Map());
+    setIsAllResult(!isAllResult);
+  };
   const handleDeleted = () => {
-    setSelected(new Set());
+    clearSelection();
+    setPage(1);
     setIsBulkOpen(false);
   };
 
@@ -245,20 +351,22 @@ export default function ExpenseHistory({ initialYm }) {
             <MonthPicker
               ym={ym}
               maxYm={maxYm}
-              enabledYms={overview.expndMonths}
+              enabledYms={months}
               onSelect={handleChangeMonth}
             />
           </MonthNav>
           <p className="flex items-baseline gap-2">
-            <b className="text-page leading-[1.35] font-bold">
-              {formatWon(sumAmt(expenses))}
+            <b className="text-page leading-[1.35] font-bold tabular-nums">
+              {monthTotals ? formatWon(monthTotals.totalExpndAmt) : '-'}
             </b>
-            <span className="text-subtle">{expenses.length}건</span>
+            <span className="text-subtle">
+              {monthTotals ? `${monthTotals.expndCnt}건` : '-'}
+            </span>
           </p>
         </section>
       )}
       <ExpenseFilterBar
-        pets={overview.pets}
+        pets={pets}
         petFilter={petFilter}
         categoryFilter={categoryFilter}
         sort={sort}
@@ -278,22 +386,17 @@ export default function ExpenseHistory({ initialYm }) {
         )}
       </ExpenseFilterBar>
       {!isEditing && (
-        <div className="-mb-2 flex items-center justify-between px-0.5 min-[761px]:hidden">
-          <label className="relative inline-flex items-center text-sm text-ink-2">
-            <select
-              aria-label="정렬"
-              value={sort}
-              onChange={(event) => handleChangeSort(event.target.value)}
-              className="cursor-pointer appearance-none bg-transparent py-1 pr-5 focus:outline-none"
-            >
-              <option value={SORT.LATEST}>최신순</option>
-              <option value={SORT.AMOUNT}>금액순</option>
-            </select>
-            <ChevronDown
-              className="pointer-events-none absolute right-0 size-4"
-              aria-hidden="true"
-            />
-          </label>
+        <div className="-mb-2 flex items-center justify-between px-0.5 min-[760px]:hidden">
+          <DropdownSelect
+            label="정렬"
+            variant="text"
+            value={sort}
+            options={[
+              { value: SORT.LATEST, label: '최신순' },
+              { value: SORT.AMOUNT, label: '금액순' },
+            ]}
+            onChange={handleChangeSort}
+          />
           <button
             type="button"
             onClick={handleStartEdit}
@@ -303,54 +406,69 @@ export default function ExpenseHistory({ initialYm }) {
           </button>
         </div>
       )}
-      <section aria-label="지출 내역" className={`${CARD} overflow-hidden`}>
-        {isEditing && (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-surface-2 px-4 py-3">
-            <label className="flex cursor-pointer items-center gap-2">
-              <input
-                type="checkbox"
+      {isListLoading ? (
+        <SkeletonCard className="h-[1786px] max-[760px]:h-[1854px]" />
+      ) : (
+        <section aria-label="지출 내역" className={`${CARD} overflow-hidden`}>
+          {isEditing && (
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-surface-2 px-4 py-3">
+              {/** 일부만 선택돼도 빈칸으로 보이고, 누르면 이 페이지 전체를 고른다 */}
+              <Checkbox
                 checked={isPageAllSelected}
                 onChange={handleTogglePage}
                 disabled={pageItems.length === 0}
-                className="size-5 cursor-pointer accent-brand-500"
-              />
-              <span>
-                전체 선택{' '}
-                <span className="text-subtle">
-                  (<span className="max-[760px]:hidden">이 페이지</span>
-                  <span className="hidden max-[760px]:inline">불러온</span>{' '}
-                  {pageItems.length}건)
+              >
+                <span>
+                  전체 선택{' '}
+                  <span className="text-subtle">
+                    (<span className="max-[760px]:hidden">이 페이지</span>
+                    <span className="hidden max-[760px]:inline">
+                      불러온
+                    </span>{' '}
+                    {pageItems.length}건)
+                  </span>
                 </span>
-              </span>
-            </label>
-            <button
-              type="button"
-              onClick={handleToggleResult}
-              disabled={filtered.length === 0}
-              className="font-semibold text-brand-600 hover:underline disabled:text-line-strong disabled:no-underline"
-            >
-              {isResultAllSelected
-                ? '선택 모두 해제'
-                : `조회 결과 ${filtered.length}건 모두 선택`}
-            </button>
-          </div>
-        )}
-        {pageItems.length === 0 ? (
-          <p className="px-4 py-10 text-center text-subtle">
-            조회된 지출이 없어요
-          </p>
-        ) : (
-          <ExpenseGroupList
-            items={pageItems}
-            groups={groupByDay(pageItems)}
-            hasDayHead={sort === SORT.LATEST}
-            isEditing={isEditing}
-            selected={selected}
-            onToggle={handleToggle}
-            onOpenItem={handleOpenItem}
-          />
-        )}
-      </section>
+              </Checkbox>
+              <button
+                type="button"
+                onClick={handleToggleResult}
+                disabled={resultCount === 0}
+                className="font-semibold text-brand-600 hover:underline disabled:text-line-strong disabled:no-underline"
+              >
+                {isAllResult
+                  ? '선택 모두 해제'
+                  : `조회 결과 ${resultCount}건 모두 선택`}
+              </button>
+            </div>
+          )}
+          {isListError ? (
+            <div className="flex flex-col items-center gap-4 px-4 py-10 text-center">
+              <p className="text-subtle">지출 내역을 불러오지 못했어요</p>
+              <button
+                type="button"
+                onClick={() => listQuery.refetch()}
+                className={BTN_PRIMARY}
+              >
+                다시 시도
+              </button>
+            </div>
+          ) : pageItems.length === 0 ? (
+            <p className="px-4 py-10 text-center text-subtle">
+              조회된 지출이 없어요
+            </p>
+          ) : (
+            <ExpenseGroupList
+              items={pageItems}
+              groups={groupByDay(pageItems)}
+              hasDayHead={sort === SORT.LATEST}
+              isEditing={isEditing}
+              selected={{ has: isChecked }}
+              onToggle={handleToggle}
+              onOpenItem={handleOpenItem}
+            />
+          )}
+        </section>
+      )}
       {isMobile ? (
         pageItems.length > 0 && (
           <ExpenseLoadMore
@@ -360,29 +478,33 @@ export default function ExpenseHistory({ initialYm }) {
             onRetry={handleLoadMore}
           />
         )
+      ) : isListLoading ? (
+        <Skeleton className="mx-auto h-9 w-64" />
       ) : (
-        <Pagination
-          page={currentPage}
-          pageCount={pageCount}
-          onChange={setPage}
-        />
+        !isListError && (
+          <Pagination
+            page={currentPage}
+            pageCount={pageCount}
+            onChange={setPage}
+          />
+        )
       )}
-      {!isEditing && (
+      {!isEditing && pageItems.length > 0 && (
         <p className="text-center text-sm text-subtle max-[760px]:hidden">
           항목을 누르면 바로 수정할 수 있어요
         </p>
       )}
       {isEditing && (
         <ExpenseSelectBar
-          count={selectedItems.length}
-          totalAmt={sumAmt(selectedItems)}
+          count={selectedCount}
+          totalAmt={selectedAmt}
           onDelete={() => setIsBulkOpen(true)}
         />
       )}
       {editingExpense && (
         <ExpenseEditModal
           expense={editingExpense}
-          pets={overview.pets}
+          pets={pets}
           onSaved={() => setEditingExpense(null)}
           onClose={() => setEditingExpense(null)}
         />
@@ -404,12 +526,16 @@ export default function ExpenseHistory({ initialYm }) {
       )}
       {isBulkOpen && (
         <ExpenseBulkDeleteDialog
-          expndSns={selectedItems.map((expense) => expense.expndSn)}
-          totalAmt={sumAmt(selectedItems)}
+          expndSns={isAllResult ? null : [...selected.keys()]}
+          bulkCond={isAllResult ? resultCond : null}
+          excludeExpndSns={isAllResult ? [...excluded.keys()] : null}
+          count={selectedCount}
+          totalAmt={selectedAmt}
           fromYm={scope.fromYm}
           toYm={scope.toYm}
           filterLabel={`${petLabel} · ${categoryLabel}`}
           onDeleted={handleDeleted}
+          onChanged={handleDeleted}
           onClose={() => setIsBulkOpen(false)}
         />
       )}

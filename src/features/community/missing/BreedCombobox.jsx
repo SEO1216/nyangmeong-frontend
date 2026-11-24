@@ -1,5 +1,7 @@
 import { Check, ChevronDown, Pencil, Search } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
+import FieldError, { Required } from '@/components/FieldError';
+import { HELP, INPUT, LABEL } from '@/components/formStyles';
 
 const SELF = '__self';
 const norm = (text) => text.replace(/\s/g, '').toLowerCase();
@@ -8,14 +10,16 @@ const norm = (text) => text.replace(/\s/g, '').toLowerCase();
  * 품종 콤보박스: 입력해서 찾거나 목록에서 고르고, 맨 아래 [직접 입력]으로 직접 쓴다(최대 20자)
  * - value: { vrtyNm, vrtyDrctInptNm, typed } (목록 품종이면 vrtyNm, 직접 입력이면 vrtyDrctInptNm, 둘 다 null이면 미선택,
  *   목록에 없는 글자를 쳐 둔 채면 typed에 그 글자)
- * - breeds: 반려동물 구분에 맞는 품종명 배열. 구분이 바뀌면 부모가 value를 비운다
- * - 직접 입력값은 품종 마스터에 올리지 않고 그 글에만 저장된다
+ * - breeds: 반려동물 구분에 맞는 품종명 배열. 구분이 바뀌면 부모가 value 초기화
+ * - required: false면 필수 표시 `*` 대신 「선택」(실종센터)
+ * - 직접 입력값은 품종 마스터에 올리지 않고 그 글에만 저장
  */
 export default function BreedCombobox({
   label,
   breeds,
   value,
   error,
+  required = true,
   onChange,
 }) {
   const id = useId();
@@ -95,12 +99,14 @@ export default function BreedCombobox({
   const listId = `${id}-list`;
 
   return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={inputId} className="text-base font-semibold text-ink">
+    <div className="flex flex-col gap-2">
+      <label htmlFor={inputId} className={LABEL}>
         {label}
-        <span aria-hidden="true" className="ml-0.5 font-bold text-danger">
-          *
-        </span>
+        {required ? (
+          <Required />
+        ) : (
+          <span className="ml-1 text-sm font-medium text-muted">선택</span>
+        )}
       </label>
       <div ref={rootRef} className="relative max-w-[420px]">
         <Search
@@ -127,7 +133,7 @@ export default function BreedCombobox({
           onClick={() => setIsOpen(true)}
           onChange={handleInput}
           onKeyDown={handleKeyDown}
-          className={`block h-10 w-full rounded-md border bg-white pr-11 pl-10 text-base placeholder:text-placeholder hover:border-line-strong focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none ${error ? 'border-danger' : 'border-input-line'}`}
+          className={`${INPUT} pr-11 pl-10`}
         />
         <button
           type="button"
@@ -151,10 +157,10 @@ export default function BreedCombobox({
             id={listId}
             role="listbox"
             aria-label={`${label} 목록`}
-            className="absolute top-[calc(100%+6px)] z-20 max-h-60 w-full overflow-y-auto rounded-md border border-line bg-white py-1 shadow-md"
+            className="absolute top-[calc(100%+4px)] z-20 max-h-60 w-full overflow-y-auto rounded-md border border-line bg-white py-1"
           >
             {filtered.length === 0 && (
-              <li className="px-3 py-2.5 text-muted">검색 결과가 없어요</li>
+              <li className="px-3 py-2 text-muted">검색 결과가 없어요</li>
             )}
             {options.map((option, index) => {
               const isSelfOption = option === SELF;
@@ -187,15 +193,10 @@ export default function BreedCombobox({
         )}
       </div>
       {isSelf && (
-        <div className="flex max-w-[420px] flex-col gap-1.5">
-          <label
-            htmlFor={`${id}-self`}
-            className="text-base font-semibold text-ink"
-          >
+        <div className="flex max-w-[420px] flex-col gap-2">
+          <label htmlFor={`${id}-self`} className={LABEL}>
             품종 직접 입력
-            <span aria-hidden="true" className="ml-0.5 font-bold text-danger">
-              *
-            </span>
+            <Required />
           </label>
           <input
             id={`${id}-self`}
@@ -207,23 +208,19 @@ export default function BreedCombobox({
             onChange={(event) =>
               onChange({
                 vrtyNm: null,
-                vrtyDrctInptNm: event.target.value,
+                vrtyDrctInptNm: event.target.value.slice(0, 20),
                 typed: '',
               })
             }
-            className={`block h-10 w-full rounded-md border bg-white px-3 text-base placeholder:text-placeholder hover:border-line-strong focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none ${error ? 'border-danger' : 'border-input-line'}`}
+            className={INPUT}
           />
         </div>
       )}
-      <p className="text-sm text-muted">
+      <p className={HELP}>
         공공데이터 품종코드 기준 목록이에요. 목록에 없으면 맨 아래 [직접 입력]을
         골라 주세요
       </p>
-      {error && (
-        <p role="alert" className="text-sm text-danger">
-          {error}
-        </p>
-      )}
+      <FieldError>{error}</FieldError>
     </div>
   );
 }

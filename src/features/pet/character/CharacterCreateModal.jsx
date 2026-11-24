@@ -1,47 +1,97 @@
 import { Cat, Dog, ImagePlus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Modal from '@/components/Modal';
 import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
+import { showToast } from '@/components/toastStore';
+import { useCharacterImage } from '@/hooks/useCharacterImage';
 import { PATHS } from '@/routes/paths';
+import { getColrName } from '@/utils/petFormat';
 import { useCreateCharacter } from '../queries';
-import { COLR_DRCT_INPT, COLR_OPTIONS, PET_SE } from '../shared/petCodes';
+import { CHRC_STTS, PET_SE } from '../shared/petCodes';
 
-/** 반려동물 등록 정보에서 읽기 전용으로 보여 줄 털색 */
-const getColrNm = (pet) => {
-  if (pet.colrCd === COLR_DRCT_INPT) return pet.colrDrctInptNm;
-  return COLR_OPTIONS[pet.petSeCd]?.find((c) => c.code === pet.colrCd)?.name;
+const PHOTO_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
+const PHOTO_MAX_BYTES = 10 * 1024 * 1024;
+const MSG_PHOTO_TYPE = 'jpg, png, webp 사진만 올릴 수 있어요';
+const MSG_PHOTO_SIZE = '10MB 이하 사진만 올릴 수 있어요';
+
+/** 선택한 사진이 올릴 수 있는지: 문제가 있으면 안내 문구, 없으면 null */
+const getPhotoError = (file) => {
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!PHOTO_EXTENSIONS.includes(ext)) return MSG_PHOTO_TYPE;
+  if (file.size > PHOTO_MAX_BYTES) return MSG_PHOTO_SIZE;
+  return null;
 };
 
 /**
- * [캐릭터 만들기 모달 1~3단계] (FN-MYP-010-08~10·12)
+ * [캐릭터 만들기 모달 1~3단계] (FN-MYP-010-08~10·12·23)
  * - 1 사진 첨부 → 2 생성 중 → 3 결과 확인, 생성 실패면 4 실패 안내
- * - 2단계에서 닫아도 생성은 계속되고(useCreateCharacter), 완료되면 목록 카드에 반영된다
+ * - 요청 뒤 단계는 pet(최신 목록의 같은 동물)의 charStatus로 정한다
+ * - 2단계에서 닫아도 생성은 계속되고, 완료되면 목록 카드에 반영
  */
 export default function CharacterCreateModal({ pet, onClose }) {
-  const [step, setStep] = useState('photo');
+  /** photo: 사진 첨부 / sent: 요청 보냄(상태는 pet이 정함) / fail: 요청 자체가 실패 */
+  const [phase, setPhase] = useState('photo');
   const [photo, setPhoto] = useState(null);
-  const { mutate } = useCreateCharacter();
+  const [photoError, setPhotoError] = useState(null);
+  /** 고른 사진 미리보기 주소: 사진이 바뀌거나 닫히면 해제 */
+  const [photoUrl, setPhotoUrl] = useState(null);
+  const { mutate, isPending } = useCreateCharacter();
+  const characterImage = useCharacterImage(pet.petSn, 'full');
 
-  const colrNm = getColrNm(pet);
+  const colrNm = getColrName(pet);
+
+  useEffect(
+    () => () => {
+      if (photoUrl) URL.revokeObjectURL(photoUrl);
+    },
+    [photoUrl],
+  );
+
+  const handlePhotoChange = (event) => {
+    const file = event.target.files[0] ?? null;
+    const nextPhoto = file && !getPhotoError(file) ? file : null;
+    setPhoto(nextPhoto);
+    setPhotoUrl(nextPhoto ? URL.createObjectURL(nextPhoto) : null);
+    setPhotoError(file ? getPhotoError(file) : null);
+  };
 
   const handleCreate = () => {
-    setStep('creating');
     mutate(
+      { petSn: pet.petSn, photo },
       {
-        petSn: pet.petSn,
-        photo,
-        colrCd: pet.colrCd,
-        ...(pet.colrCd === COLR_DRCT_INPT && {
-          colrDrctInptNm: pet.colrDrctInptNm,
-        }),
-      },
-      {
-        onSuccess: () => setStep('done'),
-        onError: () => setStep('fail'),
+        onSuccess: () => setPhase('sent'),
+        onError: (error) => {
+          if (error.code === 'FILE_TYPE_NOT_ALLOWED') {
+            setPhotoError(MSG_PHOTO_TYPE);
+          } else if (error.code === 'FILE_SIZE_EXCEEDED') {
+            setPhotoError(MSG_PHOTO_SIZE);
+          } else if (
+            error.code === 'PIXEL_CHARACTER_CREATING' ||
+            error.code === 'PIXEL_CHARACTER_ALREADY_EXISTS'
+          ) {
+            showToast('이미 캐릭터를 만들었거나 만드는 중이에요');
+            onClose();
+          } else if (error.code === 'PET_PRIMARY_ONLY') {
+            showToast('주양육자만 만들 수 있어요');
+            onClose();
+          } else {
+            setPhase('fail');
+          }
+        },
       },
     );
   };
+
+  let step = 'photo';
+  if (isPending) step = 'creating';
+  else if (phase === 'fail') step = 'fail';
+  else if (phase === 'sent') {
+    if (pet.charStatus === CHRC_STTS.GENERATING) step = 'creating';
+    else if (pet.charStatus === CHRC_STTS.DONE && !pet.isCharError)
+      step = 'done';
+    else step = 'fail';
+  }
 
   if (step === 'done') {
     return (
@@ -57,7 +107,8 @@ export default function CharacterCreateModal({ pet, onClose }) {
               state={{
                 inquiryType: 'PIXEL_CHARACTER',
                 petSn: pet.petSn,
-                imageUrl: pet.chrcImgUrl,
+                pixelCharSn: pet.pixelCharSn,
+                imageUrl: characterImage,
               }}
               className={BTN_SECONDARY}
             >
@@ -69,7 +120,7 @@ export default function CharacterCreateModal({ pet, onClose }) {
           </>
         }
       >
-        <ResultImage petSeCd={pet.petSeCd} />
+        <ResultImage petSeCd={pet.petSeCd} src={characterImage} />
       </Modal>
     );
   }
@@ -127,7 +178,7 @@ export default function CharacterCreateModal({ pet, onClose }) {
           <button
             type="button"
             onClick={handleCreate}
-            disabled={!photo}
+            disabled={!photo || Boolean(photoError)}
             className={BTN_PRIMARY}
           >
             만들기
@@ -141,19 +192,36 @@ export default function CharacterCreateModal({ pet, onClose }) {
             htmlFor="char-photo"
             className="flex min-h-40 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-[1.5px] border-dashed border-line-strong p-6 text-center text-muted hover:border-brand-500 hover:bg-brand-50 hover:text-brand-600"
           >
-            <ImagePlus className="size-9 text-line-strong" aria-hidden="true" />
+            {photoUrl ? (
+              <img
+                src={photoUrl}
+                alt="첨부한 사진"
+                className="max-h-60 max-w-full rounded-md object-contain"
+              />
+            ) : (
+              <ImagePlus
+                className="size-9 text-line-strong"
+                aria-hidden="true"
+              />
+            )}
             <b className="font-semibold">{photo ? photo.name : '사진 첨부'}</b>
             <input
               id="char-photo"
               type="file"
-              accept="image/*"
+              accept=".jpg,.jpeg,.png,.webp"
               className="sr-only"
-              onChange={(event) => setPhoto(event.target.files[0] ?? null)}
+              onChange={handlePhotoChange}
             />
           </label>
-          <p className="text-sm text-muted">
-            귀·꼬리·발이 모두 보이는 사진을 올려주세요
-          </p>
+          {photoError ? (
+            <p role="alert" className="text-sm text-danger">
+              {photoError}
+            </p>
+          ) : (
+            <p className="text-sm text-muted">
+              귀·꼬리·발이 모두 보이는 사진을 올려주세요
+            </p>
+          )}
         </div>
         <dl className="flex flex-col gap-1 rounded-xl bg-surface-2 px-5 pt-5 pb-4">
           <Row label="품종" value={pet.vrtyNm ?? pet.vrtyDrctInptNm} />
@@ -174,8 +242,17 @@ function Row({ label, value }) {
   );
 }
 
-function ResultImage({ petSeCd, muted = false }) {
+function ResultImage({ petSeCd, src = null, muted = false }) {
   const Icon = petSeCd === PET_SE.CAT ? Cat : Dog;
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt=""
+        className="mx-auto mt-4 size-48 max-w-full rounded-xl bg-brand-50 object-contain"
+      />
+    );
+  }
   return (
     <div
       className={`mx-auto mt-4 grid size-48 max-w-full place-items-center rounded-xl bg-brand-50 text-brand-500 ${

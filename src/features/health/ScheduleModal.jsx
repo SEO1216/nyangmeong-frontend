@@ -1,25 +1,32 @@
-import { useEffect, useRef, useState } from 'react';
+import { useId, useState } from 'react';
+import DropdownSelect from '@/components/DropdownSelect';
+import DatePicker from '@/components/DatePicker';
+import TimeSelect from '@/components/TimeSelect';
 import ConfirmModal from '@/components/ConfirmModal';
+import FieldError, { Required } from '@/components/FieldError';
 import Icon from '@/components/Icon';
+import Modal from '@/components/Modal';
+import { HELP, INPUT, LABEL } from '@/components/formStyles';
+import { BTN_PRIMARY, BTN_SECONDARY } from '@/components/buttonStyles';
 import { getHmOf, getYmdOf, makeDateTime } from '@/utils/formatDate';
-import { CHECKUP_TYPES, HOSPITAL, SCHEDULE_TYPES } from './scheduleTypes';
+import {
+  BADGE_COLORS,
+  CHECKUP_TYPES,
+  HOSPITAL,
+  SCHEDULE_TYPES,
+  TONE_CLASSES,
+} from './scheduleTypes';
 import {
   useCreateSchedule,
   useDeleteSchedule,
   useUpdateSchedule,
 } from './queries';
+import SegmentSwitch from './SegmentSwitch';
+import CharCount from './shared/CharCount';
 
-// 퍼블리싱 시안 .sel의 오른쪽 화살표
-const SELECT_ARROW_STYLE = {
-  backgroundImage:
-    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5' fill='none' stroke='%23566465' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")",
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'right 10px center',
-};
-
-const MAX_HOSPITAL_NAME_LENGTH = 50;
-const MAX_SCHEDULE_NAME_LENGTH = 50;
-const MAX_MEMO_LENGTH = 200;
+const MAX_HOSPITAL_NAME_LENGTH = 80;
+const MAX_SCHEDULE_NAME_LENGTH = 40;
+const MAX_MEMO_LENGTH = 500;
 
 const toForm = (schedule, defaultPetSn, defaultYmd) => ({
   petSn: schedule?.petSn ?? defaultPetSn ?? null,
@@ -30,9 +37,10 @@ const toForm = (schedule, defaultPetSn, defaultYmd) => ({
   scheduleDate: schedule ? getYmdOf(schedule.schdlDt) : defaultYmd,
   scheduleTime: schedule?.hrInptYn ? getHmOf(schedule.schdlDt) : '',
   memoCn: schedule?.memoCn ?? '',
+  cldrBadgeColrCd: schedule?.cldrBadgeColrCd ?? '',
 });
 
-// 일정 등록·수정 모달(FN-HLT-003-32~37). schedule이 있으면 수정, 없으면 등록이다
+// 일정 추가·수정 모달(FN-HLT-003-32~37). schedule이 있으면 수정, 없으면 등록이다
 export default function ScheduleModal({
   pets,
   schedule,
@@ -41,7 +49,8 @@ export default function ScheduleModal({
   onClose,
   onCreateNew,
 }) {
-  const dialogRef = useRef(null);
+  const formId = useId();
+  const petSelectId = useId();
   const isEdit = schedule != null;
   const onlyPetSn = pets.length === 1 ? pets[0].petSn : null;
   const [form, setForm] = useState(() =>
@@ -55,12 +64,9 @@ export default function ScheduleModal({
     createSchedule.isPending ||
     updateSchedule.isPending ||
     deleteSchedule.isPending;
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    dialog.showModal();
-    return () => dialog.close();
-  }, []);
+  const saveError = isEdit ? updateSchedule.error : createSchedule.error;
+  const fieldError = (field) =>
+    saveError?.fields?.find((item) => item.field === field)?.message;
 
   const setField = (name, value) =>
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -93,6 +99,8 @@ export default function ScheduleModal({
     hsptlNm: isHospitalForm ? form.hsptlNm.trim() : null,
     schdlNm: isHospitalForm ? null : form.schdlNm.trim(),
     memoCn: form.memoCn.trim(),
+    // 고르지 않으면 ''을 보낸다. 등록은 비워 저장하고, 수정은 고른 색을 지운다
+    cldrBadgeColrCd: form.cldrBadgeColrCd,
   });
 
   const save = () => {
@@ -131,236 +139,248 @@ export default function ScheduleModal({
       { onSuccess: onClose },
     );
 
-  const handleCancel = (event) => {
-    event.preventDefault();
-    if (!isPending) onClose();
-  };
-
   const targetPetNm = pets.find((pet) => pet.petSn === form.petSn)?.petNm;
 
-  const labelClass =
-    'flex items-center gap-0.5 text-base leading-[1.4] font-semibold text-[#1a3234]';
-  const inputClass =
-    'block h-10 w-full rounded-[6px] border border-[#d3dae2] bg-white px-3 text-base leading-[1.4] text-[#1a3234] outline-none hover:border-[#b9c4c4] focus:border-[#285a5c] focus:shadow-[0_0_0_3px_rgba(40,90,92,0.18)]';
-  const selectClass = `${inputClass} appearance-none pt-px pr-9`;
-  const secondaryButtonClass =
-    'inline-flex h-10 min-w-24 items-center justify-center rounded-[6px] border border-[#e2e7e7] bg-white px-4 text-base font-semibold whitespace-nowrap text-[#1a3234] hover:border-[#b9c4c4] hover:bg-[#f4f6f6] disabled:opacity-50';
-  const required = <span className="ml-0.5 font-bold text-[#b4473a]">*</span>;
+  const secondaryButtonClass = `${BTN_SECONDARY} min-w-24 whitespace-nowrap`;
+  const required = <Required />;
   const optional = (
-    <span className="ml-1 text-[13px] font-medium text-[#667374]">선택</span>
+    <span className="ml-1 text-[13px] font-medium text-subtle">선택</span>
+  );
+
+  // 수정일 때만 본문 첫 이름표 줄 오른쪽 끝(제목 줄 ✕ 아래)에 둔다
+  const deleteButton = isEdit && (
+    <button
+      type="button"
+      aria-label="일정 삭제"
+      disabled={isPending}
+      className="-my-2 grid size-9 shrink-0 place-items-center rounded-md bg-danger-soft text-danger disabled:opacity-50"
+      onClick={() => setConfirm('delete')}
+    >
+      <Icon name="delete" className="text-xl" />
+    </button>
+  );
+
+  const footer = (
+    <>
+      {isEdit ? (
+        <button
+          type="button"
+          className="text-base font-semibold text-brand-600 hover:underline hover:underline-offset-[3px]"
+          onClick={onCreateNew}
+        >
+          새 일정 추가
+        </button>
+      ) : (
+        <p className="text-muted">
+          <Required /> 표시는 필수 항목이에요
+        </p>
+      )}
+      <div className="flex gap-2">
+        <button
+          type="button"
+          disabled={isPending}
+          className={secondaryButtonClass}
+          onClick={onClose}
+        >
+          취소
+        </button>
+        <button
+          type="submit"
+          form={formId}
+          disabled={!canSubmit}
+          className={`${BTN_PRIMARY} min-w-24 whitespace-nowrap`}
+        >
+          {isEdit ? '저장하기' : '등록하기'}
+        </button>
+      </div>
+    </>
   );
 
   return (
-    <dialog
-      ref={dialogRef}
-      aria-label="일정 등록·수정"
-      className="m-auto w-[min(720px,calc(100%-32px))] rounded-[20px] bg-white p-0 shadow-[0_24px_64px_-12px_rgba(15,23,35,0.35)] backdrop:bg-[rgba(15,23,35,0.45)] backdrop:backdrop-blur-[2px]"
-      onCancel={handleCancel}
-    >
-      <form onSubmit={handleSubmit}>
-        <header className="flex items-start gap-3.5 border-b border-[#edf1f1] px-7 pt-6 pb-5">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#e9f2f2] text-[#285a5c]">
-            <Icon name="calendar_month" />
-          </span>
-          <h2 className="flex-1 text-xl leading-[1.35] font-bold text-[#1a3234]">
-            {isEdit ? '일정 수정' : '일정 등록'}
-          </h2>
-          <button
-            type="button"
-            aria-label="닫기"
-            className="-mt-1 -mr-2 grid size-9 shrink-0 place-items-center rounded-[10px] text-[#566465] hover:bg-[#ebf0f0] hover:text-[#1a3234]"
-            onClick={onClose}
-          >
-            <Icon name="close" />
-          </button>
-        </header>
+    <>
+      <Modal
+        title={isEdit ? '일정 수정' : '일정 추가'}
+        isLarge
+        isAutoHeight
+        width={720}
+        isPending={isPending}
+        onClose={onClose}
+        footer={footer}
+      >
+        <form id={formId} onSubmit={handleSubmit}>
+          <div className="flex flex-col gap-5 px-6 py-5">
+            {onlyPetSn === null && (
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <label htmlFor={petSelectId} className={LABEL}>
+                    반려동물{required}
+                  </label>
+                  {deleteButton}
+                </div>
+                <DropdownSelect
+                  id={petSelectId}
+                  value={form.petSn ?? ''}
+                  placeholder="반려동물 선택"
+                  options={pets.map((pet) => ({
+                    value: pet.petSn,
+                    label: pet.petNm,
+                  }))}
+                  onChange={(value) => setField('petSn', value)}
+                />
+                <FieldError>{fieldError('petSn')}</FieldError>
+              </div>
+            )}
 
-        <div className="flex flex-col gap-5 px-7 pt-6 pb-7">
-          {onlyPetSn === null && (
-            <label className="flex flex-col gap-1.5">
-              <span className={labelClass}>반려동물{required}</span>
-              <select
-                value={form.petSn ?? ''}
-                className={selectClass}
-                style={SELECT_ARROW_STYLE}
-                onChange={(event) =>
-                  setField(
-                    'petSn',
-                    event.target.value === ''
-                      ? null
-                      : Number(event.target.value),
-                  )
-                }
+            <fieldset className="flex flex-col gap-1.5">
+              {/* 반려동물이 한 마리라 반려동물 칸이 없으면 이 줄이 첫 줄이므로 삭제 버튼을 여기에 둔다 */}
+              <legend
+                className={`${LABEL} mb-1.5 flex w-full items-center justify-between gap-3`}
               >
-                <option value="">반려동물 선택</option>
-                {pets.map((pet) => (
-                  <option key={pet.petSn} value={pet.petSn}>
-                    {pet.petNm}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-
-          <fieldset className="flex flex-col gap-1.5">
-            <legend className={`${labelClass} mb-1.5`}>
-              일정 종류{required}
-            </legend>
-            <div className="flex h-10 rounded-[6px] border border-[#e6eaeb] bg-[#f1f3f4] p-[3px]">
-              {SCHEDULE_TYPES.map((type) => {
-                const isSelected = form.schdlKndCd === type.cd;
-                return (
-                  <button
-                    key={type.cd}
-                    type="button"
-                    aria-pressed={isSelected}
-                    className={`flex flex-1 items-center justify-center rounded-[4px] whitespace-nowrap ${
-                      isSelected
-                        ? 'bg-white font-semibold text-[#1e4a4c] shadow-[0_1px_2px_rgba(26,50,52,0.08),0_0_0_1px_rgba(40,90,92,0.18)]'
-                        : 'font-medium text-[#566465] hover:text-[#1a3234]'
-                    }`}
-                    onClick={() => handleTypeChange(type.cd)}
-                  >
-                    {type.nm}
-                  </button>
-                );
-              })}
-            </div>
-          </fieldset>
-
-          <div className="grid grid-cols-2 gap-x-8">
-            <label className="flex flex-col gap-1.5">
-              <span className={labelClass}>날짜{required}</span>
-              <input
-                type="date"
-                required
-                value={form.scheduleDate}
-                className={`${inputClass} tabular-nums`}
-                onChange={(event) =>
-                  setField('scheduleDate', event.target.value)
-                }
+                <span>일정 종류{required}</span>
+                {onlyPetSn !== null && deleteButton}
+              </legend>
+              <SegmentSwitch
+                options={SCHEDULE_TYPES}
+                selected={form.schdlKndCd}
+                onSelect={handleTypeChange}
               />
-            </label>
-            <label className="flex flex-col gap-1.5">
-              <span className={labelClass}>시간{optional}</span>
-              <input
-                type="time"
-                value={form.scheduleTime}
-                className={`${inputClass} tabular-nums`}
-                onChange={(event) =>
-                  setField('scheduleTime', event.target.value)
-                }
-              />
-            </label>
-          </div>
+              <FieldError>{fieldError('schdlKndCd')}</FieldError>
+            </fieldset>
 
-          {isHospitalForm && (
-            <div className="rounded-xl bg-[#f4f6f6] p-4">
-              <div className="grid grid-cols-2 gap-x-8">
-                <label className="flex flex-col gap-1.5">
-                  <span className={labelClass}>검진유형{required}</span>
-                  <select
-                    value={form.ckupTypeCd}
-                    className={selectClass}
-                    style={SELECT_ARROW_STYLE}
-                    onChange={(event) =>
-                      setField('ckupTypeCd', event.target.value)
-                    }
-                  >
-                    <option value="">선택</option>
-                    {CHECKUP_TYPES.map((type) => (
-                      <option key={type.cd} value={type.cd}>
-                        {type.nm}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="flex flex-col gap-1.5">
-                  <span className={labelClass}>병원명{required}</span>
-                  <input
-                    value={form.hsptlNm}
-                    maxLength={MAX_HOSPITAL_NAME_LENGTH}
-                    className={inputClass}
-                    onChange={(event) =>
-                      setField('hsptlNm', event.target.value)
-                    }
-                  />
-                </label>
+            {/* 시간 세 칸이 날짜 옆에 안 들어가는 760px 미만은 위아래로 쌓는다 */}
+            <div className="grid grid-cols-2 gap-x-8 max-[760px]:grid-cols-1 max-[760px]:gap-y-5">
+              <label className="flex flex-col gap-1.5">
+                <span className={LABEL}>날짜{required}</span>
+                <DatePicker
+                  value={form.scheduleDate}
+                  onChange={(value) => setField('scheduleDate', value)}
+                />
+                <FieldError>{fieldError('schdlDt')}</FieldError>
+              </label>
+              <div className="flex flex-col gap-1.5">
+                <span className={LABEL}>시간{optional}</span>
+                <TimeSelect
+                  value={form.scheduleTime}
+                  onChange={(scheduleTime) =>
+                    setField('scheduleTime', scheduleTime)
+                  }
+                />
+                <FieldError>{fieldError('hrInptYn')}</FieldError>
               </div>
             </div>
-          )}
 
-          {form.schdlKndCd !== null && !isHospitalForm && (
+            {isHospitalForm && (
+              <div className="rounded-xl bg-surface-2 p-4">
+                <div className="grid grid-cols-2 gap-x-8">
+                  <label className="flex flex-col gap-1.5">
+                    <span className={LABEL}>검진유형{required}</span>
+                    <DropdownSelect
+                      value={form.ckupTypeCd}
+                      placeholder="선택"
+                      options={CHECKUP_TYPES.map((type) => ({
+                        value: type.cd,
+                        label: type.nm,
+                      }))}
+                      onChange={(value) => setField('ckupTypeCd', value)}
+                    />
+                    <FieldError>{fieldError('ckupTypeCd')}</FieldError>
+                  </label>
+                  <label className="flex flex-col gap-1.5">
+                    <span className={LABEL}>병원명{required}</span>
+                    <input
+                      value={form.hsptlNm}
+                      maxLength={MAX_HOSPITAL_NAME_LENGTH}
+                      className={INPUT}
+                      onChange={(event) =>
+                        setField('hsptlNm', event.target.value)
+                      }
+                    />
+                    <CharCount
+                      value={form.hsptlNm}
+                      max={MAX_HOSPITAL_NAME_LENGTH}
+                    />
+                    <FieldError>{fieldError('hsptlNm')}</FieldError>
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {form.schdlKndCd !== null && !isHospitalForm && (
+              <label className="flex flex-col gap-1.5">
+                <span className={LABEL}>일정명{required}</span>
+                <input
+                  value={form.schdlNm}
+                  maxLength={MAX_SCHEDULE_NAME_LENGTH}
+                  className={INPUT}
+                  onChange={(event) => setField('schdlNm', event.target.value)}
+                />
+                <CharCount
+                  value={form.schdlNm}
+                  max={MAX_SCHEDULE_NAME_LENGTH}
+                />
+                <FieldError>{fieldError('schdlNm')}</FieldError>
+              </label>
+            )}
+
             <label className="flex flex-col gap-1.5">
-              <span className={labelClass}>일정명{required}</span>
+              <span className={LABEL}>일정 메모{optional}</span>
               <input
-                value={form.schdlNm}
-                maxLength={MAX_SCHEDULE_NAME_LENGTH}
-                className={inputClass}
-                onChange={(event) => setField('schdlNm', event.target.value)}
+                value={form.memoCn}
+                maxLength={MAX_MEMO_LENGTH}
+                className={INPUT}
+                onChange={(event) => setField('memoCn', event.target.value)}
               />
+              <CharCount value={form.memoCn} max={MAX_MEMO_LENGTH} />
+              <FieldError>{fieldError('memoCn')}</FieldError>
             </label>
-          )}
 
-          <label className="flex flex-col gap-1.5">
-            <span className={labelClass}>일정 메모{optional}</span>
-            <input
-              value={form.memoCn}
-              maxLength={MAX_MEMO_LENGTH}
-              className={inputClass}
-              onChange={(event) => setField('memoCn', event.target.value)}
-            />
-          </label>
-
-          {/** 캘린더 뱃지 색상: 공통코드(HLTG21) 확정 전까지 미노출 */}
-        </div>
-
-        <footer className="flex items-center justify-end gap-2 rounded-b-[20px] border-t border-[#e2e7e7] bg-[#fbfcfd] px-7 py-4">
-          {isEdit ? (
-            <button
-              type="button"
-              className="mr-auto text-base font-semibold text-[#1e4a4c] hover:underline hover:underline-offset-[3px]"
-              onClick={onCreateNew}
-            >
-              새 일정 등록
-            </button>
-          ) : (
-            <p className="mr-auto text-[#566465]">
-              <span className="font-bold text-[#b4473a]">*</span> 표시는 필수
-              항목이에요
-            </p>
-          )}
-          <button
-            type="button"
-            disabled={isPending}
-            className={secondaryButtonClass}
-            onClick={onClose}
-          >
-            취소
-          </button>
-          {isEdit && (
-            <button
-              type="button"
-              disabled={isPending}
-              className={secondaryButtonClass}
-              onClick={() => setConfirm('delete')}
-            >
-              일정 삭제하기
-            </button>
-          )}
-          <button
-            type="submit"
-            disabled={!canSubmit}
-            className="inline-flex h-10 min-w-24 items-center justify-center rounded-[6px] bg-[#285a5c] px-4 text-base font-semibold whitespace-nowrap text-white hover:bg-[#1e4a4c] disabled:opacity-40"
-          >
-            {isEdit ? '일정 수정하기' : '저장하기'}
-          </button>
-        </footer>
-      </form>
+            <div className="flex flex-col gap-1.5">
+              <span id="schedule-badge-color-label" className={LABEL}>
+                캘린더 뱃지 색상{optional}
+              </span>
+              {/* 고른 칩을 다시 누르면 선택을 푼다 */}
+              <div
+                role="radiogroup"
+                aria-labelledby="schedule-badge-color-label"
+                className="flex flex-wrap gap-3"
+              >
+                {BADGE_COLORS.map((color) => {
+                  const isChecked = form.cldrBadgeColrCd === color.cd;
+                  return (
+                    <button
+                      key={color.cd}
+                      type="button"
+                      role="radio"
+                      aria-checked={isChecked}
+                      title={color.nm}
+                      className={`grid size-8 place-items-center rounded-full outline-offset-(--spacing) focus-visible:outline focus-visible:outline-brand-500 ${
+                        TONE_CLASSES[color.tone].chip
+                      } ${isChecked ? 'outline-solid outline-[length:medium] outline-current' : ''}`}
+                      onClick={() =>
+                        setField('cldrBadgeColrCd', isChecked ? '' : color.cd)
+                      }
+                    >
+                      <span className="sr-only">{color.nm}</span>
+                      {isChecked && (
+                        <Icon name="check" className="text-lg font-semibold" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className={HELP}>
+                고르지 않으면 일정 종류의 기본 색상이 적용돼요
+              </p>
+              <FieldError>{fieldError('cldrBadgeColrCd')}</FieldError>
+            </div>
+          </div>
+        </form>
+      </Modal>
 
       {confirm === 'move' && (
         <ConfirmModal
-          title={`이 일정의 검진기록과 연동된 케어 항목도 ${targetPetNm}(으)로 옮겨집니다`}
+          title="반려동물을 바꿀까요?"
+          description={`이 일정의 검진기록과 연동된 케어 항목도 ${targetPetNm}(으)로 옮겨집니다.`}
           confirmLabel="옮기기"
           isPending={isPending}
           onConfirm={() => {
@@ -372,13 +392,15 @@ export default function ScheduleModal({
       )}
       {confirm === 'delete' && (
         <ConfirmModal
-          title="이 일정을 삭제할까요? 연결된 검진기록은 그대로 남아요"
+          title="이 일정을 삭제할까요?"
+          description="연결된 검진기록은 그대로 남아요."
           confirmLabel="삭제하기"
+          isDanger
           isPending={isPending}
           onConfirm={handleDelete}
           onCancel={() => setConfirm(null)}
         />
       )}
-    </dialog>
+    </>
   );
 }

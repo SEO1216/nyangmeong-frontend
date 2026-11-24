@@ -4,6 +4,7 @@ import logo from '@/assets/nm_logo.svg';
 import CountBadge from '@/components/CountBadge';
 import Icon from '@/components/Icon';
 import { useChatUnreadCount } from '@/features/chat/queries';
+import { useMe } from '@/features/member/queries';
 import { useChatModal } from '@/context/chatModal';
 import { PATHS } from '@/routes/paths';
 import GnbDropdown from './GnbDropdown';
@@ -17,11 +18,11 @@ const GNB_OPEN_DELAY = 200;
 const GNB_CLOSE_DELAY = 300;
 
 const iconButton =
-  'relative flex h-[42px] w-[42px] items-center justify-center rounded-full text-[#3d4a4b] hover:bg-[#ebf0f0] hover:text-[#1a3234]';
+  'relative flex h-[42px] w-[42px] items-center justify-center rounded-full text-ink-2 hover:bg-surface-3 hover:text-ink';
 
 /** 시안 .hd-profile: 40px 원형, 왼쪽 6px, 1px 테두리 */
 const profileButton =
-  'relative ml-1.5 flex size-10 items-center justify-center overflow-hidden rounded-full border border-[#e2e7e7] bg-white hover:bg-[#ebf0f0]';
+  'relative ml-1.5 flex size-10 items-center justify-center overflow-hidden rounded-full border border-line bg-white hover:bg-surface-3';
 
 export default function UserHeader() {
   /** 열린 드롭다운 하나: gnb | notification | profile | drawer | null */
@@ -32,9 +33,20 @@ export default function UserHeader() {
   /** GNB 카드를 보여 줄 1차 메뉴 순번 */
   const [gnbIndex, setGnbIndex] = useState(0);
   const { open: openChatModal } = useChatModal();
-  const { data: chatUnread } = useChatUnreadCount();
+  const { data: me } = useMe();
+  /** 로그인 전(공개 화면)에는 안 읽은 수 조회·실시간 연결을 하지 않는다 */
+  const { data: chatUnread } = useChatUnreadCount(Boolean(me));
 
   const gnbRef = useRef(null);
+  /** 맨 위에서는 바탕·테두리 투명(화면 바탕색 그대로), 아래로 스크롤하면 흰색 반투명과 테두리를 보인다 */
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 0);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   const gnbTimer = useRef(null);
   const skipGnbFocus = useRef(false);
 
@@ -134,7 +146,13 @@ export default function UserHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 h-16 border-b border-[#e2e7e7] bg-white/[.92] backdrop-blur-[10px] backdrop-saturate-[1.4]">
+      <header
+        className={`sticky top-0 z-40 h-16 border-b transition-colors ${
+          isScrolled
+            ? 'border-line bg-white/[.92] backdrop-blur-[10px] backdrop-saturate-[1.4]'
+            : 'border-transparent bg-transparent'
+        }`}
+      >
         <div className="mx-auto grid h-full max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center gap-6 px-8 max-[1100px]:flex max-[1100px]:gap-3 max-[760px]:px-4">
           <Link to={PATHS.MAIN} className="justify-self-start">
             <img src={logo} alt="냥멍케어" className="h-8 w-[121px]" />
@@ -161,14 +179,14 @@ export default function UserHeader() {
                     to={menu.to}
                     onClick={closeGnb}
                     className={({ isActive }) =>
-                      `flex h-[38px] items-center rounded-lg px-4 text-base hover:bg-[#ebf0f0] ${
+                      `flex h-[38px] items-center rounded-lg px-4 text-base hover:bg-surface-3 ${
                         openMenu === 'gnb' && gnbIndex === index
-                          ? 'bg-[#ebf0f0]'
+                          ? 'bg-surface-3'
                           : ''
                       } ${
                         isActive
-                          ? 'font-bold text-[#1a3234]'
-                          : 'font-semibold text-[#3d4a4b]'
+                          ? 'font-bold text-ink'
+                          : 'font-semibold text-ink-2'
                       }`
                     }
                   >
@@ -176,7 +194,7 @@ export default function UserHeader() {
                       <>
                         {menu.label}
                         {isActive && (
-                          <span className="absolute inset-x-4 -bottom-px h-0.5 rounded-sm bg-[#285a5c]" />
+                          <span className="absolute inset-x-4 -bottom-px h-0.5 rounded-sm bg-brand-500" />
                         )}
                       </>
                     )}

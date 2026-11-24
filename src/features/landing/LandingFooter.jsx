@@ -1,5 +1,4 @@
 import FadeIn from './FadeIn';
-import logo from '@/assets/landing/MainLogo.svg';
 import petImage from '@/assets/landing/petImage.png';
 
 export default function LandingFooter() {
@@ -8,14 +7,7 @@ export default function LandingFooter() {
       id="contact"
       className="w-full scroll-mt-20 bg-brand-600 px-6 py-12 md:px-10 md:py-16 lg:py-20"
     >
-      <FadeIn className="mx-auto grid w-full max-w-[1400px] grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_auto_1fr] lg:gap-12">
-        <div className="justify-self-start">
-          <img
-            src={logo}
-            alt="냥멍케어 로고"
-            className="h-[38px] w-[150px] shrink-0 object-contain object-left lg:h-12 lg:w-[187px]"
-          />
-        </div>
+      <FadeIn className="mx-auto flex w-full max-w-[1400px] justify-center">
         <div className="flex w-full flex-col items-center gap-6">
           <img
             src={petImage}

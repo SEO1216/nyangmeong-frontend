@@ -16,18 +16,18 @@ import {
 
 const WEEKDAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 const DAYS_PER_WEEK = 7;
-// 761px 이상: 날짜 칸은 88px로 고정한다(시안·명세는 80px, 오늘·+n 칸 태그 아래가 잘려 늘림). 일정은 두 줄 태그 1건만 보여 주고 나머지는 날짜 옆 +n으로 줄인다
+// 760px 이상: 날짜 칸은 88px로 고정한다(시안·명세는 80px, 오늘·+n 칸 태그 아래가 잘려 늘림). 일정은 두 줄 태그 1건만 보여 주고 나머지는 날짜 옆 +n으로 줄인다 (※신규 정책)
 const MAX_DAY_TAGS = 1;
 
-// 760px 이하는 마이페이지 가계부 달력과 같은 앱 모양: 칸 세로선 없이 주 사이 얇은 선만, 숫자는 가운데, 일정은 숫자 아래 점
+// 760px 미만은 마이페이지 가계부 달력과 같은 앱 모양: 칸 세로선 없이 주 사이 얇은 선만, 숫자는 가운데, 일정은 숫자 아래 점
 const CELL_CLASS =
   'border-r border-b border-line max-[760px]:border-r-0 max-[760px]:border-line-soft';
 
 const navButtonClass =
-  'grid size-9 place-items-center rounded-full text-[#566465] hover:bg-[#ebf0f0] hover:text-[#1a3234] disabled:opacity-40 disabled:hover:bg-transparent';
+  'grid size-9 place-items-center rounded-full text-muted hover:bg-surface-3 hover:text-ink disabled:opacity-40 disabled:hover:bg-transparent';
 
 // 월간 캘린더 카드(FN-HLT-003-29·30). schedules는 이미 표시 반려동물 필터를 거친 그 달 일정이다
-// children은 달력 위에 놓는 표시 반려동물 필터다
+// petSwitch는 달력 위에 놓는 「모든 아이 일정 같이 보기」 스위치다(FN-HLT-003-39, ※신규 정책). 다른 아이 일정(isOtherPet)은 연한 회색으로 보인다
 export default function MonthCalendar({
   year,
   month,
@@ -36,7 +36,7 @@ export default function MonthCalendar({
   canMoveMonth,
   onMoveMonth,
   onSelectDate,
-  children,
+  petSwitch,
 }) {
   const todayYmd = getTodayYmd();
   const daysInMonth = getDaysInMonth(year, month);
@@ -49,7 +49,7 @@ export default function MonthCalendar({
   );
   const sorted = [...schedules].sort(compareSchedules);
 
-  // 마지막 주 뒤 빈 칸은 760px 이하에서 숨긴다
+  // 마지막 주 뒤 빈 칸은 760px 미만에서 숨긴다
   const renderBlanks = (count, keyPrefix) =>
     Array.from({ length: count }, (_, index) => (
       <div
@@ -63,7 +63,7 @@ export default function MonthCalendar({
 
   return (
     <Card
-      title="통합 케어 캘린더"
+      title="케어 캘린더"
       action={
         <div className="flex items-center gap-1">
           <button
@@ -75,7 +75,7 @@ export default function MonthCalendar({
           >
             <Icon name="chevron_left" />
           </button>
-          <span className="min-w-28 text-center text-lg font-semibold text-[#1a3234]">
+          <span className="min-w-28 text-center text-lg font-semibold text-ink">
             {year}년 {month}월
           </span>
           <button
@@ -90,7 +90,7 @@ export default function MonthCalendar({
         </div>
       }
     >
-      {children}
+      {petSwitch}
       <div
         role="grid"
         aria-label={`${year}년 ${month}월`}
@@ -115,7 +115,7 @@ export default function MonthCalendar({
           const weekdayIndex = getWeekdayIndex(ymd);
           const isWeekend =
             weekdayIndex === 0 || weekdayIndex === DAYS_PER_WEEK - 1;
-          // 760px 이하 숫자: 선택은 초록 원, 오늘은 초록 글자, 주말은 흐린 색
+          // 760px 미만 숫자: 선택은 초록 원, 오늘은 초록 글자, 주말은 흐린 색
           let mobileDayClass = isWeekend
             ? 'max-[760px]:font-semibold max-[760px]:text-subtle'
             : 'max-[760px]:font-semibold max-[760px]:text-ink';
@@ -163,18 +163,14 @@ export default function MonthCalendar({
                   </span>
                 )}
               </span>
-              {/* 761px 이상: 두 줄 태그 1건, 나머지는 날짜 옆 +n */}
+              {/* 760px 이상: 두 줄 태그 1건, 나머지는 날짜 옆 +n */}
               {daySchedules.slice(0, MAX_DAY_TAGS).map((schedule) => (
                 <span
                   key={schedule.schdlSn}
                   title={`${schedule.petNm} · ${getScheduleKindName(schedule)}`}
                   className={`block truncate rounded-[4px] px-1 text-[13px] leading-tight font-semibold max-[760px]:hidden ${
-                    isPast ? 'opacity-60' : ''
-                  }`}
-                  style={{
-                    backgroundColor: getScheduleTone(schedule).bg,
-                    color: getScheduleTone(schedule).fg,
-                  }}
+                    getScheduleTone(schedule).chip
+                  } ${isPast ? 'opacity-60' : ''}`}
                 >
                   <span className="block truncate">{schedule.petNm}</span>
                   <span className="block truncate">
@@ -182,16 +178,15 @@ export default function MonthCalendar({
                   </span>
                 </span>
               ))}
-              {/* 760px 이하: 1건은 점, 2건 이상은 짧은 막대. 색은 그날 첫 일정의 종류 색 */}
+              {/* 760px 미만: 1건은 점, 2건 이상은 짧은 막대. 색은 그날 첫 일정의 종류 색 */}
               {daySchedules.length > 0 && (
                 <span
                   aria-hidden="true"
                   className={`hidden h-[5px] rounded-[3px] max-[760px]:block ${
                     daySchedules.length > 1 ? 'w-3.5' : 'w-[5px]'
-                  } ${isPast ? 'opacity-60' : ''}`}
-                  style={{
-                    backgroundColor: getScheduleTone(daySchedules[0]).fg,
-                  }}
+                  } ${getScheduleTone(daySchedules[0]).bar} ${
+                    isPast ? 'opacity-60' : ''
+                  }`}
                 />
               )}
             </button>

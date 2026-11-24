@@ -1,91 +1,134 @@
-import { useRef } from 'react';
-import useInView from '@/hooks/useInView';
-import FadeIn from './FadeIn';
+import { useEffect, useRef, useState } from 'react';
+import SectionTitle from './SectionTitle';
 import { SERVICE_CARDS } from './landingData';
 
-const MARQUEE_CARDS = [
-  ...SERVICE_CARDS,
-  ...SERVICE_CARDS,
-  ...SERVICE_CARDS,
-  ...SERVICE_CARDS,
-];
+const COUNT = SERVICE_CARDS.length;
+// 카드 한 장을 넘기는 데 쓰는 스크롤 길이(화면 높이 비율)
+const STEP_VH = 70;
+
+// 가운데에서 떨어진 칸 수(d)에 따른 카드 모양. 양옆은 작아지고 안쪽으로 기울며 흑백이 된다
+function cardStyle(d) {
+  const abs = Math.abs(d);
+  return {
+    transform: `translateX(calc(var(--gap) * ${d})) scale(${abs === 0 ? 1 : abs === 1 ? 0.84 : 0.7}) rotateY(${Math.max(-2, Math.min(2, d)) * -14}deg)`,
+    zIndex: 10 - abs,
+    opacity: abs > 2 ? 0 : 1,
+    filter: abs === 0 ? 'none' : 'grayscale(1) brightness(0.8)',
+  };
+}
 
 export default function ServiceSection() {
   const sectionRef = useRef(null);
-  const isInView = useInView(sectionRef, { threshold: 0.1 });
+  const [active, setActive] = useState(0);
+
+  // 섹션 안에서 내려간 비율로 가운데 카드를 정한다. 섹션 높이를 카드 수만큼 늘리고 안쪽을 화면에 고정한다
+  useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const section = sectionRef.current;
+      if (!section) return;
+      const rect = section.getBoundingClientRect();
+      const total = rect.height - window.innerHeight;
+      const progress =
+        total > 0 ? Math.min(1, Math.max(0, -rect.top / total)) : 0;
+      setActive(Math.min(COUNT - 1, Math.floor(progress * COUNT)));
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, []);
+
+  // 점이나 옆 카드를 누르면 그 카드가 가운데 오는 스크롤 위치로 간다
+  const goToCard = (index) => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const top = section.getBoundingClientRect().top + window.scrollY;
+    const total = section.offsetHeight - window.innerHeight;
+    window.scrollTo({
+      top: top + ((index + 0.5) / COUNT) * total,
+      behavior: 'smooth',
+    });
+  };
 
   return (
     <section
       id="service"
       ref={sectionRef}
-      className="relative w-full scroll-mt-20 overflow-hidden bg-white"
+      className="relative w-full bg-white"
+      style={{ height: `calc(100dvh + ${(COUNT - 1) * STEP_VH}vh)` }}
     >
-      <div className="flex min-h-[700px] w-full flex-col lg:h-[800px] lg:flex-row">
-        <div className="relative z-30 flex w-full justify-start bg-white pt-24 pb-20 lg:w-[45%] lg:items-center lg:justify-end lg:py-0 xl:w-[42%]">
-          <div className="flex w-full max-w-[540px] flex-col items-start bg-white px-6 text-left lg:px-0 lg:pr-20">
-            <FadeIn delay={100} className="mb-10">
-              <h2 className="text-[28px] leading-tight font-semibold break-keep text-black md:text-[38px] lg:text-[40px] xl:text-[48px]">
-                건강기록과 AI 비서
-                <br />
-                냥멍케어 서비스
-              </h2>
-            </FadeIn>
+      <div className="sticky top-0 flex h-dvh w-full flex-col items-center justify-center overflow-x-clip px-6 pt-28 pb-20 md:pt-36 md:pb-28">
+        <SectionTitle
+          label="All-in-one Pet Care"
+          title={
+            <>
+              기록부터 일상까지,
+              <br className="md:hidden" /> pawever 서비스
+            </>
+          }
+          desc={
+            <>
+              건강 일지부터 플레이스까지
+              <br className="md:hidden" /> 반려생활에 필요한 것을 한곳에
+              모았어요.
+            </>
+          }
+        />
 
-            <FadeIn delay={500} className="mb-16 space-y-6">
-              <h3 className="text-[20px] leading-tight font-normal break-keep text-black md:text-[26px] lg:text-[28px] xl:text-[32px]">
-                반려동물에 맞춘
-                <br />
-                체계적인 건강기록 서비스
-              </h3>
-              <p className="text-[14px] leading-relaxed font-normal break-keep text-[#555555] md:text-[17px] lg:text-[18px] xl:text-[20px]">
-                체중·식사량·산책·혈액검사 수치를 한눈에 보고,
-                <br />
-                AI 매니저가 분석해 리포트로 알려드려요.
-              </p>
-            </FadeIn>
-
-            <FadeIn delay={900}>
-              <button
-                type="button"
-                onClick={() =>
-                  document
-                    .getElementById('process')
-                    ?.scrollIntoView({ behavior: 'smooth' })
-                }
-                className="rounded-[50px] bg-brand-600 px-10 py-4 text-[14px] font-medium text-white transition-[background-color,transform] duration-300 hover:scale-[0.96] hover:bg-brand-900 active:scale-100 md:px-12 md:py-5 md:text-[20px]"
+        <ul
+          aria-label="pawever 서비스"
+          className="relative mt-14 h-[342px] w-full [--gap:150px] [perspective:1200px] md:mt-20 md:[--gap:250px] lg:h-[402px] lg:[--gap:300px]"
+        >
+          {SERVICE_CARDS.map((card, index) => {
+            const d = index - active;
+            return (
+              <li
+                key={card.title}
+                aria-hidden={d !== 0}
+                className="absolute top-0 left-1/2 -ml-[127.5px] h-[342px] w-[255px] overflow-hidden rounded-3xl shadow-[0_12px_32px_rgba(0,0,0,0.12)] transition-[transform,opacity,filter] duration-500 ease-out motion-reduce:transition-none lg:-ml-[150px] lg:h-[402px] lg:w-[300px]"
+                style={cardStyle(d)}
+                onClick={d === 0 ? undefined : () => goToCard(index)}
               >
-                냥멍케어 자세히 알아보기
-              </button>
-            </FadeIn>
-          </div>
-        </div>
+                <img
+                  src={card.src}
+                  alt=""
+                  className="size-full object-cover object-top"
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/85 via-black/60 to-transparent px-5 pt-20 pb-6 text-white">
+                  <p className="text-[20px] font-bold lg:text-[22px]">
+                    {card.title}
+                  </p>
+                  <p className="mt-1.5 text-[13px] leading-snug break-keep opacity-90 lg:text-[14px]">
+                    {card.desc}
+                  </p>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
 
-        <div className="relative z-10 flex w-full items-center overflow-visible lg:w-[55%] xl:w-[58%]">
-          <div className="pointer-events-none absolute top-0 left-0 z-20 h-full w-16 bg-linear-to-r from-white to-transparent lg:w-40" />
-          <div className="relative w-full">
-            <ul
-              aria-label="냥멍케어 서비스"
-              className="flex w-max animate-[landing-marquee_65s_linear_infinite] gap-6 pt-10 pb-32 motion-reduce:animate-none lg:gap-8 lg:pt-40"
-              style={{ animationPlayState: isInView ? 'running' : 'paused' }}
-            >
-              {MARQUEE_CARDS.map((item, index) => (
-                <FadeIn
-                  as="li"
-                  key={index}
-                  delay={index < SERVICE_CARDS.length ? index * 150 : 0}
-                  className={`group relative h-[280px] w-[210px] shrink-0 overflow-hidden rounded-3xl shadow-md lg:h-[342px] lg:w-[255px] ${
-                    index % 2 === 1 ? 'mt-12 lg:mt-20' : ''
-                  }`}
-                >
-                  <img
-                    src={item.src}
-                    alt={item.title}
-                    className="size-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                </FadeIn>
-              ))}
-            </ul>
-          </div>
+        <div className="mt-8 flex items-center gap-2 md:mt-10">
+          {SERVICE_CARDS.map((card, index) => (
+            <button
+              key={card.title}
+              type="button"
+              aria-label={`${card.title} 보기`}
+              aria-current={index === active}
+              onClick={() => goToCard(index)}
+              className={`h-2 rounded-full transition-[width,background-color] duration-300 ${
+                index === active ? 'w-6 bg-brand-600' : 'w-2 bg-[#d5d8d6]'
+              }`}
+            />
+          ))}
         </div>
       </div>
     </section>

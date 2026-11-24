@@ -30,7 +30,7 @@ export default function ExpenseLoadMore({
     <p
       ref={sentinelRef}
       aria-live="polite"
-      className="flex min-h-9 items-center justify-center gap-2 text-sm text-subtle min-[761px]:hidden"
+      className="flex min-h-9 items-center justify-center gap-2 text-sm text-subtle min-[760px]:hidden"
     >
       {isEnd ? (
         '이번 달 내역을 모두 불러왔어요'
@@ -41,7 +41,7 @@ export default function ExpenseLoadMore({
             type="button"
             onClick={onRetry}
             aria-label="다시 불러오기"
-            className="grid size-8 place-items-center rounded-full border border-line bg-white text-ink"
+            className="grid size-11 place-items-center rounded-full border border-line bg-white text-ink"
           >
             <RefreshCw className="size-4" aria-hidden="true" />
           </button>

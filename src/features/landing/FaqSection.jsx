@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import FadeIn from './FadeIn';
+import SectionTitle from './SectionTitle';
 import { FAQS } from './landingData';
 
 function ToggleIcon({ isOpen }) {
@@ -51,8 +52,13 @@ export default function FaqSection() {
     <section
       id="features"
       ref={sectionRef}
-      className="relative flex w-full scroll-mt-20 flex-col items-center justify-center overflow-hidden bg-[#f7f7f4] py-24 lg:min-h-[640px] lg:py-32"
+      className="relative flex w-full scroll-mt-20 flex-col items-center justify-center overflow-hidden bg-white min-h-[calc(100dvh-5rem)] py-24 lg:min-h-[max(640px,calc(100dvh-5rem))] lg:py-32"
     >
+      <SectionTitle
+        label="FAQ"
+        title="자주 묻는 질문"
+        className="mb-12 px-4 lg:mb-16"
+      />
       <div className="flex w-full max-w-[800px] flex-col gap-4 px-4 lg:px-0">
         {FAQS.map((faq, index) => {
           const isOpen = openItems[index];
@@ -60,7 +66,7 @@ export default function FaqSection() {
             <FadeIn
               key={faq.question}
               delay={100 + index * 400}
-              className={`w-full rounded-[20px] bg-[#fdfcfb] ${
+              className={`w-full rounded-[20px] bg-white ${
                 isOpen ? 'border-2 border-[#2b5254]' : 'border border-[#c9d3d3]'
               }`}
             >

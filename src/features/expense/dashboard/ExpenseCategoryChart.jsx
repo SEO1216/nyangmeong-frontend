@@ -9,7 +9,7 @@ import { formatWon } from '../shared/expenseFormat';
 /** 조각 사이 흰 간격(%) */
 const GAP = 0.6;
 
-/** 누적 비율 conic-gradient. 조각마다 앞에 흰 간격을 둔다 */
+/** 누적 비율 conic-gradient. 조각마다 앞에 흰 간격 */
 const buildGradient = (stats) => {
   let acc = 0;
   const total = stats.reduce((sum, stat) => sum + stat.totalAmt, 0);
@@ -17,7 +17,7 @@ const buildGradient = (stats) => {
     const from = (acc / total) * 100;
     acc += stat.totalAmt;
     const to = (acc / total) * 100;
-    return `#fff ${from}% ${from + GAP}%, ${stat.color} ${from + GAP}% ${to}%`;
+    return `var(--color-white) ${from}% ${from + GAP}%, ${stat.color} ${from + GAP}% ${to}%`;
   });
   return `conic-gradient(${stops.join(', ')})`;
 };
@@ -51,7 +51,9 @@ export default function ExpenseCategoryChart({ stats }) {
                     style={{ background: stat.color }}
                   />
                   <span className="flex-1 text-ink-2">{stat.name}</span>
-                  <b className="font-semibold">{formatWon(stat.totalAmt)}</b>
+                  <b className="font-semibold tabular-nums">
+                    {formatWon(stat.totalAmt)}
+                  </b>
                   <em className="w-10 text-right text-subtle not-italic">
                     {stat.ratio}%
                   </em>

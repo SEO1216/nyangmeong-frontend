@@ -5,91 +5,49 @@ export const getMe = () => api.get('/auth/me', { skipAuthRedirect: true });
 
 export const logout = () => api.post('/auth/logout');
 
-/**
- * [회원정보 수정 가짜 API]
- * - 회원 조회·수정 API(AIC) 전까지 사용 -> 나오면 본문만 api 요청으로 교체
- * - 미확정 키: acntEml·mbrNcnm·mbrTelno·prflImgUrl·snsTyCd·dplctYn·mbrJoinPathCd·mbrRegDt·mbrLastLgnDt
- * - 주소에 ?fake=sns 가 있으면 소셜 로그인 회원으로 본다
- * - 비밀번호에 wrong 을 넣으면 실패, 닉네임 초코맘2·관리자와 번호 01099998888은 중복,
- *   번호 01000000000은 조회 실패
- */
-const FAKE_DELAY_MS = 200;
-const DUP_NICKNAMES = ['초코맘2', '관리자'];
-const DUP_PHONES = ['01099998888'];
-const FAIL_PHONE = '01000000000';
+/** 응답 { acntEml, mbrNcnm, mblTelno, atchFileSn, joinPathCd, snsAcntLinks, joinDt, lastLgnDt } */
+export const getMyProfile = () => api.get('/members/me');
 
-const profile = {
-  acntEml: 'chocomom@example.com',
-  mbrNcnm: '초코맘',
-  mbrTelno: '01012345678',
-  prflImgUrl: null,
-  mbrRegDt: '2026-08-14 09:12:00',
-  mbrLastLgnDt: '2026-10-21 10:42:00',
-};
-
-const isFakeSns = () =>
-  new URLSearchParams(window.location.search).get('fake') === 'sns';
-
-const wait = (result) =>
-  new Promise((resolve) => setTimeout(() => resolve(result), FAKE_DELAY_MS));
-
-const fail = (code) =>
-  wait().then(() => {
-    throw Object.assign(new Error(code), { code });
-  });
-
-export const getMyProfile = () =>
-  wait({
-    ...profile,
-    snsTyCd: isFakeSns() ? 'KAKAO' : null,
-    mbrJoinPathCd: isFakeSns() ? 'KAKAO' : 'EMAIL',
-  });
-
+/** 본인 확인. 틀리면 CURRENT_PASSWORD_MISMATCH, SNS 전용 회원은 SNS_ONLY_MEMBER */
 export const verifyPassword = ({ pswd }) =>
-  pswd === 'wrong' ? fail('MISMATCH') : wait();
+  api.post('/members/me/password-verification', { pswd });
 
+/**
+ * 프로필 사진 변경: multipart. file이 있으면 profilePhoto, 없으면 기본 이미지(profilePhotoReset)
+ * 오류: FILE_TYPE_NOT_ALLOWED · FILE_TOO_LARGE
+ */
 export const updateProfileImage = ({ file }) => {
-  profile.prflImgUrl = file ? URL.createObjectURL(file) : null;
-  return wait({ prflImgUrl: profile.prflImgUrl });
+  const form = new FormData();
+  if (file) form.append('profilePhoto', file);
+  else form.append('profilePhotoReset', 'true');
+  return api.patch('/members/me', form);
 };
 
-export const checkNickname = ({ mbrNcnm }) =>
-  wait({ dplctYn: DUP_NICKNAMES.includes(mbrNcnm) });
-
-export const updateNickname = ({ mbrNcnm }) => {
-  if (DUP_NICKNAMES.includes(mbrNcnm)) return fail('DUPLICATE');
-  profile.mbrNcnm = mbrNcnm;
-  return wait();
+/** 휴대폰 번호 변경: multipart. 오류: PHONE_ALREADY_USED · INVALID_PHONE_NUMBER */
+export const updatePhone = ({ mblTelno }) => {
+  const form = new FormData();
+  form.append('mblTelno', mblTelno);
+  return api.patch('/members/me', form);
 };
 
-export const checkPhone = ({ mbrTelno }) =>
-  mbrTelno === FAIL_PHONE
-    ? fail('FAILED')
-    : wait({ dplctYn: DUP_PHONES.includes(mbrTelno) });
+/** 오류: CURRENT_PASSWORD_MISMATCH · PASSWORD_MISMATCH · INVALID_INPUT_VALUE(fields에 pswd) */
+export const updatePassword = ({ currentPswd, pswd, pswdCnfrm }) =>
+  api.patch('/members/me/password', { currentPswd, pswd, pswdCnfrm });
 
-export const updatePhone = ({ mbrTelno }) => {
-  if (DUP_PHONES.includes(mbrTelno)) return fail('DUPLICATE');
-  profile.mbrTelno = mbrTelno;
-  return wait();
-};
-
-export const updatePassword = ({ curPswd }) =>
-  curPswd === 'wrong' ? fail('MISMATCH') : wait();
-
-/** 실패 횟수·보안코드 요구 상태. 기록 없는 아이디도 false·0이라 가입 여부를 드러내지 않는다 */
+/** 실패 횟수·보안코드 요구 상태. 기록 없는 아이디도 false·0이라 가입 여부 비노출 */
 export const getLoginStatus = ({ acntEml }) =>
   api.get('/auth/login-attempt-limits', {
     params: { email: acntEml },
     skipAuthRedirect: true,
   });
 
-/** 보안코드 발급·새로고침. captchaImg는 PNG data URI이고 코드 원문은 오지 않는다 */
+/** 보안코드 발급·새로고침. captchaImg는 PNG data URI, 코드 원문은 응답에 없음 */
 export const getCaptcha = ({ acntEml }) =>
   api.post('/auth/captchas', { acntEml }, { skipAuthRedirect: true });
 
 /**
- * 성공은 { ncnmReguide, mbrNcnm }, 실패는 code로 거부된다
- * - 정지 회원(MEMBER_INACTIVE)도 이 화면에서 안내하므로 랜딩 이동을 끈다
+ * 성공은 { ncnmReguide, mbrNcnm }, 실패는 code로 거부
+ * - 정지 회원(MEMBER_INACTIVE)도 이 화면에서 안내하므로 랜딩 이동 끔
  */
 export const login = ({ acntEml, pswd, scrtyCd }) =>
   api.post(
@@ -99,95 +57,193 @@ export const login = ({ acntEml, pswd, scrtyCd }) =>
   );
 
 /**
- * [비밀번호 찾기·재설정 가짜 API]
- * - 인증·재설정 API(YAY 백엔드) 전까지 사용 -> 나오면 본문만 api 요청으로 교체
- * - 미확정 키: acntEml·authCd·expiresAt·snsTyCd·pswd, 인증 결과와 실패를 응답 본문으로 줄지 오류 응답으로 줄지
- * - 인증번호 123456은 일반 계정, 234567은 SNS 전용(카카오), 345678은 미가입, 456789는 탈퇴 계정, 그 외는 불일치
- * - 이메일 fail@example.com은 발송 실패, 새 비밀번호에 fail이 들어가면 저장 실패
- * - 유효시간 3분은 가짜에서만 쓴다(운영값 미확정). 본인확인 완료 상태는 새로고침하면 사라진다
+ * SNS 로그인. snsLoginRslt로 갈린다
+ * - LOGIN { ncnmReguide, mbrNcnm }: 로그인 쿠키가 심긴다
+ * - SIGNUP_REQUIRED { snsOffrCd, acntEml, mblTelno, ageCnfrmd, signupTkn }: SNS 가입 확인으로
+ * - EMAIL_DUPLICATE·RECOVERY_AVAILABLE { acntEml }
+ * - 오류: SNS_AUTH_FAILED · SNS_EMAIL_NOT_PROVIDED · MEMBER_INACTIVE(이 화면에서 안내하므로 이동 끔)
  */
-const RECOVERY_TTL_MS = 3 * 60 * 1000;
-const RECOVERY_CODES = {
-  123456: 'RESET',
-  234567: 'SNS',
-  345678: 'NOT_FOUND',
-  456789: 'WITHDRAWN',
-};
+export const snsLogin = ({ snsOffrCd, code, state }) =>
+  api.post(
+    '/auth/sns-login',
+    { snsOffrCd, code, state },
+    { skipAuthRedirect: true },
+  );
 
-let recovery = { acntEml: '', expiresAt: 0, verified: false };
+/** 제공자 코드(snsOffrCd) 중 네이버. 서버가 state를 요구하는 제공자 */
+const NAVER = 'USRC0007';
 
-export const sendRecoveryCode = ({ acntEml }) => {
-  if (acntEml === 'fail@example.com') return fail('SEND_FAILED');
-  recovery = {
-    acntEml,
-    expiresAt: Date.now() + RECOVERY_TTL_MS,
-    verified: false,
-  };
-  return wait({ expiresAt: recovery.expiresAt });
-};
+/** SNS 계정 연동(로그인 필요). 요청 { snsOffrCd, code, state }, state는 네이버만 필수. 응답·오류 형식은 서버(YAY) 확정 전 */
+export const linkSns = ({ snsOffrCd, code, state }) =>
+  api.post('/members/me/sns-links', {
+    snsOffrCd,
+    code,
+    ...(snsOffrCd === NAVER && { state }),
+  });
 
-/** 결과는 RESET·SNS·NOT_FOUND·WITHDRAWN·MISMATCH·EXPIRED 중 하나 */
-export const verifyRecoveryCode = ({ acntEml, authCd }) => {
-  if (acntEml !== recovery.acntEml || Date.now() > recovery.expiresAt) {
-    return wait({ result: 'EXPIRED' });
-  }
-  const result = RECOVERY_CODES[authCd] ?? 'MISMATCH';
-  if (result === 'RESET') recovery.verified = true;
-  return wait(result === 'SNS' ? { result, snsTyCd: 'KAKAO' } : { result });
-};
+/** 이메일 인증번호 목적 코드(공통코드 USRG04): 비밀번호 찾기 */
+const PASSWORD_RESET_PURPOSE = 'USRC0011';
 
-export const getRecoveryStatus = () => wait({ verified: recovery.verified });
+/** 인증번호 발송·재전송. 응답 { emlCertSn, certExpryDt }, 재전송 제한은 EMAIL_CERT_RESEND_NOT_YET(error.data.resendAvailableDt) */
+export const sendRecoveryCode = ({ certTrgtEml }) =>
+  api.post(
+    '/email-certifications',
+    { emlCertPrpsCd: PASSWORD_RESET_PURPOSE, certTrgtEml },
+    { skipAuthRedirect: true },
+  );
 
-/** 성공이면 { ok: true }, 실패면 { ok: false, reason: 'EXPIRED' | 'FAILED' } */
-export const resetPassword = ({ pswd }) => {
-  if (!recovery.verified) return wait({ ok: false, reason: 'EXPIRED' });
-  if (pswd.includes('fail')) return wait({ ok: false, reason: 'FAILED' });
-  recovery = { acntEml: '', expiresAt: 0, verified: false };
-  return wait({ ok: true });
-};
+/** 인증번호 확인. 응답의 certRslt로 재설정 대상·SNS 전용·미가입·탈퇴 보관 구분 */
+export const verifyRecoveryCode = ({ emlCertSn, certNo }) =>
+  api.post(
+    `/email-certifications/${emlCertSn}/verify`,
+    { certNo },
+    { skipAuthRedirect: true },
+  );
+
+/** 인증번호·재설정 권한 무효화(이메일을 다시 입력할 때) */
+export const invalidateRecoveryCode = ({ emlCertSn, certTrgtEml }) =>
+  api.post(
+    `/email-certifications/${emlCertSn}/invalidate`,
+    { certTrgtEml },
+    { skipAuthRedirect: true },
+  );
 
 /**
- * [회원가입 가짜 API]
- * - 가입·인증·중복확인 API(YAY 백엔드) 전까지 사용 -> 나오면 본문만 api 요청으로 교체
- * - 미확정 키: acntEml·authCd·expiresAt·mbrTelno·pswd·termsAgreeList·mbrNcnm, 중복·복구 대상 결과를 응답 본문으로 줄지 오류 응답으로 줄지
- * - 이메일 duplicate@example.com은 가입된 이메일, restore@example.com은 탈퇴 후 30일 이내 계정, fail@example.com은 발송 실패
- * - 인증번호 123456은 성공, 그 외는 불일치. 번호 01012345678은 중복, 01000000000은 조회 실패
- * - 비밀번호에 fail이 들어가면 가입 실패. 기본 닉네임은 가짜에서 고정값을 준다
- * - 유효시간 3분은 가짜에서만 쓴다(운영값 미확정)
+ * 재가입 복구(탈퇴 후 보관 기간 안의 회원) API. 로그인 전에 부르는 요청이라 모두 skipAuthRedirect.
+ * 인증번호 확인(verifyRecoveryCode)·무효화(invalidateRecoveryCode)는 목적과 상관없이 같은 엔드포인트를 쓴다
  */
-const SIGNUP_CODE = '123456';
-const SIGNUP_TTL_MS = 3 * 60 * 1000;
-const SIGNUP_DUP_EMAIL = 'duplicate@example.com';
-const SIGNUP_RESTORE_EMAIL = 'restore@example.com';
-const SIGNUP_DUP_PHONE = '01012345678';
+const MEMBER_RECOVERY_PURPOSE = 'USRC0012';
 
-let signup = { acntEml: '', expiresAt: 0 };
+/** 복구 인증번호 발송·재전송. 응답·오류는 비밀번호 찾기와 같다 */
+export const sendMemberRecoveryCode = ({ certTrgtEml }) =>
+  api.post(
+    '/email-certifications',
+    { emlCertPrpsCd: MEMBER_RECOVERY_PURPOSE, certTrgtEml },
+    { skipAuthRedirect: true },
+  );
 
-/** 결과는 OK·DUPLICATE·RESTORE 중 하나. OK이면 expiresAt을 함께 준다 */
-export const sendSignupCode = ({ acntEml }) => {
-  if (acntEml === 'fail@example.com') return fail('SEND_FAILED');
-  if (acntEml === SIGNUP_DUP_EMAIL) return wait({ result: 'DUPLICATE' });
-  if (acntEml === SIGNUP_RESTORE_EMAIL) return wait({ result: 'RESTORE' });
-  signup = { acntEml, expiresAt: Date.now() + SIGNUP_TTL_MS };
-  return wait({ result: 'OK', expiresAt: signup.expiresAt });
-};
+/** 복구 안내. 응답 { acntEml, mbrNcnm, whdwlDt, rcvryExpryDt, maskedMblTelno, missingTrms } */
+export const getRecoveryInfo = ({ emlCertSn, rcvryAuthrtTkn }) =>
+  api.post(
+    '/members/recovery-info',
+    { emlCertSn, rcvryAuthrtTkn },
+    { skipAuthRedirect: true },
+  );
 
-/** 결과는 OK·MISMATCH·EXPIRED 중 하나 */
-export const verifySignupCode = ({ acntEml, authCd }) => {
-  if (acntEml !== signup.acntEml || Date.now() > signup.expiresAt) {
-    return wait({ result: 'EXPIRED' });
-  }
-  return wait({ result: authCd === SIGNUP_CODE ? 'OK' : 'MISMATCH' });
-};
+/** 복구 실행. 성공해도 로그인 쿠키는 만들어지지 않는다 */
+export const recoverMember = ({
+  emlCertSn,
+  rcvryAuthrtTkn,
+  trmsAgres,
+  mblTelno,
+}) =>
+  api.post(
+    '/members/recovery',
+    { emlCertSn, rcvryAuthrtTkn, trmsAgres, mblTelno },
+    { skipAuthRedirect: true },
+  );
 
-export const checkSignupPhone = ({ mbrTelno }) =>
-  mbrTelno === FAIL_PHONE
-    ? fail('FAILED')
-    : wait({ dplctYn: mbrTelno === SIGNUP_DUP_PHONE });
+/** 휴대전화번호 정규화·중복확인(가입·복구 공용). 응답 { normalizedMblTelno, available } */
+export const checkPhoneAvailability = ({ mblTelno }) =>
+  api.get('/members/phone-availability', {
+    params: { mblTelno },
+    skipAuthRedirect: true,
+  });
 
-/** 성공이면 { ok: true, mbrNcnm }, 실패면 { ok: false, reason: 'FAILED' } */
-export const joinMember = ({ pswd }) => {
-  if (pswd.includes('fail')) return wait({ ok: false, reason: 'FAILED' });
-  signup = { acntEml: '', expiresAt: 0 };
-  return wait({ ok: true, mbrNcnm: '행복한집사4821' });
-};
+/** 사용 중인 약관 목록(가입 약관 동의). 응답 [{ trmsSn, trmsFixIdntfKey, trmsTtl, esntlAgreYn, sortSeq }] */
+export const getTermsList = () => api.get('/terms', { skipAuthRedirect: true });
+
+/** 약관 전문 */
+export const getTerms = (trmsSn) =>
+  api.get(`/terms/${trmsSn}`, { skipAuthRedirect: true });
+
+/**
+ * 비밀번호 재설정. 성공 200은 데이터 없음(자동 로그인 없음, 그 계정의 기존 로그인은 모두 종료).
+ * 실패: 400 PASSWORD_RESET_NOT_AVAILABLE(만료·사용 완료·무효화), PASSWORD_MISMATCH, INVALID_INPUT_VALUE(error.fields)
+ */
+export const resetPassword = ({ emlCertSn, pswdInitTkn, pswd, pswdCnfrm }) =>
+  api.post(
+    `/email-certifications/${emlCertSn}/password-reset`,
+    { pswdInitTkn, pswd, pswdCnfrm },
+    { skipAuthRedirect: true },
+  );
+
+/** 이메일 인증번호 목적 코드(공통코드 USRG04): 회원가입 */
+const SIGNUP_PURPOSE = 'USRC0010';
+
+/** 가입 인증번호 발송·재전송. 응답·오류는 비밀번호 찾기와 같고, 이미 가입은 409 EMAIL_ALREADY_REGISTERED, 탈퇴 보관 이메일은 409 MEMBER_RECOVERY_AVAILABLE */
+export const sendSignupCode = ({ certTrgtEml }) =>
+  api.post(
+    '/email-certifications',
+    { emlCertPrpsCd: SIGNUP_PURPOSE, certTrgtEml },
+    { skipAuthRedirect: true },
+  );
+
+/** 가입 이메일 인증 확인. 성공이면 certRslt가 SIGNUP_READY */
+export const verifySignupCode = verifyRecoveryCode;
+
+/** 이메일 가입 */
+const JOIN_PATH_EMAIL = 'USRC0006';
+
+/** 가입. 응답 { mbrNcnm, … }, 닉네임 설정용 쿠키(ncnm_setup)가 심기고 로그인은 되지 않는다 */
+export const joinMember = ({
+  emlCertSn,
+  certNo,
+  mblTelno,
+  pswd,
+  trmsAgres,
+  idmptDmndId,
+}) =>
+  api.post(
+    '/members',
+    {
+      joinPathCd: JOIN_PATH_EMAIL,
+      emlCertSn,
+      certNo,
+      mblTelno,
+      pswd,
+      pswdCnfrm: pswd,
+      trmsAgres,
+      idmptDmndId,
+    },
+    { skipAuthRedirect: true },
+  );
+
+/**
+ * SNS 가입. 가입경로는 제공자 코드, 비밀번호·이메일 인증 없이 signupTkn으로 가입한다
+ * 응답·쿠키는 이메일 가입과 같다. 오류: SNS_SIGNUP_TOKEN_INVALID(만료) · SNS_ACCOUNT_ALREADY_LINKED · PHONE_ALREADY_USED
+ */
+export const joinSnsMember = ({
+  snsOffrCd,
+  signupTkn,
+  mblTelno,
+  trmsAgres,
+  idmptDmndId,
+}) =>
+  api.post(
+    '/members',
+    { joinPathCd: snsOffrCd, signupTkn, mblTelno, trmsAgres, idmptDmndId },
+    { skipAuthRedirect: true },
+  );
+
+/** 닉네임 형식·중복 확인. 응답 { available } */
+export const checkNicknameAvailability = ({ mbrNcnm }) =>
+  api.get('/members/nickname-availability', {
+    params: { mbrNcnm },
+    skipAuthRedirect: true,
+  });
+
+/** 가입 직후(ncnm_setup 쿠키)나 로그인 뒤 닉네임 확정. 기본 닉네임을 그대로 둘 때도 보낸다 */
+export const setupNickname = ({ mbrNcnm }) =>
+  api.patch('/members/me/nickname', { mbrNcnm }, { skipAuthRedirect: true });
+
+/**
+ * 회원탈퇴. 문구는 입력 그대로(trim 하지 않음) 보낸다.
+ * 응답이 오지 않으면 결과를 확인해야 하므로 시간 제한을 둔다(timeout은 NETWORK_ERROR로 온다)
+ */
+export const withdrawMember = ({ confirmPhrase }) =>
+  api.post(
+    '/members/me/withdraw',
+    { noticeConfirmed: true, confirmPhrase },
+    { timeout: 15000 },
+  );

@@ -2,109 +2,134 @@
  * [채팅방]
  * - 상단 바, 거래 카드, 대화(텍스트·사진·주소·시스템 안내), 입력 (FN-COM-009-20, FN-CMU-005-01·04)
  * - 창이 보일 때 표시된 마지막 메시지까지 읽음 처리 (FN-COM-009-14·16)
+ * - 맨 위로 올리면 이전 30건을 이어 붙이고 보던 자리 유지
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import Avatar from '@/components/Avatar';
+import FileImage from '@/components/FileImage';
 import Icon from '@/components/Icon';
 import Modal from '@/components/Modal';
 import Skeleton from '@/components/Skeleton';
 import { BTN_DANGER, BTN_SECONDARY } from '@/components/buttonStyles';
+import { publicFileUrl } from '@/utils/fileUrl';
 import {
+  useChatImage,
   useChatMessages,
   useChatRoom,
   useLeaveChatRoom,
   useReadChatRoom,
+  useViewingChatRoom,
 } from '../queries';
-import { MSG_TYPE, SYS_TONE } from '../shared/chatCodes';
+import {
+  MSG_TYPE,
+  ROOM_STTS,
+  getDealCancelState,
+  isEndedRoom,
+} from '../shared/chatCodes';
+import AddressMessage from './AddressMessage';
 import CareDealCard from './CareDealCard';
-import ChatAvatar from './ChatAvatar';
 import ChatMessageInput from './ChatMessageInput';
+import DealCancelModal from './DealCancelModal';
 import ChatRoomHeader from './ChatRoomHeader';
-import FakePeerTools from './FakePeerTools';
+import PhotoViewer from './PhotoViewer';
 import { getLeaveText } from './dealSteps';
 
 const BUBBLE_BASE =
-  'whitespace-pre-line break-words border px-3.5 py-2 leading-[1.55]';
+  'whitespace-pre-line break-words border px-3.5 py-[7px] text-sm leading-[1.55]';
 const BUBBLE_PEER = `${BUBBLE_BASE} rounded-[4px_18px_18px_18px] border-line bg-white text-ink`;
 const BUBBLE_MINE = `${BUBBLE_BASE} rounded-[18px_4px_18px_18px] border-brand-500 bg-brand-500 text-white`;
 
-/** 보낸 시각(msgDt)이 있을 때만 "14:20" */
+/** 보낸 시각 "14:20" */
 const MessageTime = ({ message }) =>
-  message.msgDt ? (
+  message.regDt ? (
     <time className="shrink-0 text-xs text-placeholder tabular-nums">
-      {message.msgDt.slice(11, 16)}
+      {message.regDt.slice(11, 16)}
     </time>
   ) : null;
 
+/** 거래 단계 안내(요청·수락·완료 등). 서버가 강조 구분을 주지 않아 한 모양 */
 function SystemNotice({ message }) {
-  const isEnd = message.sysToneCd === SYS_TONE.END;
-  const isKey = message.sysToneCd === SYS_TONE.KEY;
-  let icon = 'check';
-  if (isEnd) icon = 'info';
-  if (isKey) icon = 'check_circle';
-
   return (
     <li className="my-3 flex justify-center">
-      <span
-        className={`inline-flex max-w-[88%] items-center gap-1.5 text-center text-sm leading-normal ${
-          isKey ? 'font-bold text-[#2f6f57]' : 'text-muted'
-        }`}
-      >
-        <Icon
-          name={icon}
-          filled={isKey}
-          className={`text-lg ${isKey ? 'text-xl text-[#2f6f57]' : 'text-subtle'}`}
-        />
+      <span className="inline-flex max-w-[88%] items-center gap-1.5 text-center text-sm leading-normal text-muted">
+        <Icon name="info" className="text-lg text-subtle" />
         {message.msgCn}
       </span>
     </li>
   );
 }
 
-function MessageBody({ message }) {
+/** 비공개 채팅 사진: 참여자 쿠키로 받아 그린다 */
+/** isGrid: 여러 장을 묶은 격자 칸(정사각형, 칸 폭에 맞춤). 아니면 한 장짜리 큰 사진 */
+function ChatPhoto({ otoChatRoomSn, atchFileSn, onOpen, isGrid = false }) {
+  const { src, isPending } = useChatImage(otoChatRoomSn, atchFileSn);
+
+  return (
+    <button
+      type="button"
+      aria-label="사진 크게 보기"
+      className={`block cursor-zoom-in ${isGrid ? 'w-full' : ''}`}
+      onClick={() => onOpen(atchFileSn)}
+    >
+      <FileImage
+        src={src}
+        pending={isPending}
+        alt="보낸 사진"
+        className={
+          isGrid
+            ? 'aspect-square w-full rounded-[10px] border border-line object-cover'
+            : 'aspect-[4/3] w-[200px] rounded-[14px] border border-line object-cover'
+        }
+      />
+    </button>
+  );
+}
+
+function MessageBody({ message, otoChatRoomSn, onOpenPhoto }) {
   if (message.msgTypeCd === MSG_TYPE.IMAGE) {
+    const { photos } = message;
+    /** 2장 이상은 폭이 정해진 한 덩어리 격자(2장·4장은 2칸, 그 밖은 3칸)라 오른쪽 끝이 한 장짜리와 맞는다 */
+    const isGrid = photos.length > 1;
+    const columns =
+      photos.length === 2 || photos.length === 4
+        ? 'grid-cols-2'
+        : 'grid-cols-3';
     return (
-      <span className="flex flex-wrap gap-1.5">
-        {message.photos.map((photo) => (
-          <img
+      <span
+        className={
+          isGrid ? `grid w-[220px] max-w-full gap-1 ${columns}` : 'block'
+        }
+      >
+        {photos.map((photo) => (
+          <ChatPhoto
             key={photo.atchFileSn}
-            src={photo.url}
-            alt="보낸 사진"
-            className="aspect-[4/3] w-[200px] rounded-[14px] border border-line object-cover"
+            otoChatRoomSn={otoChatRoomSn}
+            atchFileSn={photo.atchFileSn}
+            onOpen={onOpenPhoto}
+            isGrid={isGrid}
           />
         ))}
       </span>
     );
   }
   if (message.msgTypeCd === MSG_TYPE.ADDRESS) {
-    return (
-      <span
-        className={`flex min-w-[200px] flex-col gap-0.5 ${
-          message.mine ? BUBBLE_MINE : BUBBLE_PEER
-        }`}
-      >
-        <b className="flex items-center gap-1 text-sm">
-          <Icon name="location_on" className="text-base" />
-          주소 공유
-        </b>
-        {message.shrnAddr}
-        {message.msgCn && <span>{message.msgCn}</span>}
-      </span>
-    );
+    return <AddressMessage message={message} />;
   }
   return (
     <span className={message.mine ? BUBBLE_MINE : BUBBLE_PEER}>
-      {message.tagCn && (
-        <span className="mb-1 flex items-center gap-1 text-sm font-bold">
-          <Icon name="block" className="text-base" />
-          {message.tagCn}
-        </span>
-      )}
       {message.msgCn}
     </span>
   );
 }
 
-function MessageItem({ message, isContinued, ctptMbrNcnm }) {
+function MessageItem({
+  message,
+  isContinued,
+  ctptMbrNcnm,
+  ctptProfileAtchFileSn,
+  otoChatRoomSn,
+  onOpenPhoto,
+}) {
   if (message.msgTypeCd === MSG_TYPE.SYSTEM) {
     return <SystemNotice message={message} />;
   }
@@ -118,7 +143,10 @@ function MessageItem({ message, isContinued, ctptMbrNcnm }) {
       {message.mine && <MessageTime message={message} />}
       {!message.mine && (
         <span className={`self-start ${isContinued ? 'invisible' : ''}`}>
-          <ChatAvatar name={ctptMbrNcnm} size="sm" />
+          <Avatar
+            src={publicFileUrl(ctptProfileAtchFileSn)}
+            className="size-8"
+          />
         </span>
       )}
       <div
@@ -129,7 +157,11 @@ function MessageItem({ message, isContinued, ctptMbrNcnm }) {
         {!message.mine && !isContinued && (
           <span className="text-sm text-subtle">{ctptMbrNcnm}</span>
         )}
-        <MessageBody message={message} />
+        <MessageBody
+          message={message}
+          otoChatRoomSn={otoChatRoomSn}
+          onOpenPhoto={onOpenPhoto}
+        />
       </div>
       {!message.mine && <MessageTime message={message} />}
     </li>
@@ -139,6 +171,9 @@ function MessageItem({ message, isContinued, ctptMbrNcnm }) {
 /** 채팅 목록으로 돌아가며 onBack(없으면 ‹ 없음: 목록이 옆에 있는 두 칸), 나가기 끝나면 onLeft */
 export default function ChatConversation({ otoChatRoomSn, onBack, onLeft }) {
   const [isLeaveOpen, setIsLeaveOpen] = useState(false);
+  const [isCancelOpen, setIsCancelOpen] = useState(false);
+  /** 사진 보기에서 처음 보여 줄 사진(없으면 닫힘) */
+  const [viewerPhotoSn, setViewerPhotoSn] = useState(null);
   const {
     data: room,
     isError: isRoomError,
@@ -151,18 +186,36 @@ export default function ChatConversation({ otoChatRoomSn, onBack, onLeft }) {
     isError,
     error,
     refetch,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
   } = useChatMessages(otoChatRoomSn);
+  useViewingChatRoom(otoChatRoomSn);
   const { mutate: readChatRoom } = useReadChatRoom();
   const { mutate: leaveRoom, isPending: isLeaving } =
     useLeaveChatRoom(otoChatRoomSn);
   const listRef = useRef(null);
+  /** 이전 메시지를 받기 직전의 스크롤 { height, top }: 받은 뒤 보던 자리로 */
+  const restoreRef = useRef(null);
   const lastMsgSeq = messages?.at(-1)?.msgSeq;
 
-  /** 마지막 메시지가 보이도록 맨 아래로 */
-  useEffect(() => {
+  /** 이전 메시지를 붙였으면 보던 자리, 그 밖에는 마지막 메시지가 보이도록 맨 아래 */
+  useLayoutEffect(() => {
     const list = listRef.current;
-    if (list) list.scrollTop = list.scrollHeight;
+    if (!list) return;
+    const restore = restoreRef.current;
+    restoreRef.current = null;
+    list.scrollTop = restore
+      ? list.scrollHeight - restore.height + restore.top
+      : list.scrollHeight;
   }, [messages]);
+
+  const handleScroll = (event) => {
+    const list = event.currentTarget;
+    if (list.scrollTop > 80 || !hasNextPage || isFetchingNextPage) return;
+    restoreRef.current = { height: list.scrollHeight, top: list.scrollTop };
+    fetchNextPage();
+  };
 
   /** 창이 보일 때만 읽음 처리: 다른 탭에 가려진 동안 도착한 메시지 제외 */
   useEffect(() => {
@@ -189,7 +242,7 @@ export default function ChatConversation({ otoChatRoomSn, onBack, onLeft }) {
               className="grid size-11 place-items-center rounded-full text-ink-2 hover:bg-surface-3"
               onClick={onBack}
             >
-              <Icon name="chevron_left" className="text-[26px]" />
+              <Icon name="chevron_left" className="text-2xl" />
             </button>
           </div>
         )}
@@ -210,7 +263,12 @@ export default function ChatConversation({ otoChatRoomSn, onBack, onLeft }) {
   const [leaveTitle, leaveDescription] = room
     ? getLeaveText(room.mtchDlngSttsCd)
     : [];
-  const isClosed = room && room.chatRoomSttsCd !== 'OPEN';
+  /** 끝난 방(상대가 나감·무응답 종료)은 대화를 막는다 */
+  const isClosed = room && isEndedRoom(room);
+  /** 사진 보기에서 넘겨 볼 방의 모든 사진(시간 순, 지금까지 불러온 것) */
+  const roomPhotos = (messages ?? []).flatMap((message) =>
+    message.msgTypeCd === MSG_TYPE.IMAGE ? message.photos : [],
+  );
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -220,9 +278,12 @@ export default function ChatConversation({ otoChatRoomSn, onBack, onLeft }) {
             room={room}
             onBack={onBack}
             onLeaveAsk={() => setIsLeaveOpen(true)}
+            onCancelAsk={() => setIsCancelOpen(true)}
           />
-          <CareDealCard key={room.mtchDlngSttsCd} room={room} />
-          <FakePeerTools otoChatRoomSn={otoChatRoomSn} />
+          <CareDealCard
+            key={`${room.mtchDlngSttsCd}-${getDealCancelState(room)}`}
+            room={room}
+          />
         </>
       )}
 
@@ -231,8 +292,14 @@ export default function ChatConversation({ otoChatRoomSn, onBack, onLeft }) {
         role="log"
         aria-live="polite"
         aria-label="대화 내용"
-        className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[#fdfcfb] px-4 pt-4 pb-2"
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-page-bg px-4 pt-4 pb-2"
+        onScroll={handleScroll}
       >
+        {isFetchingNextPage && (
+          <div aria-busy="true" className="mb-3 flex justify-center">
+            <Skeleton className="h-8 w-2/5 rounded-2xl" />
+          </div>
+        )}
         {isPending && (
           <div aria-busy="true" className="flex flex-col gap-3">
             <Skeleton className="h-10 w-1/2 rounded-2xl" />
@@ -271,6 +338,9 @@ export default function ChatConversation({ otoChatRoomSn, onBack, onLeft }) {
                   message={message}
                   isContinued={isContinued}
                   ctptMbrNcnm={room?.ctptMbrNcnm}
+                  ctptProfileAtchFileSn={room?.ctptProfileAtchFileSn}
+                  otoChatRoomSn={otoChatRoomSn}
+                  onOpenPhoto={setViewerPhotoSn}
                 />
               );
             })}
@@ -278,18 +348,29 @@ export default function ChatConversation({ otoChatRoomSn, onBack, onLeft }) {
         )}
       </div>
 
-      {isClosed && (
-        <p className="flex h-11 shrink-0 items-center justify-center gap-1.5 border-t border-line text-sm text-subtle">
-          <Icon name="lock" className="text-lg" />
-          상대방이 나간 채팅방이에요 · 메시지를 보낼 수 없어요
-        </p>
-      )}
-      {room && !isClosed && !isError && (
+      {room && !isError && (
         <ChatMessageInput
           otoChatRoomSn={otoChatRoomSn}
           stage={room.mtchDlngSttsCd}
           ctptMbrNcnm={room.ctptMbrNcnm}
+          isDisabled={isClosed}
         />
+      )}
+
+      {viewerPhotoSn !== null && (
+        <PhotoViewer
+          photos={roomPhotos}
+          startIndex={Math.max(
+            roomPhotos.findIndex((photo) => photo.atchFileSn === viewerPhotoSn),
+            0,
+          )}
+          otoChatRoomSn={otoChatRoomSn}
+          onClose={() => setViewerPhotoSn(null)}
+        />
+      )}
+
+      {isCancelOpen && room && (
+        <DealCancelModal room={room} onClose={() => setIsCancelOpen(false)} />
       )}
 
       {isLeaveOpen && (

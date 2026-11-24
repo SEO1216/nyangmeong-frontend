@@ -1,11 +1,11 @@
-/** 번호 원 + 제목 + 설명이 이어지는 안내 목록(실종 Check 가이드 등) */
+/** 번호 원 + 제목 + 설명이 이어지는 안내 목록(실종 체크 가이드 등) */
 export default function CheckList({ items }) {
   return (
     <ol>
       {items.map(([title, description], index) => (
         <li
           key={title}
-          className="grid grid-cols-[28px_minmax(0,1fr)] gap-x-2.5 gap-y-0.5 border-t border-line py-3.5 first:border-t-0 first:pt-1"
+          className="grid grid-cols-[28px_minmax(0,1fr)] gap-x-3 gap-y-1 border-t border-line py-3 first:border-t-0"
         >
           <span
             aria-hidden="true"
@@ -13,8 +13,8 @@ export default function CheckList({ items }) {
           >
             {index + 1}
           </span>
-          <b className="font-semibold text-ink">{title}</b>
-          <p className="text-sm leading-[1.6] text-muted">{description}</p>
+          <b className="text-base font-semibold text-ink">{title}</b>
+          <p className="text-sm leading-normal text-muted">{description}</p>
         </li>
       ))}
     </ol>

@@ -1,3 +1,4 @@
+import { BADGE_COLORS, TONE_CLASSES } from '@/constants/calendarBadge';
 import { getYmdOf } from '@/utils/formatDate';
 
 // 코드값은 백엔드 공통코드(일정 종류 HLTG19, 검진유형 HLTG01)
@@ -11,34 +12,17 @@ export const SCHEDULE_TYPES = [
 ];
 
 export const CHECKUP_TYPES = [
-  { cd: 'HLTC0001', nm: '정기검진', icon: 'calendar_month', color: '#8b5cf6' },
-  { cd: 'HLTC0002', nm: '예방접종', icon: 'vaccines', color: '#22a06b' },
-  { cd: 'HLTC0003', nm: '질병진료', icon: 'local_hospital', color: '#e05a8c' },
-  { cd: 'HLTC0004', nm: '검사', icon: 'monitor_heart', color: '#3b82f6' },
-  { cd: 'HLTC0005', nm: '기타 진료', icon: 'local_hospital', color: '#8a9596' },
+  { cd: 'HLTC0001', nm: '정기검진', icon: 'calendar_month', tone: 'violet' },
+  { cd: 'HLTC0002', nm: '예방접종', icon: 'vaccines', tone: 'green' },
+  { cd: 'HLTC0003', nm: '질병진료', icon: 'local_hospital', tone: 'rose' },
+  { cd: 'HLTC0004', nm: '검사', icon: 'monitor_heart', tone: 'blue' },
+  { cd: 'HLTC0005', nm: '기타 진료', icon: 'local_hospital', tone: 'gray' },
 ];
 
-export const DEFAULT_SCHEDULE_COLOR = '#8a9596';
+const DEFAULT_TONE = 'gray';
 
-// 일정 모달에서 고를 수 있는 뱃지 색상
-export const BADGE_COLORS = [
-  '#3b82f6',
-  '#22a06b',
-  '#e05a8c',
-  '#8b5cf6',
-  '#f59e0b',
-  '#8a9596',
-];
-
-// 뱃지 색상은 hex로 저장하고, 화면에는 시안의 톤 색(연한 바탕 bg + 진한 글자·막대 fg)으로 그린다
-export const TONES = {
-  '#3b82f6': { bg: '#eaf1fc', fg: '#2d5fb8' },
-  '#22a06b': { bg: '#e6f4ec', fg: '#22744a' },
-  '#e05a8c': { bg: '#fcebea', fg: '#b8463f' },
-  '#8b5cf6': { bg: '#efecfa', fg: '#5f49b0' },
-  '#f59e0b': { bg: '#fcf1df', fg: '#9a5c0c' },
-  '#8a9596': { bg: '#eef1f4', fg: '#59636e' },
-};
+/** 캘린더 뱃지 색상·톤 클래스: AI 확인 카드와 같이 써서 constants로 올림 */
+export { BADGE_COLORS, TONE_CLASSES };
 
 export const HOSPITAL = 'HLTC0057';
 
@@ -59,16 +43,25 @@ export const getScheduleIcon = (schedule) =>
     ? findCheckupType(schedule.ckupTypeCd)?.icon
     : findScheduleType(schedule.schdlKndCd)?.icon;
 
-export const getDefaultScheduleColor = (schedule) =>
+const getDefaultScheduleTone = (schedule) =>
   isHospital(schedule)
-    ? (findCheckupType(schedule.ckupTypeCd)?.color ?? DEFAULT_SCHEDULE_COLOR)
-    : DEFAULT_SCHEDULE_COLOR;
+    ? (findCheckupType(schedule.ckupTypeCd)?.tone ?? DEFAULT_TONE)
+    : DEFAULT_TONE;
 
-export const getScheduleColor = (schedule) =>
-  schedule.cldrBadgeColrCd || getDefaultScheduleColor(schedule);
+/** 공통 반려동물 카드의 아이가 아닌 다른 아이 일정: 연한 회색 배경 + 흐린 글자 (※신규 정책) */
+const OTHER_PET_TONE = {
+  chip: 'bg-surface-2 text-subtle',
+  bar: 'bg-line-strong',
+};
 
-export const getScheduleTone = (schedule) =>
-  TONES[getScheduleColor(schedule)] ?? TONES[DEFAULT_SCHEDULE_COLOR];
+// 다른 아이 일정(isOtherPet)이면 연한 회색 톤, 아니면 고른 뱃지 색상이 있으면 그 톤, 없거나 모르는 코드면 종류·검진유형 기본 톤
+export const getScheduleTone = (schedule) => {
+  if (schedule.isOtherPet) return OTHER_PET_TONE;
+  const tone =
+    BADGE_COLORS.find((color) => color.cd === schedule.cldrBadgeColrCd)?.tone ??
+    getDefaultScheduleTone(schedule);
+  return TONE_CLASSES[tone];
+};
 
 export const getScheduleTypeName = (schedule) =>
   findScheduleType(schedule.schdlKndCd)?.nm;

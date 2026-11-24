@@ -38,7 +38,9 @@ export default function SignupStepper({ current }) {
             >
               {isDone ? <Check className="size-3.5" /> : number}
             </b>
-            <span className={isCurrent ? '' : 'max-md:hidden'}>{label}</span>
+            <span className={isCurrent ? '' : 'max-[760px]:hidden'}>
+              {label}
+            </span>
           </li>
         );
       })}

@@ -8,22 +8,22 @@ const ITEMS = [
   ['얼굴이 잘 보이는 사진', '첫 번째 사진이 목록 대표 사진이 돼요'],
 ];
 
-/** 글쓰기·글수정 오른쪽 「이렇게 쓰면 매칭이 빨라요」 */
+/** 글쓰기·글수정 오른쪽 「이렇게 쓰면 매칭이 빨라요」(1100px 이상: 스크롤해도 헤더(64px) 아래에 고정) */
 export default function CareWriteGuide() {
   return (
-    <aside aria-label="글쓰기 안내" className="min-w-0 max-[1101px]:mt-6">
+    <aside
+      aria-label="글쓰기 안내"
+      className="min-w-0 max-[1100px]:mt-6 min-[1100px]:sticky min-[1100px]:top-24"
+    >
       <section aria-labelledby="care-guide-title">
-        <h2
-          id="care-guide-title"
-          className="pb-2 text-lg leading-[1.4] font-bold text-ink"
-        >
+        <h2 id="care-guide-title" className="pb-2 text-lg font-bold text-ink">
           이렇게 쓰면 매칭이 빨라요
         </h2>
         <ul>
           {ITEMS.map(([title, description]) => (
             <li
               key={title}
-              className="flex flex-col gap-1 border-t border-line py-3.5 first:border-t-0 first:pt-1.5"
+              className="flex flex-col gap-1 border-t border-line py-4 first:border-t-0 first:pt-2"
             >
               <b className="font-semibold text-ink">{title}</b>
               <p className="text-sm leading-[1.6] text-muted">{description}</p>

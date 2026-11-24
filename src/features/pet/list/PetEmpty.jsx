@@ -1,7 +1,8 @@
 import { PawPrint } from 'lucide-react';
-import { MAX_OWN_PETS } from '@/utils/petCodes';
+import Skeleton from '@/components/Skeleton';
+import { BTN_PRIMARY } from '@/components/buttonStyles';
 
-export default function PetEmpty({ onRegister }) {
+export default function PetEmpty({ onRegister, limit }) {
   return (
     <section className="rounded-card border border-line bg-white shadow-sm">
       <div className="flex flex-col items-center gap-2.5 px-6 py-16 text-center text-muted">
@@ -17,13 +18,20 @@ export default function PetEmpty({ onRegister }) {
         <button
           type="button"
           onClick={onRegister}
-          className="mt-3 inline-flex h-10 items-center justify-center rounded-md bg-brand-500 px-4 font-semibold text-white hover:bg-brand-600"
+          className={`mt-3 ${BTN_PRIMARY}`}
         >
           반려동물 등록하기
         </button>
-        <p className="-mt-1 text-sm text-subtle">
-          반려동물은 최대 {MAX_OWN_PETS}마리까지 등록할 수 있어요
-        </p>
+        {limit.isPending ? (
+          <Skeleton className="-mt-1 h-5 w-64 max-w-full" />
+        ) : (
+          limit.data && (
+            <p className="-mt-1 text-sm text-subtle">
+              반려동물은 공동양육을 포함해 최대 {limit.data.petMaxCnt}마리까지
+              등록할 수 있어요
+            </p>
+          )
+        )}
       </div>
     </section>
   );

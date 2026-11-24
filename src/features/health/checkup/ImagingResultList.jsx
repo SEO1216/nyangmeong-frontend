@@ -1,51 +1,59 @@
 import { useState } from 'react';
+import FileImage from '@/components/FileImage';
 import Icon from '@/components/Icon';
 import Modal from '@/components/Modal';
 import { BTN_SECONDARY } from '@/components/buttonStyles';
+import { useFileImage } from '@/hooks/useFileImage';
+import { healthKeys } from '../queries';
+import AttachmentModal from './AttachmentModal';
 import { ROW_LINE, TEXT_BTN } from './checkupStyles';
-import { IMAGING_KINDS, IMAGING_PARTS, findName } from './checkupTypes';
+import {
+  ATTACHMENT_IMAGE,
+  IMAGING_KINDS,
+  IMAGING_PARTS,
+  findName,
+} from './checkupTypes';
 
 /**
  * [영상검사 목록]
  * - 첨부 자료 중 "영상 사진" 유형만 영상 종류·촬영 부위·썸네일로 보여 주는 조회 영역 (FN-HLT-005-02)
- * - 썸네일 클릭 → 원본 미리보기, 등록·교체·삭제는 첨부 자료 탭에서
+ * - 썸네일 클릭 → 원본 미리보기, 교체·삭제는 첨부 자료 탭에서
+ * - [첨부 자료 추가하기] → 파일 유형이 "영상 사진"으로 골라진 첨부 추가 모달
+ * - 비공개 파일이라 첨부 파일 API를 blob으로 받아 그린다
  */
-export default function ImagingResultList({ attachments, onGoAttachments }) {
+export default function ImagingResultList({ petSn, ckupRcdSn, attachments }) {
   const [previewAttachment, setPreviewAttachment] = useState(null);
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
   return (
     <div>
-      {attachments.length === 0 && <p className="text-muted">결과 없음</p>}
+      {attachments.length === 0 && <p className="text-muted">결과가 없어요</p>}
       <ul>
         {attachments.map((attachment) => (
           <li
-            key={attachment.atchSn}
+            key={attachment.ckupRcdAtchSn}
             className={`flex items-center gap-3.5 py-3.5 ${ROW_LINE}`}
           >
             <button
               type="button"
-              aria-label={`${attachment.fileNm} 원본 미리보기`}
+              aria-label={`${attachment.orgnlFileNm} 원본 미리보기`}
               className="grid aspect-[4/3] w-14 shrink-0 cursor-zoom-in place-items-center overflow-hidden rounded-[10px] border border-dashed border-line-strong bg-surface-2 text-line-strong"
               onClick={() => setPreviewAttachment(attachment)}
             >
-              {attachment.fileUrl ? (
-                <img
-                  src={attachment.fileUrl}
-                  alt=""
-                  className="size-full object-cover"
-                />
-              ) : (
-                <Icon name="image" className="text-[28px]" />
-              )}
+              <AttachmentImage
+                petSn={petSn}
+                attachment={attachment}
+                className="size-full object-cover"
+              />
             </button>
             <span className="min-w-0 flex-1">
               <span className="block font-semibold">
-                {findName(IMAGING_KINDS, attachment.imgKindCd)} ·{' '}
-                {findName(IMAGING_PARTS, attachment.imgPartCd)}
+                {findName(IMAGING_KINDS, attachment.imgKndCd)} ·{' '}
+                {findName(IMAGING_PARTS, attachment.shtRegnCd)}
               </span>
               <span className="flex items-center gap-1 text-subtle">
                 <Icon name="image" className="text-lg" />
-                <span className="break-all">{attachment.fileNm}</span>
+                <span className="break-all">{attachment.orgnlFileNm}</span>
               </span>
             </span>
           </li>
@@ -54,15 +62,24 @@ export default function ImagingResultList({ attachments, onGoAttachments }) {
       <button
         type="button"
         className={`${TEXT_BTN} mt-4`}
-        onClick={onGoAttachments}
+        onClick={() => setIsAddOpen(true)}
       >
-        첨부 자료 탭에서 등록하기
+        첨부 자료 추가하기
         <Icon name="chevron_right" className="text-lg" />
       </button>
 
+      {isAddOpen && (
+        <AttachmentModal
+          petSn={petSn}
+          ckupRcdSn={ckupRcdSn}
+          initialType={ATTACHMENT_IMAGE}
+          onClose={() => setIsAddOpen(false)}
+        />
+      )}
+
       {previewAttachment && (
         <Modal
-          title={previewAttachment.fileNm}
+          title={previewAttachment.orgnlFileNm}
           onClose={() => setPreviewAttachment(null)}
           footer={
             <button
@@ -74,19 +91,29 @@ export default function ImagingResultList({ attachments, onGoAttachments }) {
             </button>
           }
         >
-          {previewAttachment.fileUrl ? (
-            <img
-              src={previewAttachment.fileUrl}
-              alt={previewAttachment.fileNm}
-              className="max-h-[60vh] w-full object-contain"
-            />
-          ) : (
-            <div className="grid aspect-[4/3] place-items-center rounded-[10px] bg-surface-2 text-line-strong">
-              <Icon name="image" className="text-[52px]" />
-            </div>
-          )}
+          <AttachmentImage
+            petSn={petSn}
+            attachment={previewAttachment}
+            alt={previewAttachment.orgnlFileNm}
+            className="max-h-[60vh] w-full object-contain"
+          />
         </Modal>
       )}
     </div>
+  );
+}
+
+/** 첨부 이미지 한 장: 받는 중에는 로딩 자리, 실패하면 아이콘 칸 */
+function AttachmentImage({ petSn, attachment, alt = '', className }) {
+  const { src, isPending } = useFileImage({
+    queryKey: [
+      ...healthKeys.checkupDetail(attachment.ckupRcdSn),
+      'file',
+      attachment.ckupRcdAtchSn,
+    ],
+    url: `/pets/${petSn}/checkup-attachments/${attachment.ckupRcdAtchSn}`,
+  });
+  return (
+    <FileImage src={src} pending={isPending} alt={alt} className={className} />
   );
 }

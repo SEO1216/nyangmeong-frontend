@@ -1,35 +1,65 @@
 import { ChevronDown, Receipt } from 'lucide-react';
 import { useState } from 'react';
+import EmptyResult from '@/components/EmptyResult';
+import LoadError from '@/components/LoadError';
 import MonthNav from '@/components/MonthNav';
+import SkeletonCard from '@/components/SkeletonCard';
 import { formatYm, getCurrentYm, shiftYm } from '@/utils/yearMonth';
 import { usePointHistory } from '../queries';
-import { PNT_HST_TY } from '../shared/pointCodes';
+import { PNT_DLNG_TYPE } from '../shared/pointCodes';
 import { formatSignedPoint } from '../shared/pointFormat';
 import { CARD, CARD_HEAD, CARD_TITLE } from '../shared/pointStyles';
 
 /** 앱은 안쪽 스크롤 없이 이만큼만 보이고 나머지는 [더보기] */
 const MOBILE_VISIBLE = 5;
 
+/** 내용: 관리자 조정은 고정 문구, 검진기록은 "이름 · 유형"(서버 메모가 이름뿐), 그 밖은 메모, 없으면 유형 이름 */
+const getTitle = (item) => {
+  if (item.pntDlngTypeCd === PNT_DLNG_TYPE.ADMIN_ADJUST) return '관리자 조정';
+  if (item.pntDlngTypeCd === PNT_DLNG_TYPE.CHECKUP && item.memoCn)
+    return `${item.memoCn} · ${item.pntDlngTypeCdNm}`;
+  return item.memoCn ?? item.pntDlngTypeCdNm;
+};
+
+const sumBy = (items, predicate) =>
+  items.filter(predicate).reduce((sum, item) => sum + item.dlngPnt, 0);
+
 export default function PointHistory() {
   const maxYm = getCurrentYm();
   const [ym, setYm] = useState(maxYm);
   const [isOpen, setIsOpen] = useState(false);
-  const { data } = usePointHistory(ym);
+  const { data, isPending, isError, refetch } = usePointHistory(ym);
 
   const moveYm = (step) => {
     setYm(shiftYm(ym, step));
     setIsOpen(false);
   };
 
+  if (isPending)
+    return (
+      <div aria-busy="true">
+        <SkeletonCard className="h-[476px] min-[1100px]:h-[839px]" />
+      </div>
+    );
+  if (isError && !data)
+    return (
+      <LoadError
+        message="포인트 내역을 불러오지 못했어요"
+        onRetry={refetch}
+        className="rounded-card border border-line bg-white py-16"
+      />
+    );
   if (!data) return null;
 
-  const moreCount = data.items.length - MOBILE_VISIBLE;
+  const moreCount = data.length - MOBILE_VISIBLE;
+  const earnTotal = sumBy(data, (item) => item.dlngPnt > 0);
+  const useTotal = sumBy(data, (item) => item.dlngPnt < 0);
 
   return (
     <section
       id="point-history"
       aria-labelledby="point-history-title"
-      className={`${CARD} flex flex-col`}
+      className={`${CARD} flex scroll-mt-20 flex-col`}
     >
       <div className={CARD_HEAD}>
         <h2 id="point-history-title" className={CARD_TITLE}>
@@ -47,11 +77,13 @@ export default function PointHistory() {
       <div className="grid grid-cols-2 border-b border-line-soft text-muted">
         <div className="flex items-center justify-between px-6 py-3">
           <span>적립</span>
-          <b className="text-brand-600">{formatSignedPoint(data.earnTotAmt)}</b>
+          <b className="text-brand-600 tabular-nums">
+            {formatSignedPoint(earnTotal)}
+          </b>
         </div>
         <div className="flex items-center justify-between border-l border-line-soft px-6 py-3">
           <span>사용</span>
-          <b className="text-ink">{formatSignedPoint(data.useTotAmt)}</b>
+          <b className="text-ink tabular-nums">{formatSignedPoint(useTotal)}</b>
         </div>
       </div>
       {/* PC: 카드 높이를 채우고 넘치면 영역 안에서 스크롤 / 앱: 스크롤 없이 5건 + 더보기 */}
@@ -60,26 +92,28 @@ export default function PointHistory() {
         aria-label={`${formatYm(ym)} 포인트 내역`}
         className="min-h-80 flex-1 basis-0 overflow-y-auto px-6 pt-1 max-[760px]:h-auto max-[760px]:min-h-0 max-[760px]:flex-none max-[760px]:overflow-visible"
       >
-        {data.items.length === 0 && (
-          <li className="py-10 text-center text-subtle">
-            이 달의 내역이 없어요
+        {data.length === 0 && (
+          <li className="py-5">
+            <EmptyResult title="이 달의 내역이 없어요" isCompact />
           </li>
         )}
-        {data.items.map((item, index) => {
-          const isUse = item.pntHstTyCd === PNT_HST_TY.USE;
+        {data.map((item, index) => {
+          const isUse = item.dlngPnt < 0;
           return (
             <li
-              key={item.pntHstSn}
+              key={item.pntGnlgrSn}
               className={`flex items-center gap-3 border-t border-line-soft py-3 first:border-t-0 ${index >= MOBILE_VISIBLE && !isOpen ? 'max-[760px]:hidden' : ''}`}
             >
               <span className="w-11 shrink-0 text-sm text-subtle">
-                {item.pntHstYmd.slice(5)}
+                {item.regDt.slice(5, 10)}
               </span>
               <span className="min-w-0 flex-1 font-semibold">
-                {item.pntHstNm}
+                {getTitle(item)}
               </span>
-              <b className={isUse ? 'text-ink-2' : 'text-brand-600'}>
-                {formatSignedPoint(item.pntAmt)}
+              <b
+                className={`tabular-nums ${isUse ? 'text-ink-2' : 'text-brand-600'}`}
+              >
+                {formatSignedPoint(item.dlngPnt)}
               </b>
             </li>
           );

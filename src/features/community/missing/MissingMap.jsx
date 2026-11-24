@@ -1,20 +1,20 @@
 import { ExternalLink, MapPin } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import useKakaoMap from '@/hooks/useKakaoMap';
-import { findPlaceAt } from './placeSearch';
+import { findPlaceAt } from '@/utils/placeSearch';
 
 const MAP_LEVEL = 4;
-/** 개인정보 보호: 정확한 좌표 대신 반경 약 250m 원으로 보여 준다 */
+/** 개인정보 보호: 정확한 좌표 대신 반경 약 250m 원으로 표시 */
 const RADIUS_METER = 250;
 
 /**
  * 목격 장소 지도: 카카오맵 SDK(@/hooks/useKakaoMap)로 반경 원 + 장소명 라벨, 키가 없거나 SDK 오류면 안내만
  * - 길찾기: 카카오맵 앱·웹으로 연결
  * - isPreview: 길찾기 링크 없음(글쓰기 미리보기·장소 검색·펫돌봄)
- * - mapLabel·emptyText: 지도 이름(스크린 리더)과 장소가 없을 때 안내(펫돌봄이 바꿔 쓴다)
+ * - mapLabel·emptyText: 지도 이름(스크린 리더)과 장소가 없을 때 안내(펫돌봄이 교체해 사용)
  * - height: 지도 높이 Tailwind 클래스(장소 검색 모달은 낮게)
- * - onMove: 넘기면 지도를 끌어 놓은 가운데로 원을 옮기고 그 자리의 장소(주소·시군구·동·좌표)를 onMove(place)로 넘긴다.
- *   전북 밖이면 안내 후 이전 위치로 되돌린다. 상세는 넘기지 않아 둘러보기만 한다
+ * - onMove: 전달하면 지도를 끌어 놓은 가운데로 원을 옮기고 그 자리의 장소(주소·시군구·동·좌표)를 onMove(place)로 전달.
+ *   전북 밖이면 안내 후 이전 위치로 되돌림. 상세는 미전달로 둘러보기만 가능
  */
 export default function MissingMap({
   place,
@@ -115,13 +115,13 @@ export default function MissingMap({
       {moveNotice && (
         <p
           role="status"
-          className="absolute top-3 left-1/2 -translate-x-1/2 rounded-full bg-ink/85 px-3 py-1.5 text-sm whitespace-nowrap text-white"
+          className="absolute top-3 left-1/2 -translate-x-1/2 rounded-full bg-ink/85 px-3 py-2 text-sm whitespace-nowrap text-white"
         >
           {moveNotice}
         </p>
       )}
       {place && (
-        <span className="absolute bottom-3 left-3 inline-flex h-7 items-center gap-1 rounded-full bg-white px-2.5 text-sm text-ink-2 shadow-[inset_0_0_0_1px_var(--color-line)]">
+        <span className="absolute bottom-3 left-3 inline-flex h-7 items-center gap-1 rounded-full bg-white px-3 text-sm text-ink-2 ring-1 ring-line ring-inset">
           <MapPin size={14} aria-hidden="true" className="text-brand-500" />
           {place.wtnsPlcNm}
         </span>
@@ -131,7 +131,7 @@ export default function MissingMap({
           href={`https://map.kakao.com/link/to/${encodeURIComponent(place.wtnsPlcNm)},${place.wtnsPlcLat},${place.wtnsPlcLot}`}
           target="_blank"
           rel="noreferrer"
-          className="absolute right-3 bottom-3 inline-flex h-7 items-center gap-1 rounded-full bg-white px-2.5 text-sm font-medium text-brand-600 shadow-[inset_0_0_0_1px_var(--color-line)] hover:bg-brand-50"
+          className="absolute right-3 bottom-3 inline-flex h-7 items-center gap-1 rounded-full bg-white px-3 text-sm font-medium text-brand-600 ring-1 ring-line ring-inset hover:bg-brand-50"
         >
           길찾기
           <ExternalLink size={13} aria-hidden="true" />

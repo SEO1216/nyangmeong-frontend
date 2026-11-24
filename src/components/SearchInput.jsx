@@ -1,11 +1,12 @@
 import { Search } from 'lucide-react';
 
-/** 검색창: 입력값은 부모가 들고, 제출할 때만 onSubmit을 부른다 */
+/** 검색창: 입력값은 부모 보관, 제출할 때만 onSubmit 호출. compact: 높이 34px·글자 14px */
 export default function SearchInput({
   value,
   onChange,
   onSubmit,
   placeholder,
+  compact = false,
   className = '',
 }) {
   const handleSubmit = (event) => {
@@ -21,12 +22,12 @@ export default function SearchInput({
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
-        className="h-10 w-full rounded-md border border-[#d3dae2] bg-white pr-10 pl-[15px] text-base placeholder:text-[#8c9899]"
+        className={`w-full rounded-md border border-input-line bg-white pr-10 pl-3 ${compact ? 'h-[34px] text-sm' : 'h-10 text-base'} placeholder:text-placeholder hover:border-line-strong focus:border-brand-500 focus:outline-none focus:ring-focus`}
       />
       <button
         type="submit"
         aria-label="검색"
-        className="absolute top-[9px] right-[9px] text-[#566465]"
+        className="absolute top-1/2 right-1 grid size-8 -translate-y-1/2 place-items-center text-muted"
       >
         <Search size={20} />
       </button>

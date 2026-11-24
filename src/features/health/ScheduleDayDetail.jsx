@@ -1,6 +1,8 @@
 import Badge from '@/components/Badge';
 import Card from '@/components/Card';
+import EmptyResult from '@/components/EmptyResult';
 import Icon from '@/components/Icon';
+import { BTN_PRIMARY } from '@/components/buttonStyles';
 import {
   formatMonthDayWeekday,
   formatTime,
@@ -42,31 +44,26 @@ export default function ScheduleDayDetail({
         // 좁은 화면에서는 제목·부제가 잘리지 않게 ＋ 아이콘만 남긴다
         <button
           type="button"
-          aria-label="새 일정 등록"
-          className="inline-flex h-8 shrink-0 items-center justify-center rounded-[6px] bg-brand-500 px-3 text-base font-semibold text-white hover:bg-brand-600 max-[760px]:w-8 max-[760px]:px-0"
+          aria-label="새 일정 추가"
+          className={`${BTN_PRIMARY} shrink-0 max-[760px]:w-10 max-[760px]:px-0`}
           onClick={onCreate}
         >
-          <Icon name="add" className="text-xl min-[761px]:hidden" />
-          <span className="max-[760px]:hidden">새 일정 등록</span>
+          <Icon name="add" className="text-lg min-[760px]:hidden" />
+          <span className="max-[760px]:hidden">새 일정 추가</span>
         </button>
       }
     >
       {sorted.length === 0 ? (
-        <div className="rounded-[10px] border border-dashed border-[#b9c4c4]">
-          <div className="flex flex-col items-center gap-2 px-4 py-6 text-center">
-            <span className="grid size-10 place-items-center rounded-full bg-[#f4f6f6] text-[#667374]">
-              <Icon name="calendar_month" />
-            </span>
-            <p className="text-sm text-[#566465]">등록된 일정이 없습니다</p>
-            <button
-              type="button"
-              className="inline-flex h-8 items-center rounded-[6px] bg-brand-500 px-3 text-sm font-semibold text-white hover:bg-brand-600"
-              onClick={onCreate}
-            >
-              새 일정 등록
-            </button>
-          </div>
-        </div>
+        <EmptyResult
+          isCompact
+          icon={
+            <Icon
+              name="calendar_month"
+              className="text-[28px] text-line-strong"
+            />
+          }
+          title="등록된 일정이 없어요"
+        />
       ) : (
         <>
           <ul>
@@ -74,25 +71,24 @@ export default function ScheduleDayDetail({
               <li key={schedule.schdlSn}>
                 <button
                   type="button"
-                  className="group flex w-full items-start gap-3 border-b border-[#edf1f1] py-3 text-left"
+                  className="group flex w-full items-start gap-3 border-b border-line-soft py-3 text-left"
                   onClick={() => onSelectSchedule(schedule)}
                 >
                   <span
                     aria-hidden="true"
-                    className="w-1 shrink-0 self-stretch rounded-full"
-                    style={{
-                      backgroundColor: getScheduleTone(schedule).fg,
-                    }}
+                    className={`w-1 shrink-0 self-stretch rounded-full ${
+                      getScheduleTone(schedule).bar
+                    }`}
                   />
                   {schedule.hrInptYn && (
-                    <span className="shrink-0 whitespace-nowrap text-[#667374]">
+                    <span className="shrink-0 whitespace-nowrap text-subtle">
                       {formatTime(getHmOf(schedule.schdlDt))}
                     </span>
                   )}
                   <span className="min-w-0 flex-1">
                     <span
-                      className={`group-hover:text-[#1e4a4c] ${
-                        isPast ? 'text-[#667374]' : 'text-[#1a3234]'
+                      className={`group-hover:text-brand-600 ${
+                        isPast ? 'text-subtle' : 'text-ink'
                       }`}
                     >
                       {schedule.petNm} · {getScheduleKindName(schedule)} ·{' '}
@@ -108,12 +104,12 @@ export default function ScheduleDayDetail({
                         >
                           {schedule.ckupRcdCnt > 0
                             ? '검진기록 있음'
-                            : '검진기록 없음'}
+                            : '검진기록이 없어요'}
                         </Badge>
                       </>
                     )}
                     {schedule.memoCn && (
-                      <span className="block text-sm text-[#667374]">
+                      <span className="block text-sm text-subtle">
                         {schedule.memoCn}
                       </span>
                     )}
