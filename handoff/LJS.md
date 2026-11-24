@@ -2,15 +2,16 @@
 
 ## 지금 하는 것
 
-끝남: SCR-AIM-011 AI 대화창 답변 아이콘을 반려동물 캐릭터 얼굴로 (2026-11-23, 검증 1회차 통과, 사람 확인). 새 `features/ai/chat/AiAvatar.jsx`로 말풍선 6개 얼굴을 방 태그 반려동물(새 대화는 고른 칩) `PetFace`로, "전체"·반려동물 없음은 기본 강아지 얼굴. 탈퇴 화면 `components/AiErrorGuide`는 그대로
+끝남: SCR-COM-002 플로팅 버튼 말풍선·반려동물 등록·TOP 디자인 (2026-11-24, 검증 2회차 통과, 사람 확인). 'AI 매니저' 말풍선을 AI 답변 말풍선 모양(PC 캐릭터 위·모바일 왼쪽)으로, [등록]·[TOP]을 흰 발바닥 + 연청록 패드 + 가운데 글자(PC 56·모바일 48)로. 추가-1 모바일 접었다 펼칠 때 캐릭터 로딩 칸 없앰(접어도 지우지 않고 숨김), 추가-2 모바일 AI·[등록] 묶음 끌어서 접기
 
 ## 다음에 할 것
 
+- SCR-COM-002 플로팅 버튼 사람이 고치는 문서: 공통레이아웃 화면설계서 SCR-COM-002 ⑦에 말풍선 위치(PC 캐릭터 위·760 미만 왼쪽, 꼬리 없는 흰 말풍선)·[등록]·[TOP] 발바닥 모양·모바일 AI+[등록] 묶음 접기, 기능명세서 FN-COM-002-19(접기 범위)·FN-COM-002-27 플로팅 반려동물 등록 버튼
+- SCR-COM-002 플로팅 버튼 참고(검증 보고, 판정 밖): 1440 `/health`에서 말풍선이 'AI 건강분석 리포트' 카드 [새로고침] 글자 위에 겹침(플로팅이라 원래 겹침). 플로팅 [등록]으로 연 반려동물 등록 모달이 Esc로 안 닫힘(닫기 버튼은 됨, 전부터인지 안 봄, `PetFormModal` SJM). 등록 한도가 찬 계정은 [등록]이 숨음(사람 결정 "이대로 유지"). 말풍선 흔들림(`animate-sway`)은 그대로
 - SCR-AIM-011 참고(검증 보고, 판정 밖): 오류 확인 중(`bscCharSbstYn`) 흑백 얼굴은 검증 계정에 그런 방이 없어 화면으로 못 봄(PetFace 공용 규칙). 검증이 8081 공용 DB 취두부 방에 "[검증] 고마워" 메시지·답변 하나를 남김(메시지 삭제 기능 없음)
 - SCR-ADM-112 참고(검증 보고, 판정 밖): 8081에 사유 null·21건 이상 실패·토큰 데이터가 없어 Playwright route로만 확인. 회원 계정으로 `/admin/...`에 가면 `ProtectedRoute`가 `/main`으로 보내 `AdminForbidden`은 화면에서 안 보임(전부터)
 - SCR-COM-002 피드백 묶음 2 팀 알림(PR 본문 + 팀 채널, 모두): ① 터치 기기에서 `input`·`textarea`·`select` 글자가 16px(iOS 확대 막기, `assets/index.css` 레이어 밖 규칙이라 `text-sm`보다 앞섬) ② 공용 `DatePicker` 위 "YYYY년 M월 ▾"로 월 고르기 보기 ③ `DatePicker`·`DropdownSelect` 펼침 창이 포털(모달 안이면 그 dialog, 아니면 body) + fixed로 뜨고, `TimeSelect` 포함 열린 동안 바깥 휠·터치 스크롤이 막힘(`hooks/useFloatingLayer.js`). 펼침 창 안에 스크롤 목록을 새로 두면 `overscroll-contain` ④ 플로팅 버튼 z-30 → z-20, `KebabMenu`·`MonthPicker` 펼침 창 z-30 ⑤ 사이드 메뉴 '›'가 줄 오른쪽 끝. JAJ·KSJ·YAY·SJM: 새 공용 `components/FieldFoot`(왼쪽 오류, 오른쪽 "n / 최대")으로 바뀜 — JAJ 일정·검진·관찰·기타 검사·처방·케어 항목(라벨 줄 글자 수가 칸 아래로)·검사 수치 입력, `health/shared/CharCount.jsx` 삭제, KSJ `AddressShareModal`, YAY `NicknameModal`(칸 안 글자 수가 칸 아래로), SJM `PetFormModal`(라벨 줄 글자 수가 칸 아래로). `FieldError`에 `className` prop. 모달에 글자 수 칸을 새로 만들면 `FieldFoot`
 - 피드백 묶음 2 참고(검증 보고, 판정 밖): G2 실제 iOS 확대는 검증이 못 봄(에뮬레이션은 계산 글자 크기만). 사람이 휴대폰으로 LAN 접속해 확인. [반려동물 등록] 플로팅 버튼은 검증 계정 등록 한도라 route로만 확인
-- 우측 아래 AI 플로팅 버튼 아이콘을 AI 매니저 말풍선 아이콘으로(사람 피드백 2026-11-23, 디자인이 오면 기획. `layouts/FloatingButtons.jsx`)
 - SCR-COM-002 모바일 바텀시트 팀 알림(PR 본문 + 팀 채널, 모두): 760px 미만에서 공용 `Modal`(확인 창 `isConfirm`·`ConfirmModal`은 가운데 카드 그대로)이 모두 아래 시트. 손잡이·제목 줄을 끌어 80px 넘게 내리면 닫힘(`isPending`·`isDismissDisabled`면 제자리), 열 때 200ms 올라옴(동작 줄이기면 없음). JAJ: 건강기록 입력(`FormModal`)·일정·케어 항목 관리·건강기록 둘러보기가 화면 전체 → 시트(고정 높이 창은 화면 − 32px). 관리자 `isTop` 입력 창도 모바일은 시트. SJM: `isSheet` prop 없어짐(가계부 6곳·하루 기록 수정·가족 초대·반려동물 등록에서 지움). 모바일 `isWide` 푸터 버튼 반반, `isLarge` 푸터는 `<p>` 안내가 버튼 위 한 줄·버튼 둘 묶음 반반. 모달 안에서 모바일 화면 전체를 가정한 코드를 새로 쓰지 말 것
 - 바텀시트 참고(검증 보고, 판정 밖): 반반 규칙은 버튼이 둘일 때만이라 가족 초대(`InviteModal` 자체 `justify-end`)는 자기 너비, 케어 항목 관리 [저장하기] 하나는 89px. 건강기록 둘러보기(`HealthGuideModal`, JAJ)는 서비스 둘러보기와 같은 스케일 연출을 쓰는지 안 봄(쓰면 모바일 시트 연출과 겹침). 반려동물 등록 창은 검증 계정 등록 한도라 수정 창·route로 확인
 - 헤더 알림 참고(2026-11-23 코드 확인, 말만): 알림은 지우지 않고 `AUTO_HIDE_DT`(생성 + 운영 설정 일수, 기본 7일) 지나면 목록에서 숨김. 숨긴 행을 지우는 배치 없음(`INAPP_NOTI` 쌓임), 일수 변경은 새 알림부터
