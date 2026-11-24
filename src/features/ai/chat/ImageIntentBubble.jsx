@@ -1,6 +1,6 @@
-import aiCharacter from '@/assets/ai-character.png';
 import CharacterRequestBubble from './CharacterRequestBubble';
 import ImageKindChips from './ImageKindChips';
+import AiAvatar from './AiAvatar';
 
 const bubbleClass =
   'max-w-[592px] rounded-[4px_18px_18px_18px] border border-line bg-white px-4 py-3 text-[15px] leading-relaxed text-ink';
@@ -8,16 +8,10 @@ const primaryClass =
   'h-8 rounded-md bg-brand-500 px-3 text-base font-semibold text-white hover:bg-brand-600';
 
 /** AI 아바타 + 내용 */
-function AiRow({ children }) {
+function AiRow({ avatarPet, children }) {
   return (
     <div className="flex min-w-0 items-start gap-3">
-      <img
-        src={aiCharacter}
-        alt=""
-        width="36"
-        height="36"
-        className="size-9 shrink-0 rounded-full border border-line bg-brand-50 object-contain p-1"
-      />
+      <AiAvatar pet={avatarPet} />
       <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
         {children}
       </div>
@@ -41,6 +35,7 @@ export default function ImageIntentBubble({
   onCancelCharacter,
   onOpenCharacters,
   onOpenExpenses,
+  avatarPet,
 }) {
   const isSaved = image.aiCnvrsRoomSn != null;
   return (
@@ -63,7 +58,7 @@ export default function ImageIntentBubble({
       )}
 
       {image.status === 'judging' && (
-        <AiRow>
+        <AiRow avatarPet={avatarPet}>
           <p role="status" className={bubbleClass}>
             사진을 살펴보고 있어요…
           </p>
@@ -81,7 +76,7 @@ export default function ImageIntentBubble({
       )}
 
       {image.status === 'character' && (
-        <AiRow>
+        <AiRow avatarPet={avatarPet}>
           <CharacterRequestBubble
             pet={image.pet}
             pets={pets}
@@ -97,7 +92,7 @@ export default function ImageIntentBubble({
       )}
 
       {image.status === 'expense' && (
-        <AiRow>
+        <AiRow avatarPet={avatarPet}>
           {image.isChosen && (
             <p className={bubbleClass}>
               가계부 영수증은 가계부 화면에서 올릴 수 있어요.

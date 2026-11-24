@@ -69,7 +69,7 @@ export default function MonthPicker({
         <div
           role="dialog"
           aria-label="월 선택"
-          className="absolute top-[calc(100%+0.5rem)] left-1/2 z-20 w-80 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-card border border-line bg-white p-4 shadow-depth-md"
+          className="absolute top-[calc(100%+0.5rem)] left-1/2 z-30 w-80 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-card border border-line bg-white p-4 shadow-depth-md"
         >
           <div className="mb-3 flex items-center justify-center gap-4 font-bold">
             <button

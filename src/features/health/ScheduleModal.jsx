@@ -26,7 +26,7 @@ import {
 } from './queries';
 import { TEXT_BTN } from './checkup/checkupStyles';
 import SegmentSwitch from './SegmentSwitch';
-import CharCount from './shared/CharCount';
+import FieldFoot from '@/components/FieldFoot';
 
 const MAX_HOSPITAL_NAME_LENGTH = 80;
 const MAX_SCHEDULE_NAME_LENGTH = 40;
@@ -316,11 +316,11 @@ export default function ScheduleModal({
                         setField('hsptlNm', event.target.value)
                       }
                     />
-                    <CharCount
+                    <FieldFoot
                       value={form.hsptlNm}
                       max={MAX_HOSPITAL_NAME_LENGTH}
+                      error={fieldError('hsptlNm')}
                     />
-                    <FieldError>{fieldError('hsptlNm')}</FieldError>
                   </label>
                 </div>
               </div>
@@ -335,11 +335,11 @@ export default function ScheduleModal({
                   className={INPUT}
                   onChange={(event) => setField('schdlNm', event.target.value)}
                 />
-                <CharCount
+                <FieldFoot
                   value={form.schdlNm}
                   max={MAX_SCHEDULE_NAME_LENGTH}
+                  error={fieldError('schdlNm')}
                 />
-                <FieldError>{fieldError('schdlNm')}</FieldError>
               </label>
             )}
 
@@ -351,8 +351,11 @@ export default function ScheduleModal({
                 className={INPUT}
                 onChange={(event) => setField('memoCn', event.target.value)}
               />
-              <CharCount value={form.memoCn} max={MAX_MEMO_LENGTH} />
-              <FieldError>{fieldError('memoCn')}</FieldError>
+              <FieldFoot
+                value={form.memoCn}
+                max={MAX_MEMO_LENGTH}
+                error={fieldError('memoCn')}
+              />
             </label>
 
             <div className="flex flex-col gap-1.5">

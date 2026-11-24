@@ -1,8 +1,8 @@
 import { ArrowRight } from 'lucide-react';
-import aiCharacter from '@/assets/ai-character.png';
 import MarkdownText from '@/components/MarkdownText';
 import { useOpenMain } from './aiHost';
 import { shortcutChips } from './shortcutChips';
+import AiAvatar from './AiAvatar';
 
 const NOTE_MARK = '\n\n※';
 
@@ -50,19 +50,14 @@ export default function AnswerBubble({
   shortcuts = [],
   onRetry,
   onRegenerate,
+  avatarPet,
 }) {
   const openMain = useOpenMain();
   const { body, note } = splitNote(text);
 
   return (
     <div className="flex min-w-0 items-start gap-3">
-      <img
-        src={aiCharacter}
-        alt=""
-        width="36"
-        height="36"
-        className="size-9 shrink-0 rounded-full border border-line bg-brand-50 object-contain p-1"
-      />
+      <AiAvatar pet={avatarPet} />
       <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
         <div className="max-w-[min(592px,100%)] rounded-[4px_18px_18px_18px] border border-line bg-white px-4 py-3 text-[15px] leading-relaxed text-ink">
           {status === 'waiting' && <TypingDots />}
