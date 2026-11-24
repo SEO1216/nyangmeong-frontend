@@ -29,9 +29,7 @@ SCR-MYP-003 반려동물 등록/수정 · 생년월일 달력에서 연·월 바
 ### 팀 답 기다림
 
 - 초대 수락 카드(`InvitationAccept`)에서 아직 양육자가 아니라 얼굴이 403이면 기본 아이콘만 보인다. 허용할지(LJS)
-- 공용 DB 정리(SCR-MYP-031 검증): 회원 1 지출 `EXPND_SN=10459`(소프트 삭제), 인앱 알림 `INAPP_NOTI_SN=5297`(남김). `NOTI_SNDNG_LOG` 발송 기록, petSn 1011 케어미션(EXPENSE_CREATE) 반영이 생겼을 수 있다. 복구: `DELETE FROM EXPND WHERE EXPND_SN = 10459;`, `DELETE FROM INAPP_NOTI WHERE INAPP_NOTI_SN = 5297;`
 - 스타일 결정 합의: 그림자 토큰 `shadow-depth-sm/md/lg`·`ring-focus`·`ring-error`(`OPEN_ISSUES.md`에 제안), `@theme` 토큰·Pretendard CDN·브랜드 색 #285a5c·lucide·가계부 tone·warn 토큰. 합의되면 `docs/OPEN_ISSUES.md` 스타일링 항목 갱신
-- 공용 DB 정리(SCR-MYP-005 검증): tester(mbrSn 1)가 보낸 초대 `JNT_BRUP_INVTN_SN` 217~219·221~223·225~236이 남았다(화면에서 취소·삭제해 대부분 `DEL_YN='Y'`, 229는 일부 수락이고 탄이–user0006 연동은 화면에서 해제함). 상태 이력·대상 반려동물·user0006 인앱 알림·미가입 메일 발송 기록(230·234)도 있을 수 있다. 복구: `JNT_BRUP_INVTN_STTS_HSTRY` → `INVTN_TRGT_PET` → `JNT_BRUP_INVTN` 순으로 그 번호를 지운다
 
 ### 다른 사람 담당·기다리는 것
 
